@@ -15,6 +15,15 @@ import articleKusama from "@/assets/article-kusama.jpg";
 import articlePfw from "@/assets/article-pfw.jpg";
 import articleCambiasoPhoto1 from "@/assets/article-cambiaso-photo1.jpg";
 import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.jpg";
+// Volume 2 — January 2026
+import heroDavosWef from "@/assets/hero-davos-wef.jpg";
+import heroSnowPolo from "@/assets/hero-snow-polo.jpg";
+import heroHauteCouture from "@/assets/hero-haute-couture.jpg";
+import articleGoldenGlobes from "@/assets/article-golden-globes.jpg";
+import articleLvmhWatches from "@/assets/article-lvmh-watches.jpg";
+import articleDiorBristol from "@/assets/article-dior-bristol.jpg";
+import articleVicenzaoro from "@/assets/article-vicenzaoro.jpg";
+import articleShoptalkLuxe from "@/assets/article-shoptalk-luxe.jpg";
 
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 
@@ -92,6 +101,31 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Equestrian",
     imageUrl: heroWhiteTurf,
     date: "2026-02-15",
+  },
+  // --- Volume 2 — January 2026 Heroes ---
+  {
+    id: "h-wef",
+    title: "Davos 2026: The World Economic Forum's Annual Meeting",
+    subtitle: "Record numbers of world leaders converge on Davos for five days of dialogue on AI, climate, and the global economy",
+    category: "Tech & AI",
+    imageUrl: heroDavosWef,
+    date: "2026-01-19",
+  },
+  {
+    id: "h-snow-polo",
+    title: "41st Snow Polo World Cup St. Moritz",
+    subtitle: "The frozen lake becomes the world's most spectacular polo arena as Standing Rock claims the title",
+    category: "Equestrian",
+    imageUrl: heroSnowPolo,
+    date: "2026-01-24",
+  },
+  {
+    id: "h-haute-couture",
+    title: "Paris Haute Couture Week SS26: The Art of the Extraordinary",
+    subtitle: "From Chanel to Dior to Valentino — the pinnacle of fashion craftsmanship returns to the grand palaces of Paris",
+    category: "Fashion",
+    imageUrl: heroHauteCouture,
+    date: "2026-01-26",
   },
 ];
 
@@ -243,8 +277,97 @@ const DEFAULT_ARTICLES: Article[] = [
       { id: "pfw-b1", type: "text", content: "Matthieu Blazy's highly anticipated debut at Chanel and Sarah Burton's second collection at Givenchy defined the season at Paris Fashion Week SS26. The collections signaled a new chapter for both houses — one of quiet confidence and refined craftsmanship." },
     ],
   },
+  // --- Volume 2 — January 2026 ---
+  {
+    id: "v2-golden-globes",
+    title: "Golden Globes 2026: Chalamet, Adolescence & a Night of Firsts",
+    excerpt: "The 83rd Golden Globe Awards crowned Timothée Chalamet, Teyana Taylor, and the phenomenon 'Adolescence' — a ceremony that signaled Hollywood's generational shift.",
+    category: "Film & Festivals",
+    imageUrl: articleGoldenGlobes,
+    author: "Charlotte Thames",
+    date: "2026-01-11",
+    featured: true,
+    body: [
+      { id: "gg-b1", type: "text", content: "The 83rd Golden Globe Awards at the Beverly Hilton delivered one of the most compelling ceremonies in recent memory. Timothée Chalamet took home Best Actor in a Drama for his transformative turn in a biopic that critics called career-defining. Teyana Taylor won Best Actress in a Musical or Comedy for 'One Battle After Another,' a film that also claimed the top musical/comedy prize." },
+      { id: "gg-b2", type: "text", content: "The night belonged equally to 'Adolescence,' the British limited series that swept the television categories and became the evening's most discussed work. Stephen Graham added a Golden Globe to his growing collection of accolades for the show. 'Hamnet' won Best Motion Picture — Drama, anchoring a ceremony that felt less like an industry event and more like a cultural inflection point." },
+      { id: "gg-b3", type: "text", content: "On the red carpet, the fashion was as deliberate as the performances being honored. Designers leaned into structured silhouettes, deep jewel tones, and bespoke tailoring — a visual echo of the evening's theme: precision over spectacle. The after-parties, from the InStyle suite to the Netflix gathering at Spago, hummed with the energy of an industry recalibrating its compass." },
+      { id: "gg-b4", type: "text", content: "For the luxury world, the Golden Globes remain one of January's most important stages — a night where fashion, film, and cultural capital converge under the California palms." },
+    ],
+  },
+  {
+    id: "v2-lvmh-watches",
+    title: "LVMH Watch Week Milan: The Year of the Fire Horse",
+    excerpt: "Nine LVMH maisons unveiled their 2026 horological visions in Milan — from Bulgari to Hublot to Zenith, the seventh edition signaled a return to bold craftsmanship.",
+    category: "Art & Design",
+    imageUrl: articleLvmhWatches,
+    author: "Millie Sealana",
+    date: "2026-01-19",
+    body: [
+      { id: "lw-b1", type: "text", content: "The seventh edition of LVMH Watch Week moved to a single destination for the first time — Milan — after previous editions spanning Dubai, Singapore, Miami, New York, and Paris. From January 19–21, nine LVMH-owned maisons including Bulgari, Hublot, TAG Heuer, Zenith, and Louis Vuitton presented their latest horological creations to trade journalists, retailers, and select clients." },
+      { id: "lw-b2", type: "text", content: "The choice of Milan was deliberate. As a city that straddles fashion, design, and industry, it provided the ideal backdrop for collections that emphasized material innovation and aesthetic risk. Bulgari unveiled complications that pushed the boundaries of ultra-thin movements, while Hublot leaned into bold material fusions that have become the house's signature." },
+      { id: "lw-b3", type: "text", content: "TAG Heuer's presentation centered on its motorsport heritage with new chronographs designed for the modern collector, and Zenith continued its revival of the Chronomaster line. Louis Vuitton surprised with a trunk-inspired collection that merged travel heritage with haute horlogerie." },
+      { id: "lw-b4", type: "text", content: "The mood across the exhibition was one of measured optimism. After a period of market correction in the luxury watch segment, the maisons signaled confidence through investment in craftsmanship rather than hype — a welcome recalibration for serious collectors." },
+    ],
+  },
+  {
+    id: "v2-dior-bristol",
+    title: "Dior Masterpieces: The Mouna Ayoub Collection at Le Bristol Paris",
+    excerpt: "126 haute couture pieces from Dior's golden era go on display at Le Bristol — a free exhibition during Paris Haute Couture Week that traces decades of the house's artistry.",
+    category: "Fashion",
+    imageUrl: articleDiorBristol,
+    author: "Elena Voss",
+    date: "2026-01-26",
+    body: [
+      { id: "db-b1", type: "text", content: "During Paris Haute Couture Week, Le Bristol Paris opened its grand salons to an extraordinary exhibition: 'Dior Masterpieces: The Mouna Ayoub Collection.' The free exhibition showcased 126 haute couture pieces spanning decades of the house's artistry — from the New Look era through to contemporary collections." },
+      { id: "db-b2", type: "text", content: "Collector Mouna Ayoub, one of the world's foremost private holders of haute couture, curated the display with the precision of a museum director. Each gown occupied its own space within the hotel's ornate rooms, the crystal chandeliers and marble floors providing a setting that felt less like an exhibition and more like a private audience with fashion history." },
+      { id: "db-b3", type: "text", content: "The timing was impeccable. As Paris Haute Couture Week unfolded across the city — with Chanel, Valentino, and Givenchy presenting their Spring 2026 collections — Le Bristol offered a counterpoint: a reminder that couture's power lies not just in the new, but in the enduring conversation between past and present craftsmanship." },
+    ],
+  },
+  {
+    id: "v2-snow-polo",
+    title: "Standing Rock Claims the 41st Snow Polo World Cup St. Moritz",
+    excerpt: "On the frozen lake of St. Moritz, Standing Rock defeated Flexjet in a championship match that embodied the tournament's unique blend of sport, spectacle, and alpine glamour.",
+    category: "Equestrian",
+    imageUrl: heroSnowPolo,
+    author: "Millie Sealana",
+    date: "2026-01-25",
+    body: [
+      { id: "sp-b1", type: "text", content: "The 41st Snow Polo World Cup St. Moritz concluded on Sunday, January 25, with Standing Rock defeating Flexjet in a championship match played on the frozen surface of Lake St. Moritz. The tournament — the world's most prestigious snow polo event — brought four teams to the Engadin for three days of competition against the backdrop of the Swiss Alps." },
+      { id: "sp-b2", type: "text", content: "The conditions were quintessential St. Moritz: crisp winter air, brilliant sunshine, and the distinctive crunch of hooves on compacted snow. The frozen lake, which has hosted the tournament for over four decades, provided a surface that demanded both precision and adaptability from players and horses alike." },
+      { id: "sp-b3", type: "text", content: "Standing Rock's victory was built on tactical discipline and fluid transitions between attack and defense. The team controlled the pace of the final, preventing Flexjet from establishing the rhythm that had carried them through the group stages. Key goals in the third and fourth chukkers created separation that proved decisive." },
+      { id: "sp-b4", type: "text", content: "Beyond the pitch, the Snow Polo World Cup remains one of the winter social calendar's most coveted events. The VIP tent, the Cartier lounge, and the champagne terraces along the lake's edge drew an international crowd that understands the tournament as much as a social occasion as a sporting one. St. Moritz, once again, proved why it remains the undisputed capital of winter luxury sport." },
+    ],
+  },
+  {
+    id: "v2-vicenzaoro",
+    title: "Vicenzaoro January 2026: The Global Jewellery Industry Converges in Italy",
+    excerpt: "Over 1,300 exhibiting brands gathered in Vicenza for the first major international jewellery business platform of the year — another sold-out edition redefining the industry.",
+    category: "Art & Design",
+    imageUrl: articleVicenzaoro,
+    author: "Elena Voss",
+    date: "2026-01-16",
+    body: [
+      { id: "vz-b1", type: "text", content: "Vicenzaoro returned from January 16–20 as the first major international business platform of the year for the global jewellery supply chain. Organised by Italian Exhibition Group at the Vicenza Expo Centre, the show recorded another sold-out edition with over 1,300 exhibiting brands. International exhibitors accounted for a significant share, underscoring Vicenza's role as a global crossroads for the industry." },
+      { id: "vz-b2", type: "text", content: "The exhibition spanned the full spectrum of the jewellery world — from high jewellery and fine craftsmanship to emerging designers and technology-driven innovation. Italian goldsmiths from the Valenza, Arezzo, and Vicenza districts showcased collections that balanced traditional artisanship with contemporary design sensibility." },
+      { id: "vz-b3", type: "text", content: "Sustainability and traceability were dominant themes, with several exhibitors presenting blockchain-verified sourcing for precious stones and recycled gold collections. The convergence of luxury and responsibility continues to reshape the industry's direction — and Vicenzaoro positioned itself at the center of that conversation." },
+    ],
+  },
+  {
+    id: "v2-shoptalk-luxe",
+    title: "Shoptalk Luxe Abu Dhabi: The Future of Luxury Retail Lands in the Gulf",
+    excerpt: "The inaugural Middle East edition of Shoptalk Luxe brought 2,000+ attendees and 170+ speakers to Abu Dhabi — exploring what's next for luxury retail in a shifting global landscape.",
+    category: "Tech & AI",
+    imageUrl: articleShoptalkLuxe,
+    author: "Charlotte Thames",
+    date: "2026-01-27",
+    body: [
+      { id: "sl-b1", type: "text", content: "Abu Dhabi hosted the inaugural Middle East edition of Shoptalk Luxe from January 27–29, bringing one of the world's most influential platforms for luxury retail innovation to the Gulf. Over 2,000 attendees and 170+ speakers gathered to explore pioneering concepts shaping the next chapter of luxury retail." },
+      { id: "sl-b2", type: "text", content: "The conference addressed the tectonic shifts reshaping luxury: the rise of AI-driven personalization, the growing influence of Middle Eastern and Asian consumers, the evolution of experiential retail, and the tension between digital convenience and physical exclusivity. Abu Dhabi — positioning itself as a global hub for luxury, culture, and innovation — provided the ideal stage." },
+      { id: "sl-b3", type: "text", content: "Panels explored how luxury houses are rethinking their digital strategies, from virtual try-ons powered by generative AI to private client platforms that blur the line between e-commerce and concierge service. The consensus: the future of luxury retail is not about channels, but about seamless, emotionally intelligent experiences." },
+      { id: "sl-b4", type: "text", content: "For the luxury industry, the message from Abu Dhabi was clear — the center of gravity is shifting, and the brands that thrive will be those that understand the new geography of desire." },
+    ],
+  },
 ];
-
 const DEFAULT_ADS: AdSlot[] = [
   { id: "ad1", label: "Hero Sidebar Ad", position: "hero-sidebar", width: 300, height: 250 },
   { id: "ad2", label: "Mid-Feed Banner", position: "mid-feed", width: 728, height: 90 },

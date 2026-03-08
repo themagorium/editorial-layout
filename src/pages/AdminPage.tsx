@@ -166,11 +166,11 @@ export default function AdminPage() {
 }
 
 /* ---- Heroes Manager ---- */
-function HeroesManager({ heroes, setHeroes }: { heroes: HeroItem[]; setHeroes: (h: HeroItem[]) => void }) {
+function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { heroes: HeroItem[]; setHeroes: (h: HeroItem[]) => void; filteredHeroes: HeroItem[]; currentEdition: string }) {
   const addHero = () => {
     setHeroes([
+      { id: `h-${Date.now()}`, title: "New Hero", subtitle: "", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) },
       ...heroes,
-      { id: `h-${Date.now()}`, title: "New Hero", subtitle: "", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: new Date().toISOString().slice(0, 7) },
     ]);
   };
 
@@ -182,7 +182,8 @@ function HeroesManager({ heroes, setHeroes }: { heroes: HeroItem[]; setHeroes: (
 
   return (
     <div className="space-y-6">
-      {heroes.map((hero) => (
+      <AddButton onClick={addHero} label={`Add Hero to ${currentEdition ? formatEditionLabel(currentEdition) : 'Edition'}`} />
+      {filteredHeroes.map((hero) => (
         <ContentCard key={hero.id} onRemove={() => remove(hero.id)}>
           <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
             <MediaUpload
@@ -204,17 +205,16 @@ function HeroesManager({ heroes, setHeroes }: { heroes: HeroItem[]; setHeroes: (
           </div>
         </ContentCard>
       ))}
-      <AddButton onClick={addHero} label="Add Hero" />
     </div>
   );
 }
 
 /* ---- Articles Manager ---- */
-function ArticlesManager({ articles, setArticles }: { articles: Article[]; setArticles: (a: Article[]) => void }) {
+function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string }) {
   const addArticle = () => {
     setArticles([
+      { id: `a-${Date.now()}`, title: "New Article", excerpt: "", category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) },
       ...articles,
-      { id: `a-${Date.now()}`, title: "New Article", excerpt: "", category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: new Date().toISOString().slice(0, 7) },
     ]);
   };
 
@@ -226,7 +226,8 @@ function ArticlesManager({ articles, setArticles }: { articles: Article[]; setAr
 
   return (
     <div className="space-y-6">
-      {articles.map((article) => (
+      <AddButton onClick={addArticle} label={`Add Article to ${currentEdition ? formatEditionLabel(currentEdition) : 'Edition'}`} />
+      {filteredArticles.map((article) => (
         <ContentCard key={article.id} onRemove={() => remove(article.id)}>
           <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
             <MediaUpload
@@ -260,7 +261,6 @@ function ArticlesManager({ articles, setArticles }: { articles: Article[]; setAr
           </div>
         </ContentCard>
       ))}
-      <AddButton onClick={addArticle} label="Add Article" />
     </div>
   );
 }

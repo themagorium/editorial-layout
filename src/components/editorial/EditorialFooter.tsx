@@ -49,12 +49,12 @@ export default function EditorialFooter() {
         <div className="mt-12 pt-6 border-t border-border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs font-sans text-muted-foreground">
           <p>© {new Date().getFullYear()} The Editorial. All rights reserved.</p>
           <div className="flex items-center gap-5">
-            <button type="button" className="hover:text-foreground transition-colors">Privacy</button>
             <button type="button" className="hover:text-foreground transition-colors">Cookies</button>
             <button type="button" className="hover:text-foreground transition-colors">Terms</button>
           </div>
         </div>
       </div>
+      <PrivacyPopupButton />
     </footer>
   );
 }

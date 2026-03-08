@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CATEGORIES } from "@/lib/content-store";
+import { CATEGORIES, getEditions, formatEditionLabel } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 import PrivacyPopupButton from "@/components/editorial/PrivacyPopupButton";
 import { toast } from "sonner";

@@ -339,6 +339,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleDiorBristol,
     author: "Elena Voss",
     date: "2026-01-26",
+    edition: "2026-01",
     body: [
       { id: "db-b1", type: "text", content: "During Paris Haute Couture Week, Le Bristol Paris opened its grand salons to an extraordinary exhibition: 'Dior Masterpieces: The Mouna Ayoub Collection.' The free exhibition showcased 126 haute couture pieces spanning decades of the house's artistry — from the New Look era through to contemporary collections." },
       { id: "db-b2", type: "text", content: "Collector Mouna Ayoub, one of the world's foremost private holders of haute couture, curated the display with the precision of a museum director. Each gown occupied its own space within the hotel's ornate rooms, the crystal chandeliers and marble floors providing a setting that felt less like an exhibition and more like a private audience with fashion history." },

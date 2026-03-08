@@ -292,6 +292,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articlePfw,
     author: "Millie Sealana",
     date: "2025-10-06",
+    edition: "2025-10",
     body: [
       { id: "pfw-b1", type: "text", content: "Matthieu Blazy's highly anticipated debut at Chanel and Sarah Burton's second collection at Givenchy defined the season at Paris Fashion Week SS26. The collections signaled a new chapter for both houses — one of quiet confidence and refined craftsmanship." },
     ],

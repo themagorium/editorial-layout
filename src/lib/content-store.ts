@@ -114,7 +114,7 @@ const DEFAULT_ARTICLES: Article[] = [
     id: "a2",
     title: "Super Bowl LX: Stadium Lights & Bay Area Glamour",
     excerpt: "Levi's Stadium hosts the biggest night in American sport — VIP suites, halftime spectacle, and celebrity-heavy parties.",
-    category: "Motorsport",
+    category: "Sports",
     imageUrl: articleSuperbowl,
     author: "James Whitfield",
     date: "2026-02-08",

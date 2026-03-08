@@ -102,37 +102,22 @@ const DEFAULT_HEROES: HeroItem[] = [
 ];
 
 // ===================================================================
-// ARTICLES — 4 per edition, NO city repeats across editions
-// Feb 2026: Venice, Rio, Bay Area, Dubai
-// Jan 2026: Los Angeles, Singapore, Florence, Paris
-// Oct 2025: Geneva, Zurich, Basel, Marrakech
+// ARTICLES — 4 per edition, unique categories (no overlap with heroes)
+// Feb 2026: Rio (Music), Bay Area (Film & Festivals), Düsseldorf (Yachting), Pebble Beach (Golf)
+// Jan 2026: LA (Film & Festivals), Singapore (Art & Design), Florence (Travel), Melbourne (Tennis)
+// Oct 2025: Geneva (Yachting), Zurich (Tech & AI), Basel (Travel), Marrakech (Music)
 // ===================================================================
 const DEFAULT_ARTICLES: Article[] = [
   // ========== FEBRUARY 2026 ==========
   {
     id: "a1",
-    title: "Venice Carnival 2026: Masks, Palazzi & the Olympic Spirit",
-    excerpt: "The theme 'Olympus, the origins of play' transforms Piazza San Marco into a theatrical spectacle of masked balls and candlelit lagoon cruises.",
-    category: "Travel",
-    imageUrl: articleVeniceCarnival,
-    author: "Elena Voss",
-    date: "2026-02-01",
-    featured: true,
-    edition: "2026-02",
-    body: [
-      { id: "vc-b1", type: "text", content: "Venice Carnival 2026 opened under the theme 'Olympus, the origins of play' — a fitting tribute to the Olympic year. Piazza San Marco was transformed into an open-air theatre where masked revelers in gilded costumes mingled with candlelit processions along the Grand Canal." },
-      { id: "vc-b2", type: "text", content: "The carnival's most coveted invitation remains the Gran Ballo della Cavalchina at La Fenice, where guests in 18th-century Venetian attire danced until dawn. This year's edition added a modern twist: a floating installation by teamLab illuminated the lagoon, creating an ethereal bridge between Venice's theatrical past and its digital future." },
-      { id: "vc-b3", type: "text", content: "Beyond the spectacle, the luxury hotels of Venice — the Gritti Palace, the Danieli, the Bauer — hosted private salons and intimate masquerade dinners. The carnival has evolved from a tourist attraction into a curated cultural experience, where the masks serve not as disguise but as invitation." },
-    ],
-  },
-  {
-    id: "a2",
     title: "Rio Carnival 2026: Samba Under the Stars",
     excerpt: "From the Sambadrome to the blocos — the most exuberant celebration on earth returns for six electric nights.",
     category: "Music",
     imageUrl: articleRioCarnival,
     author: "Marcus Chen",
     date: "2026-02-13",
+    featured: true,
     edition: "2026-02",
     body: [
       { id: "rc-b1", type: "text", content: "Rio Carnival 2026 returned with six electric nights of samba, spectacle, and cultural expression that confirmed its position as the world's most exuberant celebration. The Sambadrome's parade saw 12 samba schools compete for the championship, each float more ambitious than the last." },
@@ -141,10 +126,10 @@ const DEFAULT_ARTICLES: Article[] = [
     ],
   },
   {
-    id: "a3",
+    id: "a2",
     title: "Super Bowl LX: Stadium Lights & Bay Area Glamour",
     excerpt: "Levi's Stadium hosts the biggest night in American sport — VIP suites, halftime spectacle, and celebrity-heavy parties.",
-    category: "Travel",
+    category: "Film & Festivals",
     imageUrl: articleSuperbowl,
     author: "James Whitfield",
     date: "2026-02-08",
@@ -155,22 +140,35 @@ const DEFAULT_ARTICLES: Article[] = [
     ],
   },
   {
-    id: "a4",
-    title: "Dubai Shopping Festival: The Gold Souk Meets the Future",
-    excerpt: "The world's longest-running retail festival returns with 45 days of luxury activations, from the Gold Souk to the Dubai Mall's couture pop-ups.",
-    category: "Travel",
-    imageUrl: articleDubaiFestival,
-    author: "Charlotte Thames",
-    date: "2026-02-15",
+    id: "a3",
+    title: "Boot Düsseldorf: The World's Largest Yacht & Watersport Show",
+    excerpt: "250,000 visitors, 1,500 exhibitors, and superyachts that redefine what's possible on water — Boot Düsseldorf remains the industry's definitive gathering.",
+    category: "Yachting",
+    imageUrl: articleBootDusseldorf,
+    author: "James Whitfield",
+    date: "2026-02-17",
     edition: "2026-02",
     body: [
-      { id: "dsf-b1", type: "text", content: "Dubai Shopping Festival celebrated its 31st edition with 45 days of luxury activations that spanned the city's most iconic destinations. From the historic Gold Souk in Deira — where traders have sold precious metals for over a century — to the couture pop-ups lining Dubai Mall's Fashion Avenue, the festival embodied Dubai's unique position at the crossroads of tradition and spectacle." },
-      { id: "dsf-b2", type: "text", content: "This year's highlights included a limited-edition Bulgari collection unveiled exclusively at the Dubai Mall boutique, a Rolls-Royce raffle, and the annual gold prize draws that have become a tradition. The Burj Khalifa's nightly LED shows were synchronized to a luxury brand campaign for the first time." },
-      { id: "dsf-b3", type: "text", content: "Beyond the retail, DSF has evolved into a lifestyle festival — with fine dining collaborations, yacht parties on Dubai Marina, and exclusive access to the new Atlantis The Royal residences. Dubai continues to prove that luxury retail is not just about transactions but about creating entire ecosystems of desire." },
+      { id: "bd-b1", type: "text", content: "Boot Düsseldorf returned for its 57th edition, confirming its position as the world's largest and most important yacht and watersport exhibition. Over 1,500 exhibitors from 68 countries filled the Messe Düsseldorf's vast halls with everything from 60-metre superyachts to cutting-edge electric tenders." },
+      { id: "bd-b2", type: "text", content: "The Superyacht Hall — a cathedral-like space reserved for vessels over 30 metres — was this year's centrepiece. Lürssen, Benetti, and Sunseeker unveiled new models that pushed the boundaries of naval architecture, with hybrid propulsion systems and sustainability-driven design dominating the conversation." },
+      { id: "bd-b3", type: "text", content: "Beyond the hardware, Boot has evolved into a lifestyle destination: private buyers' lounges, invitation-only evening events, and a programme of talks featuring some of the world's most accomplished ocean explorers. For the serious yachting community, there is no substitute." },
     ],
   },
-
-  // ========== JANUARY 2026 ==========
+  {
+    id: "a4",
+    title: "AT&T Pebble Beach Pro-Am: Where Golf Meets the Pacific",
+    excerpt: "The most scenic tournament in golf returns to the Monterey Peninsula — where celebrities, pros, and the Pacific coastline create an unforgettable week.",
+    category: "Golf",
+    imageUrl: articlePebbleBeach,
+    author: "James Whitfield",
+    date: "2026-02-05",
+    edition: "2026-02",
+    body: [
+      { id: "pb-b1", type: "text", content: "The AT&T Pebble Beach Pro-Am is not merely a golf tournament — it is a pilgrimage. Played across three of America's most stunning courses — Pebble Beach Golf Links, Spyglass Hill, and Monterey Peninsula — the Pro-Am combines world-class professional golf with a celebrity amateur format that draws A-listers from entertainment, tech, and sport." },
+      { id: "pb-b2", type: "text", content: "The 7th hole at Pebble Beach, perched on a rocky outcrop above the Pacific, remains one of the most photographed spots in global sport. This year's field included defending champion and a roster of Hollywood and Silicon Valley names that confirmed the tournament's unique position at the intersection of sport and lifestyle." },
+      { id: "pb-b3", type: "text", content: "Off the course, the Monterey Peninsula during Pro-Am week transforms into a luxury enclave: private dinners at the Lodge at Pebble Beach, wine tastings in Carmel Valley, and the annual Concours-quality car displays that line 17-Mile Drive. It is the most civilised week in American sport." },
+    ],
+  },
   {
     id: "v2-oscars",
     title: "The 98th Academy Awards: Hollywood's Grandest Night Returns",

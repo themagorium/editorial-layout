@@ -18,10 +18,10 @@ function SubscribeSection() {
   };
 
   return (
-    <div className="bg-primary text-primary-foreground">
+    <div className="bg-background border-t border-border">
       <div className="container mx-auto px-4 py-14">
-        <h3 className="masthead-font text-2xl md:text-3xl font-bold italic mb-2">Stay in the Loop</h3>
-        <p className="text-sm font-sans opacity-80 mb-6 max-w-2xl">
+        <h3 className="font-serif text-2xl md:text-3xl font-bold italic text-foreground mb-2">Stay in the Loop</h3>
+        <p className="text-sm font-sans text-muted-foreground mb-6 max-w-2xl">
           Subscribe to The Magorium for the latest on art, culture, travel, tech, motorsport, sailing, fashion, and more.
         </p>
         <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-2xl">
@@ -30,12 +30,12 @@ function SubscribeSection() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Your email"
-            className="flex-1 rounded-full border border-primary-foreground/30 bg-transparent px-6 py-3 text-sm font-sans text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-primary-foreground/60 transition-colors"
+            className="flex-1 rounded-full border border-muted-foreground/30 bg-transparent px-6 py-3 text-sm font-sans text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors"
             maxLength={255}
           />
           <button
             type="submit"
-            className="rounded-full border border-primary-foreground/60 px-8 py-3 text-sm font-sans font-medium text-primary-foreground hover:bg-primary-foreground/10 transition-colors whitespace-nowrap"
+            className="rounded-full border border-muted-foreground/40 px-8 py-3 text-sm font-sans font-medium text-foreground hover:bg-foreground/5 transition-colors whitespace-nowrap"
           >
             Subscribe
           </button>

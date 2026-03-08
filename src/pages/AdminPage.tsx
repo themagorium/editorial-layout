@@ -182,6 +182,13 @@ function ArticlesManager({ articles, setArticles }: { articles: Article[]; setAr
                   Featured
                 </label>
               </div>
+              {/* Article body editor */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <ArticleBodyEditor
+                  blocks={article.body || []}
+                  onChange={(blocks) => update(article.id, { body: blocks })}
+                />
+              </div>
             </div>
           </div>
         </ContentCard>

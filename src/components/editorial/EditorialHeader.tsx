@@ -12,7 +12,7 @@ export default function EditorialHeader() {
         {/* Top bar */}
         <div className="flex items-center justify-between py-10 md:py-14">
           <Link to="/" className="block">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight masthead-font whitespace-nowrap">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight masthead-font whitespace-nowrap">
               <span className="text-foreground">THE </span>
               <span className="text-primary">MAGORIUM</span>
             </h1>
@@ -41,12 +41,13 @@ export default function EditorialHeader() {
         {/* Category nav */}
         <nav className="flex gap-1 overflow-x-auto pb-3 scrollbar-hide">
           {CATEGORIES.map((cat) => (
-            <span
+            <Link
               key={cat}
+              to={`/archive?category=${encodeURIComponent(cat)}`}
               className="whitespace-nowrap px-3 py-1.5 text-xs font-sans font-medium uppercase tracking-widest text-muted-foreground hover:text-primary cursor-pointer transition-colors"
             >
               {cat}
-            </span>
+            </Link>
           ))}
         </nav>
       </div>

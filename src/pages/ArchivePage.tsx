@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
+import { useSearchParams } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import ArticleCard from "@/components/editorial/ArticleCard";
@@ -40,7 +41,9 @@ function groupByMonth(articles: Article[], heroes: HeroItem[]): Volume[] {
 }
 
 export default function ArchivePage() {
-  const [search, setSearch] = useState("");
+  const [searchParams] = useSearchParams();
+  const categoryFilter = searchParams.get("category") || "";
+  const [search, setSearch] = useState(categoryFilter);
   const [expandedVolume, setExpandedVolume] = useState<string | null>(null);
 
   const volumes = useMemo(() => {

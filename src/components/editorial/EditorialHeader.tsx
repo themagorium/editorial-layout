@@ -16,7 +16,7 @@ export default function EditorialHeader() {
               <span className="text-foreground">THE </span>
               <span className="text-primary">MAGORIUM</span>
             </h1>
-            <p className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground mt-1.5 font-light">
+            <p className="text-[10px] tracking-[0.4em] uppercase text-primary mt-1.5 font-light">
               where curated becomes legend
             </p>
           </Link>

@@ -13,7 +13,7 @@ import heroSnowPolo from "@/assets/hero-snow-polo.jpg";
 import heroHauteCouture from "@/assets/hero-haute-couture.jpg";
 import articleOscars from "@/assets/article-oscars.jpg";
 import articleArtSg from "@/assets/article-art-sg.jpg";
-import articlePittiUomo from "@/assets/article-pitti-uomo.jpg";
+// (Pitti Uomo import removed — replaced by Abu Dhabi Art)
 import articleAustralianOpen from "@/assets/article-australian-open.jpg";
 // October 2025
 import articleCambiaso from "@/assets/article-cambiaso.jpg";

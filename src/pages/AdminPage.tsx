@@ -8,7 +8,7 @@ import {
 import type { HeroItem, Article, AdSlot, Category } from "@/lib/content-store";
 import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
-import { getAnalyticsSummary, getTotalStats, getRecentEvents, clearAnalytics, type ContentStats } from "@/lib/analytics";
+import { getAnalyticsSummary, getTotalStats, getRecentEvents, getLocationStats, clearAnalytics, type ContentStats } from "@/lib/analytics";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve) => {

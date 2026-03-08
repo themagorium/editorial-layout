@@ -65,6 +65,7 @@ export interface Article {
   date: string;
   featured?: boolean;
   body?: ArticleBodyBlock[];
+  edition: string; // e.g. "2026-02"
 }
 
 export interface AdSlot {

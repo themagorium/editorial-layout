@@ -31,7 +31,7 @@ export default function Index() {
       <EditorialHeader />
 
       {/* Hero + Sidebar Ad */}
-      <section className="container mx-auto px-4 mt-10 md:mt-14">
+      <section className="container mx-auto px-4 mt-16 md:mt-24">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
           <HeroCarousel heroes={heroes} />
           {sidebarAd && (

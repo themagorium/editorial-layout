@@ -26,8 +26,9 @@ export default function ArticleCard({ article, variant = "medium" }: Props) {
   };
 
   return (
-    <article
-      className={`group cursor-pointer animate-fade-in ${isLarge ? "col-span-2 row-span-2" : ""}`}
+    <Link
+      to={`/article/${article.id}`}
+      className={`group cursor-pointer animate-fade-in block ${isLarge ? "col-span-2 row-span-2" : ""}`}
       onClick={handleClick}
     >
       <div className={`relative overflow-hidden rounded ${isSmall ? "aspect-[4/3]" : isLarge ? "aspect-[16/10]" : "aspect-[3/2]"}`}>

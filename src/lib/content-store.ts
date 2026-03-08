@@ -43,6 +43,7 @@ export interface HeroItem {
   imageUrl: string;
   videoUrl?: string;
   date: string;
+  edition: string; // e.g. "2026-02"
 }
 
 export interface ArticleBodyBlock {

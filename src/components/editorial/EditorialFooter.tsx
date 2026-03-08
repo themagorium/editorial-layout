@@ -64,8 +64,6 @@ export default function EditorialFooter() {
             </Link>
           </div>
 
-          </div>
-
           <div>
             <h4 className="text-xs font-sans uppercase tracking-widest text-primary mb-4">Sections</h4>
             <div className="space-y-2">

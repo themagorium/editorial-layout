@@ -62,9 +62,8 @@ export default function EditorialFooter() {
                 <span className="text-primary">MAGORIUM</span>
               </h3>
             </Link>
-            <p className="text-sm text-muted-foreground mt-4 font-sans max-w-xs leading-relaxed">
-              A private-view magazine for travel, style, culture, and modern luxury.
-            </p>
+          </div>
+
           </div>
 
           <div>

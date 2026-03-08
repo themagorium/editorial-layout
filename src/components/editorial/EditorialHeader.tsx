@@ -41,12 +41,13 @@ export default function EditorialHeader() {
         {/* Category nav */}
         <nav className="flex gap-1 overflow-x-auto pb-3 scrollbar-hide">
           {CATEGORIES.map((cat) => (
-            <span
+            <Link
               key={cat}
+              to={`/archive?category=${encodeURIComponent(cat)}`}
               className="whitespace-nowrap px-3 py-1.5 text-xs font-sans font-medium uppercase tracking-widest text-muted-foreground hover:text-primary cursor-pointer transition-colors"
             >
               {cat}
-            </span>
+            </Link>
           ))}
         </nav>
       </div>

@@ -370,6 +370,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleVicenzaoro,
     author: "Elena Voss",
     date: "2026-01-16",
+    edition: "2026-01",
     body: [
       { id: "vz-b1", type: "text", content: "Vicenzaoro returned from January 16–20 as the first major international business platform of the year for the global jewellery supply chain. Organised by Italian Exhibition Group at the Vicenza Expo Centre, the show recorded another sold-out edition with over 1,300 exhibiting brands. International exhibitors accounted for a significant share, underscoring Vicenza's role as a global crossroads for the industry." },
       { id: "vz-b2", type: "text", content: "The exhibition spanned the full spectrum of the jewellery world — from high jewellery and fine craftsmanship to emerging designers and technology-driven innovation. Italian goldsmiths from the Valenza, Arezzo, and Vicenza districts showcased collections that balanced traditional artisanship with contemporary design sensibility." },

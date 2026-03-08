@@ -368,6 +368,7 @@ const DEFAULT_ARTICLES: Article[] = [
     ],
   },
 ];
+const DEFAULT_ADS: AdSlot[] = [
   { id: "ad1", label: "Hero Sidebar Ad", position: "hero-sidebar", width: 300, height: 250 },
   { id: "ad2", label: "Mid-Feed Banner", position: "mid-feed", width: 728, height: 90 },
   { id: "ad3", label: "Bottom Banner", position: "bottom-banner", width: 970, height: 250 },

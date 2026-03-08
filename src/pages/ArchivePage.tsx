@@ -47,7 +47,7 @@ export default function ArchivePage() {
             <span className="text-primary">Archive</span>
           </h2>
           <p className="text-muted-foreground font-sans text-sm tracking-wide">
-            Browse every volume by month. Each edition features 3 heroes and 4 editor's picks.
+            Search by volume or category.
           </p>
         </div>
 

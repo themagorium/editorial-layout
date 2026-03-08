@@ -21,9 +21,9 @@ export default function EditorialFooter() {
             <h4 className="text-xs font-sans uppercase tracking-widest text-primary mb-4">Sections</h4>
             <div className="space-y-2">
               {CATEGORIES.slice(0, 6).map((cat) => (
-                <p key={cat} className="text-sm font-sans text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
+                <Link key={cat} to={`/archive?category=${encodeURIComponent(cat)}`} className="block text-sm font-sans text-muted-foreground hover:text-foreground transition-colors">
                   {cat}
-                </p>
+                </Link>
               ))}
             </div>
           </div>

@@ -6,7 +6,7 @@ import {
   saveHeroes, saveArticles, saveAds, resetToDefaults,
   CATEGORIES,
 } from "@/lib/content-store";
-import type { HeroItem, Article, AdSlot, Category } from "@/lib/content-store";
+import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
 import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { getAnalyticsSummary, getTotalStats, getRecentEvents, getLocationStats, clearAnalytics, type ContentStats } from "@/lib/analytics";

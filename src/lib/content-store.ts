@@ -354,6 +354,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: heroSnowPolo,
     author: "Millie Sealana",
     date: "2026-01-25",
+    edition: "2026-01",
     body: [
       { id: "sp-b1", type: "text", content: "The 41st Snow Polo World Cup St. Moritz concluded on Sunday, January 25, with Standing Rock defeating Flexjet in a championship match played on the frozen surface of Lake St. Moritz. The tournament — the world's most prestigious snow polo event — brought four teams to the Engadin for three days of competition against the backdrop of the Swiss Alps." },
       { id: "sp-b2", type: "text", content: "The conditions were quintessential St. Moritz: crisp winter air, brilliant sunshine, and the distinctive crunch of hooves on compacted snow. The frozen lake, which has hosted the tournament for over four decades, provided a surface that demanded both precision and adaptability from players and horses alike." },

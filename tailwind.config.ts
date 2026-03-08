@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ['Libre Bodoni', 'Didot', 'Bodoni MT', 'serif'],
+        serif: ['Cinzel', 'Didot', 'Bodoni MT', 'serif'],
         sans: ['Outfit', 'system-ui', 'sans-serif'],
       },
       colors: {

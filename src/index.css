@@ -73,10 +73,10 @@
 
 @layer components {
   .masthead-font {
-    font-family: 'Cormorant Garamond', 'Didot', serif;
-    font-weight: 300;
-    letter-spacing: 0.18em;
-    transform: scaleX(1.0) scaleY(1.15);
+    font-family: 'Oranienbaum', 'Didot', serif;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    transform: scaleY(1.1);
     transform-origin: left center;
   }
   .font-hero {

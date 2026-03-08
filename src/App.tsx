@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import AdminPage from "./pages/AdminPage";
 import ArchivePage from "./pages/ArchivePage";
 import ArticlePage from "./pages/ArticlePage";
+import EditionPage from "./pages/EditionPage";
 import EditorsLetterPage from "./pages/EditorsLetterPage";
 import ContributorsPage from "./pages/ContributorsPage";
 import PartnershipsPage from "./pages/PartnershipsPage";

@@ -1,10 +1,10 @@
 import heroOlympics from "@/assets/hero-olympics.jpg";
 import heroMilanFashion from "@/assets/hero-milan-fashion.jpg";
 import heroWhiteTurf from "@/assets/hero-white-turf.jpg";
-import articleMonacoGP from "@/assets/article-monaco-gp.jpg";
-import articleArtBasel from "@/assets/article-art-basel.jpg";
-import articleCannes from "@/assets/article-cannes.jpg";
-import articleAscot from "@/assets/article-ascot.jpg";
+import articleVeniceCarnival from "@/assets/article-venice-carnival.jpg";
+import articleRioCarnival from "@/assets/article-rio-carnival.jpg";
+import articleSuperbowl from "@/assets/article-superbowl.jpg";
+import articleNiceCarnival from "@/assets/article-nice-carnival.jpg";
 
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 

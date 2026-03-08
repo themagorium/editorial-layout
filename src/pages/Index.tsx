@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import AdPlacement from "@/components/editorial/AdPlacement";
-import { getHeroes, getArticles, getAds } from "@/lib/content-store";
+import { getAds, getLatestEdition, getHeroesByEdition, getArticlesByEdition, formatEditionLabel } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
@@ -79,11 +79,14 @@ export default function Index() {
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<AdSlot[]>([]);
+  const [editionLabel, setEditionLabel] = useState("");
 
   useEffect(() => {
-    setHeroes(getHeroes());
-    setArticles(getArticles());
+    const edition = getLatestEdition();
+    setHeroes(getHeroesByEdition(edition).slice(0, 3));
+    setArticles(getArticlesByEdition(edition).slice(0, 4));
     setAds(getAds());
+    setEditionLabel(formatEditionLabel(edition));
   }, []);
 
   const midAd = ads.find((a) => a.position === "mid-feed");
@@ -92,6 +95,13 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <EditorialHeader />
+
+      {/* Edition label */}
+      {editionLabel && (
+        <div className="container mx-auto px-4 mt-4">
+          <span className="font-sans text-xs tracking-widest uppercase text-muted-foreground">{editionLabel} Edition</span>
+        </div>
+      )}
 
       {/* Heroes — 3 large cards */}
       <section className="container mx-auto px-4 mt-4 md:mt-6">

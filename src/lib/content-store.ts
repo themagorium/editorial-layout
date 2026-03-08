@@ -43,6 +43,7 @@ export interface HeroItem {
   imageUrl: string;
   videoUrl?: string;
   date: string;
+  edition: string; // e.g. "2026-02"
 }
 
 export interface ArticleBodyBlock {
@@ -64,6 +65,7 @@ export interface Article {
   date: string;
   featured?: boolean;
   body?: ArticleBodyBlock[];
+  edition: string; // e.g. "2026-02"
 }
 
 export interface AdSlot {
@@ -78,6 +80,7 @@ export interface AdSlot {
 }
 
 const DEFAULT_HEROES: HeroItem[] = [
+  // --- February 2026 ---
   {
     id: "h1",
     title: "Winter Olympics XXV: Milano-Cortina 2026",
@@ -85,6 +88,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Travel",
     imageUrl: heroOlympics,
     date: "2026-02-06",
+    edition: "2026-02",
   },
   {
     id: "h2",
@@ -93,6 +97,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Fashion",
     imageUrl: heroMilanFashion,
     date: "2026-02-25",
+    edition: "2026-02",
   },
   {
     id: "h3",
@@ -101,8 +106,9 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Equestrian",
     imageUrl: heroWhiteTurf,
     date: "2026-02-15",
+    edition: "2026-02",
   },
-  // --- Volume 2 — January 2026 Heroes ---
+  // --- January 2026 ---
   {
     id: "h-wef",
     title: "Davos 2026: The World Economic Forum's Annual Meeting",
@@ -110,6 +116,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Tech & AI",
     imageUrl: heroDavosWef,
     date: "2026-01-19",
+    edition: "2026-01",
   },
   {
     id: "h-snow-polo",
@@ -118,6 +125,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Equestrian",
     imageUrl: heroSnowPolo,
     date: "2026-01-24",
+    edition: "2026-01",
   },
   {
     id: "h-haute-couture",
@@ -126,6 +134,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Fashion",
     imageUrl: heroHauteCouture,
     date: "2026-01-26",
+    edition: "2026-01",
   },
 ];
 
@@ -139,6 +148,7 @@ const DEFAULT_ARTICLES: Article[] = [
     author: "Elena Voss",
     date: "2026-02-01",
     featured: true,
+    edition: "2026-02",
   },
   {
     id: "a2",
@@ -148,6 +158,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleRioCarnival,
     author: "Marcus Chen",
     date: "2026-02-13",
+    edition: "2026-02",
   },
   {
     id: "a3",
@@ -157,6 +168,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleSuperbowl,
     author: "James Whitfield",
     date: "2026-02-08",
+    edition: "2026-02",
   },
   {
     id: "a4",
@@ -166,6 +178,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleIceStMoritz,
     author: "Sophie Laurent",
     date: "2026-02-06",
+    edition: "2026-02",
   },
   // --- Volume 1 — October 2025 ---
   {
@@ -176,6 +189,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleSailgp,
     author: "Millie Sealana",
     date: "2025-10-04",
+    edition: "2025-10",
     body: [
       { id: "sailgp-b1", type: "text", content: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany in its first final and first win. Switzerland hosted the SailGP for the first time and the local crowd got more than just a glimpse of world-class foiling — they saw history." },
       { id: "sailgp-b2", type: "text", content: "Being a freshwater venue, the conditions were challenging as the teams were used to coastal and sea venues. Light winds forced teams to rethink tactics. The unpredictability of the winds and shifting conditions meant that each start and positioning made a difference. SailGP commentators stated \"the difference between success and failure was razor thin.\"" },
@@ -193,6 +207,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleCvSummit,
     author: "Millie Sealana",
     date: "2025-10-06",
+    edition: "2025-10",
     body: [
       { id: "cv-b1", type: "text", content: "CV Summit 2025 took place at the Kongresshaus Zurich, uniting more than 3,000 technology leaders, investors, institutions, and innovators. With 190 speakers, the summit underscored its role as a catalyst event for defining the new era of finance and technology. This year's edition occupied its familiar space as part alpine think-tank, part deal-floor, part Swiss-precision diplomacy — but the shift from spectacle to substance was unmistakable." },
       { id: "cv-b2", type: "text", content: "The agenda spanned four tracks: Blockchain (innovation and infrastructure), Institutions & Digital Assets (banking, capital markets, and compliant adoption), Wealth Management (digital-era investment), and Artificial Intelligence (acceleration of financial evolution). Switzerland's neutrality and governance were repeatedly invoked as stabilizing anchors in an increasingly volatile global environment." },
@@ -209,6 +224,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleF1Americas,
     author: "Charlotte Thames",
     date: "2025-10-06",
+    edition: "2025-10",
     body: [
       { id: "f1-b1", type: "text", content: "Just on the heels of the Singapore Grand Prix, which is notorious for being one of the toughest races physically for Formula 1 drivers as it was declared the first 'heat hazard' race of the year, meaning drivers either had to use a cooling vest or add extra ballast to their car. Max Verstappen chose not to." },
       { id: "f1-b2", type: "text", content: "In Singapore, the finals were tight as George Russell amazed the entire F1 paddock with a faultless display of skill from qualifying to the final race. McLaren finished as Formula 1's top team at the Singapore Grand Prix on a challenging day for the 1,2,3 finish of George Russell, Mercedes Benz AMG; Max Verstappen, Red Bull Racing; and Lando Norris, McLaren." },
@@ -225,6 +241,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleCambiaso,
     author: "Millie Sealana",
     date: "2025-10-06",
+    edition: "2025-10",
     body: [
       { id: "polo-b1", type: "text", content: "The 132nd Hurlingham Open unfolded with two teams forced to rethink their assumptions rather than rely on routine. On the historic turf at Hurlingham, La Natividad La Dolfina, in their first title since the merger of the two teams, delivered a win that didn't hinge on overpowering their opponent, but on interpreting a match that evolved in real time. It brought father and son, Adolfo and Poroto Cambiaso back on home soil." },
       { id: "polo-b2", type: "text", content: "Their 12–9 result over UAE Polo signaled far more than a strong showing at the start of the Triple Crown. It revealed a team learning to operate as a single unit, navigating momentum shifts with the kind of clarity that only comes from maturity, trust, and an unspoken internal rhythm." },
@@ -246,6 +263,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleEngadin,
     author: "Millie Sealana",
     date: "2025-10-06",
+    edition: "2025-10",
     body: [
       { id: "eng-b1", type: "text", content: "The Engadin in late autumn is a quiet pause before the endless myriad of choices for skiers and non skiers alike. There is no other region in the world like the Engadin, from St. Moritz to Davos Klosters to the quieter towns of Scuol and Arosa. Winter is non stop with everything from A-to-Z. The lakes freeze from the edges inward, the light shifts to a colder blue, and the valley begins its quiet transformation into the winter playground the world knows so well." },
       { id: "eng-b2", type: "text", content: "St. Moritz is already rehearsing for its defining months: opening with FIS World Cup in action, Snow Polo, the White Turf races and the International Concours of Elegance (ICE). Everywhere is preparing for the gorgeous diamond-like snow to come. The private chalet gatherings, the art, the design, the discreet international arrivals that shape the season." },
@@ -261,6 +279,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleKusama,
     author: "Millie Sealana",
     date: "2025-10-05",
+    edition: "2025-10",
     body: [
       { id: "kus-b1", type: "text", content: "Pumpkins, infinity, and luminous polka worlds — Kusama's language of repetition and wonder arrives at Fondation Beyeler in Riehen. The exhibition explores the artist's enduring fascination with the infinite, transforming the galleries into immersive environments that blur the line between viewer and artwork." },
     ],
@@ -273,6 +292,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articlePfw,
     author: "Millie Sealana",
     date: "2025-10-06",
+    edition: "2025-10",
     body: [
       { id: "pfw-b1", type: "text", content: "Matthieu Blazy's highly anticipated debut at Chanel and Sarah Burton's second collection at Givenchy defined the season at Paris Fashion Week SS26. The collections signaled a new chapter for both houses — one of quiet confidence and refined craftsmanship." },
     ],
@@ -287,6 +307,7 @@ const DEFAULT_ARTICLES: Article[] = [
     author: "Charlotte Thames",
     date: "2026-01-11",
     featured: true,
+    edition: "2026-01",
     body: [
       { id: "gg-b1", type: "text", content: "The 83rd Golden Globe Awards at the Beverly Hilton delivered one of the most compelling ceremonies in recent memory. Timothée Chalamet took home Best Actor in a Drama for his transformative turn in a biopic that critics called career-defining. Teyana Taylor won Best Actress in a Musical or Comedy for 'One Battle After Another,' a film that also claimed the top musical/comedy prize." },
       { id: "gg-b2", type: "text", content: "The night belonged equally to 'Adolescence,' the British limited series that swept the television categories and became the evening's most discussed work. Stephen Graham added a Golden Globe to his growing collection of accolades for the show. 'Hamnet' won Best Motion Picture — Drama, anchoring a ceremony that felt less like an industry event and more like a cultural inflection point." },
@@ -302,6 +323,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleLvmhWatches,
     author: "Millie Sealana",
     date: "2026-01-19",
+    edition: "2026-01",
     body: [
       { id: "lw-b1", type: "text", content: "The seventh edition of LVMH Watch Week moved to a single destination for the first time — Milan — after previous editions spanning Dubai, Singapore, Miami, New York, and Paris. From January 19–21, nine LVMH-owned maisons including Bulgari, Hublot, TAG Heuer, Zenith, and Louis Vuitton presented their latest horological creations to trade journalists, retailers, and select clients." },
       { id: "lw-b2", type: "text", content: "The choice of Milan was deliberate. As a city that straddles fashion, design, and industry, it provided the ideal backdrop for collections that emphasized material innovation and aesthetic risk. Bulgari unveiled complications that pushed the boundaries of ultra-thin movements, while Hublot leaned into bold material fusions that have become the house's signature." },
@@ -317,6 +339,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleDiorBristol,
     author: "Elena Voss",
     date: "2026-01-26",
+    edition: "2026-01",
     body: [
       { id: "db-b1", type: "text", content: "During Paris Haute Couture Week, Le Bristol Paris opened its grand salons to an extraordinary exhibition: 'Dior Masterpieces: The Mouna Ayoub Collection.' The free exhibition showcased 126 haute couture pieces spanning decades of the house's artistry — from the New Look era through to contemporary collections." },
       { id: "db-b2", type: "text", content: "Collector Mouna Ayoub, one of the world's foremost private holders of haute couture, curated the display with the precision of a museum director. Each gown occupied its own space within the hotel's ornate rooms, the crystal chandeliers and marble floors providing a setting that felt less like an exhibition and more like a private audience with fashion history." },
@@ -331,6 +354,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: heroSnowPolo,
     author: "Millie Sealana",
     date: "2026-01-25",
+    edition: "2026-01",
     body: [
       { id: "sp-b1", type: "text", content: "The 41st Snow Polo World Cup St. Moritz concluded on Sunday, January 25, with Standing Rock defeating Flexjet in a championship match played on the frozen surface of Lake St. Moritz. The tournament — the world's most prestigious snow polo event — brought four teams to the Engadin for three days of competition against the backdrop of the Swiss Alps." },
       { id: "sp-b2", type: "text", content: "The conditions were quintessential St. Moritz: crisp winter air, brilliant sunshine, and the distinctive crunch of hooves on compacted snow. The frozen lake, which has hosted the tournament for over four decades, provided a surface that demanded both precision and adaptability from players and horses alike." },
@@ -346,6 +370,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleVicenzaoro,
     author: "Elena Voss",
     date: "2026-01-16",
+    edition: "2026-01",
     body: [
       { id: "vz-b1", type: "text", content: "Vicenzaoro returned from January 16–20 as the first major international business platform of the year for the global jewellery supply chain. Organised by Italian Exhibition Group at the Vicenza Expo Centre, the show recorded another sold-out edition with over 1,300 exhibiting brands. International exhibitors accounted for a significant share, underscoring Vicenza's role as a global crossroads for the industry." },
       { id: "vz-b2", type: "text", content: "The exhibition spanned the full spectrum of the jewellery world — from high jewellery and fine craftsmanship to emerging designers and technology-driven innovation. Italian goldsmiths from the Valenza, Arezzo, and Vicenza districts showcased collections that balanced traditional artisanship with contemporary design sensibility." },
@@ -360,6 +385,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleArtSg,
     author: "Millie Sealana",
     date: "2026-01-23",
+    edition: "2026-01",
     body: [
       { id: "asg-b1", type: "text", content: "The fourth edition of ART SG returned from January 23–25, continuing to set the pace as the leading international art fair in Southeast Asia. Visitors encountered presentations by global heavyweights including White Cube, Thaddaeus Ropac, neugerriemschneider, and Perrotin — alongside a strong contingent of Asian galleries that underscored the region's growing influence on the global art market." },
       { id: "asg-b2", type: "text", content: "The fair coincided with Singapore Art Week, which transformed the city-state into a concentrated hub of exhibitions, installations, and cultural programming. The most talked-about work was Ai Weiwei's monumental 60-metre inflatable raft — placed between diners at Capella Singapore — a provocative commentary on displacement that anchored the week's broader conversation about art's role in addressing global crises." },
@@ -412,4 +438,32 @@ export function resetToDefaults() {
   localStorage.removeItem(STORAGE_KEYS.heroes);
   localStorage.removeItem(STORAGE_KEYS.articles);
   localStorage.removeItem(STORAGE_KEYS.ads);
+}
+
+export function getEditions(): string[] {
+  const heroes = getHeroes();
+  const articles = getArticles();
+  const editions = new Set<string>();
+  heroes.forEach((h) => editions.add(h.edition));
+  articles.forEach((a) => editions.add(a.edition));
+  return Array.from(editions).sort().reverse();
+}
+
+export function getLatestEdition(): string {
+  const editions = getEditions();
+  return editions[0] || "2026-02";
+}
+
+export function getHeroesByEdition(edition: string): HeroItem[] {
+  return getHeroes().filter((h) => h.edition === edition);
+}
+
+export function getArticlesByEdition(edition: string): Article[] {
+  return getArticles().filter((a) => a.edition === edition);
+}
+
+export function formatEditionLabel(edition: string): string {
+  const [year, month] = edition.split("-");
+  const date = new Date(parseInt(year), parseInt(month) - 1);
+  return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }

@@ -207,6 +207,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleCvSummit,
     author: "Millie Sealana",
     date: "2025-10-06",
+    edition: "2025-10",
     body: [
       { id: "cv-b1", type: "text", content: "CV Summit 2025 took place at the Kongresshaus Zurich, uniting more than 3,000 technology leaders, investors, institutions, and innovators. With 190 speakers, the summit underscored its role as a catalyst event for defining the new era of finance and technology. This year's edition occupied its familiar space as part alpine think-tank, part deal-floor, part Swiss-precision diplomacy — but the shift from spectacle to substance was unmistakable." },
       { id: "cv-b2", type: "text", content: "The agenda spanned four tracks: Blockchain (innovation and infrastructure), Institutions & Digital Assets (banking, capital markets, and compliant adoption), Wealth Management (digital-era investment), and Artificial Intelligence (acceleration of financial evolution). Switzerland's neutrality and governance were repeatedly invoked as stabilizing anchors in an increasingly volatile global environment." },

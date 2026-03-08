@@ -76,6 +76,8 @@
     font-family: 'Bodoni Moda', 'Didot', 'Bodoni MT', serif;
     font-weight: 400;
     letter-spacing: 0.08em;
+    transform: scaleX(0.92);
+    transform-origin: left center;
   }
   .font-hero {
     font-family: 'Cinzel', 'Didot', 'Bodoni MT', serif;

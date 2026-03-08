@@ -22,13 +22,6 @@ export default function EditorialHeader() {
           </Link>
           <div className="flex items-center gap-3">
             <Link
-              to="/archive"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-sans text-muted-foreground hover:text-primary transition-colors border border-border rounded hover:border-primary"
-            >
-              <Archive className="w-4 h-4" />
-              Archive
-            </Link>
-            <Link
               to={isAdmin ? "/" : "/admin"}
               className="flex items-center gap-2 px-4 py-2 text-sm font-sans text-muted-foreground hover:text-primary transition-colors border border-border rounded hover:border-primary"
             >

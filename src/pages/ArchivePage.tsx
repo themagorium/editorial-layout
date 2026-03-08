@@ -1,43 +1,31 @@
 import { useState, useMemo } from "react";
-import { format } from "date-fns";
 import { useSearchParams } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import ArticleCard from "@/components/editorial/ArticleCard";
-import { getArticles, getHeroes } from "@/lib/content-store";
+import { getArticles, getHeroes, getEditions, formatEditionLabel } from "@/lib/content-store";
 import type { Article, HeroItem } from "@/lib/content-store";
 import { Input } from "@/components/ui/input";
 import { Search, ChevronRight, BookOpen } from "lucide-react";
 
 interface Volume {
-  key: string; // "2026-03"
-  label: string; // "March 2026"
-  articles: Article[];
+  key: string;
+  label: string;
   heroes: HeroItem[];
+  articles: Article[];
 }
 
-function groupByMonth(articles: Article[], heroes: HeroItem[]): Volume[] {
-  const map = new Map<string, Volume>();
+function buildVolumes(): Volume[] {
+  const allHeroes = getHeroes();
+  const allArticles = getArticles();
+  const editions = getEditions();
 
-  for (const a of articles) {
-    const d = new Date(a.date);
-    const key = format(d, "yyyy-MM");
-    if (!map.has(key)) {
-      map.set(key, { key, label: format(d, "MMMM yyyy"), articles: [], heroes: [] });
-    }
-    map.get(key)!.articles.push(a);
-  }
-
-  for (const h of heroes) {
-    const d = new Date(h.date);
-    const key = format(d, "yyyy-MM");
-    if (!map.has(key)) {
-      map.set(key, { key, label: format(d, "MMMM yyyy"), articles: [], heroes: [] });
-    }
-    map.get(key)!.heroes.push(h);
-  }
-
-  return Array.from(map.values()).sort((a, b) => b.key.localeCompare(a.key));
+  return editions.map((ed) => ({
+    key: ed,
+    label: formatEditionLabel(ed),
+    heroes: allHeroes.filter((h) => h.edition === ed).slice(0, 3),
+    articles: allArticles.filter((a) => a.edition === ed).slice(0, 4),
+  }));
 }
 
 export default function ArchivePage() {
@@ -46,11 +34,7 @@ export default function ArchivePage() {
   const [search, setSearch] = useState(categoryFilter);
   const [expandedVolume, setExpandedVolume] = useState<string | null>(null);
 
-  const volumes = useMemo(() => {
-    const articles = getArticles();
-    const heroes = getHeroes();
-    return groupByMonth(articles, heroes);
-  }, []);
+  const volumes = useMemo(() => buildVolumes(), []);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return volumes;
@@ -104,7 +88,6 @@ export default function ArchivePage() {
           <div className="max-w-4xl mx-auto space-y-4">
             {filtered.map((vol) => {
               const isOpen = expandedVolume === vol.key;
-              const totalItems = vol.articles.length + vol.heroes.length;
 
               return (
                 <div key={vol.key} className="border border-border rounded overflow-hidden">
@@ -135,7 +118,7 @@ export default function ArchivePage() {
                       {vol.heroes.length > 0 && (
                         <div className="mb-6">
                           <h4 className="category-pill text-[10px] mb-4 inline-block">Heroes</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {vol.heroes.map((h) => (
                               <div key={h.id} className="group relative overflow-hidden rounded aspect-[16/9]">
                                 <img
@@ -159,7 +142,7 @@ export default function ArchivePage() {
 
                       {vol.articles.length > 0 && (
                         <div>
-                          <h4 className="category-pill text-[10px] mb-4 inline-block">Articles</h4>
+                          <h4 className="category-pill text-[10px] mb-4 inline-block">Editor's Picks</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {vol.articles.map((a) => (
                               <ArticleCard key={a.id} article={a} variant="small" />

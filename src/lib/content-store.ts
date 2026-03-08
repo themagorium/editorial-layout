@@ -1,19 +1,19 @@
 // ===== Image Imports =====
 import heroOlympics from "@/assets/hero-olympics.jpg";
-import heroNyfw from "@/assets/hero-nyfw.jpg";
-import heroLfw from "@/assets/hero-lfw.jpg";
-import articleVeniceCarnival from "@/assets/article-venice-carnival.jpg";
+import heroMilanFashion from "@/assets/hero-milan-fashion.jpg";
+import heroSothebys from "@/assets/hero-sothebys.jpg";
 import articleRioCarnival from "@/assets/article-rio-carnival.jpg";
 import articleSuperbowl from "@/assets/article-superbowl.jpg";
-import articleDubaiFestival from "@/assets/article-dubai-festival.jpg";
+import articleBootDusseldorf from "@/assets/article-boot-dusseldorf.jpg";
+import articlePebbleBeach from "@/assets/article-pebble-beach.jpg";
 // January 2026
 import heroDavosWef from "@/assets/hero-davos-wef.jpg";
 import heroSnowPolo from "@/assets/hero-snow-polo.jpg";
 import heroHauteCouture from "@/assets/hero-haute-couture.jpg";
 import articleOscars from "@/assets/article-oscars.jpg";
 import articleArtSg from "@/assets/article-art-sg.jpg";
-import articleMilanFashion from "@/assets/hero-milan-fashion.jpg";
 import articlePittiUomo from "@/assets/article-pitti-uomo.jpg";
+import articleAustralianOpen from "@/assets/article-australian-open.jpg";
 // October 2025
 import articleCambiaso from "@/assets/article-cambiaso.jpg";
 import articleF1Americas from "@/assets/article-f1-americas.jpg";

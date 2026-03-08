@@ -2,6 +2,7 @@ import type { Article } from "@/lib/content-store";
 import { Play } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 
 interface Props {
   article: Article;

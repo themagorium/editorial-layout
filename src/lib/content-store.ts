@@ -168,6 +168,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleSuperbowl,
     author: "James Whitfield",
     date: "2026-02-08",
+    edition: "2026-02",
   },
   {
     id: "a4",

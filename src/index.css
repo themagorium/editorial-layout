@@ -65,13 +65,18 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cinzel', 'Didot', 'Bodoni MT', serif;
-    font-weight: 500;
+    font-family: 'Cormorant Garamond', 'Didot', 'Bodoni MT', serif;
+    font-weight: 600;
     letter-spacing: -0.01em;
   }
 }
 
 @layer components {
+  .masthead-font {
+    font-family: 'Cinzel', 'Didot', 'Bodoni MT', serif;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
   .editorial-gradient {
     background: linear-gradient(180deg, hsl(var(--navy-deep)) 0%, hsl(var(--background)) 100%);
   }

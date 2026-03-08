@@ -4,52 +4,52 @@
 
 @layer base {
   :root {
-    --background: 255 42% 16%;
-    --foreground: 40 20% 92%;
+    --background: 248 50% 22%;
+    --foreground: 40 20% 94%;
 
-    --card: 255 36% 19%;
-    --card-foreground: 40 20% 92%;
+    --card: 248 44% 26%;
+    --card-foreground: 40 20% 94%;
 
-    --popover: 255 36% 19%;
-    --popover-foreground: 40 20% 92%;
+    --popover: 248 44% 26%;
+    --popover-foreground: 40 20% 94%;
 
     --primary: 40 60% 65%;
-    --primary-foreground: 260 35% 9%;
+    --primary-foreground: 248 45% 12%;
 
-    --secondary: 255 30% 24%;
-    --secondary-foreground: 40 20% 85%;
+    --secondary: 248 38% 30%;
+    --secondary-foreground: 40 20% 88%;
 
-    --muted: 255 25% 22%;
-    --muted-foreground: 258 12% 55%;
+    --muted: 248 32% 28%;
+    --muted-foreground: 248 15% 58%;
 
     --accent: 40 60% 65%;
-    --accent-foreground: 260 35% 9%;
+    --accent-foreground: 248 45% 12%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 40 20% 92%;
+    --destructive-foreground: 40 20% 94%;
 
-    --border: 260 18% 20%;
-    --input: 260 18% 20%;
+    --border: 248 22% 28%;
+    --input: 248 22% 28%;
     --ring: 40 60% 65%;
 
     --radius: 0.25rem;
 
-    --sidebar-background: 260 30% 10%;
-    --sidebar-foreground: 40 20% 85%;
+    --sidebar-background: 248 38% 14%;
+    --sidebar-foreground: 40 20% 88%;
     --sidebar-primary: 40 60% 65%;
-    --sidebar-primary-foreground: 260 35% 9%;
-    --sidebar-accent: 260 25% 15%;
-    --sidebar-accent-foreground: 40 20% 85%;
-    --sidebar-border: 260 18% 20%;
+    --sidebar-primary-foreground: 248 45% 12%;
+    --sidebar-accent: 248 30% 20%;
+    --sidebar-accent-foreground: 40 20% 88%;
+    --sidebar-border: 248 22% 28%;
     --sidebar-ring: 40 60% 65%;
 
     /* Custom editorial tokens */
     --gold: 40 60% 65%;
     --gold-bright: 40 75% 72%;
-    --navy-deep: 260 40% 5%;
-    --navy-light: 260 25% 22%;
+    --navy-deep: 248 48% 10%;
+    --navy-light: 248 30% 28%;
     --cream: 40 30% 90%;
-    --ad-bg: 260 25% 14%;
+    --ad-bg: 248 32% 20%;
   }
 }
 

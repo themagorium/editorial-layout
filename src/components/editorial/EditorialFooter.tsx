@@ -13,7 +13,11 @@ function SubscribeSection() {
       toast.error("Please enter a valid email address.");
       return;
     }
-    toast.success("Thank you for subscribing!");
+    // Send subscription via mailto link
+    window.open(`mailto:subscribe@themagorium.com?subject=New Subscription&body=Please subscribe me: ${encodeURIComponent(email)}`);
+    toast("Thank you for subscribing", {
+      style: { background: "hsl(248, 44%, 26%)", color: "hsl(40, 60%, 65%)", border: "1px solid hsl(40, 60%, 65%, 0.3)" },
+    });
     setEmail("");
   };
 

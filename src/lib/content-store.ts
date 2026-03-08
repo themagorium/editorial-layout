@@ -241,6 +241,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleCambiaso,
     author: "Millie Sealana",
     date: "2025-10-06",
+    edition: "2025-10",
     body: [
       { id: "polo-b1", type: "text", content: "The 132nd Hurlingham Open unfolded with two teams forced to rethink their assumptions rather than rely on routine. On the historic turf at Hurlingham, La Natividad La Dolfina, in their first title since the merger of the two teams, delivered a win that didn't hinge on overpowering their opponent, but on interpreting a match that evolved in real time. It brought father and son, Adolfo and Poroto Cambiaso back on home soil." },
       { id: "polo-b2", type: "text", content: "Their 12–9 result over UAE Polo signaled far more than a strong showing at the start of the Triple Crown. It revealed a team learning to operate as a single unit, navigating momentum shifts with the kind of clarity that only comes from maturity, trust, and an unspoken internal rhythm." },

@@ -13,14 +13,18 @@ function SubscribeSection() {
       toast.error("Please enter a valid email address.");
       return;
     }
-    toast.success("Thank you for subscribing!");
+    // Send subscription via mailto link
+    window.open(`mailto:subscribe@themagorium.com?subject=New Subscription&body=Please subscribe me: ${encodeURIComponent(email)}`);
+    toast("Thank you for subscribing", {
+      style: { background: "hsl(248, 44%, 26%)", color: "hsl(40, 60%, 65%)", border: "1px solid hsl(40, 60%, 65%, 0.3)" },
+    });
     setEmail("");
   };
 
   return (
     <div className="bg-background border-t border-border">
       <div className="container mx-auto px-4 py-14">
-        <h3 className="font-serif text-2xl md:text-3xl font-bold italic text-foreground mb-2">Stay in the Loop</h3>
+        <h3 className="font-sans text-2xl md:text-3xl font-bold italic text-foreground mb-2">Stay in the Loop</h3>
         <p className="text-sm font-sans text-muted-foreground mb-6 max-w-2xl">
           Subscribe to The Magorium for the latest on art, culture, travel, tech, motorsport, sailing, fashion, and more.
         </p>
@@ -58,9 +62,6 @@ export default function EditorialFooter() {
                 <span className="text-primary">MAGORIUM</span>
               </h3>
             </Link>
-            <p className="text-sm text-muted-foreground mt-4 font-sans max-w-xs leading-relaxed">
-              A private-view magazine for travel, style, culture, and modern luxury.
-            </p>
           </div>
 
           <div>

@@ -103,7 +103,7 @@ function HeroesManager({ heroes, setHeroes }: { heroes: HeroItem[]; setHeroes: (
   const addHero = () => {
     setHeroes([
       ...heroes,
-      { id: `h-${Date.now()}`, title: "New Hero", subtitle: "", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0] },
+      { id: `h-${Date.now()}`, title: "New Hero", subtitle: "", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: new Date().toISOString().slice(0, 7) },
     ]);
   };
 

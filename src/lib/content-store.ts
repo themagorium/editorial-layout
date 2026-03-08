@@ -115,12 +115,12 @@ const DEFAULT_ARTICLES: Article[] = [
   },
   {
     id: "a4",
-    title: "Nice Carnival: Vive la Reine on the Riviera",
-    excerpt: "Illuminated night parades, flower battles, and Mediterranean elegance on the Promenade des Anglais.",
-    category: "Travel",
-    imageUrl: articleNiceCarnival,
+    title: "ICE St. Moritz: Cricket & Polo on the Frozen Lake",
+    excerpt: "The Engadin's legendary frozen lake hosts the world's most exclusive winter polo and cricket tournaments against a stunning Alpine backdrop.",
+    category: "Equestrian",
+    imageUrl: articleIceStMoritz,
     author: "Sophie Laurent",
-    date: "2026-02-11",
+    date: "2026-02-06",
   },
 ];
 

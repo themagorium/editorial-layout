@@ -118,6 +118,12 @@ export default function ArticleBodyEditor({ blocks, onChange }: Props) {
                 placeholder="Image caption (optional)"
                 className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
               />
+              <input
+                value={block.citation || ""}
+                onChange={(e) => updateBlock(block.id, { citation: e.target.value })}
+                placeholder="Photo credit / citation (e.g. Photo: John Smith / Getty)"
+                className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans text-right"
+              />
             </div>
           )}
 
@@ -129,6 +135,12 @@ export default function ArticleBodyEditor({ blocks, onChange }: Props) {
                 onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
                 placeholder="Video caption (optional)"
                 className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
+              />
+              <input
+                value={block.citation || ""}
+                onChange={(e) => updateBlock(block.id, { citation: e.target.value })}
+                placeholder="Video credit / citation (e.g. Video: BBC Sport)"
+                className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans text-right"
               />
             </div>
           )}

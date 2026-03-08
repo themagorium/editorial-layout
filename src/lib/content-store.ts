@@ -439,3 +439,31 @@ export function resetToDefaults() {
   localStorage.removeItem(STORAGE_KEYS.articles);
   localStorage.removeItem(STORAGE_KEYS.ads);
 }
+
+export function getEditions(): string[] {
+  const heroes = getHeroes();
+  const articles = getArticles();
+  const editions = new Set<string>();
+  heroes.forEach((h) => editions.add(h.edition));
+  articles.forEach((a) => editions.add(a.edition));
+  return Array.from(editions).sort().reverse();
+}
+
+export function getLatestEdition(): string {
+  const editions = getEditions();
+  return editions[0] || "2026-02";
+}
+
+export function getHeroesByEdition(edition: string): HeroItem[] {
+  return getHeroes().filter((h) => h.edition === edition);
+}
+
+export function getArticlesByEdition(edition: string): Article[] {
+  return getArticles().filter((a) => a.edition === edition);
+}
+
+export function formatEditionLabel(edition: string): string {
+  const [year, month] = edition.split("-");
+  const date = new Date(parseInt(year), parseInt(month) - 1);
+  return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}

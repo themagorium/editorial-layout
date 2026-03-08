@@ -115,9 +115,9 @@ const DEFAULT_ARTICLES: Article[] = [
   },
   {
     id: "a4",
-    title: "ICE St. Moritz: Cricket & Polo on the Frozen Lake",
-    excerpt: "The Engadin's legendary frozen lake hosts the world's most exclusive winter polo and cricket tournaments against a stunning Alpine backdrop.",
-    category: "Equestrian",
+    title: "ICE St. Moritz: The International Concours of Elegance",
+    excerpt: "The world's only concours d'élégance held on a frozen lake — rare vintage masterpieces gleam against the Alpine winter sun in the Engadin.",
+    category: "Motorsport",
     imageUrl: articleIceStMoritz,
     author: "Sophie Laurent",
     date: "2026-02-06",

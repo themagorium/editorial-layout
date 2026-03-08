@@ -1,4 +1,5 @@
 import { CATEGORIES } from "@/lib/content-store";
+import PrivacyPopupButton from "@/components/editorial/PrivacyPopupButton";
 
 export default function EditorialFooter() {
   return (

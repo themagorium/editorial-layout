@@ -5,6 +5,14 @@ import articleVeniceCarnival from "@/assets/article-venice-carnival.jpg";
 import articleRioCarnival from "@/assets/article-rio-carnival.jpg";
 import articleSuperbowl from "@/assets/article-superbowl.jpg";
 import articleIceStMoritz from "@/assets/article-ice-stmoritz.jpg";
+// Volume 1 — October 2025
+import articleSailgp from "@/assets/article-sailgp.jpg";
+import articleCvSummit from "@/assets/article-cv-summit.jpg";
+import articleF1Americas from "@/assets/article-f1-americas.jpg";
+import articleCambiaso from "@/assets/article-cambiaso.jpg";
+import articleEngadin from "@/assets/article-engadin.jpg";
+import articleKusama from "@/assets/article-kusama.jpg";
+import articlePfw from "@/assets/article-pfw.jpg";
 
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 

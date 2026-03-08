@@ -34,7 +34,7 @@ export type Category =
 
 export const CATEGORIES: Category[] = [
   "Travel", "Yachting", "Art & Design", "Fashion", "Tech & AI",
-  "Motorsport", "Film & Festivals", "Music", "Golf", "Tennis", "Wellness", "Equestrian"
+  "Motorsport", "Film & Festivals", "Music", "Golf", "Tennis", "Wellness", "Equestrian", "Sports"
 ];
 
 export interface HeroItem {

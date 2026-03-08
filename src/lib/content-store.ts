@@ -10,9 +10,9 @@ import articleDubaiFestival from "@/assets/article-dubai-festival.jpg";
 import heroDavosWef from "@/assets/hero-davos-wef.jpg";
 import heroSnowPolo from "@/assets/hero-snow-polo.jpg";
 import heroHauteCouture from "@/assets/hero-haute-couture.jpg";
-import articleGoldenGlobes from "@/assets/article-golden-globes.jpg";
+import articleOscars from "@/assets/article-oscars.jpg";
 import articleArtSg from "@/assets/article-art-sg.jpg";
-import articleDiorBristol from "@/assets/article-dior-bristol.jpg";
+import articleMilanFashion from "@/assets/hero-milan-fashion.jpg";
 import articlePittiUomo from "@/assets/article-pitti-uomo.jpg";
 // October 2025
 import articleCambiaso from "@/assets/article-cambiaso.jpg";

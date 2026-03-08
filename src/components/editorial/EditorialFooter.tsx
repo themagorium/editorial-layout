@@ -33,7 +33,7 @@ export default function EditorialFooter() {
             <div className="space-y-2 text-sm font-sans text-muted-foreground">
               <p className="hover:text-foreground cursor-pointer transition-colors">Editor’s Letter</p>
               <p className="hover:text-foreground cursor-pointer transition-colors">Contributors</p>
-              <p className="hover:text-foreground cursor-pointer transition-colors">Archive</p>
+              <Link to="/archive" className="block hover:text-foreground transition-colors">Archive</Link>
               <p className="hover:text-foreground cursor-pointer transition-colors">Partnerships</p>
             </div>
           </div>

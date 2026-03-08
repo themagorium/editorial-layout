@@ -73,9 +73,9 @@
 
 @layer components {
   .masthead-font {
-    font-family: 'Italiana', 'Didot', 'Bodoni MT', serif;
-    font-weight: 400;
-    letter-spacing: 0.16em;
+    font-family: 'Cormorant Garamond', 'Didot', serif;
+    font-weight: 300;
+    letter-spacing: 0.18em;
   }
   .font-hero {
     font-family: 'Cinzel', 'Didot', 'Bodoni MT', serif;

@@ -267,15 +267,29 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
 
 /* ---- Ads Manager ---- */
 function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => void }) {
+  const addAd = () => {
+    setAds([
+      ...ads,
+      { id: `ad-${Date.now()}`, label: "New Ad Slot", position: "mid-feed", width: 728, height: 90 },
+    ]);
+  };
+
   const update = (id: string, patch: Partial<AdSlot>) => {
     setAds(ads.map((a) => (a.id === id ? { ...a, ...patch } : a)));
   };
 
+  const remove = (id: string) => setAds(ads.filter((a) => a.id !== id));
+
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground font-sans">Upload images or videos for each ad placement. These slots appear throughout the editorial layout.</p>
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-muted-foreground font-sans">Upload images or videos for each ad placement. These slots appear throughout the editorial layout.</p>
+        <button onClick={addAd} className="px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Add Slot
+        </button>
+      </div>
       {ads.map((ad) => (
-        <ContentCard key={ad.id}>
+        <ContentCard key={ad.id} onRemove={() => remove(ad.id)}>
           <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
             <MediaUpload
               imageUrl={ad.imageUrl}
@@ -285,10 +299,22 @@ function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => v
             />
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <span className="category-pill">{ad.position}</span>
-                <span className="text-xs text-muted-foreground">{ad.width}×{ad.height}</span>
+                <select 
+                  value={ad.position} 
+                  onChange={(e) => update(ad.id, { position: e.target.value as any })} 
+                  className="category-pill bg-secondary text-foreground border-none"
+                >
+                  <option value="hero-sidebar">Hero Sidebar</option>
+                  <option value="mid-feed">Mid Feed</option>
+                  <option value="bottom-banner">Bottom Banner</option>
+                  <option value="sidebar">Sidebar</option>
+                </select>
+                <span className="text-xs text-muted-foreground">
+                  W: <input type="number" value={ad.width} onChange={(e) => update(ad.id, { width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
+                  × H: <input type="number" value={ad.height} onChange={(e) => update(ad.id, { height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
+                </span>
               </div>
-              <input value={ad.label} onChange={(e) => update(ad.id, { label: e.target.value })} placeholder="Ad label" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+              <input value={ad.label} onChange={(e) => update(ad.id, { label: e.target.value })} placeholder="Ad label (internal use)" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm" />
               <input value={ad.linkUrl || ""} onChange={(e) => update(ad.id, { linkUrl: e.target.value })} placeholder="Click-through URL" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
             </div>
           </div>

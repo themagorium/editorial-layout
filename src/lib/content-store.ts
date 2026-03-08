@@ -4,8 +4,9 @@ import heroMilanFashion from "@/assets/hero-milan-fashion.jpg";
 import heroSothebys from "@/assets/hero-sothebys.jpg";
 import articleRioCarnival from "@/assets/article-rio-carnival.jpg";
 import articleSuperbowl from "@/assets/article-superbowl.jpg";
-import articleBootDusseldorf from "@/assets/article-boot-dusseldorf.jpg";
+import articleDubaiBoatShow from "@/assets/article-dubai-boat-show.jpg";
 import articlePebbleBeach from "@/assets/article-pebble-beach.jpg";
+import articleAbuDhabiArt from "@/assets/article-abu-dhabi-art.jpg";
 // January 2026
 import heroDavosWef from "@/assets/hero-davos-wef.jpg";
 import heroSnowPolo from "@/assets/hero-snow-polo.jpg";

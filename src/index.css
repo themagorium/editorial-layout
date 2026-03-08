@@ -73,11 +73,10 @@
 
 @layer components {
   .masthead-font {
-    font-family: 'Playfair Display', 'Didot', serif;
-    font-weight: 400;
-    letter-spacing: 0.12em;
-    transform: scaleY(1.08);
-    transform-origin: left center;
+    font-family: 'Josefin Sans', sans-serif;
+    font-weight: 100;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
   }
   .font-hero {
     font-family: 'Cinzel', 'Didot', 'Bodoni MT', serif;

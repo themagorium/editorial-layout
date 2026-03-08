@@ -76,7 +76,7 @@
     font-family: 'Cormorant Garamond', 'Didot', serif;
     font-weight: 300;
     letter-spacing: 0.18em;
-    transform: scaleX(0.82) scaleY(1.15);
+    transform: scaleX(1.0) scaleY(1.15);
     transform-origin: left center;
   }
   .font-hero {

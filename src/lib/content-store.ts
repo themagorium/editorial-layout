@@ -5,6 +5,14 @@ import articleVeniceCarnival from "@/assets/article-venice-carnival.jpg";
 import articleRioCarnival from "@/assets/article-rio-carnival.jpg";
 import articleSuperbowl from "@/assets/article-superbowl.jpg";
 import articleIceStMoritz from "@/assets/article-ice-stmoritz.jpg";
+// Volume 1 — October 2025
+import articleSailgp from "@/assets/article-sailgp.jpg";
+import articleCvSummit from "@/assets/article-cv-summit.jpg";
+import articleF1Americas from "@/assets/article-f1-americas.jpg";
+import articleCambiaso from "@/assets/article-cambiaso.jpg";
+import articleEngadin from "@/assets/article-engadin.jpg";
+import articleKusama from "@/assets/article-kusama.jpg";
+import articlePfw from "@/assets/article-pfw.jpg";
 
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 
@@ -122,6 +130,70 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleIceStMoritz,
     author: "Sophie Laurent",
     date: "2026-02-06",
+  },
+  // --- Volume 1 — October 2025 ---
+  {
+    id: "v1-sailgp",
+    title: "SailGP from Geneva to Cadiz",
+    excerpt: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany in its first final.",
+    category: "Yachting",
+    imageUrl: articleSailgp,
+    author: "Millie Sealana",
+    date: "2025-10-04",
+  },
+  {
+    id: "v1-cv-summit",
+    title: "Zurich's CV Summit: Capital Meets AI Coding by the Lake",
+    excerpt: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance around infrastructure.",
+    category: "Tech & AI",
+    imageUrl: articleCvSummit,
+    author: "Millie Sealana",
+    date: "2025-10-06",
+  },
+  {
+    id: "v1-f1-americas",
+    title: "F1 Returns to the Circuit of the Americas",
+    excerpt: "Just on the heels of Singapore, F1 heads to Austin's tech haven — where Russell amazed and Hamilton raced for Roscoe.",
+    category: "Motorsport",
+    imageUrl: articleF1Americas,
+    author: "Charlotte Thames",
+    date: "2025-10-06",
+  },
+  {
+    id: "v1-cambiaso",
+    title: "Cambiaso x Cambiaso: Hurlingham and a New Legacy Begins",
+    excerpt: "The 132nd Hurlingham Open: La Natividad La Dolfina establish a new standard under pressure, bringing father and son back on home soil.",
+    category: "Equestrian",
+    imageUrl: articleCambiaso,
+    author: "Millie Sealana",
+    date: "2025-10-06",
+  },
+  {
+    id: "v1-engadin",
+    title: "Engadin Awaits the Winter",
+    excerpt: "There is no other region in the world like the Engadin — from St. Moritz to Davos Klosters. The lakes freeze, the light shifts, and the valley transforms.",
+    category: "Travel",
+    imageUrl: articleEngadin,
+    author: "Millie Sealana",
+    date: "2025-10-06",
+  },
+  {
+    id: "v1-kusama",
+    title: "Kusama Before the Crowds",
+    excerpt: "Pumpkins, infinity, and luminous polka worlds — Kusama's language of repetition and wonder arrives at Fondation Beyeler in Riehen.",
+    category: "Art & Design",
+    imageUrl: articleKusama,
+    author: "Millie Sealana",
+    date: "2025-10-05",
+  },
+  {
+    id: "v1-pfw",
+    title: "Paris Fashion Week SS26: Blazy's Debut at Chanel & Burton's Givenchy",
+    excerpt: "Matthieu Blazy's highly anticipated debut at Chanel, and Sarah Burton's second collection at Givenchy define the season.",
+    category: "Fashion",
+    imageUrl: articlePfw,
+    author: "Millie Sealana",
+    date: "2025-10-06",
   },
 ];
 

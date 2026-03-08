@@ -12,9 +12,9 @@ export default function EditorialHeader() {
         {/* Top bar */}
         <div className="flex items-center justify-between py-6">
           <Link to="/" className="block">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight masthead-font">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight masthead-font">
               <span className="text-foreground">THE </span>
-              <span className="text-primary">EDITORIAL</span>
+              <span className="text-primary">MAGORIUM</span>
             </h1>
             <p className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground mt-1.5 font-light">
               where curated becomes legend

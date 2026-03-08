@@ -42,7 +42,7 @@ export default function EditorialFooter() {
             <p className="text-sm text-muted-foreground font-sans leading-relaxed">
               For editorial features and brand placements, contact our private desk.
             </p>
-            <p className="text-sm text-foreground font-sans mt-3">concierge@theeditorial.com</p>
+            <p className="text-sm text-foreground font-sans mt-3">concierge@themagorium.com</p>
           </div>
         </div>
 

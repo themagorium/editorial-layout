@@ -30,11 +30,11 @@ import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.jpg";
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 
   | "Tech & AI" | "Motorsport" | "Film & Festivals" 
-  | "Music" | "Golf" | "Tennis" | "Wellness" | "Equestrian";
+  | "Music" | "Golf" | "Tennis" | "Wellness" | "Equestrian" | "Sports";
 
 export const CATEGORIES: Category[] = [
   "Travel", "Yachting", "Art & Design", "Fashion", "Tech & AI",
-  "Motorsport", "Film & Festivals", "Music", "Golf", "Tennis", "Wellness", "Equestrian"
+  "Motorsport", "Film & Festivals", "Music", "Golf", "Tennis", "Wellness", "Equestrian", "Sports"
 ];
 
 export interface HeroItem {
@@ -114,7 +114,7 @@ const DEFAULT_ARTICLES: Article[] = [
     id: "a2",
     title: "Super Bowl LX: Stadium Lights & Bay Area Glamour",
     excerpt: "Levi's Stadium hosts the biggest night in American sport — VIP suites, halftime spectacle, and celebrity-heavy parties.",
-    category: "Film & Festivals",
+    category: "Sports",
     imageUrl: articleSuperbowl,
     author: "James Whitfield",
     date: "2026-02-08",

@@ -279,6 +279,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleKusama,
     author: "Millie Sealana",
     date: "2025-10-05",
+    edition: "2025-10",
     body: [
       { id: "kus-b1", type: "text", content: "Pumpkins, infinity, and luminous polka worlds — Kusama's language of repetition and wonder arrives at Fondation Beyeler in Riehen. The exhibition explores the artist's enduring fascination with the infinite, transforming the galleries into immersive environments that blur the line between viewer and artwork." },
     ],

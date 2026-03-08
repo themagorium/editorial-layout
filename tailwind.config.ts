@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ['Cormorant Garamond', 'Didot', 'Bodoni MT', 'serif'],
+        serif: ['Gloock', 'Didot', 'Bodoni MT', 'serif'],
         sans: ['Outfit', 'system-ui', 'sans-serif'],
       },
       colors: {

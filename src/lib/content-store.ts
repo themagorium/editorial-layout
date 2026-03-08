@@ -172,19 +172,19 @@ const DEFAULT_ARTICLES: Article[] = [
 
   // ========== JANUARY 2026 ==========
   {
-    id: "v2-golden-globes",
-    title: "Golden Globes 2026: Chalamet, Adolescence & a Night of Firsts",
-    excerpt: "The 83rd Golden Globe Awards crowned Timothée Chalamet, Teyana Taylor, and the phenomenon 'Adolescence' — a ceremony that signaled Hollywood's generational shift.",
+    id: "v2-oscars",
+    title: "The 98th Academy Awards: Hollywood's Grandest Night Returns",
+    excerpt: "The Dolby Theatre hosts the Oscars — the definitive night of cinema, couture red carpets, and the after-parties that define the season.",
     category: "Film & Festivals",
-    imageUrl: articleGoldenGlobes,
+    imageUrl: articleOscars,
     author: "Charlotte Thames",
-    date: "2026-01-11",
+    date: "2026-01-25",
     featured: true,
     edition: "2026-01",
     body: [
-      { id: "gg-b1", type: "text", content: "The 83rd Golden Globe Awards at the Beverly Hilton delivered one of the most compelling ceremonies in recent memory. Timothée Chalamet took home Best Actor in a Drama for his transformative turn in a biopic that critics called career-defining. Teyana Taylor won Best Actress in a Musical or Comedy for 'One Battle After Another,' a film that also claimed the top musical/comedy prize." },
-      { id: "gg-b2", type: "text", content: "The night belonged equally to 'Adolescence,' the British limited series that swept the television categories and became the evening's most discussed work. Stephen Graham added a Golden Globe to his growing collection of accolades for the show. 'Hamnet' won Best Motion Picture — Drama, anchoring a ceremony that felt less like an industry event and more like a cultural inflection point." },
-      { id: "gg-b3", type: "text", content: "On the red carpet, the fashion was as deliberate as the performances being honored. Designers leaned into structured silhouettes, deep jewel tones, and bespoke tailoring. The after-parties, from the InStyle suite to the Netflix gathering at Spago, hummed with the energy of an industry recalibrating its compass." },
+      { id: "osc-b1", type: "text", content: "The 98th Academy Awards at the Dolby Theatre in Hollywood delivered a ceremony that felt both timeless and urgent. The red carpet was a masterclass in couture — Valentino, Givenchy, and Armani Privé dominated, with structured silhouettes and jewel-toned satins setting the tone for a night that celebrated cinema's highest achievements." },
+      { id: "osc-b2", type: "text", content: "The evening's biggest moment belonged to the Best Picture race, which saw a fierce contest between intimate character studies and sweeping epics. The after-parties — from the Vanity Fair gathering at the Wallis Annenberg Center to the Governor's Ball — hummed with the energy of an industry that still believes in the power of the big screen." },
+      { id: "osc-b3", type: "text", content: "For the luxury world, the Oscars remain the ultimate intersection of fashion, celebrity, and cultural capital. The jewellery alone — Cartier, Bulgari, Tiffany — was estimated at over $100 million on the red carpet. Hollywood's grandest night continues to prove that spectacle, when done with conviction, is an art form in itself." },
     ],
   },
   {

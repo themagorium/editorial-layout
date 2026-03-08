@@ -1,5 +1,7 @@
 import type { AdSlot } from "@/lib/content-store";
 import { Megaphone } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
+import { useEffect, useRef } from "react";
 
 interface Props {
   ad: AdSlot;
@@ -7,8 +9,27 @@ interface Props {
 }
 
 export default function AdPlacement({ ad, className = "" }: Props) {
+  const tracked = useRef(false);
+
+  useEffect(() => {
+    if (!tracked.current) {
+      trackEvent(ad.id, "ad", "view");
+      tracked.current = true;
+    }
+  }, [ad.id]);
+
+  const handleClick = () => {
+    trackEvent(ad.id, "ad", "click");
+  };
+
   const content = ad.imageUrl ? (
-    <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+    <a
+      href={ad.linkUrl || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block w-full h-full"
+      onClick={handleClick}
+    >
       {ad.videoUrl ? (
         <video src={ad.videoUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
       ) : (

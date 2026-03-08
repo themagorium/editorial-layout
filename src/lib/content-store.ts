@@ -178,6 +178,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleIceStMoritz,
     author: "Sophie Laurent",
     date: "2026-02-06",
+    edition: "2026-02",
   },
   // --- Volume 1 — October 2025 ---
   {

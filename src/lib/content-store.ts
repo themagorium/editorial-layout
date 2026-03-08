@@ -1,10 +1,10 @@
-import heroYacht from "@/assets/hero-yacht.jpg";
-import heroFashion from "@/assets/hero-fashion.jpg";
-import heroMotorsport from "@/assets/hero-motorsport.jpg";
-import articleTravel from "@/assets/article-travel.jpg";
-import articleArt from "@/assets/article-art.jpg";
-import articleGolf from "@/assets/article-golf.jpg";
-import articleMusic from "@/assets/article-music.jpg";
+import heroOlympics from "@/assets/hero-olympics.jpg";
+import heroMilanFashion from "@/assets/hero-milan-fashion.jpg";
+import heroWhiteTurf from "@/assets/hero-white-turf.jpg";
+import articleMonacoGP from "@/assets/article-monaco-gp.jpg";
+import articleArtBasel from "@/assets/article-art-basel.jpg";
+import articleCannes from "@/assets/article-cannes.jpg";
+import articleAscot from "@/assets/article-ascot.jpg";
 
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 
@@ -29,7 +29,7 @@ export interface HeroItem {
 export interface ArticleBodyBlock {
   id: string;
   type: "text" | "image" | "video";
-  content: string; // text content, image data URL, or video data URL
+  content: string;
   caption?: string;
 }
 
@@ -60,67 +60,67 @@ export interface AdSlot {
 const DEFAULT_HEROES: HeroItem[] = [
   {
     id: "h1",
-    title: "Mediterranean Dreams: Yachting Season Opens",
-    subtitle: "From Monaco to Mykonos — the ultimate charter guide for 2026",
-    category: "Yachting",
-    imageUrl: heroYacht,
-    date: "2026-03-01",
+    title: "Winter Olympics XXV: Milano-Cortina 2026",
+    subtitle: "The Dolomites prepare to host the world's greatest winter spectacle — a complete preview",
+    category: "Travel",
+    imageUrl: heroOlympics,
+    date: "2026-02-06",
   },
   {
     id: "h2",
     title: "Milan Fashion Week: The New Gilded Age",
     subtitle: "A front-row look at the collections defining this decade",
     category: "Fashion",
-    imageUrl: heroFashion,
-    date: "2026-03-05",
+    imageUrl: heroMilanFashion,
+    date: "2026-02-25",
   },
   {
     id: "h3",
-    title: "F1 Returns to the Streets of Monaco",
-    subtitle: "Preview of the most prestigious race on the calendar",
-    category: "Motorsport",
-    imageUrl: heroMotorsport,
-    date: "2026-03-08",
+    title: "White Turf: Racing on Ice in St. Moritz",
+    subtitle: "The world's most glamorous winter horse racing returns to the frozen lake of the Engadin",
+    category: "Equestrian",
+    imageUrl: heroWhiteTurf,
+    date: "2026-02-15",
   },
 ];
 
 const DEFAULT_ARTICLES: Article[] = [
   {
     id: "a1",
-    title: "Santorini at Sunset: Greece's Timeless Allure",
-    excerpt: "Why the Cyclades remain the world's most coveted escape — and the hidden gems beyond the postcard views.",
-    category: "Travel",
-    imageUrl: articleTravel,
-    author: "Elena Voss",
-    date: "2026-03-06",
+    title: "Monaco Grand Prix 2026: The Crown Jewel of Motorsport",
+    excerpt: "From the hairpin to the tunnel — everything you need to know about the most prestigious race on the calendar.",
+    category: "Motorsport",
+    imageUrl: articleMonacoGP,
+    author: "James Whitfield",
+    date: "2026-05-24",
     featured: true,
   },
   {
     id: "a2",
-    title: "The New Sculptors: Art Basel Preview",
-    excerpt: "Inside the galleries pushing contemporary sculpture into uncharted territory this spring.",
+    title: "Art Basel Miami Beach: Where Culture Meets Capital",
+    excerpt: "Inside the galleries and private viewings that make this the world's premier contemporary art fair.",
     category: "Art & Design",
-    imageUrl: articleArt,
+    imageUrl: articleArtBasel,
     author: "Marcus Chen",
-    date: "2026-03-04",
+    date: "2026-12-04",
   },
   {
     id: "a3",
-    title: "Augusta Awaits: Masters 2026 Preview",
-    excerpt: "Amen Corner has never looked more dramatic. A course guide for the discerning spectator.",
-    category: "Golf",
-    imageUrl: articleGolf,
-    author: "James Whitfield",
-    date: "2026-03-02",
+    title: "Cannes Film Festival: Cinema's Most Coveted Stage",
+    excerpt: "The Palme d'Or contenders, the yacht parties, and the films that will define the year.",
+    category: "Film & Festivals",
+    imageUrl: articleCannes,
+    author: "Sophie Laurent",
+    date: "2026-05-12",
   },
   {
     id: "a4",
-    title: "Glastonbury's Golden Jubilee Lineup",
-    excerpt: "Fifty years of the world's greatest festival — and the headline acts that will define the anniversary.",
-    category: "Music",
-    imageUrl: articleMusic,
-    author: "Sophie Laurent",
-    date: "2026-02-28",
+    title: "Royal Ascot: The Pinnacle of British Elegance",
+    excerpt: "Morning dress, millinery masterpieces, and world-class thoroughbred racing in the Royal Enclosure.",
+    category: "Equestrian",
+    imageUrl: articleAscot,
+    author: "Elena Voss",
+    date: "2026-06-16",
   },
 ];
 

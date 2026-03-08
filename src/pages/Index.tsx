@@ -13,7 +13,7 @@ function HeroCard({ hero }: { hero: HeroItem }) {
       className="group relative overflow-hidden rounded cursor-pointer"
       onClick={() => trackEvent(hero.id, "hero", "click")}
     >
-      <div className="aspect-[3/2] overflow-hidden">
+      <div className="aspect-[16/7] overflow-hidden">
         <img
           src={hero.imageUrl}
           alt={hero.title}

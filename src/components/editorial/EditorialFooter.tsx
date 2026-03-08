@@ -24,7 +24,7 @@ function SubscribeSection() {
   return (
     <div className="bg-background border-t border-border">
       <div className="container mx-auto px-4 py-14">
-        <h3 className="font-serif text-2xl md:text-3xl font-bold italic text-foreground mb-2">Stay in the Loop</h3>
+        <h3 className="font-sans text-2xl md:text-3xl font-bold italic text-foreground mb-2">Stay in the Loop</h3>
         <p className="text-sm font-sans text-muted-foreground mb-6 max-w-2xl">
           Subscribe to The Magorium for the latest on art, culture, travel, tech, motorsport, sailing, fashion, and more.
         </p>

@@ -12,7 +12,7 @@ export default function EditorialHeader() {
         {/* Top bar */}
         <div className="flex items-center justify-between py-6">
           <Link to="/" className="block">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: "'Italiana', serif" }}>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: "'Didot', 'Bodoni MT', 'Playfair Display', serif" }}>
               <span className="text-foreground">THE </span>
               <span className="text-primary">EDITORIAL</span>
             </h1>

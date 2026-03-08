@@ -23,7 +23,7 @@ import articleGoldenGlobes from "@/assets/article-golden-globes.jpg";
 import articleLvmhWatches from "@/assets/article-lvmh-watches.jpg";
 import articleDiorBristol from "@/assets/article-dior-bristol.jpg";
 import articleVicenzaoro from "@/assets/article-vicenzaoro.jpg";
-import articleShoptalkLuxe from "@/assets/article-shoptalk-luxe.jpg";
+import articleArtSg from "@/assets/article-art-sg.jpg";
 
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 
@@ -353,18 +353,18 @@ const DEFAULT_ARTICLES: Article[] = [
     ],
   },
   {
-    id: "v2-shoptalk-luxe",
-    title: "Shoptalk Luxe Abu Dhabi: The Future of Luxury Retail Lands in the Gulf",
-    excerpt: "The inaugural Middle East edition of Shoptalk Luxe brought 2,000+ attendees and 170+ speakers to Abu Dhabi — exploring what's next for luxury retail in a shifting global landscape.",
-    category: "Tech & AI",
-    imageUrl: articleShoptalkLuxe,
-    author: "Charlotte Thames",
-    date: "2026-01-27",
+    id: "v2-art-sg",
+    title: "ART SG 2026: Southeast Asia's Leading Art Fair Expands Its Global Reach",
+    excerpt: "The fourth edition of ART SG brought White Cube, Thaddaeus Ropac, and over 100 galleries to Singapore — alongside Ai Weiwei's monumental installation during Singapore Art Week.",
+    category: "Art & Design",
+    imageUrl: articleArtSg,
+    author: "Millie Sealana",
+    date: "2026-01-23",
     body: [
-      { id: "sl-b1", type: "text", content: "Abu Dhabi hosted the inaugural Middle East edition of Shoptalk Luxe from January 27–29, bringing one of the world's most influential platforms for luxury retail innovation to the Gulf. Over 2,000 attendees and 170+ speakers gathered to explore pioneering concepts shaping the next chapter of luxury retail." },
-      { id: "sl-b2", type: "text", content: "The conference addressed the tectonic shifts reshaping luxury: the rise of AI-driven personalization, the growing influence of Middle Eastern and Asian consumers, the evolution of experiential retail, and the tension between digital convenience and physical exclusivity. Abu Dhabi — positioning itself as a global hub for luxury, culture, and innovation — provided the ideal stage." },
-      { id: "sl-b3", type: "text", content: "Panels explored how luxury houses are rethinking their digital strategies, from virtual try-ons powered by generative AI to private client platforms that blur the line between e-commerce and concierge service. The consensus: the future of luxury retail is not about channels, but about seamless, emotionally intelligent experiences." },
-      { id: "sl-b4", type: "text", content: "For the luxury industry, the message from Abu Dhabi was clear — the center of gravity is shifting, and the brands that thrive will be those that understand the new geography of desire." },
+      { id: "asg-b1", type: "text", content: "The fourth edition of ART SG returned from January 23–25, continuing to set the pace as the leading international art fair in Southeast Asia. Visitors encountered presentations by global heavyweights including White Cube, Thaddaeus Ropac, neugerriemschneider, and Perrotin — alongside a strong contingent of Asian galleries that underscored the region's growing influence on the global art market." },
+      { id: "asg-b2", type: "text", content: "The fair coincided with Singapore Art Week, which transformed the city-state into a concentrated hub of exhibitions, installations, and cultural programming. The most talked-about work was Ai Weiwei's monumental 60-metre inflatable raft — placed between diners at Capella Singapore — a provocative commentary on displacement that anchored the week's broader conversation about art's role in addressing global crises." },
+      { id: "asg-b3", type: "text", content: "ART SG's expanded programming included curated sections dedicated to emerging artists from the Asia-Pacific region, immersive digital art installations, and a series of collector-led talks that drew private collectors from Hong Kong, Tokyo, Jakarta, and Sydney. The fair's position within Singapore — a city that bridges East and West — gives it a unique gravitational pull." },
+      { id: "asg-b4", type: "text", content: "For the international art world, ART SG 2026 confirmed what many have sensed: the center of gravity is shifting eastward. The energy, the collectors, the institutional ambition — Singapore is no longer an emerging art destination. It is one." },
     ],
   },
 ];

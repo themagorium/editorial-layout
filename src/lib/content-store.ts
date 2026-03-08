@@ -30,7 +30,7 @@ import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.jpg";
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 
   | "Tech & AI" | "Motorsport" | "Film & Festivals" 
-  | "Music" | "Golf" | "Tennis" | "Wellness" | "Equestrian";
+  | "Music" | "Golf" | "Tennis" | "Wellness" | "Equestrian" | "Sports";
 
 export const CATEGORIES: Category[] = [
   "Travel", "Yachting", "Art & Design", "Fashion", "Tech & AI",

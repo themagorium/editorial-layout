@@ -80,6 +80,7 @@ export interface AdSlot {
 }
 
 const DEFAULT_HEROES: HeroItem[] = [
+  // --- February 2026 ---
   {
     id: "h1",
     title: "Winter Olympics XXV: Milano-Cortina 2026",
@@ -87,6 +88,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Travel",
     imageUrl: heroOlympics,
     date: "2026-02-06",
+    edition: "2026-02",
   },
   {
     id: "h2",
@@ -95,6 +97,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Fashion",
     imageUrl: heroMilanFashion,
     date: "2026-02-25",
+    edition: "2026-02",
   },
   {
     id: "h3",
@@ -103,8 +106,9 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Equestrian",
     imageUrl: heroWhiteTurf,
     date: "2026-02-15",
+    edition: "2026-02",
   },
-  // --- Volume 2 — January 2026 Heroes ---
+  // --- January 2026 ---
   {
     id: "h-wef",
     title: "Davos 2026: The World Economic Forum's Annual Meeting",
@@ -112,6 +116,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Tech & AI",
     imageUrl: heroDavosWef,
     date: "2026-01-19",
+    edition: "2026-01",
   },
   {
     id: "h-snow-polo",
@@ -120,6 +125,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Equestrian",
     imageUrl: heroSnowPolo,
     date: "2026-01-24",
+    edition: "2026-01",
   },
   {
     id: "h-haute-couture",
@@ -128,6 +134,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     category: "Fashion",
     imageUrl: heroHauteCouture,
     date: "2026-01-26",
+    edition: "2026-01",
   },
 ];
 

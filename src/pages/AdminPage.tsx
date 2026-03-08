@@ -179,7 +179,15 @@ export default function AdminPage() {
                 ))}
               </select>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={deleteCurrentEdition}
+                disabled={!currentEdition}
+                className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive text-destructive rounded hover:bg-destructive/10 transition-colors disabled:pointer-events-none disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" /> Delete Edition
+              </button>
+
               {showNewEdition ? (
                 <div className="flex items-center gap-2">
                   <input

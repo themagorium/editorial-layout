@@ -1,4 +1,5 @@
 import { CATEGORIES } from "@/lib/content-store";
+import { Link } from "react-router-dom";
 import PrivacyPopupButton from "@/components/editorial/PrivacyPopupButton";
 
 export default function EditorialFooter() {
@@ -20,9 +21,9 @@ export default function EditorialFooter() {
             <h4 className="text-xs font-sans uppercase tracking-widest text-primary mb-4">Sections</h4>
             <div className="space-y-2">
               {CATEGORIES.slice(0, 6).map((cat) => (
-                <p key={cat} className="text-sm font-sans text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
+                <Link key={cat} to={`/archive?category=${encodeURIComponent(cat)}`} className="block text-sm font-sans text-muted-foreground hover:text-foreground transition-colors">
                   {cat}
-                </p>
+                </Link>
               ))}
             </div>
           </div>
@@ -32,7 +33,7 @@ export default function EditorialFooter() {
             <div className="space-y-2 text-sm font-sans text-muted-foreground">
               <p className="hover:text-foreground cursor-pointer transition-colors">Editor’s Letter</p>
               <p className="hover:text-foreground cursor-pointer transition-colors">Contributors</p>
-              <p className="hover:text-foreground cursor-pointer transition-colors">Archive</p>
+              <Link to="/archive" className="block hover:text-foreground transition-colors">Archive</Link>
               <p className="hover:text-foreground cursor-pointer transition-colors">Partnerships</p>
             </div>
           </div>

@@ -385,6 +385,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleArtSg,
     author: "Millie Sealana",
     date: "2026-01-23",
+    edition: "2026-01",
     body: [
       { id: "asg-b1", type: "text", content: "The fourth edition of ART SG returned from January 23–25, continuing to set the pace as the leading international art fair in Southeast Asia. Visitors encountered presentations by global heavyweights including White Cube, Thaddaeus Ropac, neugerriemschneider, and Perrotin — alongside a strong contingent of Asian galleries that underscored the region's growing influence on the global art market." },
       { id: "asg-b2", type: "text", content: "The fair coincided with Singapore Art Week, which transformed the city-state into a concentrated hub of exhibitions, installations, and cultural programming. The most talked-about work was Ai Weiwei's monumental 60-metre inflatable raft — placed between diners at Capella Singapore — a provocative commentary on displacement that anchored the week's broader conversation about art's role in addressing global crises." },

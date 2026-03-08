@@ -22,7 +22,7 @@ export default function AdminPage() {
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<AdSlot[]>([]);
-  const [tab, setTab] = useState<"heroes" | "articles" | "ads">("heroes");
+  const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics">("heroes");
 
   useEffect(() => {
     setHeroes(getHeroes());

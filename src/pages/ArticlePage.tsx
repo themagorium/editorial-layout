@@ -79,22 +79,32 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
 
   if (block.type === "image") {
     return (
-      <figure className="my-8">
+      <figure className="my-8 relative">
         <img src={block.content} alt={block.caption || ""} className="w-full rounded" loading="lazy" />
-        {block.caption && (
-          <figcaption className="font-sans text-xs text-muted-foreground mt-2 italic">{block.caption}</figcaption>
-        )}
+        <div className="flex items-start justify-between mt-2 gap-4">
+          {block.caption ? (
+            <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption>
+          ) : <span />}
+          {block.citation && (
+            <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap">{block.citation}</span>
+          )}
+        </div>
       </figure>
     );
   }
 
   if (block.type === "video") {
     return (
-      <figure className="my-8">
+      <figure className="my-8 relative">
         <video src={block.content} controls className="w-full rounded" />
-        {block.caption && (
-          <figcaption className="font-sans text-xs text-muted-foreground mt-2 italic">{block.caption}</figcaption>
-        )}
+        <div className="flex items-start justify-between mt-2 gap-4">
+          {block.caption ? (
+            <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption>
+          ) : <span />}
+          {block.citation && (
+            <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap">{block.citation}</span>
+          )}
+        </div>
       </figure>
     );
   }

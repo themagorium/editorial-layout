@@ -31,6 +31,7 @@ export interface ArticleBodyBlock {
   type: "text" | "image" | "video";
   content: string;
   caption?: string;
+  citation?: string;
 }
 
 export interface Article {

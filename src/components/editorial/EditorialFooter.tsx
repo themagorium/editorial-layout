@@ -1,10 +1,54 @@
+import { useState } from "react";
 import { CATEGORIES } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 import PrivacyPopupButton from "@/components/editorial/PrivacyPopupButton";
+import { toast } from "sonner";
+
+function SubscribeSection() {
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    toast.success("Thank you for subscribing!");
+    setEmail("");
+  };
+
+  return (
+    <div className="bg-primary text-primary-foreground">
+      <div className="container mx-auto px-4 py-14">
+        <h3 className="masthead-font text-2xl md:text-3xl font-bold italic mb-2">Stay in the Loop</h3>
+        <p className="text-sm font-sans opacity-80 mb-6 max-w-2xl">
+          Subscribe to The Magorium for the latest on art, culture, travel, tech, motorsport, sailing, fashion, and more.
+        </p>
+        <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-2xl">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Your email"
+            className="flex-1 rounded-full border border-primary-foreground/30 bg-transparent px-6 py-3 text-sm font-sans text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-primary-foreground/60 transition-colors"
+            maxLength={255}
+          />
+          <button
+            type="submit"
+            className="rounded-full border border-primary-foreground/60 px-8 py-3 text-sm font-sans font-medium text-primary-foreground hover:bg-primary-foreground/10 transition-colors whitespace-nowrap"
+          >
+            Subscribe
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function EditorialFooter() {
   return (
     <footer className="border-t border-border mt-20">
+      <SubscribeSection />
       <div className="container mx-auto px-4 py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="lg:col-span-1">

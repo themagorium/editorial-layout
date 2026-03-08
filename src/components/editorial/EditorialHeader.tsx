@@ -1,6 +1,6 @@
 import { CATEGORIES } from "@/lib/content-store";
 import { Link, useLocation } from "react-router-dom";
-import { Settings } from "lucide-react";
+import { Settings, Archive } from "lucide-react";
 
 export default function EditorialHeader() {
   const location = useLocation();

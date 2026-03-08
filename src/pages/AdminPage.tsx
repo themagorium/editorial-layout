@@ -4,10 +4,10 @@ import ArticleBodyEditor from "@/components/editorial/ArticleBodyEditor";
 import {
   getHeroes, getArticles, getAds,
   saveHeroes, saveArticles, saveAds, resetToDefaults,
-  CATEGORIES,
+  CATEGORIES, getEditions, formatEditionLabel,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
-import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe } from "lucide-react";
+import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { getAnalyticsSummary, getTotalStats, getRecentEvents, getLocationStats, clearAnalytics, type ContentStats } from "@/lib/analytics";
 
@@ -24,12 +24,21 @@ export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<AdSlot[]>([]);
   const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics">("heroes");
+  const [currentEdition, setCurrentEdition] = useState<string>("");
+  const [showNewEdition, setShowNewEdition] = useState(false);
+  const [newEditionMonth, setNewEditionMonth] = useState("");
 
   useEffect(() => {
     setHeroes(getHeroes());
     setArticles(getArticles());
     setAds(getAds());
+    const editions = getEditions();
+    if (editions.length > 0) setCurrentEdition(editions[0]);
   }, []);
+
+  const editions = getEditions();
+  const filteredHeroes = currentEdition ? heroes.filter(h => h.edition === currentEdition) : heroes;
+  const filteredArticles = currentEdition ? articles.filter(a => a.edition === currentEdition) : articles;
 
   const save = () => {
     saveHeroes(heroes);
@@ -44,6 +53,17 @@ export default function AdminPage() {
     setArticles(getArticles());
     setAds(getAds());
     toast.success("Reset to defaults.");
+  };
+
+  const createNewEdition = () => {
+    if (!newEditionMonth) {
+      toast.error("Please select a month for the new edition");
+      return;
+    }
+    setCurrentEdition(newEditionMonth);
+    setShowNewEdition(false);
+    setNewEditionMonth("");
+    toast.success(`Created new edition: ${formatEditionLabel(newEditionMonth)}`);
   };
 
   return (
@@ -65,6 +85,53 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Edition Selector */}
+        <div className="bg-card border border-border rounded-lg p-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-primary" />
+              <span className="text-sm font-sans uppercase tracking-wider text-muted-foreground">Current Edition:</span>
+              <select
+                value={currentEdition}
+                onChange={(e) => setCurrentEdition(e.target.value)}
+                className="bg-secondary text-foreground px-4 py-2 rounded font-serif text-lg border-0"
+              >
+                {editions.map((ed) => (
+                  <option key={ed} value={ed}>{formatEditionLabel(ed)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-3">
+              {showNewEdition ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="month"
+                    value={newEditionMonth}
+                    onChange={(e) => setNewEditionMonth(e.target.value)}
+                    className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
+                  />
+                  <button onClick={createNewEdition} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded">
+                    Create
+                  </button>
+                  <button onClick={() => setShowNewEdition(false)} className="px-3 py-2 text-sm text-muted-foreground">
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowNewEdition(true)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> New Edition
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="mt-3 text-xs text-muted-foreground font-sans">
+            {filteredHeroes.length} heroes · {filteredArticles.length} articles in this edition
+          </div>
+        </div>
+
         {/* Tabs */}
         <div className="flex gap-1 border-b border-border mb-8">
           {(["heroes", "articles", "ads", "analytics"] as const).map((t) => (
@@ -82,10 +149,10 @@ export default function AdminPage() {
         </div>
 
         {tab === "heroes" && (
-          <HeroesManager heroes={heroes} setHeroes={setHeroes} />
+          <HeroesManager heroes={heroes} setHeroes={setHeroes} filteredHeroes={filteredHeroes} currentEdition={currentEdition} />
         )}
         {tab === "articles" && (
-          <ArticlesManager articles={articles} setArticles={setArticles} />
+          <ArticlesManager articles={articles} setArticles={setArticles} filteredArticles={filteredArticles} currentEdition={currentEdition} />
         )}
         {tab === "ads" && (
           <AdsManager ads={ads} setAds={setAds} />
@@ -99,11 +166,11 @@ export default function AdminPage() {
 }
 
 /* ---- Heroes Manager ---- */
-function HeroesManager({ heroes, setHeroes }: { heroes: HeroItem[]; setHeroes: (h: HeroItem[]) => void }) {
+function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { heroes: HeroItem[]; setHeroes: (h: HeroItem[]) => void; filteredHeroes: HeroItem[]; currentEdition: string }) {
   const addHero = () => {
     setHeroes([
+      { id: `h-${Date.now()}`, title: "New Hero", subtitle: "", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) },
       ...heroes,
-      { id: `h-${Date.now()}`, title: "New Hero", subtitle: "", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: new Date().toISOString().slice(0, 7) },
     ]);
   };
 
@@ -115,7 +182,8 @@ function HeroesManager({ heroes, setHeroes }: { heroes: HeroItem[]; setHeroes: (
 
   return (
     <div className="space-y-6">
-      {heroes.map((hero) => (
+      <AddButton onClick={addHero} label={`Add Hero to ${currentEdition ? formatEditionLabel(currentEdition) : 'Edition'}`} />
+      {filteredHeroes.map((hero) => (
         <ContentCard key={hero.id} onRemove={() => remove(hero.id)}>
           <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
             <MediaUpload
@@ -137,17 +205,16 @@ function HeroesManager({ heroes, setHeroes }: { heroes: HeroItem[]; setHeroes: (
           </div>
         </ContentCard>
       ))}
-      <AddButton onClick={addHero} label="Add Hero" />
     </div>
   );
 }
 
 /* ---- Articles Manager ---- */
-function ArticlesManager({ articles, setArticles }: { articles: Article[]; setArticles: (a: Article[]) => void }) {
+function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string }) {
   const addArticle = () => {
     setArticles([
+      { id: `a-${Date.now()}`, title: "New Article", excerpt: "", category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) },
       ...articles,
-      { id: `a-${Date.now()}`, title: "New Article", excerpt: "", category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: new Date().toISOString().slice(0, 7) },
     ]);
   };
 
@@ -159,7 +226,8 @@ function ArticlesManager({ articles, setArticles }: { articles: Article[]; setAr
 
   return (
     <div className="space-y-6">
-      {articles.map((article) => (
+      <AddButton onClick={addArticle} label={`Add Article to ${currentEdition ? formatEditionLabel(currentEdition) : 'Edition'}`} />
+      {filteredArticles.map((article) => (
         <ContentCard key={article.id} onRemove={() => remove(article.id)}>
           <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
             <MediaUpload
@@ -193,22 +261,35 @@ function ArticlesManager({ articles, setArticles }: { articles: Article[]; setAr
           </div>
         </ContentCard>
       ))}
-      <AddButton onClick={addArticle} label="Add Article" />
     </div>
   );
 }
 
 /* ---- Ads Manager ---- */
 function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => void }) {
+  const addAd = () => {
+    setAds([
+      ...ads,
+      { id: `ad-${Date.now()}`, label: "New Ad Slot", position: "mid-feed", width: 728, height: 90 },
+    ]);
+  };
+
   const update = (id: string, patch: Partial<AdSlot>) => {
     setAds(ads.map((a) => (a.id === id ? { ...a, ...patch } : a)));
   };
 
+  const remove = (id: string) => setAds(ads.filter((a) => a.id !== id));
+
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground font-sans">Upload images or videos for each ad placement. These slots appear throughout the editorial layout.</p>
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-muted-foreground font-sans">Upload images or videos for each ad placement. These slots appear throughout the editorial layout.</p>
+        <button onClick={addAd} className="px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Add Slot
+        </button>
+      </div>
       {ads.map((ad) => (
-        <ContentCard key={ad.id}>
+        <ContentCard key={ad.id} onRemove={() => remove(ad.id)}>
           <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
             <MediaUpload
               imageUrl={ad.imageUrl}
@@ -218,10 +299,22 @@ function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => v
             />
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <span className="category-pill">{ad.position}</span>
-                <span className="text-xs text-muted-foreground">{ad.width}×{ad.height}</span>
+                <select 
+                  value={ad.position} 
+                  onChange={(e) => update(ad.id, { position: e.target.value as any })} 
+                  className="category-pill bg-secondary text-foreground border-none"
+                >
+                  <option value="hero-sidebar">Hero Sidebar</option>
+                  <option value="mid-feed">Mid Feed</option>
+                  <option value="bottom-banner">Bottom Banner</option>
+                  <option value="sidebar">Sidebar</option>
+                </select>
+                <span className="text-xs text-muted-foreground">
+                  W: <input type="number" value={ad.width} onChange={(e) => update(ad.id, { width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
+                  × H: <input type="number" value={ad.height} onChange={(e) => update(ad.id, { height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
+                </span>
               </div>
-              <input value={ad.label} onChange={(e) => update(ad.id, { label: e.target.value })} placeholder="Ad label" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+              <input value={ad.label} onChange={(e) => update(ad.id, { label: e.target.value })} placeholder="Ad label (internal use)" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm" />
               <input value={ad.linkUrl || ""} onChange={(e) => update(ad.id, { linkUrl: e.target.value })} placeholder="Click-through URL" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
             </div>
           </div>

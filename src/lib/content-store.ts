@@ -4,7 +4,7 @@ import heroWhiteTurf from "@/assets/hero-white-turf.jpg";
 import articleVeniceCarnival from "@/assets/article-venice-carnival.jpg";
 import articleRioCarnival from "@/assets/article-rio-carnival.jpg";
 import articleSuperbowl from "@/assets/article-superbowl.jpg";
-import articleNiceCarnival from "@/assets/article-nice-carnival.jpg";
+import articleIceStMoritz from "@/assets/article-ice-stmoritz.jpg";
 
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 

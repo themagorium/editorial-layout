@@ -148,6 +148,7 @@ const DEFAULT_ARTICLES: Article[] = [
     author: "Elena Voss",
     date: "2026-02-01",
     featured: true,
+    edition: "2026-02",
   },
   {
     id: "a2",

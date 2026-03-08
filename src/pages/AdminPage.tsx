@@ -89,6 +89,9 @@ export default function AdminPage() {
         {tab === "ads" && (
           <AdsManager ads={ads} setAds={setAds} />
         )}
+        {tab === "analytics" && (
+          <AnalyticsDashboard articles={articles} heroes={heroes} ads={ads} />
+        )}
       </div>
     </div>
   );

@@ -4,15 +4,16 @@ import heroMilanFashion from "@/assets/hero-milan-fashion.jpg";
 import heroSothebys from "@/assets/hero-sothebys.jpg";
 import articleRioCarnival from "@/assets/article-rio-carnival.jpg";
 import articleSuperbowl from "@/assets/article-superbowl.jpg";
-import articleBootDusseldorf from "@/assets/article-boot-dusseldorf.jpg";
+import articleDubaiBoatShow from "@/assets/article-dubai-boat-show.jpg";
 import articlePebbleBeach from "@/assets/article-pebble-beach.jpg";
+import articleAbuDhabiArt from "@/assets/article-abu-dhabi-art.jpg";
 // January 2026
 import heroDavosWef from "@/assets/hero-davos-wef.jpg";
 import heroSnowPolo from "@/assets/hero-snow-polo.jpg";
 import heroHauteCouture from "@/assets/hero-haute-couture.jpg";
 import articleOscars from "@/assets/article-oscars.jpg";
 import articleArtSg from "@/assets/article-art-sg.jpg";
-import articlePittiUomo from "@/assets/article-pitti-uomo.jpg";
+// (Pitti Uomo import removed — replaced by Abu Dhabi Art)
 import articleAustralianOpen from "@/assets/article-australian-open.jpg";
 // October 2025
 import articleCambiaso from "@/assets/article-cambiaso.jpg";
@@ -103,28 +104,12 @@ const DEFAULT_HEROES: HeroItem[] = [
 
 // ===================================================================
 // ARTICLES — 4 per edition, unique categories (no overlap with heroes)
-// Feb 2026: Rio (Music), Bay Area (Film & Festivals), Düsseldorf (Yachting), Pebble Beach (Golf)
-// Jan 2026: LA (Film & Festivals), Singapore (Art & Design), Florence (Travel), Melbourne (Tennis)
+// Feb 2026: Bay Area (Film & Festivals), Rio (Music), Dubai (Yachting), Pebble Beach (Golf)
+// Jan 2026: LA (Film & Festivals), Singapore (Art & Design), Abu Dhabi (Travel), Melbourne (Tennis)
 // Oct 2025: Geneva (Yachting), Zurich (Tech & AI), Basel (Travel), Marrakech (Music)
 // ===================================================================
 const DEFAULT_ARTICLES: Article[] = [
   // ========== FEBRUARY 2026 ==========
-  {
-    id: "a1",
-    title: "Rio Carnival 2026: Samba Under the Stars",
-    excerpt: "From the Sambadrome to the blocos — the most exuberant celebration on earth returns for six electric nights.",
-    category: "Music",
-    imageUrl: articleRioCarnival,
-    author: "Marcus Chen",
-    date: "2026-02-13",
-    featured: true,
-    edition: "2026-02",
-    body: [
-      { id: "rc-b1", type: "text", content: "Rio Carnival 2026 returned with six electric nights of samba, spectacle, and cultural expression that confirmed its position as the world's most exuberant celebration. The Sambadrome's parade saw 12 samba schools compete for the championship, each float more ambitious than the last." },
-      { id: "rc-b2", type: "text", content: "This year's standout was Mangueira's tribute to Afro-Brazilian heritage, a visual symphony of gold, green, and black that earned standing ovations from the 70,000-strong crowd. The street blocos — the informal neighborhood parades — drew millions more across the city." },
-      { id: "rc-b3", type: "text", content: "For the luxury traveler, Rio during Carnival is a different proposition: private camarotes in the Sambadrome, rooftop parties at the Fasano in Ipanema, and yacht gatherings along the Guanabara Bay. The energy is infectious, the fashion is fearless, and the music never stops." },
-    ],
-  },
   {
     id: "a2",
     title: "Super Bowl LX: Stadium Lights & Bay Area Glamour",
@@ -133,6 +118,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleSuperbowl,
     author: "James Whitfield",
     date: "2026-02-08",
+    featured: true,
     edition: "2026-02",
     body: [
       { id: "sb-b1", type: "text", content: "Super Bowl LX at Levi's Stadium in the San Francisco Bay Area delivered the blend of sport, entertainment, and luxury that has made it America's defining cultural event. The halftime show, the VIP suites, and the celebrity-heavy after-parties transformed Silicon Valley into Hollywood South for one electric weekend." },
@@ -140,18 +126,33 @@ const DEFAULT_ARTICLES: Article[] = [
     ],
   },
   {
-    id: "a3",
-    title: "Boot Düsseldorf: The World's Largest Yacht & Watersport Show",
-    excerpt: "250,000 visitors, 1,500 exhibitors, and superyachts that redefine what's possible on water — Boot Düsseldorf remains the industry's definitive gathering.",
-    category: "Yachting",
-    imageUrl: articleBootDusseldorf,
-    author: "James Whitfield",
-    date: "2026-02-17",
+    id: "a1",
+    title: "Rio Carnival 2026: Samba Under the Stars",
+    excerpt: "From the Sambadrome to the blocos — the most exuberant celebration on earth returns for six electric nights.",
+    category: "Music",
+    imageUrl: articleRioCarnival,
+    author: "Marcus Chen",
+    date: "2026-02-13",
     edition: "2026-02",
     body: [
-      { id: "bd-b1", type: "text", content: "Boot Düsseldorf returned for its 57th edition, confirming its position as the world's largest and most important yacht and watersport exhibition. Over 1,500 exhibitors from 68 countries filled the Messe Düsseldorf's vast halls with everything from 60-metre superyachts to cutting-edge electric tenders." },
-      { id: "bd-b2", type: "text", content: "The Superyacht Hall — a cathedral-like space reserved for vessels over 30 metres — was this year's centrepiece. Lürssen, Benetti, and Sunseeker unveiled new models that pushed the boundaries of naval architecture, with hybrid propulsion systems and sustainability-driven design dominating the conversation." },
-      { id: "bd-b3", type: "text", content: "Beyond the hardware, Boot has evolved into a lifestyle destination: private buyers' lounges, invitation-only evening events, and a programme of talks featuring some of the world's most accomplished ocean explorers. For the serious yachting community, there is no substitute." },
+      { id: "rc-b1", type: "text", content: "Rio Carnival 2026 returned with six electric nights of samba, spectacle, and cultural expression that confirmed its position as the world's most exuberant celebration. The Sambadrome's parade saw 12 samba schools compete for the championship, each float more ambitious than the last." },
+      { id: "rc-b2", type: "text", content: "This year's standout was Mangueira's tribute to Afro-Brazilian heritage, a visual symphony of gold, green, and black that earned standing ovations from the 70,000-strong crowd. The street blocos — the informal neighborhood parades — drew millions more across the city." },
+      { id: "rc-b3", type: "text", content: "For the luxury traveler, Rio during Carnival is a different proposition: private camarotes in the Sambadrome, rooftop parties at the Fasano in Ipanema, and yacht gatherings along the Guanabara Bay. The energy is infectious, the fashion is fearless, and the music never stops." },
+    ],
+  },
+  {
+    id: "a3",
+    title: "Dubai International Boat Show: The Middle East's Premier Superyacht Gathering",
+    excerpt: "Dubai Harbour transforms into the world's most glamorous marina — superyachts, private buyers, and the ultra-luxury maritime market converge under Arabian skies.",
+    category: "Yachting",
+    imageUrl: articleDubaiBoatShow,
+    author: "James Whitfield",
+    date: "2026-02-24",
+    edition: "2026-02",
+    body: [
+      { id: "db-b1", type: "text", content: "The Dubai International Boat Show returned to Dubai Harbour for its most ambitious edition yet, cementing the emirate's position as the global epicentre of superyacht culture. Over 800 exhibitors and 200 vessels — including several 60-metre-plus superyachts making their Middle Eastern debut — lined the marina against the backdrop of the Dubai skyline." },
+      { id: "db-b2", type: "text", content: "Unlike European boat shows that serve the broader maritime industry, Dubai's event is unapologetically focused on the ultra-high-net-worth buyer. Private viewing appointments, invitation-only evening galas aboard moored superyachts, and a curated programme of luxury lifestyle activations from Rolls-Royce, Bulgari, and Dom Pérignon set a tone that is more exclusive than commercial." },
+      { id: "db-b3", type: "text", content: "The show's evolution mirrors Dubai's own trajectory: from regional curiosity to global luxury capital. With the Middle East's superyacht market growing at 15% annually, Dubai Harbour — purpose-built to accommodate the world's largest vessels — is now the winter berth of choice for owners who once looked only to Monaco and Antibes." },
     ],
   },
   {
@@ -201,18 +202,18 @@ const DEFAULT_ARTICLES: Article[] = [
     ],
   },
   {
-    id: "v2-pitti-uomo",
-    title: "Florence in Winter: Palazzi, Pitti & the Tuscan Table",
-    excerpt: "Beyond the runways of Pitti Uomo, Florence in January reveals itself as Europe's most refined cultural destination — intimate galleries, Renaissance architecture, and truffle season.",
+    id: "v2-abu-dhabi-art",
+    title: "Abu Dhabi Art 2026: The Gulf's Most Ambitious Cultural Moment",
+    excerpt: "Manarat Al Saadiyat hosts the Middle East's premier contemporary art fair — 100 galleries, Louvre Abu Dhabi collaborations, and a collector programme that draws the world's elite.",
     category: "Travel",
-    imageUrl: articlePittiUomo,
+    imageUrl: articleAbuDhabiArt,
     author: "Elena Voss",
-    date: "2026-01-13",
+    date: "2026-01-15",
     edition: "2026-01",
     body: [
-      { id: "pu-b1", type: "text", content: "Florence in January belongs to those who know. While the world's menswear industry descends on the Fortezza da Basso for Pitti Uomo, the city itself offers a quieter, richer experience: empty galleries at the Uffizi, private palazzo tours, and truffle season in the surrounding Tuscan hills." },
-      { id: "pu-b2", type: "text", content: "The Renaissance capital at its winter best is a masterclass in slow luxury. The Oltrarno artisans — bookbinders, perfumers, leather craftsmen — open their workshops to visitors. The trattorias serve ribollita and bistecca alla fiorentina by candlelight. The Arno, low and silver, reflects a city that has been perfecting the art of living for six centuries." },
-      { id: "pu-b3", type: "text", content: "For the cultural traveler, January in Florence is the antidote to the summer crowds. The Boboli Gardens are yours alone. The Brancacci Chapel frescoes glow in the winter light. And the evening passeggiata along Via de' Tornabuoni — past Ferragamo, Gucci, and Prada — remains one of Europe's great urban rituals." },
+      { id: "ad-b1", type: "text", content: "Abu Dhabi Art returned for its 16th edition at Manarat Al Saadiyat, the cultural heart of Saadiyat Island, confirming the UAE capital's emergence as a serious destination for collectors, curators, and cultural tourists. Over 100 galleries from 30 countries presented works spanning contemporary painting, sculpture, digital art, and large-scale installation." },
+      { id: "ad-b2", type: "text", content: "The fair's proximity to the Louvre Abu Dhabi — Jean Nouvel's extraordinary museum under a dome of light — creates a cultural corridor unlike anything else in the region. VIP programming included private tours of the Louvre's latest acquisition, a Cy Twombly retrospective, and collector dinners at the Emirates Palace that blurred the line between art fair and state occasion." },
+      { id: "ad-b3", type: "text", content: "For the luxury traveler, Abu Dhabi during Art week offers a singular proposition: world-class culture, Arabian hospitality, and winter sunshine. The desert dunes of the Empty Quarter are an hour away. The Royal Mansour-style suites at the Emirates Palace set a standard that few hotels on earth can match. Abu Dhabi is no longer Dubai's quieter sibling — it is its own cultural force." },
     ],
   },
   {

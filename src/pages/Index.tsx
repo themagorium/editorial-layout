@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import AdPlacement from "@/components/editorial/AdPlacement";
-import SubscribeBar from "@/components/editorial/SubscribeBar";
+
 import { getAds, getLatestEdition, getHeroesByEdition, getArticlesByEdition, formatEditionLabel } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { Link } from "react-router-dom";

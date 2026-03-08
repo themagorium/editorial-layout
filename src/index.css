@@ -73,10 +73,10 @@
 
 @layer components {
   .masthead-font {
-    font-family: 'Bodoni Moda', 'Didot', 'Bodoni MT', serif;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    transform: scaleX(0.9) scaleY(1.1);
+    font-family: 'Cinzel', 'Didot', 'Bodoni MT', serif;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    transform: scaleY(1.05);
     transform-origin: left center;
   }
   .font-hero {

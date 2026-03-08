@@ -66,15 +66,16 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="flex gap-1 border-b border-border mb-8">
-          {(["heroes", "articles", "ads"] as const).map((t) => (
+          {(["heroes", "articles", "ads", "analytics"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 ${
+              className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${
                 tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              {t === "ads" ? "Advertising" : t}
+              {t === "analytics" && <BarChart3 className="w-4 h-4" />}
+              {t === "ads" ? "Advertising" : t === "analytics" ? "Analytics" : t}
             </button>
           ))}
         </div>

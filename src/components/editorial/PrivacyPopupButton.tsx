@@ -1,35 +1,35 @@
 import { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export default function PrivacyPopupButton() {
   const [open, setOpen] = useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <button
           type="button"
           className="fixed bottom-5 left-5 z-50 px-3 py-2 text-[10px] uppercase tracking-widest font-sans border border-border bg-card/90 backdrop-blur text-muted-foreground rounded hover:text-foreground hover:border-primary transition-colors"
         >
           Privacy Preferences
         </button>
-      </DialogTrigger>
-      <DialogContent className="bg-card border-border sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-2xl text-foreground">Privacy Preferences</DialogTitle>
-          <DialogDescription className="font-sans text-sm text-muted-foreground">
+      </SheetTrigger>
+      <SheetContent side="right" className="bg-card border-border sm:max-w-lg">
+        <SheetHeader>
+          <SheetTitle className="font-serif text-2xl text-foreground">Privacy Preferences</SheetTitle>
+          <SheetDescription className="font-sans text-sm text-muted-foreground">
             We use cookies for analytics, performance, and editorial personalization.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <div className="space-y-4 text-sm font-sans text-muted-foreground">
+        <div className="space-y-4 text-sm font-sans text-muted-foreground mt-6">
           <div className="p-3 rounded border border-border bg-secondary/50">
             <p className="text-foreground font-medium">Essential Cookies</p>
             <p className="mt-1">Required for core site functionality and security.</p>
@@ -44,7 +44,7 @@ export default function PrivacyPopupButton() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-3">
+        <div className="flex items-center justify-end gap-2 pt-6">
           <button
             type="button"
             onClick={() => setOpen(false)}
@@ -60,7 +60,7 @@ export default function PrivacyPopupButton() {
             Accept
           </button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

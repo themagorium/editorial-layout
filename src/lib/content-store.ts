@@ -23,7 +23,7 @@ import articleGoldenGlobes from "@/assets/article-golden-globes.jpg";
 import articleLvmhWatches from "@/assets/article-lvmh-watches.jpg";
 import articleDiorBristol from "@/assets/article-dior-bristol.jpg";
 import articleVicenzaoro from "@/assets/article-vicenzaoro.jpg";
-import articleShoptalkLuxe from "@/assets/article-shoptalk-luxe.jpg";
+import articleArtSg from "@/assets/article-art-sg.jpg";
 
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 

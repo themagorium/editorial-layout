@@ -7,6 +7,11 @@ import Index from "./pages/Index";
 import AdminPage from "./pages/AdminPage";
 import ArchivePage from "./pages/ArchivePage";
 import ArticlePage from "./pages/ArticlePage";
+import EditorsLetterPage from "./pages/EditorsLetterPage";
+import ContributorsPage from "./pages/ContributorsPage";
+import PartnershipsPage from "./pages/PartnershipsPage";
+import TermsPage from "./pages/TermsPage";
+import CookiesPage from "./pages/CookiesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +27,11 @@ const App = () => (
           <Route path="/article/:id" element={<ArticlePage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/archive" element={<ArchivePage />} />
+          <Route path="/editors-letter" element={<EditorsLetterPage />} />
+          <Route path="/contributors" element={<ContributorsPage />} />
+          <Route path="/partnerships" element={<PartnershipsPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/cookies" element={<CookiesPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -158,6 +158,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleRioCarnival,
     author: "Marcus Chen",
     date: "2026-02-13",
+    edition: "2026-02",
   },
   {
     id: "a3",

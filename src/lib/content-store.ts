@@ -81,16 +81,16 @@ export interface AdSlot {
 }
 
 // ===================================================================
-// HEROES — 3 per edition, NO city repeats across editions
-// Feb 2026: Milano-Cortina, New York, London
-// Jan 2026: Davos, St. Moritz, Paris
-// Oct 2025: Buenos Aires, Austin, Cape Town
+// HEROES — 3 per edition, unique categories per edition
+// Feb 2026: Milano-Cortina (Travel), Milan (Fashion), New York Sotheby's (Art & Design)
+// Jan 2026: Davos (Tech & AI), St. Moritz (Equestrian), Paris (Fashion)
+// Oct 2025: Buenos Aires (Equestrian), Austin (Motorsport), Cape Town (Art & Design)
 // ===================================================================
 const DEFAULT_HEROES: HeroItem[] = [
   // --- February 2026 ---
   { id: "h1", title: "Winter Olympics XXV: Milano-Cortina 2026", subtitle: "The Dolomites prepare to host the world's greatest winter spectacle — a complete preview", category: "Travel", imageUrl: heroOlympics, date: "2026-02-06", edition: "2026-02" },
-  { id: "h2", title: "New York Fashion Week: A New Energy", subtitle: "NYFW returns to Manhattan's industrial lofts with bold new designers and a front row that means business", category: "Fashion", imageUrl: heroNyfw, date: "2026-02-12", edition: "2026-02" },
-  { id: "h3", title: "London Fashion Week: The British Avant-Garde", subtitle: "92 shows across the capital as LFW builds momentum under new BFC leadership — expect the unexpected", category: "Fashion", imageUrl: heroLfw, date: "2026-02-19", edition: "2026-02" },
+  { id: "h2", title: "Milan Fashion Week FW26: Power, Precision & Italian Glamour", subtitle: "From Prada's conceptual minimalism to Versace's maximalist revival — a season of bold contrasts and Italian craftsmanship", category: "Fashion", imageUrl: heroMilanFashion, date: "2026-02-20", edition: "2026-02" },
+  { id: "h3", title: "Sotheby's Magnificent Jewels: A New York Evening Sale", subtitle: "A 28-carat Kashmir sapphire leads a $120 million catalogue — the auction house's most ambitious jewellery sale in a decade", category: "Art & Design", imageUrl: heroSothebys, date: "2026-02-11", edition: "2026-02" },
   // --- January 2026 ---
   { id: "h-wef", title: "Davos 2026: The World Economic Forum's Annual Meeting", subtitle: "Record numbers of world leaders converge on Davos for five days of dialogue on AI, climate, and the global economy", category: "Tech & AI", imageUrl: heroDavosWef, date: "2026-01-19", edition: "2026-01" },
   { id: "h-snow-polo", title: "41st Snow Polo World Cup St. Moritz", subtitle: "The frozen lake becomes the world's most spectacular polo arena as Standing Rock claims the title", category: "Equestrian", imageUrl: heroSnowPolo, date: "2026-01-24", edition: "2026-01" },

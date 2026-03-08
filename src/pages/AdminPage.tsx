@@ -60,10 +60,27 @@ export default function AdminPage() {
       toast.error("Please select a month for the new edition");
       return;
     }
+
+    // Create starter template content for new edition
+    const starterHeroes: HeroItem[] = [
+      { id: `h-${Date.now()}-1`, title: "New Hero 1", subtitle: "Add your first hero story", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      { id: `h-${Date.now()}-2`, title: "New Hero 2", subtitle: "Add your second hero story", category: "Fashion", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      { id: `h-${Date.now()}-3`, title: "New Hero 3", subtitle: "Add your third hero story", category: "Art & Design", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+    ];
+
+    const starterArticles: Article[] = [
+      { id: `a-${Date.now()}-1`, title: "New Article 1", excerpt: "Add your first article", category: "Yachting", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      { id: `a-${Date.now()}-2`, title: "New Article 2", excerpt: "Add your second article", category: "Sports", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      { id: `a-${Date.now()}-3`, title: "New Article 3", excerpt: "Add your third article", category: "Golf", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      { id: `a-${Date.now()}-4`, title: "New Article 4", excerpt: "Add your fourth article", category: "Tennis", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+    ];
+
+    setHeroes([...heroes, ...starterHeroes]);
+    setArticles([...articles, ...starterArticles]);
     setCurrentEdition(newEditionMonth);
     setShowNewEdition(false);
     setNewEditionMonth("");
-    toast.success(`Created new edition: ${formatEditionLabel(newEditionMonth)}`);
+    toast.success(`Created new edition: ${formatEditionLabel(newEditionMonth)} with starter content!`);
   };
 
   return (

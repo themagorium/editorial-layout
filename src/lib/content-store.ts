@@ -102,6 +102,31 @@ const DEFAULT_HEROES: HeroItem[] = [
     imageUrl: heroWhiteTurf,
     date: "2026-02-15",
   },
+  // --- Volume 2 — January 2026 Heroes ---
+  {
+    id: "h-wef",
+    title: "Davos 2026: The World Economic Forum's Annual Meeting",
+    subtitle: "Record numbers of world leaders converge on Davos for five days of dialogue on AI, climate, and the global economy",
+    category: "Tech & AI",
+    imageUrl: heroDavosWef,
+    date: "2026-01-19",
+  },
+  {
+    id: "h-snow-polo",
+    title: "41st Snow Polo World Cup St. Moritz",
+    subtitle: "The frozen lake becomes the world's most spectacular polo arena as Standing Rock claims the title",
+    category: "Equestrian",
+    imageUrl: heroSnowPolo,
+    date: "2026-01-24",
+  },
+  {
+    id: "h-haute-couture",
+    title: "Paris Haute Couture Week SS26: The Art of the Extraordinary",
+    subtitle: "From Chanel to Dior to Valentino — the pinnacle of fashion craftsmanship returns to the grand palaces of Paris",
+    category: "Fashion",
+    imageUrl: heroHauteCouture,
+    date: "2026-01-26",
+  },
 ];
 
 const DEFAULT_ARTICLES: Article[] = [

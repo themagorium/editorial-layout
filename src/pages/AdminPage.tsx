@@ -6,9 +6,9 @@ import {
   CATEGORIES,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category } from "@/lib/content-store";
-import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp } from "lucide-react";
+import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe } from "lucide-react";
 import { toast } from "sonner";
-import { getAnalyticsSummary, getTotalStats, getRecentEvents, clearAnalytics, type ContentStats } from "@/lib/analytics";
+import { getAnalyticsSummary, getTotalStats, getRecentEvents, getLocationStats, clearAnalytics, type ContentStats } from "@/lib/analytics";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve) => {
@@ -292,6 +292,7 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
   const totals = getTotalStats();
   const summary = getAnalyticsSummary(articles, heroes, ads);
   const recent = getRecentEvents(30);
+  const locations = getLocationStats();
 
   const filtered = filter === "all" ? summary : summary.filter((s) => s.contentType === filter);
   const sorted = [...filtered].sort((a, b) => b.views - a.views);
@@ -299,14 +300,13 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
   const handleClear = () => {
     clearAnalytics();
     toast.success("Analytics data cleared.");
-    // Force re-render
     window.location.reload();
   };
 
   return (
     <div className="space-y-8">
       {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={<Eye className="w-5 h-5" />} label="Total Views" value={totals.totalViews} />
         <StatCard icon={<MousePointer className="w-5 h-5" />} label="Total Clicks" value={totals.totalClicks} />
         <StatCard
@@ -314,6 +314,7 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
           label="Click-Through Rate"
           value={totals.totalViews > 0 ? `${((totals.totalClicks / totals.totalViews) * 100).toFixed(1)}%` : "—"}
         />
+        <StatCard icon={<Globe className="w-5 h-5" />} label="Unique Locations" value={totals.uniqueLocations} />
       </div>
 
       {/* Filter + clear */}
@@ -375,22 +376,69 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
         )}
       </div>
 
+      {/* Viewer Locations */}
+      <div>
+        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
+          <MapPin className="w-5 h-5 text-primary" /> Viewer Locations
+        </h3>
+        <div className="bg-card border border-border rounded overflow-hidden">
+          <div className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
+            <span>City</span>
+            <span>Country</span>
+            <span className="text-center">Views</span>
+            <span className="text-center">Clicks</span>
+          </div>
+          {locations.length === 0 ? (
+            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">
+              No location data yet. Locations are captured automatically from viewer IP addresses.
+            </div>
+          ) : (
+            locations.map((loc) => (
+              <div
+                key={`${loc.city}|${loc.country}`}
+                className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors"
+              >
+                <span className="text-foreground flex items-center gap-2">
+                  <MapPin className="w-3 h-3 text-primary shrink-0" />
+                  {loc.city}
+                </span>
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <span className="text-xs">{loc.countryCode}</span>
+                  {loc.country}
+                </span>
+                <span className="text-center text-foreground font-medium">{loc.views}</span>
+                <span className="text-center text-foreground font-medium">{loc.clicks}</span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
       {/* Recent events log */}
       <div>
         <h3 className="font-serif text-lg font-semibold mb-3 text-foreground">Recent Events</h3>
-        <div className="bg-card border border-border rounded max-h-64 overflow-y-auto">
+        <div className="bg-card border border-border rounded max-h-72 overflow-y-auto">
           {recent.length === 0 ? (
             <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No events recorded yet.</div>
           ) : (
             recent.map((ev) => (
-              <div key={ev.id} className="flex items-center gap-3 px-4 py-2 text-xs font-sans border-b border-border/30">
-                <span className={`w-2 h-2 rounded-full ${ev.eventType === "view" ? "bg-primary/50" : "bg-primary"}`} />
+              <div key={ev.id} className="flex items-center gap-3 px-4 py-2.5 text-xs font-sans border-b border-border/30">
+                <span className={`w-2 h-2 rounded-full shrink-0 ${ev.eventType === "view" ? "bg-primary/50" : "bg-primary"}`} />
                 <span className="text-muted-foreground w-36 shrink-0">
                   {new Date(ev.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </span>
                 <span className="text-foreground">{ev.eventType}</span>
                 <span className="text-muted-foreground">·</span>
                 <span className="text-muted-foreground truncate">{ev.contentType} — {ev.contentId}</span>
+                {ev.location && (
+                  <>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="text-primary/70 shrink-0 flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {ev.location.city}, {ev.location.countryCode}
+                    </span>
+                  </>
+                )}
               </div>
             ))
           )}

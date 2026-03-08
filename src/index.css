@@ -94,7 +94,7 @@
   }
 
   .category-pill {
-    @apply inline-block px-3 py-1 text-xs font-medium uppercase tracking-widest;
+    @apply inline-block px-3 py-1 text-[10px] font-light uppercase tracking-[0.2em];
     color: hsl(var(--gold));
     border: 1px solid hsl(var(--gold) / 0.3);
   }

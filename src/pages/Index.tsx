@@ -13,7 +13,7 @@ function HeroCard({ hero }: { hero: HeroItem }) {
       className="group relative overflow-hidden rounded cursor-pointer"
       onClick={() => trackEvent(hero.id, "hero", "click")}
     >
-      <div className="aspect-[3/2] overflow-hidden">
+      <div className="aspect-[16/7] overflow-hidden">
         <img
           src={hero.imageUrl}
           alt={hero.title}
@@ -95,7 +95,7 @@ export default function Index() {
 
       {/* Heroes — 3 large cards */}
       <section className="container mx-auto px-4 mt-16 md:mt-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-6">
           {heroes.map((hero) => (
             <HeroCard key={hero.id} hero={hero} />
           ))}

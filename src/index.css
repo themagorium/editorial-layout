@@ -75,8 +75,8 @@
   .masthead-font {
     font-family: 'Bodoni Moda', 'Didot', 'Bodoni MT', serif;
     font-weight: 400;
-    letter-spacing: 0.08em;
-    transform: scaleX(0.85) scaleY(1.1);
+    letter-spacing: 0.12em;
+    transform: scaleX(0.9) scaleY(1.1);
     transform-origin: left center;
   }
   .font-hero {

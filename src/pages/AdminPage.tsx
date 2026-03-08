@@ -95,6 +95,27 @@ export default function AdminPage() {
     toast.success("Reset to defaults.");
   };
 
+  const deleteCurrentEdition = () => {
+    if (!currentEdition) return;
+
+    const label = formatEditionLabel(currentEdition);
+    const ok = window.confirm(
+      `Delete the entire ${label} edition? This will remove all heroes and articles for that edition.\n\nClick “Save Changes” after deleting to make it permanent.`,
+    );
+    if (!ok) return;
+
+    const nextHeroes = heroes.filter((h) => h.edition !== currentEdition);
+    const nextArticles = articles.filter((a) => a.edition !== currentEdition);
+
+    setHeroes(nextHeroes);
+    setArticles(nextArticles);
+
+    const remainingEditions = getEditionsFromState(nextHeroes, nextArticles);
+    setCurrentEdition(remainingEditions[0] ?? "");
+
+    toast.success(`Deleted edition: ${label}.`);
+  };
+
   const createNewEdition = () => {
     if (!newEditionMonth) {
       toast.error("Please select a month for the new edition");

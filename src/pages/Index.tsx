@@ -136,7 +136,6 @@ export default function Index() {
       )}
 
       <EditorialFooter />
-      <SubscribeBar />
     </div>
   );
 }

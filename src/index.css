@@ -46,10 +46,10 @@
     /* Custom editorial tokens */
     --gold: 40 60% 65%;
     --gold-bright: 40 75% 72%;
-    --navy-deep: 252 35% 5%;
-    --navy-light: 252 20% 22%;
+    --navy-deep: 260 40% 5%;
+    --navy-light: 260 25% 22%;
     --cream: 40 30% 90%;
-    --ad-bg: 252 20% 14%;
+    --ad-bg: 260 25% 14%;
   }
 }
 

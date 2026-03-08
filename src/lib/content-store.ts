@@ -104,8 +104,8 @@ const DEFAULT_HEROES: HeroItem[] = [
 
 // ===================================================================
 // ARTICLES — 4 per edition, unique categories (no overlap with heroes)
-// Feb 2026: Rio (Music), Bay Area (Film & Festivals), Düsseldorf (Yachting), Pebble Beach (Golf)
-// Jan 2026: LA (Film & Festivals), Singapore (Art & Design), Florence (Travel), Melbourne (Tennis)
+// Feb 2026: Bay Area (Film & Festivals), Rio (Music), Dubai (Yachting), Pebble Beach (Golf)
+// Jan 2026: LA (Film & Festivals), Singapore (Art & Design), Abu Dhabi (Travel), Melbourne (Tennis)
 // Oct 2025: Geneva (Yachting), Zurich (Tech & AI), Basel (Travel), Marrakech (Music)
 // ===================================================================
 const DEFAULT_ARTICLES: Article[] = [

@@ -4,52 +4,52 @@
 
 @layer base {
   :root {
-    --background: 222 30% 8%;
+    --background: 252 30% 8%;
     --foreground: 40 20% 92%;
 
-    --card: 222 25% 12%;
+    --card: 252 25% 12%;
     --card-foreground: 40 20% 92%;
 
-    --popover: 222 25% 12%;
+    --popover: 252 25% 12%;
     --popover-foreground: 40 20% 92%;
 
     --primary: 40 60% 65%;
-    --primary-foreground: 222 30% 8%;
+    --primary-foreground: 252 30% 8%;
 
-    --secondary: 222 20% 18%;
+    --secondary: 252 20% 18%;
     --secondary-foreground: 40 20% 85%;
 
-    --muted: 222 15% 16%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 252 15% 16%;
+    --muted-foreground: 250 10% 55%;
 
     --accent: 40 60% 65%;
-    --accent-foreground: 222 30% 8%;
+    --accent-foreground: 252 30% 8%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 40 20% 92%;
 
-    --border: 222 15% 20%;
-    --input: 222 15% 20%;
+    --border: 252 15% 20%;
+    --input: 252 15% 20%;
     --ring: 40 60% 65%;
 
     --radius: 0.25rem;
 
-    --sidebar-background: 222 25% 10%;
+    --sidebar-background: 252 25% 10%;
     --sidebar-foreground: 40 20% 85%;
     --sidebar-primary: 40 60% 65%;
-    --sidebar-primary-foreground: 222 30% 8%;
-    --sidebar-accent: 222 20% 15%;
+    --sidebar-primary-foreground: 252 30% 8%;
+    --sidebar-accent: 252 20% 15%;
     --sidebar-accent-foreground: 40 20% 85%;
-    --sidebar-border: 222 15% 20%;
+    --sidebar-border: 252 15% 20%;
     --sidebar-ring: 40 60% 65%;
 
     /* Custom editorial tokens */
     --gold: 40 60% 65%;
     --gold-bright: 40 75% 72%;
-    --navy-deep: 222 35% 5%;
-    --navy-light: 222 20% 22%;
+    --navy-deep: 252 35% 5%;
+    --navy-light: 252 20% 22%;
     --cream: 40 30% 90%;
-    --ad-bg: 222 20% 14%;
+    --ad-bg: 252 20% 14%;
   }
 }
 
@@ -73,9 +73,9 @@
 
 @layer components {
   .masthead-font {
-    font-family: 'Italiana', 'Didot', 'Bodoni MT', serif;
-    font-weight: 400;
-    letter-spacing: 0.02em;
+    font-family: 'Cormorant Garamond', 'Didot', 'Bodoni MT', serif;
+    font-weight: 300;
+    letter-spacing: 0.04em;
   }
   .font-hero {
     font-family: 'Cinzel', 'Didot', 'Bodoni MT', serif;
@@ -101,7 +101,7 @@
   }
 
   .article-overlay {
-    background: linear-gradient(0deg, hsl(222 30% 8% / 0.85) 0%, transparent 60%);
+    background: linear-gradient(0deg, hsl(252 30% 8% / 0.85) 0%, transparent 60%);
   }
 
   .category-pill {

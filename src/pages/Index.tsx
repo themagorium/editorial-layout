@@ -94,7 +94,7 @@ export default function Index() {
       <EditorialHeader />
 
       {/* Heroes — 3 large cards */}
-      <section className="container mx-auto px-4 mt-16 md:mt-24">
+      <section className="container mx-auto px-4 mt-4 md:mt-6">
         <div className="flex flex-col gap-6">
           {heroes.map((hero) => (
             <HeroCard key={hero.id} hero={hero} />

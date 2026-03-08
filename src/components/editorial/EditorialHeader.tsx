@@ -10,7 +10,7 @@ export default function EditorialHeader() {
     <header className="border-b border-border">
       <div className="container mx-auto px-4">
         {/* Top bar */}
-        <div className="flex items-center justify-between py-6">
+        <div className="flex items-center justify-between py-10 md:py-14">
           <Link to="/" className="block">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight masthead-font whitespace-nowrap">
               <span className="text-foreground">THE </span>

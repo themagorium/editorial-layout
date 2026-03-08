@@ -24,12 +24,21 @@ export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<AdSlot[]>([]);
   const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics">("heroes");
+  const [currentEdition, setCurrentEdition] = useState<string>("");
+  const [showNewEdition, setShowNewEdition] = useState(false);
+  const [newEditionMonth, setNewEditionMonth] = useState("");
 
   useEffect(() => {
     setHeroes(getHeroes());
     setArticles(getArticles());
     setAds(getAds());
+    const editions = getEditions();
+    if (editions.length > 0) setCurrentEdition(editions[0]);
   }, []);
+
+  const editions = getEditions();
+  const filteredHeroes = currentEdition ? heroes.filter(h => h.edition === currentEdition) : heroes;
+  const filteredArticles = currentEdition ? articles.filter(a => a.edition === currentEdition) : articles;
 
   const save = () => {
     saveHeroes(heroes);
@@ -44,6 +53,17 @@ export default function AdminPage() {
     setArticles(getArticles());
     setAds(getAds());
     toast.success("Reset to defaults.");
+  };
+
+  const createNewEdition = () => {
+    if (!newEditionMonth) {
+      toast.error("Please select a month for the new edition");
+      return;
+    }
+    setCurrentEdition(newEditionMonth);
+    setShowNewEdition(false);
+    setNewEditionMonth("");
+    toast.success(`Created new edition: ${formatEditionLabel(newEditionMonth)}`);
   };
 
   return (
@@ -65,6 +85,53 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Edition Selector */}
+        <div className="bg-card border border-border rounded-lg p-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-primary" />
+              <span className="text-sm font-sans uppercase tracking-wider text-muted-foreground">Current Edition:</span>
+              <select
+                value={currentEdition}
+                onChange={(e) => setCurrentEdition(e.target.value)}
+                className="bg-secondary text-foreground px-4 py-2 rounded font-serif text-lg border-0"
+              >
+                {editions.map((ed) => (
+                  <option key={ed} value={ed}>{formatEditionLabel(ed)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-3">
+              {showNewEdition ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="month"
+                    value={newEditionMonth}
+                    onChange={(e) => setNewEditionMonth(e.target.value)}
+                    className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
+                  />
+                  <button onClick={createNewEdition} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded">
+                    Create
+                  </button>
+                  <button onClick={() => setShowNewEdition(false)} className="px-3 py-2 text-sm text-muted-foreground">
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowNewEdition(true)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> New Edition
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="mt-3 text-xs text-muted-foreground font-sans">
+            {filteredHeroes.length} heroes · {filteredArticles.length} articles in this edition
+          </div>
+        </div>
+
         {/* Tabs */}
         <div className="flex gap-1 border-b border-border mb-8">
           {(["heroes", "articles", "ads", "analytics"] as const).map((t) => (
@@ -82,10 +149,10 @@ export default function AdminPage() {
         </div>
 
         {tab === "heroes" && (
-          <HeroesManager heroes={heroes} setHeroes={setHeroes} />
+          <HeroesManager heroes={heroes} setHeroes={setHeroes} filteredHeroes={filteredHeroes} currentEdition={currentEdition} />
         )}
         {tab === "articles" && (
-          <ArticlesManager articles={articles} setArticles={setArticles} />
+          <ArticlesManager articles={articles} setArticles={setArticles} filteredArticles={filteredArticles} currentEdition={currentEdition} />
         )}
         {tab === "ads" && (
           <AdsManager ads={ads} setAds={setAds} />

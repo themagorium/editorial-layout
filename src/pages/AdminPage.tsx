@@ -6,8 +6,9 @@ import {
   CATEGORIES,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category } from "@/lib/content-store";
-import { Trash2, Plus, Upload, RotateCcw, Image, Video } from "lucide-react";
+import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
+import { getAnalyticsSummary, getTotalStats, getRecentEvents, clearAnalytics, type ContentStats } from "@/lib/analytics";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve) => {
@@ -21,7 +22,7 @@ export default function AdminPage() {
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<AdSlot[]>([]);
-  const [tab, setTab] = useState<"heroes" | "articles" | "ads">("heroes");
+  const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics">("heroes");
 
   useEffect(() => {
     setHeroes(getHeroes());
@@ -65,15 +66,16 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="flex gap-1 border-b border-border mb-8">
-          {(["heroes", "articles", "ads"] as const).map((t) => (
+          {(["heroes", "articles", "ads", "analytics"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 ${
+              className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${
                 tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              {t === "ads" ? "Advertising" : t}
+              {t === "analytics" && <BarChart3 className="w-4 h-4" />}
+              {t === "ads" ? "Advertising" : t === "analytics" ? "Analytics" : t}
             </button>
           ))}
         </div>
@@ -86,6 +88,9 @@ export default function AdminPage() {
         )}
         {tab === "ads" && (
           <AdsManager ads={ads} setAds={setAds} />
+        )}
+        {tab === "analytics" && (
+          <AnalyticsDashboard articles={articles} heroes={heroes} ads={ads} />
         )}
       </div>
     </div>
@@ -277,6 +282,134 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
       {videoUrl && <p className="text-[10px] text-primary truncate">Video attached ✓</p>}
       <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
       <input ref={vidRef} type="file" accept="video/*" className="hidden" onChange={handleVideo} />
+    </div>
+  );
+}
+
+/* ---- Analytics Dashboard ---- */
+function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; heroes: HeroItem[]; ads: AdSlot[] }) {
+  const [filter, setFilter] = useState<"all" | "article" | "hero" | "ad">("all");
+  const totals = getTotalStats();
+  const summary = getAnalyticsSummary(articles, heroes, ads);
+  const recent = getRecentEvents(30);
+
+  const filtered = filter === "all" ? summary : summary.filter((s) => s.contentType === filter);
+  const sorted = [...filtered].sort((a, b) => b.views - a.views);
+
+  const handleClear = () => {
+    clearAnalytics();
+    toast.success("Analytics data cleared.");
+    // Force re-render
+    window.location.reload();
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard icon={<Eye className="w-5 h-5" />} label="Total Views" value={totals.totalViews} />
+        <StatCard icon={<MousePointer className="w-5 h-5" />} label="Total Clicks" value={totals.totalClicks} />
+        <StatCard
+          icon={<TrendingUp className="w-5 h-5" />}
+          label="Click-Through Rate"
+          value={totals.totalViews > 0 ? `${((totals.totalClicks / totals.totalViews) * 100).toFixed(1)}%` : "—"}
+        />
+      </div>
+
+      {/* Filter + clear */}
+      <div className="flex flex-wrap items-center gap-3">
+        {(["all", "article", "hero", "ad"] as const).map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-4 py-2 text-xs uppercase tracking-widest font-sans border rounded transition-colors ${
+              filter === f
+                ? "border-primary text-primary bg-primary/10"
+                : "border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {f === "all" ? "All Content" : f === "ad" ? "Ads" : `${f}s`}
+          </button>
+        ))}
+        <button
+          onClick={handleClear}
+          className="ml-auto px-4 py-2 text-xs uppercase tracking-widest font-sans border border-destructive/30 text-destructive rounded hover:bg-destructive/10 transition-colors"
+        >
+          Clear Data
+        </button>
+      </div>
+
+      {/* Content table */}
+      <div className="bg-card border border-border rounded overflow-hidden">
+        <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
+          <span>Content</span>
+          <span className="text-center">Type</span>
+          <span className="text-center">Views</span>
+          <span className="text-center">Clicks</span>
+          <span className="text-center">CTR</span>
+        </div>
+        {sorted.length === 0 ? (
+          <div className="px-5 py-8 text-center text-muted-foreground text-sm font-sans">No data yet. Views and clicks are tracked as visitors interact with content.</div>
+        ) : (
+          sorted.map((item) => {
+            const ctr = item.views > 0 ? ((item.clicks / item.views) * 100).toFixed(1) : "0.0";
+            return (
+              <div
+                key={`${item.contentType}:${item.contentId}`}
+                className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors"
+              >
+                <span className="truncate text-foreground">{item.label || item.contentId}</span>
+                <span className="text-center">
+                  <span className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider rounded ${
+                    item.contentType === "article" ? "bg-primary/10 text-primary" :
+                    item.contentType === "hero" ? "bg-accent/10 text-accent" :
+                    "bg-muted text-muted-foreground"
+                  }`}>{item.contentType}</span>
+                </span>
+                <span className="text-center text-foreground font-medium">{item.views}</span>
+                <span className="text-center text-foreground font-medium">{item.clicks}</span>
+                <span className="text-center text-primary font-medium">{ctr}%</span>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Recent events log */}
+      <div>
+        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground">Recent Events</h3>
+        <div className="bg-card border border-border rounded max-h-64 overflow-y-auto">
+          {recent.length === 0 ? (
+            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No events recorded yet.</div>
+          ) : (
+            recent.map((ev) => (
+              <div key={ev.id} className="flex items-center gap-3 px-4 py-2 text-xs font-sans border-b border-border/30">
+                <span className={`w-2 h-2 rounded-full ${ev.eventType === "view" ? "bg-primary/50" : "bg-primary"}`} />
+                <span className="text-muted-foreground w-36 shrink-0">
+                  {new Date(ev.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                </span>
+                <span className="text-foreground">{ev.eventType}</span>
+                <span className="text-muted-foreground">·</span>
+                <span className="text-muted-foreground truncate">{ev.contentType} — {ev.contentId}</span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
+  return (
+    <div className="bg-card border border-border rounded p-5 flex items-center gap-4">
+      <div className="w-10 h-10 rounded flex items-center justify-center bg-primary/10 text-primary">
+        {icon}
+      </div>
+      <div>
+        <p className="text-2xl font-serif font-bold text-foreground">{value}</p>
+        <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{label}</p>
+      </div>
     </div>
   );
 }

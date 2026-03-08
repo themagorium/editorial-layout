@@ -111,6 +111,21 @@ const DEFAULT_HEROES: HeroItem[] = [
 const DEFAULT_ARTICLES: Article[] = [
   // ========== FEBRUARY 2026 ==========
   {
+    id: "a2",
+    title: "Super Bowl LX: Stadium Lights & Bay Area Glamour",
+    excerpt: "Levi's Stadium hosts the biggest night in American sport — VIP suites, halftime spectacle, and celebrity-heavy parties.",
+    category: "Film & Festivals",
+    imageUrl: articleSuperbowl,
+    author: "James Whitfield",
+    date: "2026-02-08",
+    featured: true,
+    edition: "2026-02",
+    body: [
+      { id: "sb-b1", type: "text", content: "Super Bowl LX at Levi's Stadium in the San Francisco Bay Area delivered the blend of sport, entertainment, and luxury that has made it America's defining cultural event. The halftime show, the VIP suites, and the celebrity-heavy after-parties transformed Silicon Valley into Hollywood South for one electric weekend." },
+      { id: "sb-b2", type: "text", content: "The luxury ecosystem around the Super Bowl has become as significant as the game itself. Private aviation traffic into San Jose and Oakland surged, hotel suites at the Four Seasons and Rosewood Sand Hill were booked months in advance, and the official NFL Honors ceremony drew A-listers from sport, entertainment, and tech." },
+    ],
+  },
+  {
     id: "a1",
     title: "Rio Carnival 2026: Samba Under the Stars",
     excerpt: "From the Sambadrome to the blocos — the most exuberant celebration on earth returns for six electric nights.",
@@ -118,7 +133,6 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleRioCarnival,
     author: "Marcus Chen",
     date: "2026-02-13",
-    featured: true,
     edition: "2026-02",
     body: [
       { id: "rc-b1", type: "text", content: "Rio Carnival 2026 returned with six electric nights of samba, spectacle, and cultural expression that confirmed its position as the world's most exuberant celebration. The Sambadrome's parade saw 12 samba schools compete for the championship, each float more ambitious than the last." },
@@ -127,32 +141,18 @@ const DEFAULT_ARTICLES: Article[] = [
     ],
   },
   {
-    id: "a2",
-    title: "Super Bowl LX: Stadium Lights & Bay Area Glamour",
-    excerpt: "Levi's Stadium hosts the biggest night in American sport — VIP suites, halftime spectacle, and celebrity-heavy parties.",
-    category: "Film & Festivals",
-    imageUrl: articleSuperbowl,
-    author: "James Whitfield",
-    date: "2026-02-08",
-    edition: "2026-02",
-    body: [
-      { id: "sb-b1", type: "text", content: "Super Bowl LX at Levi's Stadium in the San Francisco Bay Area delivered the blend of sport, entertainment, and luxury that has made it America's defining cultural event. The halftime show, the VIP suites, and the celebrity-heavy after-parties transformed Silicon Valley into Hollywood South for one electric weekend." },
-      { id: "sb-b2", type: "text", content: "The luxury ecosystem around the Super Bowl has become as significant as the game itself. Private aviation traffic into San Jose and Oakland surged, hotel suites at the Four Seasons and Rosewood Sand Hill were booked months in advance, and the official NFL Honors ceremony drew A-listers from sport, entertainment, and tech." },
-    ],
-  },
-  {
     id: "a3",
-    title: "Boot Düsseldorf: The World's Largest Yacht & Watersport Show",
-    excerpt: "250,000 visitors, 1,500 exhibitors, and superyachts that redefine what's possible on water — Boot Düsseldorf remains the industry's definitive gathering.",
+    title: "Dubai International Boat Show: The Middle East's Premier Superyacht Gathering",
+    excerpt: "Dubai Harbour transforms into the world's most glamorous marina — superyachts, private buyers, and the ultra-luxury maritime market converge under Arabian skies.",
     category: "Yachting",
-    imageUrl: articleBootDusseldorf,
+    imageUrl: articleDubaiBoatShow,
     author: "James Whitfield",
-    date: "2026-02-17",
+    date: "2026-02-24",
     edition: "2026-02",
     body: [
-      { id: "bd-b1", type: "text", content: "Boot Düsseldorf returned for its 57th edition, confirming its position as the world's largest and most important yacht and watersport exhibition. Over 1,500 exhibitors from 68 countries filled the Messe Düsseldorf's vast halls with everything from 60-metre superyachts to cutting-edge electric tenders." },
-      { id: "bd-b2", type: "text", content: "The Superyacht Hall — a cathedral-like space reserved for vessels over 30 metres — was this year's centrepiece. Lürssen, Benetti, and Sunseeker unveiled new models that pushed the boundaries of naval architecture, with hybrid propulsion systems and sustainability-driven design dominating the conversation." },
-      { id: "bd-b3", type: "text", content: "Beyond the hardware, Boot has evolved into a lifestyle destination: private buyers' lounges, invitation-only evening events, and a programme of talks featuring some of the world's most accomplished ocean explorers. For the serious yachting community, there is no substitute." },
+      { id: "db-b1", type: "text", content: "The Dubai International Boat Show returned to Dubai Harbour for its most ambitious edition yet, cementing the emirate's position as the global epicentre of superyacht culture. Over 800 exhibitors and 200 vessels — including several 60-metre-plus superyachts making their Middle Eastern debut — lined the marina against the backdrop of the Dubai skyline." },
+      { id: "db-b2", type: "text", content: "Unlike European boat shows that serve the broader maritime industry, Dubai's event is unapologetically focused on the ultra-high-net-worth buyer. Private viewing appointments, invitation-only evening galas aboard moored superyachts, and a curated programme of luxury lifestyle activations from Rolls-Royce, Bulgari, and Dom Pérignon set a tone that is more exclusive than commercial." },
+      { id: "db-b3", type: "text", content: "The show's evolution mirrors Dubai's own trajectory: from regional curiosity to global luxury capital. With the Middle East's superyacht market growing at 15% annually, Dubai Harbour — purpose-built to accommodate the world's largest vessels — is now the winter berth of choice for owners who once looked only to Monaco and Antibes." },
     ],
   },
   {

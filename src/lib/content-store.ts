@@ -10,9 +10,9 @@ import articleDubaiFestival from "@/assets/article-dubai-festival.jpg";
 import heroDavosWef from "@/assets/hero-davos-wef.jpg";
 import heroSnowPolo from "@/assets/hero-snow-polo.jpg";
 import heroHauteCouture from "@/assets/hero-haute-couture.jpg";
-import articleGoldenGlobes from "@/assets/article-golden-globes.jpg";
+import articleOscars from "@/assets/article-oscars.jpg";
 import articleArtSg from "@/assets/article-art-sg.jpg";
-import articleDiorBristol from "@/assets/article-dior-bristol.jpg";
+import articleMilanFashion from "@/assets/hero-milan-fashion.jpg";
 import articlePittiUomo from "@/assets/article-pitti-uomo.jpg";
 // October 2025
 import articleCambiaso from "@/assets/article-cambiaso.jpg";
@@ -172,19 +172,19 @@ const DEFAULT_ARTICLES: Article[] = [
 
   // ========== JANUARY 2026 ==========
   {
-    id: "v2-golden-globes",
-    title: "Golden Globes 2026: Chalamet, Adolescence & a Night of Firsts",
-    excerpt: "The 83rd Golden Globe Awards crowned Timothée Chalamet, Teyana Taylor, and the phenomenon 'Adolescence' — a ceremony that signaled Hollywood's generational shift.",
+    id: "v2-oscars",
+    title: "The 98th Academy Awards: Hollywood's Grandest Night Returns",
+    excerpt: "The Dolby Theatre hosts the Oscars — the definitive night of cinema, couture red carpets, and the after-parties that define the season.",
     category: "Film & Festivals",
-    imageUrl: articleGoldenGlobes,
+    imageUrl: articleOscars,
     author: "Charlotte Thames",
-    date: "2026-01-11",
+    date: "2026-01-25",
     featured: true,
     edition: "2026-01",
     body: [
-      { id: "gg-b1", type: "text", content: "The 83rd Golden Globe Awards at the Beverly Hilton delivered one of the most compelling ceremonies in recent memory. Timothée Chalamet took home Best Actor in a Drama for his transformative turn in a biopic that critics called career-defining. Teyana Taylor won Best Actress in a Musical or Comedy for 'One Battle After Another,' a film that also claimed the top musical/comedy prize." },
-      { id: "gg-b2", type: "text", content: "The night belonged equally to 'Adolescence,' the British limited series that swept the television categories and became the evening's most discussed work. Stephen Graham added a Golden Globe to his growing collection of accolades for the show. 'Hamnet' won Best Motion Picture — Drama, anchoring a ceremony that felt less like an industry event and more like a cultural inflection point." },
-      { id: "gg-b3", type: "text", content: "On the red carpet, the fashion was as deliberate as the performances being honored. Designers leaned into structured silhouettes, deep jewel tones, and bespoke tailoring. The after-parties, from the InStyle suite to the Netflix gathering at Spago, hummed with the energy of an industry recalibrating its compass." },
+      { id: "osc-b1", type: "text", content: "The 98th Academy Awards at the Dolby Theatre in Hollywood delivered a ceremony that felt both timeless and urgent. The red carpet was a masterclass in couture — Valentino, Givenchy, and Armani Privé dominated, with structured silhouettes and jewel-toned satins setting the tone for a night that celebrated cinema's highest achievements." },
+      { id: "osc-b2", type: "text", content: "The evening's biggest moment belonged to the Best Picture race, which saw a fierce contest between intimate character studies and sweeping epics. The after-parties — from the Vanity Fair gathering at the Wallis Annenberg Center to the Governor's Ball — hummed with the energy of an industry that still believes in the power of the big screen." },
+      { id: "osc-b3", type: "text", content: "For the luxury world, the Oscars remain the ultimate intersection of fashion, celebrity, and cultural capital. The jewellery alone — Cartier, Bulgari, Tiffany — was estimated at over $100 million on the red carpet. Hollywood's grandest night continues to prove that spectacle, when done with conviction, is an art form in itself." },
     ],
   },
   {
@@ -218,18 +218,18 @@ const DEFAULT_ARTICLES: Article[] = [
     ],
   },
   {
-    id: "v2-dior-bristol",
-    title: "Dior Masterpieces: The Mouna Ayoub Collection at Le Bristol Paris",
-    excerpt: "126 haute couture pieces from Dior's golden era go on display at Le Bristol — a free exhibition during Haute Couture Week.",
+    id: "v2-milan-fw",
+    title: "Milan Fashion Week FW26: Power, Precision & Italian Glamour",
+    excerpt: "From Prada's conceptual minimalism to Versace's maximalist revival — Milan Fashion Week delivered a season of bold contrasts and Italian craftsmanship.",
     category: "Fashion",
-    imageUrl: articleDiorBristol,
+    imageUrl: articleMilanFashion,
     author: "Elena Voss",
-    date: "2026-01-26",
+    date: "2026-01-20",
     edition: "2026-01",
     body: [
-      { id: "db-b1", type: "text", content: "During Paris Haute Couture Week, Le Bristol Paris opened its grand salons to an extraordinary exhibition: 'Dior Masterpieces: The Mouna Ayoub Collection.' The free exhibition showcased 126 haute couture pieces spanning decades of the house's artistry — from the New Look era through to contemporary collections." },
-      { id: "db-b2", type: "text", content: "Collector Mouna Ayoub, one of the world's foremost private holders of haute couture, curated the display with the precision of a museum director. Each gown occupied its own space within the hotel's ornate rooms, the crystal chandeliers and marble floors providing a setting that felt less like an exhibition and more like a private audience with fashion history." },
-      { id: "db-b3", type: "text", content: "As Haute Couture Week unfolded across the city — with Chanel, Valentino, and Givenchy presenting their Spring 2026 collections — Le Bristol offered a counterpoint: a reminder that couture's power lies not just in the new, but in the enduring conversation between past and present craftsmanship." },
+      { id: "mfw-b1", type: "text", content: "Milan Fashion Week Fall/Winter 2026 opened with a statement of intent: Italian fashion is reclaiming its position at the centre of global luxury. From Prada's stripped-back intellectual elegance to Versace's unapologetic maximalism, the week was defined by bold contrasts and a return to the craftsmanship that made Milan the capital of ready-to-wear." },
+      { id: "mfw-b2", type: "text", content: "Bottega Veneta's show at the Palazzo del Cinema was the week's most talked-about moment — Matthieu Blazy's collection merged artisanal leather techniques with sculptural tailoring that drew standing ovations. Giorgio Armani, showing at his Teatro, reminded the audience why his name remains synonymous with Italian elegance." },
+      { id: "mfw-b3", type: "text", content: "Off the runway, Milan during fashion week transforms into a city-wide salon. The private dinners at Palazzo Serbelloni, the showroom appointments in the Quadrilatero della Moda, and the street style outside the Camera Nazionale della Moda confirmed that Milan's fashion ecosystem extends far beyond the catwalk." },
     ],
   },
 

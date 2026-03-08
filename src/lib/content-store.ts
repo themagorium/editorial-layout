@@ -323,7 +323,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleLvmhWatches,
     author: "Millie Sealana",
     date: "2026-01-19",
-    body: [
+    edition: "2026-01",
       { id: "lw-b1", type: "text", content: "The seventh edition of LVMH Watch Week moved to a single destination for the first time — Milan — after previous editions spanning Dubai, Singapore, Miami, New York, and Paris. From January 19–21, nine LVMH-owned maisons including Bulgari, Hublot, TAG Heuer, Zenith, and Louis Vuitton presented their latest horological creations to trade journalists, retailers, and select clients." },
       { id: "lw-b2", type: "text", content: "The choice of Milan was deliberate. As a city that straddles fashion, design, and industry, it provided the ideal backdrop for collections that emphasized material innovation and aesthetic risk. Bulgari unveiled complications that pushed the boundaries of ultra-thin movements, while Hublot leaned into bold material fusions that have become the house's signature." },
       { id: "lw-b3", type: "text", content: "TAG Heuer's presentation centered on its motorsport heritage with new chronographs designed for the modern collector, and Zenith continued its revival of the Chronomaster line. Louis Vuitton surprised with a trunk-inspired collection that merged travel heritage with haute horlogerie." },

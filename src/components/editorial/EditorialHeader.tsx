@@ -12,7 +12,7 @@ export default function EditorialHeader() {
         {/* Top bar */}
         <div className="flex items-center justify-between py-6">
           <Link to="/" className="block">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight masthead-font">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight masthead-font whitespace-nowrap">
               <span className="text-foreground">THE </span>
               <span className="text-primary">MAGORIUM</span>
             </h1>

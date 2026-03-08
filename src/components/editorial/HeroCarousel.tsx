@@ -53,7 +53,7 @@ export default function HeroCarousel({ heroes }: Props) {
 
       <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 z-10">
         <span className="category-pill mb-4">{hero.category}</span>
-        <h2 className="text-lg md:text-xl font-semibold text-foreground mt-3 max-w-3xl leading-snug font-editorial">
+        <h2 className="text-xl md:text-2xl font-semibold text-foreground mt-3 max-w-3xl leading-snug font-editorial">
           {hero.title}
         </h2>
         <p className="font-sans text-base md:text-lg text-muted-foreground mt-3 max-w-2xl">

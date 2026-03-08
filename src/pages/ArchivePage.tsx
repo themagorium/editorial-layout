@@ -41,7 +41,9 @@ function groupByMonth(articles: Article[], heroes: HeroItem[]): Volume[] {
 }
 
 export default function ArchivePage() {
-  const [search, setSearch] = useState("");
+  const [searchParams] = useSearchParams();
+  const categoryFilter = searchParams.get("category") || "";
+  const [search, setSearch] = useState(categoryFilter);
   const [expandedVolume, setExpandedVolume] = useState<string | null>(null);
 
   const volumes = useMemo(() => {

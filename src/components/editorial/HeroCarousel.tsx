@@ -53,7 +53,7 @@ export default function HeroCarousel({ heroes }: Props) {
 
       <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 z-10">
         <span className="category-pill mb-4">{hero.category}</span>
-        <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mt-3 max-w-3xl leading-tight" style={{ fontFamily: "'Cinzel', serif" }}>
+        <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mt-3 max-w-3xl leading-tight" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
           {hero.title}
         </h2>
         <p className="font-sans text-base md:text-lg text-muted-foreground mt-3 max-w-2xl">

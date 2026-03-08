@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import AdminPage from "./pages/AdminPage";
 import ArchivePage from "./pages/ArchivePage";
 import ArticlePage from "./pages/ArticlePage";
+import EditionPage from "./pages/EditionPage";
 import EditorsLetterPage from "./pages/EditorsLetterPage";
 import ContributorsPage from "./pages/ContributorsPage";
 import PartnershipsPage from "./pages/PartnershipsPage";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/article/:id" element={<ArticlePage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/archive" element={<ArchivePage />} />
+          <Route path="/archive/:edition" element={<EditionPage />} />
           <Route path="/editors-letter" element={<EditorsLetterPage />} />
           <Route path="/contributors" element={<ContributorsPage />} />
           <Route path="/partnerships" element={<PartnershipsPage />} />

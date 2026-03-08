@@ -88,9 +88,6 @@ export default function ArchivePage() {
                       {ed.label}
                     </h3>
                   </div>
-                  <p className="text-xs text-muted-foreground font-sans">
-                    {ed.heroCount} heroes · {ed.articleCount} editor's picks
-                  </p>
                 </div>
               </Link>
             ))}

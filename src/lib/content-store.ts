@@ -15,6 +15,15 @@ import articleKusama from "@/assets/article-kusama.jpg";
 import articlePfw from "@/assets/article-pfw.jpg";
 import articleCambiasoPhoto1 from "@/assets/article-cambiaso-photo1.jpg";
 import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.jpg";
+// Volume 2 — January 2026
+import heroDavosWef from "@/assets/hero-davos-wef.jpg";
+import heroSnowPolo from "@/assets/hero-snow-polo.jpg";
+import heroHauteCouture from "@/assets/hero-haute-couture.jpg";
+import articleGoldenGlobes from "@/assets/article-golden-globes.jpg";
+import articleLvmhWatches from "@/assets/article-lvmh-watches.jpg";
+import articleDiorBristol from "@/assets/article-dior-bristol.jpg";
+import articleVicenzaoro from "@/assets/article-vicenzaoro.jpg";
+import articleShoptalkLuxe from "@/assets/article-shoptalk-luxe.jpg";
 
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 

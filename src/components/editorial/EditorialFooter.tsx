@@ -7,9 +7,9 @@ export default function EditorialFooter() {
       <div className="container mx-auto px-4 py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="lg:col-span-1">
-            <h3 className="masthead-font text-3xl leading-none">
+            <h3 className="masthead-font text-4xl leading-none">
               <span className="text-foreground">THE </span>
-              <span className="text-primary">EDITORIAL</span>
+              <span className="text-primary">MAGORIUM</span>
             </h3>
             <p className="text-sm text-muted-foreground mt-4 font-sans max-w-xs leading-relaxed">
               A private-view magazine for travel, style, culture, and modern luxury.
@@ -42,12 +42,12 @@ export default function EditorialFooter() {
             <p className="text-sm text-muted-foreground font-sans leading-relaxed">
               For editorial features and brand placements, contact our private desk.
             </p>
-            <p className="text-sm text-foreground font-sans mt-3">concierge@theeditorial.com</p>
+            <p className="text-sm text-foreground font-sans mt-3">concierge@themagorium.com</p>
           </div>
         </div>
 
         <div className="mt-12 pt-6 border-t border-border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs font-sans text-muted-foreground">
-          <p>© {new Date().getFullYear()} The Editorial. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} The Magorium. All rights reserved.</p>
           <div className="flex items-center gap-5">
             <button type="button" className="hover:text-foreground transition-colors">Cookies</button>
             <button type="button" className="hover:text-foreground transition-colors">Terms</button>

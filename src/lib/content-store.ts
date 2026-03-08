@@ -26,6 +26,13 @@ export interface HeroItem {
   date: string;
 }
 
+export interface ArticleBodyBlock {
+  id: string;
+  type: "text" | "image" | "video";
+  content: string; // text content, image data URL, or video data URL
+  caption?: string;
+}
+
 export interface Article {
   id: string;
   title: string;
@@ -36,6 +43,7 @@ export interface Article {
   author: string;
   date: string;
   featured?: boolean;
+  body?: ArticleBodyBlock[];
 }
 
 export interface AdSlot {

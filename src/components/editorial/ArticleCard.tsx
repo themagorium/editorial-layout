@@ -2,6 +2,7 @@ import type { Article } from "@/lib/content-store";
 import { Play } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 
 interface Props {
   article: Article;
@@ -25,8 +26,9 @@ export default function ArticleCard({ article, variant = "medium" }: Props) {
   };
 
   return (
-    <article
-      className={`group cursor-pointer animate-fade-in ${isLarge ? "col-span-2 row-span-2" : ""}`}
+    <Link
+      to={`/article/${article.id}`}
+      className={`group cursor-pointer animate-fade-in block ${isLarge ? "col-span-2 row-span-2" : ""}`}
       onClick={handleClick}
     >
       <div className={`relative overflow-hidden rounded ${isSmall ? "aspect-[4/3]" : isLarge ? "aspect-[16/10]" : "aspect-[3/2]"}`}>
@@ -64,6 +66,6 @@ export default function ArticleCard({ article, variant = "medium" }: Props) {
           <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

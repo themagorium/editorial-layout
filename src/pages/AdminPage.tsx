@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
+import ArticleBodyEditor from "@/components/editorial/ArticleBodyEditor";
 import {
   getHeroes, getArticles, getAds,
   saveHeroes, saveArticles, saveAds, resetToDefaults,
   CATEGORIES,
 } from "@/lib/content-store";
-import type { HeroItem, Article, AdSlot, Category } from "@/lib/content-store";
+import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
 import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { getAnalyticsSummary, getTotalStats, getRecentEvents, getLocationStats, clearAnalytics, type ContentStats } from "@/lib/analytics";
@@ -180,6 +181,13 @@ function ArticlesManager({ articles, setArticles }: { articles: Article[]; setAr
                   <input type="checkbox" checked={article.featured || false} onChange={(e) => update(article.id, { featured: e.target.checked })} className="accent-primary" />
                   Featured
                 </label>
+              </div>
+              {/* Article body editor */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <ArticleBodyEditor
+                  blocks={article.body || []}
+                  onChange={(blocks) => update(article.id, { body: blocks })}
+                />
               </div>
             </div>
           </div>

@@ -189,6 +189,7 @@ const DEFAULT_ARTICLES: Article[] = [
     imageUrl: articleSailgp,
     author: "Millie Sealana",
     date: "2025-10-04",
+    edition: "2025-10",
     body: [
       { id: "sailgp-b1", type: "text", content: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany in its first final and first win. Switzerland hosted the SailGP for the first time and the local crowd got more than just a glimpse of world-class foiling — they saw history." },
       { id: "sailgp-b2", type: "text", content: "Being a freshwater venue, the conditions were challenging as the teams were used to coastal and sea venues. Light winds forced teams to rethink tactics. The unpredictability of the winds and shifting conditions meant that each start and positioning made a difference. SailGP commentators stated \"the difference between success and failure was razor thin.\"" },

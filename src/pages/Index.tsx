@@ -46,7 +46,7 @@ export default function Index() {
       <section className="container mx-auto px-4 mt-16 md:mt-20">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
           <div>
-            <h2 className="font-serif text-2xl font-bold mb-8 text-primary">Editor’s Picks</h2>
+            <h2 className="font-editorial text-2xl font-bold mb-8 text-primary tracking-wide">Editor's Picks</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {featuredArticle && (

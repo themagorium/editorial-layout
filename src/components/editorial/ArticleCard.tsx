@@ -50,7 +50,7 @@ export default function ArticleCard({ article, variant = "medium" }: Props) {
 
       <div className="mt-3">
         <span className="category-pill text-[10px]">{article.category}</span>
-        <h3 className={`font-serif font-semibold mt-2 leading-snug group-hover:text-primary transition-colors ${
+        <h3 className={`font-editorial font-semibold mt-2 leading-snug group-hover:text-primary transition-colors ${
           isLarge ? "text-2xl md:text-3xl" : isSmall ? "text-base" : "text-lg md:text-xl"
         }`}>
           {article.title}

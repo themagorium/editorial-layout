@@ -66,6 +66,6 @@ export default function ArticleCard({ article, variant = "medium" }: Props) {
           <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

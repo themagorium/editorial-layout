@@ -78,10 +78,10 @@
     letter-spacing: 0.02em;
   }
   .font-hero {
-    font-family: 'Oranienbaum', 'Didot', 'Bodoni MT', serif;
+    font-family: 'Cinzel', 'Didot', 'Bodoni MT', serif;
   }
   .font-editorial {
-    font-family: 'Forum', 'Didot', 'Bodoni MT', serif;
+    font-family: 'Cinzel', 'Didot', 'Bodoni MT', serif;
   }
   .editorial-gradient {
     background: linear-gradient(180deg, hsl(var(--navy-deep)) 0%, hsl(var(--background)) 100%);

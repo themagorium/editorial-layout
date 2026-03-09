@@ -80,15 +80,15 @@ export default function EditionPage() {
       {/* Editor's Picks — 4 cards */}
       <section className="container mx-auto px-4 mt-16 md:mt-20">
         <h2 className="font-editorial text-2xl font-bold mb-8 text-primary tracking-wide">Editor's Picks</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {articles.map((article) => (
             <Link
               key={article.id}
               to={`/article/${article.id}`}
-              className="group cursor-pointer block"
+              className="group cursor-pointer flex flex-row sm:flex-col gap-3 sm:gap-0"
               onClick={() => trackEvent(article.id, "article", "click")}
             >
-              <div className="relative overflow-hidden rounded aspect-[4/3]">
+              <div className="relative overflow-hidden rounded aspect-square w-[7.2rem] sm:w-full sm:aspect-[4/3] flex-shrink-0">
                 <img
                   src={article.imageUrl}
                   alt={article.title}
@@ -97,15 +97,15 @@ export default function EditionPage() {
                 />
                 <div className="article-overlay absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <div className="mt-3">
+              <div className="sm:mt-3 flex flex-col justify-center">
                 <span className="category-pill text-[10px]">{article.category}</span>
-                <h3 className="font-editorial font-semibold mt-2 leading-snug group-hover:text-primary transition-colors text-base md:text-lg">
+                <h3 className="font-editorial font-semibold mt-1 sm:mt-2 leading-snug group-hover:text-primary transition-colors text-sm sm:text-base md:text-lg">
                   {article.title}
                 </h3>
-                <p className="font-sans text-sm text-muted-foreground mt-1.5 line-clamp-2">
+                <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 hidden sm:block">
                   {article.excerpt}
                 </p>
-                <div className="flex items-center gap-2 mt-2 text-xs font-sans text-muted-foreground">
+                <div className="flex items-center gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
                   <span>{article.author}</span>
                   <span className="text-primary">·</span>
                   <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>

@@ -97,10 +97,10 @@ const DEFAULT_HEROES: HeroItem[] = [
   { id: "h-wef", title: "Davos 2026: The World Economic Forum's Annual Meeting", subtitle: "Record numbers of world leaders converge on Davos for five days of dialogue on AI, climate, and the global economy", category: "Tech & AI", imageUrl: heroDavosWef, date: "2026-01-19", edition: "2026-01" },
   { id: "h-snow-polo", title: "41st Snow Polo World Cup St. Moritz", subtitle: "The frozen lake becomes the world's most spectacular polo arena as Standing Rock claims the title", category: "Equestrian", imageUrl: heroSnowPolo, date: "2026-01-24", edition: "2026-01" },
   { id: "h-haute-couture", title: "Paris Haute Couture Week SS26: The Art of the Extraordinary", subtitle: "From Chanel to Dior to Valentino — the pinnacle of fashion craftsmanship returns to the grand palaces of Paris", category: "Fashion", imageUrl: heroHauteCouture, date: "2026-01-26", edition: "2026-01" },
-  // --- October 2025 ---
-  { id: "h-polo-ba", title: "Cambiaso x Cambiaso: The Hurlingham Open", subtitle: "Father and son reunite on the historic turf of Buenos Aires as La Natividad La Dolfina begin their Triple Crown campaign", category: "Equestrian", imageUrl: articleCambiaso, date: "2025-10-06", edition: "2025-10" },
-  { id: "h-f1-austin", title: "F1 Returns to the Circuit of the Americas", subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe", category: "Motorsport", imageUrl: articleF1Americas, date: "2025-10-06", edition: "2025-10" },
-  { id: "h-cape-town", title: "Cape Town Design Week: Africa's Creative Vanguard", subtitle: "Table Mountain as backdrop — where African contemporary design meets global luxury at the continent's most ambitious design gathering", category: "Art & Design", imageUrl: heroCapeTown, date: "2025-10-15", edition: "2025-10" },
+  // --- October 2025 --- (Heroes: SailGP, CV Summit, F1)
+  { id: "h-sailgp", title: "SailGP from Geneva to Cadiz", subtitle: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany", category: "Yachting", imageUrl: articleSailgp, date: "2025-10-04", edition: "2025-10" },
+  { id: "h-cv-summit", title: "Zurich's CV Summit: Capital Meets AI by the Lake", subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance", category: "Tech & AI", imageUrl: articleCvSummit, date: "2025-10-06", edition: "2025-10" },
+  { id: "h-f1-austin", title: "F1 Returns to the Circuit of the Americas", subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe", category: "Motorsport", imageUrl: articleF1Americas, date: "2025-10-20", edition: "2025-10" },
 ];
 
 // ===================================================================

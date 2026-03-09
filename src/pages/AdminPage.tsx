@@ -54,7 +54,59 @@ function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[]
   return Array.from(editions).sort().reverse();
 }
 
+const ADMIN_PASSWORD = "Magorium2025";
+
 export default function AdminPage() {
+  const [authenticated, setAuthenticated] = useState(() => {
+    return sessionStorage.getItem("magorium-admin-auth") === "true";
+  });
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+      setAuthenticated(true);
+      sessionStorage.setItem("magorium-admin-auth", "true");
+      setPasswordError(false);
+    } else {
+      setPasswordError(true);
+    }
+  };
+
+  if (!authenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <form onSubmit={handleLogin} className="w-full max-w-sm mx-auto p-8 space-y-6 text-center">
+          <h1 className="text-3xl font-bold tracking-tight masthead-font">
+            <span className="text-foreground">THE </span>
+            <span className="text-primary">MAGORIUM</span>
+          </h1>
+          <p className="text-sm text-muted-foreground uppercase tracking-widest">Content Manager</p>
+          <div className="space-y-3">
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }}
+              placeholder="Enter password"
+              className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              autoFocus
+            />
+            {passwordError && (
+              <p className="text-sm text-destructive">Incorrect password</p>
+            )}
+            <button
+              type="submit"
+              className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              Sign In
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<AdSlot[]>([]);

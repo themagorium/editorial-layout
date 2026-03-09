@@ -23,6 +23,7 @@ import articleSailgp from "@/assets/article-sailgp.jpg";
 import articleCvSummit from "@/assets/article-cv-summit.jpg";
 import articleKusama from "@/assets/article-kusama.jpg";
 import articleMarrakech from "@/assets/article-marrakech.jpg";
+import articleEngadin from "@/assets/article-engadin.jpg";
 import articleCambiasoPhoto1 from "@/assets/article-cambiaso-photo1.jpg";
 import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.jpg";
 import articlePfw from "@/assets/article-pfw.jpg";
@@ -280,18 +281,18 @@ const DEFAULT_ARTICLES: Article[] = [
     ],
   },
   {
-    id: "v1-marrakech",
-    title: "Marrakech: Where African Design Meets Global Luxury",
-    excerpt: "From riad galleries to palace exhibitions, Marrakech is quietly becoming one of the world's most compelling destinations for art, design, and cultural crossover.",
+    id: "v1-engadin",
+    title: "Winter Awaits the Engadin",
+    excerpt: "As the first snows dust the peaks, the Engadin Valley prepares for another season of Alpine luxury — from St. Moritz's frozen lake to Pontresina's quiet elegance.",
     category: "Travel",
-    imageUrl: articleMarrakech,
+    imageUrl: articleEngadin,
     author: "Millie Sealana",
     date: "2025-10-20",
     edition: "2025-10",
     body: [
-      { id: "mk-b1", type: "text", content: "Marrakech has evolved beyond its reputation as a luxury travel destination. In October 2025, the Red City emerged as a serious cultural hub — hosting gallery openings, private collection viewings, and design exhibitions that drew collectors and curators from Paris, London, and New York." },
-      { id: "mk-b2", type: "text", content: "The Musée Yves Saint Laurent Marrakech anchors the city's cultural offering, but the real energy lies in the riads-turned-galleries of the Medina and the private collections of Moroccan industrialists who have quietly assembled world-class contemporary art holdings. The convergence of Islamic geometry, Berber craft, and contemporary African art creates an aesthetic language found nowhere else." },
-      { id: "mk-b3", type: "text", content: "For the design world, Marrakech represents something more than exoticism. It is a living laboratory where artisanship — zellige tilework, brass lanterns, hand-woven textiles — coexists with experimental architecture and digital art. The city's trajectory as a cultural capital is no longer emerging. It has arrived." },
+      { id: "eng-b1", type: "text", content: "The Engadin Valley awakens in October with the first dustings of snow on the Bernina peaks. St. Moritz, the valley's glamorous anchor, begins its transformation from summer hiking destination to the world's most storied winter playground. The Palace Hotel opens its doors, the frozen lake awaits its polo ponies, and the Cresta Run prepares for another season of aristocratic speed." },
+      { id: "eng-b2", type: "text", content: "Yet beyond St. Moritz's glitter lies the quieter elegance of Pontresina, Sils Maria, and the upper valley villages. Here, cross-country skiers trace the frozen lakes, horse-drawn carriages carry guests through snow-laden forests, and the Kronenhof's spa offers Alpine wellness at its most refined. The Engadin is not merely a ski destination — it is winter elevated to an art form." },
+      { id: "eng-b3", type: "text", content: "For the discerning traveler, October is the moment of anticipation: securing tables at Chesa Veglia, booking the coveted suites, and watching the valley transform. Winter awaits the Engadin — and the Engadin awaits the world." },
     ],
   },
 ];

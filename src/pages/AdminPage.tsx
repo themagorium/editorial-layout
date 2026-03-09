@@ -1,15 +1,43 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import ArticleBodyEditor from "@/components/editorial/ArticleBodyEditor";
 import {
-  getHeroes, getArticles, getAds,
-  saveHeroes, saveArticles, saveAds, resetToDefaults,
-  CATEGORIES, getEditions, formatEditionLabel,
+  getHeroes,
+  getArticles,
+  getAds,
+  saveHeroes,
+  saveArticles,
+  saveAds,
+  resetToDefaults,
+  CATEGORIES,
+  formatEditionLabel,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
-import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, ChevronDown } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  Upload,
+  RotateCcw,
+  Image,
+  Video,
+  BarChart3,
+  Eye,
+  MousePointer,
+  TrendingUp,
+  MapPin,
+  Globe,
+  Calendar,
+  ChevronDown,
+} from "lucide-react";
 import { toast } from "sonner";
-import { getAnalyticsSummary, getTotalStats, getRecentEvents, getLocationStats, clearAnalytics, type ContentStats } from "@/lib/analytics";
+import {
+  getAnalyticsSummary,
+  getTotalStats,
+  getRecentEvents,
+  getLocationStats,
+  clearAnalytics,
+  type ContentStats,
+} from "@/lib/analytics";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve) => {
@@ -17,6 +45,13 @@ function fileToDataUrl(file: File): Promise<string> {
     reader.onload = () => resolve(reader.result as string);
     reader.readAsDataURL(file);
   });
+}
+
+function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[] {
+  const editions = new Set<string>();
+  heroes.forEach((h) => editions.add(h.edition));
+  articles.forEach((a) => editions.add(a.edition));
+  return Array.from(editions).sort().reverse();
 }
 
 export default function AdminPage() {
@@ -29,16 +64,21 @@ export default function AdminPage() {
   const [newEditionMonth, setNewEditionMonth] = useState("");
 
   useEffect(() => {
-    setHeroes(getHeroes());
-    setArticles(getArticles());
-    setAds(getAds());
-    const editions = getEditions();
-    if (editions.length > 0) setCurrentEdition(editions[0]);
+    const initialHeroes = getHeroes();
+    const initialArticles = getArticles();
+    const initialAds = getAds();
+
+    setHeroes(initialHeroes);
+    setArticles(initialArticles);
+    setAds(initialAds);
+
+    const initialEditions = getEditionsFromState(initialHeroes, initialArticles);
+    if (initialEditions.length > 0) setCurrentEdition(initialEditions[0]);
   }, []);
 
-  const editions = getEditions();
-  const filteredHeroes = currentEdition ? heroes.filter(h => h.edition === currentEdition) : heroes;
-  const filteredArticles = currentEdition ? articles.filter(a => a.edition === currentEdition) : articles;
+  const editions = useMemo(() => getEditionsFromState(heroes, articles), [heroes, articles]);
+  const filteredHeroes = currentEdition ? heroes.filter((h) => h.edition === currentEdition) : heroes;
+  const filteredArticles = currentEdition ? articles.filter((a) => a.edition === currentEdition) : articles;
 
   const save = () => {
     saveHeroes(heroes);
@@ -53,6 +93,27 @@ export default function AdminPage() {
     setArticles(getArticles());
     setAds(getAds());
     toast.success("Reset to defaults.");
+  };
+
+  const deleteCurrentEdition = () => {
+    if (!currentEdition) return;
+
+    const label = formatEditionLabel(currentEdition);
+    const ok = window.confirm(
+      `Delete the entire ${label} edition? This will remove all heroes and articles for that edition.\n\nClick “Save Changes” after deleting to make it permanent.`,
+    );
+    if (!ok) return;
+
+    const nextHeroes = heroes.filter((h) => h.edition !== currentEdition);
+    const nextArticles = articles.filter((a) => a.edition !== currentEdition);
+
+    setHeroes(nextHeroes);
+    setArticles(nextArticles);
+
+    const remainingEditions = getEditionsFromState(nextHeroes, nextArticles);
+    setCurrentEdition(remainingEditions[0] ?? "");
+
+    toast.success(`Deleted edition: ${label}.`);
   };
 
   const createNewEdition = () => {
@@ -118,7 +179,15 @@ export default function AdminPage() {
                 ))}
               </select>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={deleteCurrentEdition}
+                disabled={!currentEdition}
+                className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive text-destructive rounded hover:bg-destructive/10 transition-colors disabled:pointer-events-none disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" /> Delete Edition
+              </button>
+
               {showNewEdition ? (
                 <div className="flex items-center gap-2">
                   <input

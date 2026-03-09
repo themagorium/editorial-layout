@@ -49,7 +49,7 @@ function ArticleCard({ article }: { article: Article }) {
       className="group cursor-pointer flex flex-row sm:flex-col gap-3 sm:gap-0"
       onClick={() => trackEvent(article.id, "article", "click")}
     >
-      <div className="relative overflow-hidden rounded aspect-square w-24 sm:w-full sm:aspect-[4/3] flex-shrink-0">
+      <div className="relative overflow-hidden rounded aspect-square w-[7.2rem] sm:w-full sm:aspect-[4/3] flex-shrink-0">
         <img
           src={article.imageUrl}
           alt={article.title}

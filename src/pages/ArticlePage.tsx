@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { getArticles } from "@/lib/content-store";
+import { getArticles, resetToDefaults } from "@/lib/content-store";
 import type { ArticleBodyBlock } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
@@ -7,8 +7,15 @@ import { ArrowLeft } from "lucide-react";
 
 export default function ArticlePage() {
   const { id } = useParams<{ id: string }>();
-  const articles = getArticles();
-  const article = articles.find((a) => a.id === id);
+  let articles = getArticles();
+  let article = articles.find((a) => a.id === id);
+
+  // If not found, reset localStorage in case of corrupted data and retry
+  if (!article) {
+    resetToDefaults();
+    articles = getArticles();
+    article = articles.find((a) => a.id === id);
+  }
 
   if (!article) {
     return (

@@ -43,9 +43,10 @@ export default function EditionPage() {
       <section className="container mx-auto px-4 mt-4 md:mt-6">
         <div className="flex flex-col gap-6">
           {heroes.map((hero) => (
-            <div
+            <Link
               key={hero.id}
-              className="group relative overflow-hidden rounded cursor-pointer"
+              to={`/article/${hero.id}`}
+              className="group relative overflow-hidden rounded cursor-pointer block"
               onClick={() => trackEvent(hero.id, "hero", "click")}
             >
               <div className="aspect-[16/7] overflow-hidden">
@@ -72,7 +73,7 @@ export default function EditionPage() {
                   {hero.subtitle}
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

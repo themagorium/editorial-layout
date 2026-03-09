@@ -107,6 +107,10 @@ export default function AdminPage() {
     );
   }
 
+  return <AdminDashboard />;
+}
+
+function AdminDashboard() {
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<AdSlot[]>([]);

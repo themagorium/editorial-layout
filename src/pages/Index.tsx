@@ -114,9 +114,9 @@ export default function Index() {
       </section>
 
       {/* Editor's Picks — 4 smaller cards in a 2x2 grid */}
-      <section className="container mx-auto px-4 mt-16 md:mt-20">
-        <h2 className="font-editorial text-2xl font-bold mb-8 text-primary tracking-wide">Editor's Picks</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="container mx-auto px-4 mt-10 md:mt-20">
+        <h2 className="font-editorial text-xl md:text-2xl font-bold mb-6 md:mb-8 text-primary tracking-wide">Editor's Picks</h2>
+        <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {articles.map((article) => (
             <ArticleCard key={article.id} article={article} />
           ))}

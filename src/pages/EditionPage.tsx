@@ -80,7 +80,7 @@ export default function EditionPage() {
       {/* Editor's Picks — 4 cards */}
       <section className="container mx-auto px-4 mt-16 md:mt-20">
         <h2 className="font-editorial text-2xl font-bold mb-8 text-primary tracking-wide">Editor's Picks</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {articles.map((article) => (
             <Link
               key={article.id}

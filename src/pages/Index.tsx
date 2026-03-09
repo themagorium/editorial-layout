@@ -14,7 +14,7 @@ function HeroCard({ hero }: { hero: HeroItem }) {
       className="group relative overflow-hidden rounded cursor-pointer"
       onClick={() => trackEvent(hero.id, "hero", "click")}
     >
-      <div className="aspect-[16/7] overflow-hidden">
+      <div className="aspect-[3/4] sm:aspect-[16/9] md:aspect-[16/7] overflow-hidden">
         <img
           src={hero.imageUrl}
           alt={hero.title}
@@ -29,12 +29,12 @@ function HeroCard({ hero }: { hero: HeroItem }) {
         )}
         <div className="article-overlay absolute inset-0" />
       </div>
-      <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
+      <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8 z-10">
         <span className="category-pill">{hero.category}</span>
-        <h2 className="text-xl md:text-2xl font-semibold text-foreground mt-2 leading-snug font-editorial">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground mt-2 leading-snug font-editorial">
           {hero.title}
         </h2>
-        <p className="font-sans text-sm text-muted-foreground mt-2 line-clamp-2">
+        <p className="font-sans text-sm md:text-base text-muted-foreground mt-2 line-clamp-3">
           {hero.subtitle}
         </p>
       </div>

@@ -25,6 +25,7 @@ import articleKusama from "@/assets/article-kusama.jpg";
 import articleMarrakech from "@/assets/article-marrakech.jpg";
 import articleCambiasoPhoto1 from "@/assets/article-cambiaso-photo1.jpg";
 import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.jpg";
+import articlePfw from "@/assets/article-pfw.jpg";
 
 // ===== Types =====
 export type Category = 
@@ -96,10 +97,10 @@ const DEFAULT_HEROES: HeroItem[] = [
   { id: "h-wef", title: "Davos 2026: The World Economic Forum's Annual Meeting", subtitle: "Record numbers of world leaders converge on Davos for five days of dialogue on AI, climate, and the global economy", category: "Tech & AI", imageUrl: heroDavosWef, date: "2026-01-19", edition: "2026-01" },
   { id: "h-snow-polo", title: "41st Snow Polo World Cup St. Moritz", subtitle: "The frozen lake becomes the world's most spectacular polo arena as Standing Rock claims the title", category: "Equestrian", imageUrl: heroSnowPolo, date: "2026-01-24", edition: "2026-01" },
   { id: "h-haute-couture", title: "Paris Haute Couture Week SS26: The Art of the Extraordinary", subtitle: "From Chanel to Dior to Valentino — the pinnacle of fashion craftsmanship returns to the grand palaces of Paris", category: "Fashion", imageUrl: heroHauteCouture, date: "2026-01-26", edition: "2026-01" },
-  // --- October 2025 ---
-  { id: "h-polo-ba", title: "Cambiaso x Cambiaso: The Hurlingham Open", subtitle: "Father and son reunite on the historic turf of Buenos Aires as La Natividad La Dolfina begin their Triple Crown campaign", category: "Equestrian", imageUrl: articleCambiaso, date: "2025-10-06", edition: "2025-10" },
-  { id: "h-f1-austin", title: "F1 Returns to the Circuit of the Americas", subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe", category: "Motorsport", imageUrl: articleF1Americas, date: "2025-10-06", edition: "2025-10" },
-  { id: "h-cape-town", title: "Cape Town Design Week: Africa's Creative Vanguard", subtitle: "Table Mountain as backdrop — where African contemporary design meets global luxury at the continent's most ambitious design gathering", category: "Art & Design", imageUrl: heroCapeTown, date: "2025-10-15", edition: "2025-10" },
+  // --- October 2025 --- (Heroes: SailGP, CV Summit, F1)
+  { id: "h-sailgp", title: "SailGP from Geneva to Cadiz", subtitle: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany", category: "Yachting", imageUrl: articleSailgp, date: "2025-10-04", edition: "2025-10" },
+  { id: "h-cv-summit", title: "Zurich's CV Summit: Capital Meets AI by the Lake", subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance", category: "Tech & AI", imageUrl: articleCvSummit, date: "2025-10-06", edition: "2025-10" },
+  { id: "h-f1-austin", title: "F1 Returns to the Circuit of the Americas", subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe", category: "Motorsport", imageUrl: articleF1Americas, date: "2025-10-20", edition: "2025-10" },
 ];
 
 // ===================================================================
@@ -232,36 +233,36 @@ const DEFAULT_ARTICLES: Article[] = [
     ],
   },
 
-  // ========== OCTOBER 2025 ==========
+  // ========== OCTOBER 2025 ========== (Editor's Picks: Polo, PFW, Kusama, Marrakech)
   {
-    id: "v1-sailgp",
-    title: "SailGP from Geneva to Cadiz",
-    excerpt: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany.",
-    category: "Yachting",
-    imageUrl: articleSailgp,
-    author: "Millie Sealana",
-    date: "2025-10-04",
-    edition: "2025-10",
-    body: [
-      { id: "sailgp-b1", type: "text", content: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany in its first final and first win. Switzerland hosted the SailGP for the first time and the local crowd got more than just a glimpse of world-class foiling — they saw history." },
-      { id: "sailgp-b2", type: "text", content: "Being a freshwater venue, the conditions were challenging as the teams were used to coastal and sea venues. Light winds forced teams to rethink tactics. The unpredictability of the winds and shifting conditions meant that each start and positioning made a difference." },
-      { id: "sailgp-b3", type: "text", content: "The F50 catamarans require a certain wind threshold (~28 km/h) to consistently stay foiling. In Geneva, wind speeds were well below that threshold, forcing boats to operate more in displacement mode during parts of the race." },
-      { id: "sailgp-b4", type: "text", content: "Germany's win was due to precision and perfect execution from start to finish. It was a first final as well as first win for Germany, which depicted the diverse strengths and parity across all of the teams. Next up, the runup before the finals takes place in Cadiz on the Spanish team's home soil." },
-    ],
-  },
-  {
-    id: "v1-cv-summit",
-    title: "Zurich's CV Summit: Capital Meets AI by the Lake",
-    excerpt: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance.",
-    category: "Tech & AI",
-    imageUrl: articleCvSummit,
+    id: "v1-cambiaso",
+    title: "Cambiaso x Cambiaso: The Hurlingham Open",
+    excerpt: "Father and son reunite on the historic turf of Buenos Aires as La Natividad La Dolfina begin their Triple Crown campaign.",
+    category: "Equestrian",
+    imageUrl: articleCambiaso,
     author: "Millie Sealana",
     date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "cv-b1", type: "text", content: "CV Summit 2025 took place at the Kongresshaus Zurich, uniting more than 3,000 technology leaders, investors, institutions, and innovators. With 190 speakers, the summit underscored its role as a catalyst event for defining the new era of finance and technology." },
-      { id: "cv-b2", type: "text", content: "The agenda spanned four tracks: Blockchain, Institutions & Digital Assets, Wealth Management, and Artificial Intelligence. Switzerland's neutrality and governance were repeatedly invoked as stabilizing anchors in an increasingly volatile global environment." },
-      { id: "cv-b3", type: "text", content: "Olaf Hannemann, Co-Founder of CV VC, captured the Summit's spirit: 'Innovation has never been as fast as today, but will never be as slow ever again.' The community is recalibrating itself: quieter, sharper, ready for a more disciplined era of innovation." },
+      { id: "cam-b1", type: "text", content: "The Hurlingham Open marked a historic moment as Adolfo Cambiaso and his son Poroto took to the field together for La Natividad La Dolfina. The Buenos Aires crowd witnessed polo royalty as the greatest player of all time shared the turf with the next generation." },
+      { id: "cam-b2", type: "image", content: articleCambiasoPhoto1, caption: "Adolfo and Poroto Cambiaso on the field at Hurlingham", citation: "AAP/Getty Images" },
+      { id: "cam-b3", type: "text", content: "The Triple Crown campaign begins here at Hurlingham, continues through Tortugas, and culminates at the prestigious Palermo Open in December. For the Cambiaso dynasty, this season represents more than competition — it's a passing of the torch." },
+      { id: "cam-b4", type: "image", content: articleCambiasoPhoto2, caption: "La Natividad La Dolfina celebrating after the match", citation: "AAP/Getty Images" },
+    ],
+  },
+  {
+    id: "v1-pfw",
+    title: "Blazy Takes in Paris Fashion Week",
+    excerpt: "Paris Fashion Week SS26 delivered drama, artistry, and statement-making collections — from Dior's garden romanticism to Balenciaga's architectural precision.",
+    category: "Fashion",
+    imageUrl: articlePfw,
+    author: "Elena Voss",
+    date: "2025-10-01",
+    edition: "2025-10",
+    body: [
+      { id: "pfw-b1", type: "text", content: "Paris Fashion Week SS26 opened with Dior's ethereal garden collection at the Musée Rodin, where Maria Grazia Chiuri transformed the courtyard into a dreamscape of tulle, embroidery, and botanical motifs. The collection was a meditation on femininity and nature — each piece more delicate than the last." },
+      { id: "pfw-b2", type: "text", content: "At Balenciaga, Demna continued his exploration of architectural silhouettes, sending models down a stark industrial runway in exaggerated shoulders and sculptural coats. The contrast with Dior couldn't have been more striking — yet both houses captured the essence of Parisian couture: uncompromising vision." },
+      { id: "pfw-b3", type: "text", content: "The week's standout moment came at Chanel, where Virginie Viard staged a show along the Seine at sunset. Models walked on a floating barge as the Eiffel Tower glittered in the background — a reminder that Paris Fashion Week remains the industry's most theatrical stage." },
     ],
   },
   {
@@ -282,7 +283,7 @@ const DEFAULT_ARTICLES: Article[] = [
     id: "v1-marrakech",
     title: "Marrakech: Where African Design Meets Global Luxury",
     excerpt: "From riad galleries to palace exhibitions, Marrakech is quietly becoming one of the world's most compelling destinations for art, design, and cultural crossover.",
-    category: "Art & Design",
+    category: "Travel",
     imageUrl: articleMarrakech,
     author: "Millie Sealana",
     date: "2025-10-20",

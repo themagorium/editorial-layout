@@ -23,6 +23,7 @@ import articleSailgp from "@/assets/article-sailgp.jpg";
 import articleCvSummit from "@/assets/article-cv-summit.jpg";
 import articleKusama from "@/assets/article-kusama.jpg";
 import articleMarrakech from "@/assets/article-marrakech.jpg";
+import articleEngadin from "@/assets/article-engadin.jpg";
 import articleCambiasoPhoto1 from "@/assets/article-cambiaso-photo1.jpg";
 import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.jpg";
 import articlePfw from "@/assets/article-pfw.jpg";

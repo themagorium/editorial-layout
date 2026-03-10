@@ -48,6 +48,7 @@ export interface HeroItem {
   videoUrl?: string;
   date: string;
   edition: string;
+  body?: ArticleBodyBlock[];
 }
 
 export interface ArticleBodyBlock {
@@ -91,17 +92,101 @@ export interface AdSlot {
 // ===================================================================
 const DEFAULT_HEROES: HeroItem[] = [
   // --- February 2026 ---
-  { id: "h1", title: "Winter Olympics XXV: Milano-Cortina 2026", subtitle: "The Dolomites prepare to host the world's greatest winter spectacle — a complete preview", category: "Travel", imageUrl: heroOlympics, date: "2026-02-06", edition: "2026-02" },
-  { id: "h3", title: "Sotheby's Magnificent Jewels: A New York Evening Sale", subtitle: "A 28-carat Kashmir sapphire leads a $120 million catalogue — the auction house's most ambitious jewellery sale in a decade", category: "Art & Design", imageUrl: heroSothebys, date: "2026-02-11", edition: "2026-02" },
-  { id: "h2", title: "Milan Fashion Week FW26: Power, Precision & Italian Glamour", subtitle: "From Prada's conceptual minimalism to Versace's maximalist revival — a season of bold contrasts and Italian craftsmanship", category: "Fashion", imageUrl: heroMilanFashion, date: "2026-02-20", edition: "2026-02" },
+  {
+    id: "h1", title: "Winter Olympics XXV: Milano-Cortina 2026", subtitle: "The Dolomites prepare to host the world's greatest winter spectacle — a complete preview", category: "Travel", imageUrl: heroOlympics, date: "2026-02-06", edition: "2026-02",
+    body: [
+      { id: "wo-b1", type: "text", content: "The Milano-Cortina 2026 Winter Olympics promise to be the most spectacular winter Games in a generation. Set against the breathtaking Dolomites, the event spans two iconic Italian destinations — Milan's metropolitan energy and Cortina d'Ampezzo's Alpine elegance — creating a dual-city format that celebrates Italy's extraordinary range." },
+      { id: "wo-b2", type: "text", content: "Cortina, the jewel of the Italian Alps, will host the alpine skiing, bobsled, and luge events on slopes that have defined winter sport since the 1956 Games. The town itself — with its luxury boutiques, historic Grand Hotels, and aperitivo culture — transforms into a living room for the world's sporting elite." },
+      { id: "wo-b3", type: "text", content: "Milan brings the urban dimension: the opening ceremony at San Siro, ice hockey at the newly refurbished PalaSharp, and a cultural programme that spans La Scala, the Triennale, and the Fondazione Prada. For the luxury traveler, the combination of world-class sport and Italian dolce vita is irresistible." },
+    ],
+  },
+  {
+    id: "h3", title: "Sotheby's Magnificent Jewels: A New York Evening Sale", subtitle: "A 28-carat Kashmir sapphire leads a $120 million catalogue — the auction house's most ambitious jewellery sale in a decade", category: "Art & Design", imageUrl: heroSothebys, date: "2026-02-11", edition: "2026-02",
+    body: [
+      { id: "sj-b1", type: "text", content: "Sotheby's Magnificent Jewels evening sale in New York assembled a $120 million catalogue that represented the auction house's most ambitious jewellery offering in a decade. The star lot — a 28-carat Kashmir sapphire of extraordinary provenance — drew bidding from collectors in Geneva, Hong Kong, and the Gulf." },
+      { id: "sj-b2", type: "text", content: "The sale reflected a broader trend in the ultra-high-net-worth market: a flight to tangible assets of unimpeachable quality. Coloured diamonds, signed Cartier Art Deco pieces, and estate jewellery from European royal collections commanded premiums that defied broader market uncertainty." },
+      { id: "sj-b3", type: "text", content: "For The Magorium, the evening was a masterclass in the theatre of auction. Sotheby's York Avenue saleroom, with its hushed reverence and the auctioneer's measured cadence, remains one of the great rituals of the luxury world — where beauty, rarity, and desire converge under the hammer." },
+    ],
+  },
+  {
+    id: "h2", title: "Milan Fashion Week FW26: Power, Precision & Italian Glamour", subtitle: "From Prada's conceptual minimalism to Versace's maximalist revival — a season of bold contrasts and Italian craftsmanship", category: "Fashion", imageUrl: heroMilanFashion, date: "2026-02-20", edition: "2026-02",
+    body: [
+      { id: "mf-b1", type: "text", content: "Milan Fashion Week FW26 delivered a season of bold contrasts and unwavering Italian craftsmanship. Prada opened with a collection of conceptual minimalism — structured coats, muted palettes, and an intellectual rigour that has become Miuccia and Raf's signature. The Via Fogazzaro venue was stripped to concrete and light." },
+      { id: "mf-b2", type: "text", content: "Versace countered with maximalist revival: gold Medusa hardware, body-conscious silhouettes, and a celebration of the house's DNA that felt both nostalgic and urgent. Donatella's after-show dinner at Palazzo Versace drew every A-lister in Milan." },
+      { id: "mf-b3", type: "text", content: "The week's revelation was Bottega Veneta under Matthieu Blazy, whose collection of artisanal leatherwork, hand-painted fabrics, and deconstructed tailoring earned a standing ovation. Milan reminded the fashion world that Italian glamour is not a trend — it is a tradition." },
+    ],
+  },
   // --- January 2026 ---
-  { id: "h-wef", title: "Davos 2026: The World Economic Forum's Annual Meeting", subtitle: "Record numbers of world leaders converge on Davos for five days of dialogue on AI, climate, and the global economy", category: "Tech & AI", imageUrl: heroDavosWef, date: "2026-01-19", edition: "2026-01" },
-  { id: "h-snow-polo", title: "41st Snow Polo World Cup St. Moritz", subtitle: "The frozen lake becomes the world's most spectacular polo arena as Standing Rock claims the title", category: "Equestrian", imageUrl: heroSnowPolo, date: "2026-01-24", edition: "2026-01" },
-  { id: "h-haute-couture", title: "Paris Haute Couture Week SS26: The Art of the Extraordinary", subtitle: "From Chanel to Dior to Valentino — the pinnacle of fashion craftsmanship returns to the grand palaces of Paris", category: "Fashion", imageUrl: heroHauteCouture, date: "2026-01-26", edition: "2026-01" },
+  {
+    id: "h-wef", title: "Davos 2026: The World Economic Forum's Annual Meeting", subtitle: "Record numbers of world leaders converge on Davos for five days of dialogue on AI, climate, and the global economy", category: "Tech & AI", imageUrl: heroDavosWef, date: "2026-01-19", edition: "2026-01",
+    body: [
+      { id: "wef-b1", type: "text", content: "The World Economic Forum's 2026 Annual Meeting in Davos brought record numbers of heads of state, CEOs, and thought leaders to the Swiss Alpine town for five days of intensive dialogue. AI regulation, climate finance, and the restructuring of global trade dominated the formal programme." },
+      { id: "wef-b2", type: "text", content: "Beyond the Congress Centre, the real business of Davos unfolded in the private chalets and hotel suites that line the Promenade. Bilateral meetings between tech CEOs and government leaders, private dinners hosted by sovereign wealth funds, and invitation-only roundtables shaped decisions that will ripple through the global economy for years." },
+      { id: "wef-b3", type: "text", content: "For the luxury world, Davos represents the ultimate networking nexus. The Steigenberger Grandhotel Belvédère, the Hotel Seehof, and the private residences that host parallel events create an ecosystem where influence, capital, and vision converge at 1,560 metres above sea level." },
+    ],
+  },
+  {
+    id: "h-snow-polo", title: "41st Snow Polo World Cup St. Moritz", subtitle: "The frozen lake becomes the world's most spectacular polo arena as Standing Rock claims the title", category: "Equestrian", imageUrl: heroSnowPolo, date: "2026-01-24", edition: "2026-01",
+    body: [
+      { id: "sp-b1", type: "text", content: "The 41st Snow Polo World Cup on the frozen Lake St. Moritz delivered three days of high-goal polo in the most spectacular setting in world sport. The tournament — the only high-goal polo event played on snow — attracts the finest players and the most discerning spectators to the Engadin Valley each January." },
+      { id: "sp-b2", type: "text", content: "Standing Rock's victory in the final was a triumph of precision and tactical intelligence. Playing on the frozen lake demands adaptations that reward experience: the ball moves differently, the horses need specialised shoeing, and the altitude affects endurance. The winning team's mastery of these conditions was evident from the first chukker." },
+      { id: "sp-b3", type: "text", content: "The VIP hospitality tents along the lake — hosted by sponsors including Maserati, Badrutt's Palace, and La Martina — provided champagne-fuelled viewing with the Engadin peaks as a backdrop. Snow Polo St. Moritz remains the ultimate expression of winter luxury sport: exclusive, beautiful, and utterly unique." },
+    ],
+  },
+  {
+    id: "h-haute-couture", title: "Paris Haute Couture Week SS26: The Art of the Extraordinary", subtitle: "From Chanel to Dior to Valentino — the pinnacle of fashion craftsmanship returns to the grand palaces of Paris", category: "Fashion", imageUrl: heroHauteCouture, date: "2026-01-26", edition: "2026-01",
+    body: [
+      { id: "hc-b1", type: "text", content: "Paris Haute Couture Week SS26 returned to the grand palaces and ateliers of the French capital with collections that reaffirmed couture's position as fashion's highest art. Chanel opened at the Grand Palais with a collection that celebrated the maison's tweed heritage through a contemporary lens — each piece requiring over 800 hours of handwork." },
+      { id: "hc-b2", type: "text", content: "Dior's show at the Musée Rodin was a meditation on botanical beauty, with embroidered gowns that blurred the line between fashion and fine art. Valentino, under Pierpaolo Piccioli, continued to push couture toward minimalism with monochromatic looks of devastating simplicity and perfect proportion." },
+      { id: "hc-b3", type: "text", content: "Haute Couture Week is more than fashion — it is a cultural event that brings the world's most important collectors, celebrities, and editors to Paris. The front rows at the Ritz, the private fittings at Avenue Montaigne, and the intimate dinners that follow each show create a week of unparalleled intimacy with the world's finest craft." },
+    ],
+  },
   // --- October 2025 --- (Heroes: SailGP, CV Summit, F1)
-  { id: "h-sailgp", title: "SailGP from Geneva to Cadiz", subtitle: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany", category: "Yachting", imageUrl: articleSailgp, date: "2025-10-04", edition: "2025-10" },
-  { id: "h-cv-summit", title: "Zurich's CV Summit: Capital Meets AI by the Lake", subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance", category: "Tech & AI", imageUrl: articleCvSummit, date: "2025-10-06", edition: "2025-10" },
-  { id: "h-f1-austin", title: "F1 Returns to the Circuit of the Americas", subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe", category: "Motorsport", imageUrl: articleF1Americas, date: "2025-10-20", edition: "2025-10" },
+  {
+    id: "h-sailgp",
+    title: "SailGP from Geneva to Cadiz",
+    subtitle: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany",
+    category: "Yachting",
+    imageUrl: articleSailgp,
+    date: "2025-10-04",
+    edition: "2025-10",
+    body: [
+      { id: "sg-b1", type: "text", content: "The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history. With the Jet d'Eau as a backdrop and the Alps framing the horizon, eight national teams battled across two days of intense F50 catamaran racing in conditions that tested tactics as much as speed." },
+      { id: "sg-b2", type: "text", content: "Germany's stunning breakthrough victory — their first podium finish in SailGP history — was the story of the weekend. Skippered with clinical precision, the German crew exploited the lake's notoriously fickle winds to outmanoeuvre favourites Australia and Great Britain in a dramatic final race that came down to the last leg." },
+      { id: "sg-b3", type: "text", content: "The event's luxury ecosystem matched the racing drama. Rolex hospitality suites along the Quai du Mont-Blanc hosted collectors, brand ambassadors, and the sailing world's elite. Private yacht viewings from the lake offered an intimate perspective on the F50s hitting 100 km/h just metres from shore — a visceral combination of speed, danger, and beauty." },
+      { id: "sg-b4", type: "text", content: "From Geneva, the SailGP circuit heads to Cadiz, where the Atlantic winds and Andalusian light promise an entirely different spectacle. But for those who witnessed the Lake Geneva event, this was SailGP at its most refined — where the sport's future met one of Europe's most elegant cities." },
+    ],
+  },
+  {
+    id: "h-cv-summit",
+    title: "Zurich's CV Summit: Capital Meets AI by the Lake",
+    subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance",
+    category: "Tech & AI",
+    imageUrl: articleCvSummit,
+    date: "2025-10-06",
+    edition: "2025-10",
+    body: [
+      { id: "cv-b1", type: "text", content: "CV Summit 2025 at Zurich's historic Kongresshaus marked a turning point for the European tech conference circuit. Over 3,000 founders, investors, and corporate innovators gathered on the shores of Lake Zurich for two days of programming that abandoned crypto hype in favour of serious discourse on AI, deep tech, and sustainable venture capital." },
+      { id: "cv-b2", type: "text", content: "The headline panel — featuring partners from Sequoia, Andreessen Horowitz, and Balderton Capital — addressed the recalibration of European venture funding. The message was clear: capital is flowing, but it's flowing to companies with real revenue, real technology, and real defensibility. The era of narrative-driven valuations is over." },
+      { id: "cv-b3", type: "text", content: "Zurich itself proved the perfect host. The Kongresshaus, a 1930s lakeside landmark, provided an intimate setting that encouraged the kind of corridor conversations that larger conferences struggle to facilitate. Evening receptions at the Baur au Lac and the Dolder Grand extended the networking into Zurich's most exclusive spaces." },
+      { id: "cv-b4", type: "text", content: "For The Magorium, CV Summit represents a broader trend: the convergence of technology and luxury. AI-driven personalisation, blockchain provenance for luxury goods, and the digitisation of the art market were recurring themes — confirming that the tech and luxury worlds are no longer parallel tracks, but increasingly the same conversation." },
+    ],
+  },
+  {
+    id: "h-f1-austin",
+    title: "F1 Returns to the Circuit of the Americas",
+    subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe",
+    category: "Motorsport",
+    imageUrl: articleF1Americas,
+    date: "2025-10-20",
+    edition: "2025-10",
+    body: [
+      { id: "f1-b1", type: "text", content: "The United States Grand Prix at the Circuit of the Americas delivered one of the season's most compelling weekends. Austin — the tech capital of the American South — welcomed Formula 1 with its unique blend of innovation culture, Southern hospitality, and an atmosphere that no other circuit on the calendar can replicate." },
+      { id: "f1-b2", type: "text", content: "George Russell's masterful drive from fourth on the grid to victory was the headline, but the weekend belonged to Lewis Hamilton. In what many speculated could be among his final races at COTA, Hamilton's relentless charge through the field — accompanied by his beloved bulldog Roscoe in the paddock — provided the emotional heart of the event." },
+      { id: "f1-b3", type: "text", content: "Off the track, Austin during F1 weekend transforms into a luxury destination that rivals Monaco and Singapore. The Paddock Club hospitality, the celebrity-heavy grid walks, and the after-race concerts — this year headlined by a surprise Beyoncé appearance — confirmed COTA's position as the most culturally significant race on the American calendar." },
+      { id: "f1-b4", type: "text", content: "The Circuit of the Americas itself, with its dramatic Turn 1 climb and the sweeping esses that reference Silverstone and Suzuka, remains one of the finest purpose-built tracks in modern F1. As the sport's American expansion continues with races in Miami and Las Vegas, Austin's COTA retains its authenticity — a circuit built by racing fans, for racing fans." },
+    ],
+  },
 ];
 
 // ===================================================================

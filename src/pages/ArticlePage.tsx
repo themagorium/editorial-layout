@@ -33,7 +33,7 @@ export default function ArticlePage() {
     videoUrl: heroAsArticle.videoUrl,
     author: "The Magorium",
     date: heroAsArticle.date,
-    body: [] as ArticleBodyBlock[],
+    body: (heroAsArticle.body || []) as ArticleBodyBlock[],
     edition: heroAsArticle.edition,
   } : undefined);
 

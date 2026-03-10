@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { getArticles, resetToDefaults } from "@/lib/content-store";
+import { getArticles, getHeroes, resetToDefaults } from "@/lib/content-store";
 import type { ArticleBodyBlock } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";

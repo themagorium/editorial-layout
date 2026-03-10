@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { getArticles, resetToDefaults } from "@/lib/content-store";
+import { getArticles, getHeroes, resetToDefaults } from "@/lib/content-store";
 import type { ArticleBodyBlock } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
@@ -8,16 +8,36 @@ import { ArrowLeft } from "lucide-react";
 export default function ArticlePage() {
   const { id } = useParams<{ id: string }>();
   let articles = getArticles();
+  let heroes = getHeroes();
   let article = articles.find((a) => a.id === id);
 
-  // If not found, reset localStorage in case of corrupted data and retry
-  if (!article) {
+  // Also search heroes — they share the same article detail page
+  let heroAsArticle = !article ? heroes.find((h) => h.id === id) : undefined;
+
+  // If not found in either, reset localStorage and retry
+  if (!article && !heroAsArticle) {
     resetToDefaults();
     articles = getArticles();
+    heroes = getHeroes();
     article = articles.find((a) => a.id === id);
+    heroAsArticle = !article ? heroes.find((h) => h.id === id) : undefined;
   }
 
-  if (!article) {
+  // Normalize hero into article-like shape for rendering
+  const content = article || (heroAsArticle ? {
+    id: heroAsArticle.id,
+    title: heroAsArticle.title,
+    excerpt: heroAsArticle.subtitle,
+    category: heroAsArticle.category,
+    imageUrl: heroAsArticle.imageUrl,
+    videoUrl: heroAsArticle.videoUrl,
+    author: "The Magorium",
+    date: heroAsArticle.date,
+    body: [] as ArticleBodyBlock[],
+    edition: heroAsArticle.edition,
+  } : undefined);
+
+  if (!content) {
     return (
       <div className="min-h-screen bg-background">
         <EditorialHeader />
@@ -36,7 +56,7 @@ export default function ArticlePage() {
 
       {/* Hero image */}
       <div className="relative w-full aspect-[21/9] max-h-[500px] overflow-hidden">
-        <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover" />
+        <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover" />
         <div className="article-overlay absolute inset-0" />
       </div>
 
@@ -45,21 +65,21 @@ export default function ArticlePage() {
           <ArrowLeft className="w-4 h-4" /> Back to stories
         </Link>
 
-        <span className="category-pill mb-4 block w-fit">{article.category}</span>
+        <span className="category-pill mb-4 block w-fit">{content.category}</span>
         <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mt-3">
-          {article.title}
+          {content.title}
         </h1>
-        <p className="font-sans text-lg text-muted-foreground mt-4">{article.excerpt}</p>
+        <p className="font-sans text-lg text-muted-foreground mt-4">{content.excerpt}</p>
         <div className="flex items-center gap-3 mt-6 text-sm font-sans text-muted-foreground border-b border-border pb-6">
-          <span className="font-medium text-foreground">{article.author}</span>
+          <span className="font-medium text-foreground">{content.author}</span>
           <span className="text-primary">·</span>
-          <span>{new Date(article.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+          <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
         </div>
 
         {/* Article body blocks */}
         <div className="mt-10 space-y-8">
-          {article.body && article.body.length > 0 ? (
-            article.body.map((block) => <BodyBlock key={block.id} block={block} />)
+          {content.body && content.body.length > 0 ? (
+            content.body.map((block) => <BodyBlock key={block.id} block={block} />)
           ) : (
             <p className="font-sans text-muted-foreground text-base leading-relaxed italic">
               Full article content coming soon...

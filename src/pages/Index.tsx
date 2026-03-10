@@ -10,8 +10,9 @@ import { trackEvent } from "@/lib/analytics";
 
 function HeroCard({ hero }: { hero: HeroItem }) {
   return (
-    <div
-      className="group relative overflow-hidden rounded cursor-pointer"
+    <Link
+      to={`/article/${hero.id}`}
+      className="group relative overflow-hidden rounded cursor-pointer block"
       onClick={() => trackEvent(hero.id, "hero", "click")}
     >
       <div className="aspect-[3/4] sm:aspect-[16/9] md:aspect-[16/7] overflow-hidden">
@@ -38,7 +39,7 @@ function HeroCard({ hero }: { hero: HeroItem }) {
           {hero.subtitle}
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
 

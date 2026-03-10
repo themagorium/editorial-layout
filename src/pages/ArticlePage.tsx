@@ -8,14 +8,34 @@ import { ArrowLeft } from "lucide-react";
 export default function ArticlePage() {
   const { id } = useParams<{ id: string }>();
   let articles = getArticles();
+  let heroes = getHeroes();
   let article = articles.find((a) => a.id === id);
 
-  // If not found, reset localStorage in case of corrupted data and retry
-  if (!article) {
+  // Also search heroes — they share the same article detail page
+  let heroAsArticle = !article ? heroes.find((h) => h.id === id) : undefined;
+
+  // If not found in either, reset localStorage and retry
+  if (!article && !heroAsArticle) {
     resetToDefaults();
     articles = getArticles();
+    heroes = getHeroes();
     article = articles.find((a) => a.id === id);
+    heroAsArticle = !article ? heroes.find((h) => h.id === id) : undefined;
   }
+
+  // Normalize hero into article-like shape for rendering
+  const content = article || (heroAsArticle ? {
+    id: heroAsArticle.id,
+    title: heroAsArticle.title,
+    excerpt: heroAsArticle.subtitle,
+    category: heroAsArticle.category,
+    imageUrl: heroAsArticle.imageUrl,
+    videoUrl: heroAsArticle.videoUrl,
+    author: "The Magorium",
+    date: heroAsArticle.date,
+    body: [] as ArticleBodyBlock[],
+    edition: heroAsArticle.edition,
+  } : undefined);
 
   if (!article) {
     return (

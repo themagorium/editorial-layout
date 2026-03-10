@@ -100,9 +100,51 @@ const DEFAULT_HEROES: HeroItem[] = [
   { id: "h-snow-polo", title: "41st Snow Polo World Cup St. Moritz", subtitle: "The frozen lake becomes the world's most spectacular polo arena as Standing Rock claims the title", category: "Equestrian", imageUrl: heroSnowPolo, date: "2026-01-24", edition: "2026-01" },
   { id: "h-haute-couture", title: "Paris Haute Couture Week SS26: The Art of the Extraordinary", subtitle: "From Chanel to Dior to Valentino — the pinnacle of fashion craftsmanship returns to the grand palaces of Paris", category: "Fashion", imageUrl: heroHauteCouture, date: "2026-01-26", edition: "2026-01" },
   // --- October 2025 --- (Heroes: SailGP, CV Summit, F1)
-  { id: "h-sailgp", title: "SailGP from Geneva to Cadiz", subtitle: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany", category: "Yachting", imageUrl: articleSailgp, date: "2025-10-04", edition: "2025-10" },
-  { id: "h-cv-summit", title: "Zurich's CV Summit: Capital Meets AI by the Lake", subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance", category: "Tech & AI", imageUrl: articleCvSummit, date: "2025-10-06", edition: "2025-10" },
-  { id: "h-f1-austin", title: "F1 Returns to the Circuit of the Americas", subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe", category: "Motorsport", imageUrl: articleF1Americas, date: "2025-10-20", edition: "2025-10" },
+  {
+    id: "h-sailgp",
+    title: "SailGP from Geneva to Cadiz",
+    subtitle: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany",
+    category: "Yachting",
+    imageUrl: articleSailgp,
+    date: "2025-10-04",
+    edition: "2025-10",
+    body: [
+      { id: "sg-b1", type: "text", content: "The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history. With the Jet d'Eau as a backdrop and the Alps framing the horizon, eight national teams battled across two days of intense F50 catamaran racing in conditions that tested tactics as much as speed." },
+      { id: "sg-b2", type: "text", content: "Germany's stunning breakthrough victory — their first podium finish in SailGP history — was the story of the weekend. Skippered with clinical precision, the German crew exploited the lake's notoriously fickle winds to outmanoeuvre favourites Australia and Great Britain in a dramatic final race that came down to the last leg." },
+      { id: "sg-b3", type: "text", content: "The event's luxury ecosystem matched the racing drama. Rolex hospitality suites along the Quai du Mont-Blanc hosted collectors, brand ambassadors, and the sailing world's elite. Private yacht viewings from the lake offered an intimate perspective on the F50s hitting 100 km/h just metres from shore — a visceral combination of speed, danger, and beauty." },
+      { id: "sg-b4", type: "text", content: "From Geneva, the SailGP circuit heads to Cadiz, where the Atlantic winds and Andalusian light promise an entirely different spectacle. But for those who witnessed the Lake Geneva event, this was SailGP at its most refined — where the sport's future met one of Europe's most elegant cities." },
+    ],
+  },
+  {
+    id: "h-cv-summit",
+    title: "Zurich's CV Summit: Capital Meets AI by the Lake",
+    subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance",
+    category: "Tech & AI",
+    imageUrl: articleCvSummit,
+    date: "2025-10-06",
+    edition: "2025-10",
+    body: [
+      { id: "cv-b1", type: "text", content: "CV Summit 2025 at Zurich's historic Kongresshaus marked a turning point for the European tech conference circuit. Over 3,000 founders, investors, and corporate innovators gathered on the shores of Lake Zurich for two days of programming that abandoned crypto hype in favour of serious discourse on AI, deep tech, and sustainable venture capital." },
+      { id: "cv-b2", type: "text", content: "The headline panel — featuring partners from Sequoia, Andreessen Horowitz, and Balderton Capital — addressed the recalibration of European venture funding. The message was clear: capital is flowing, but it's flowing to companies with real revenue, real technology, and real defensibility. The era of narrative-driven valuations is over." },
+      { id: "cv-b3", type: "text", content: "Zurich itself proved the perfect host. The Kongresshaus, a 1930s lakeside landmark, provided an intimate setting that encouraged the kind of corridor conversations that larger conferences struggle to facilitate. Evening receptions at the Baur au Lac and the Dolder Grand extended the networking into Zurich's most exclusive spaces." },
+      { id: "cv-b4", type: "text", content: "For The Magorium, CV Summit represents a broader trend: the convergence of technology and luxury. AI-driven personalisation, blockchain provenance for luxury goods, and the digitisation of the art market were recurring themes — confirming that the tech and luxury worlds are no longer parallel tracks, but increasingly the same conversation." },
+    ],
+  },
+  {
+    id: "h-f1-austin",
+    title: "F1 Returns to the Circuit of the Americas",
+    subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe",
+    category: "Motorsport",
+    imageUrl: articleF1Americas,
+    date: "2025-10-20",
+    edition: "2025-10",
+    body: [
+      { id: "f1-b1", type: "text", content: "The United States Grand Prix at the Circuit of the Americas delivered one of the season's most compelling weekends. Austin — the tech capital of the American South — welcomed Formula 1 with its unique blend of innovation culture, Southern hospitality, and an atmosphere that no other circuit on the calendar can replicate." },
+      { id: "f1-b2", type: "text", content: "George Russell's masterful drive from fourth on the grid to victory was the headline, but the weekend belonged to Lewis Hamilton. In what many speculated could be among his final races at COTA, Hamilton's relentless charge through the field — accompanied by his beloved bulldog Roscoe in the paddock — provided the emotional heart of the event." },
+      { id: "f1-b3", type: "text", content: "Off the track, Austin during F1 weekend transforms into a luxury destination that rivals Monaco and Singapore. The Paddock Club hospitality, the celebrity-heavy grid walks, and the after-race concerts — this year headlined by a surprise Beyoncé appearance — confirmed COTA's position as the most culturally significant race on the American calendar." },
+      { id: "f1-b4", type: "text", content: "The Circuit of the Americas itself, with its dramatic Turn 1 climb and the sweeping esses that reference Silverstone and Suzuka, remains one of the finest purpose-built tracks in modern F1. As the sport's American expansion continues with races in Miami and Las Vegas, Austin's COTA retains its authenticity — a circuit built by racing fans, for racing fans." },
+    ],
+  },
 ];
 
 // ===================================================================

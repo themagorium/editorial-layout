@@ -37,7 +37,7 @@ export default function ArticlePage() {
     edition: heroAsArticle.edition,
   } : undefined);
 
-  if (!article) {
+  if (!content) {
     return (
       <div className="min-h-screen bg-background">
         <EditorialHeader />
@@ -56,7 +56,7 @@ export default function ArticlePage() {
 
       {/* Hero image */}
       <div className="relative w-full aspect-[21/9] max-h-[500px] overflow-hidden">
-        <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover" />
+        <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover" />
         <div className="article-overlay absolute inset-0" />
       </div>
 
@@ -65,21 +65,21 @@ export default function ArticlePage() {
           <ArrowLeft className="w-4 h-4" /> Back to stories
         </Link>
 
-        <span className="category-pill mb-4 block w-fit">{article.category}</span>
+        <span className="category-pill mb-4 block w-fit">{content.category}</span>
         <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mt-3">
-          {article.title}
+          {content.title}
         </h1>
-        <p className="font-sans text-lg text-muted-foreground mt-4">{article.excerpt}</p>
+        <p className="font-sans text-lg text-muted-foreground mt-4">{content.excerpt}</p>
         <div className="flex items-center gap-3 mt-6 text-sm font-sans text-muted-foreground border-b border-border pb-6">
-          <span className="font-medium text-foreground">{article.author}</span>
+          <span className="font-medium text-foreground">{content.author}</span>
           <span className="text-primary">·</span>
-          <span>{new Date(article.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+          <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
         </div>
 
         {/* Article body blocks */}
         <div className="mt-10 space-y-8">
-          {article.body && article.body.length > 0 ? (
-            article.body.map((block) => <BodyBlock key={block.id} block={block} />)
+          {content.body && content.body.length > 0 ? (
+            content.body.map((block) => <BodyBlock key={block.id} block={block} />)
           ) : (
             <p className="font-sans text-muted-foreground text-base leading-relaxed italic">
               Full article content coming soon...

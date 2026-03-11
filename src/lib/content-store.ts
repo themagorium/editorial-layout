@@ -410,11 +410,13 @@ function ensureFreshDefaults() {
 }
 
 export function getHeroes(): HeroItem[] {
+  ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.heroes);
   return stored ? JSON.parse(stored) : DEFAULT_HEROES;
 }
 
 export function getArticles(): Article[] {
+  ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.articles);
   return stored ? JSON.parse(stored) : DEFAULT_ARTICLES;
 }

@@ -149,6 +149,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     subtitle: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany",
     category: "Yachting",
     imageUrl: articleSailgp,
+    author: "Charlotte Thames",
     date: "2025-10-04",
     edition: "2025-10",
     body: [
@@ -164,6 +165,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance",
     category: "Tech & AI",
     imageUrl: articleCvSummit,
+    author: "Millie Sealana",
     date: "2025-10-06",
     edition: "2025-10",
     body: [
@@ -179,6 +181,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe",
     category: "Motorsport",
     imageUrl: articleF1Americas,
+    author: "Charlotte Thames",
     date: "2025-10-20",
     edition: "2025-10",
     body: [

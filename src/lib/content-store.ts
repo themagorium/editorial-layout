@@ -390,11 +390,24 @@ const DEFAULT_ADS: AdSlot[] = [
 ];
 
 // ===== Storage & API =====
+// Bump this version whenever DEFAULT content changes to invalidate stale localStorage
+const CONTENT_VERSION = "2";
 const STORAGE_KEYS = {
   heroes: "editorial_heroes",
   articles: "editorial_articles",
   ads: "editorial_ads",
+  version: "editorial_content_version",
 };
+
+function ensureFreshDefaults() {
+  const storedVersion = localStorage.getItem(STORAGE_KEYS.version);
+  if (storedVersion !== CONTENT_VERSION) {
+    localStorage.removeItem(STORAGE_KEYS.heroes);
+    localStorage.removeItem(STORAGE_KEYS.articles);
+    localStorage.removeItem(STORAGE_KEYS.ads);
+    localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
+  }
+}
 
 export function getHeroes(): HeroItem[] {
   const stored = localStorage.getItem(STORAGE_KEYS.heroes);

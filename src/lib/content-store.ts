@@ -46,6 +46,7 @@ export interface HeroItem {
   category: Category;
   imageUrl: string;
   videoUrl?: string;
+  author?: string;
   date: string;
   edition: string;
   body?: ArticleBodyBlock[];

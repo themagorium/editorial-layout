@@ -395,7 +395,7 @@ const DEFAULT_ADS: AdSlot[] = [
 
 // ===== Storage & API =====
 // Bump this version whenever DEFAULT content changes to invalidate stale localStorage
-const CONTENT_VERSION = "2";
+const CONTENT_VERSION = "3";
 const STORAGE_KEYS = {
   heroes: "editorial_heroes",
   articles: "editorial_articles",

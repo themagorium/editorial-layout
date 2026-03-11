@@ -346,7 +346,7 @@ const DEFAULT_ARTICLES: Article[] = [
     excerpt: "Paris Fashion Week SS26 delivered drama, artistry, and statement-making collections — from Dior's garden romanticism to Balenciaga's architectural precision.",
     category: "Fashion",
     imageUrl: articlePfw,
-    author: "Elena Voss",
+    author: "Charlotte Thames",
     date: "2025-10-01",
     edition: "2025-10",
     body: [
@@ -375,7 +375,7 @@ const DEFAULT_ARTICLES: Article[] = [
     excerpt: "As the first snows dust the peaks, the Engadin Valley prepares for another season of Alpine luxury — from St. Moritz's frozen lake to Pontresina's quiet elegance.",
     category: "Travel",
     imageUrl: articleEngadin,
-    author: "Millie Sealana",
+    author: "Charlotte Thames",
     date: "2025-10-20",
     edition: "2025-10",
     body: [

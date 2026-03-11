@@ -46,6 +46,7 @@ export interface HeroItem {
   category: Category;
   imageUrl: string;
   videoUrl?: string;
+  author?: string;
   date: string;
   edition: string;
   body?: ArticleBodyBlock[];
@@ -148,6 +149,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     subtitle: "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany",
     category: "Yachting",
     imageUrl: articleSailgp,
+    author: "Charlotte Thames",
     date: "2025-10-04",
     edition: "2025-10",
     body: [
@@ -163,6 +165,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance",
     category: "Tech & AI",
     imageUrl: articleCvSummit,
+    author: "Millie Sealana",
     date: "2025-10-06",
     edition: "2025-10",
     body: [
@@ -178,6 +181,7 @@ const DEFAULT_HEROES: HeroItem[] = [
     subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe",
     category: "Motorsport",
     imageUrl: articleF1Americas,
+    author: "Charlotte Thames",
     date: "2025-10-20",
     edition: "2025-10",
     body: [
@@ -342,7 +346,7 @@ const DEFAULT_ARTICLES: Article[] = [
     excerpt: "Paris Fashion Week SS26 delivered drama, artistry, and statement-making collections — from Dior's garden romanticism to Balenciaga's architectural precision.",
     category: "Fashion",
     imageUrl: articlePfw,
-    author: "Elena Voss",
+    author: "Charlotte Thames",
     date: "2025-10-01",
     edition: "2025-10",
     body: [
@@ -371,7 +375,7 @@ const DEFAULT_ARTICLES: Article[] = [
     excerpt: "As the first snows dust the peaks, the Engadin Valley prepares for another season of Alpine luxury — from St. Moritz's frozen lake to Pontresina's quiet elegance.",
     category: "Travel",
     imageUrl: articleEngadin,
-    author: "Millie Sealana",
+    author: "Charlotte Thames",
     date: "2025-10-20",
     edition: "2025-10",
     body: [
@@ -391,7 +395,7 @@ const DEFAULT_ADS: AdSlot[] = [
 
 // ===== Storage & API =====
 // Bump this version whenever DEFAULT content changes to invalidate stale localStorage
-const CONTENT_VERSION = "2";
+const CONTENT_VERSION = "3";
 const STORAGE_KEYS = {
   heroes: "editorial_heroes",
   articles: "editorial_articles",

@@ -31,7 +31,7 @@ export default function ArticlePage() {
     category: heroAsArticle.category,
     imageUrl: heroAsArticle.imageUrl,
     videoUrl: heroAsArticle.videoUrl,
-    author: "The Magorium",
+    author: heroAsArticle.author || "The Magorium",
     date: heroAsArticle.date,
     body: (heroAsArticle.body || []) as ArticleBodyBlock[],
     edition: heroAsArticle.edition,

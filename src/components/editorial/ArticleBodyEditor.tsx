@@ -5,6 +5,7 @@ import { Plus, Trash2, Image, Video, Type, GripVertical } from "lucide-react";
 interface Props {
   blocks: ArticleBodyBlock[];
   onChange: (blocks: ArticleBodyBlock[]) => void;
+  heading?: string;
 }
 
 function fileToDataUrl(file: File): Promise<string> {
@@ -15,7 +16,7 @@ function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
-export default function ArticleBodyEditor({ blocks, onChange }: Props) {
+export default function ArticleBodyEditor({ blocks, onChange, heading = "Article Body" }: Props) {
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
   const pendingInsertIndex = useRef<number>(blocks.length);
@@ -70,7 +71,7 @@ export default function ArticleBodyEditor({ blocks, onChange }: Props) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs uppercase tracking-widest text-muted-foreground font-sans font-medium">Article Body</h4>
+        <h4 className="text-xs uppercase tracking-widest text-muted-foreground font-sans font-medium">{heading}</h4>
       </div>
 
       {blocks.length === 0 && (

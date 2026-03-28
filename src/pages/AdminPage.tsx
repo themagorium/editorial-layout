@@ -420,8 +420,12 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
               </div>
               {/* Hero body editor */}
               <div className="mt-4 pt-4 border-t border-border">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">
+                  Hero Body (same editor as Articles)
+                </p>
                 <ArticleBodyEditor
                   blocks={hero.body || []}
+                  label="Hero Body"
                   onChange={(blocks) => update(hero.id, { body: blocks })}
                 />
               </div>

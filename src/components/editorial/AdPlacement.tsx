@@ -22,7 +22,9 @@ export default function AdPlacement({ ad, className = "" }: Props) {
     trackEvent(ad.id, "ad", "click");
   };
 
-  const content = ad.imageUrl ? (
+  const hasMedia = Boolean(ad.imageUrl || ad.videoUrl);
+
+  const content = hasMedia ? (
     <a
       href={ad.linkUrl || "#"}
       target="_blank"

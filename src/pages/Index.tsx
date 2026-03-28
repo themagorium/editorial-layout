@@ -93,6 +93,8 @@ export default function Index() {
 
   const midAd = ads.find((a) => a.position === "mid-feed");
   const bottomAd = ads.find((a) => a.position === "bottom-banner");
+  const heroSidebarAds = ads.filter((a) => a.position === "hero-sidebar");
+  const sidebarAds = ads.filter((a) => a.position === "sidebar");
 
   return (
     <div className="min-h-screen bg-background">
@@ -105,12 +107,25 @@ export default function Index() {
         </div>
       )}
 
-      {/* Heroes — 3 large cards */}
+      {/* Heroes + side rail ads */}
       <section className="container mx-auto px-4 mt-4 md:mt-6">
-        <div className="flex flex-col gap-6">
-          {heroes.map((hero) => (
-            <HeroCard key={hero.id} hero={hero} />
-          ))}
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-6 items-start">
+          <div className="flex flex-col gap-6">
+            {heroes.map((hero) => (
+              <HeroCard key={hero.id} hero={hero} />
+            ))}
+          </div>
+          <aside className="hidden xl:flex flex-col gap-6 sticky top-24">
+            {heroSidebarAds.length > 0 ? (
+              heroSidebarAds.map((ad) => (
+                <AdPlacement key={ad.id} ad={ad} className="w-full" />
+              ))
+            ) : (
+              sidebarAds.map((ad) => (
+                <AdPlacement key={ad.id} ad={ad} className="w-full" />
+              ))
+            )}
+          </aside>
         </div>
       </section>
 
@@ -133,6 +148,16 @@ export default function Index() {
       {bottomAd && (
         <section className="container mx-auto px-4 mt-12">
           <AdPlacement ad={bottomAd} className="w-full" />
+        </section>
+      )}
+
+      {sidebarAds.length > 0 && (
+        <section className="container mx-auto px-4 mt-8 xl:hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {sidebarAds.map((ad) => (
+              <AdPlacement key={ad.id} ad={ad} className="w-full" />
+            ))}
+          </div>
         </section>
       )}
 

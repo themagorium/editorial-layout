@@ -48,6 +48,7 @@ export interface HeroItem {
   videoUrl?: string;
   author?: string;
   date: string;
+  featured?: boolean;
   edition: string;
   body?: ArticleBodyBlock[];
 }

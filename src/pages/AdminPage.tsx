@@ -44,6 +44,7 @@ import {
   verifyAdminPassword,
   resetAdminPasswordAccess,
   setAdminPassword,
+  DEFAULT_ADMIN_PASSWORD,
 } from "@/lib/admin-auth";
 
 function fileToDataUrl(file: File): Promise<string> {
@@ -73,6 +74,10 @@ export default function AdminPage() {
   const [emailDraftHref, setEmailDraftHref] = useState("");
   const [resetLinkHref, setResetLinkHref] = useState("");
   const [isSendingResetEmail, setIsSendingResetEmail] = useState(false);
+  const [lastEmailError, setLastEmailError] = useState("");
+  const [isCheckingEmailService, setIsCheckingEmailService] = useState(true);
+  const [isEmailServiceConfigured, setIsEmailServiceConfigured] = useState(false);
+  const [emailServiceStatus, setEmailServiceStatus] = useState("Checking email service...");
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -90,6 +95,36 @@ export default function AdminPage() {
     url.searchParams.delete("resetToken");
     window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
     toast.success("Reset link used. Default password is Happiness2025.");
+  }, []);
+
+  useEffect(() => {
+    const checkEmailService = async () => {
+      setIsCheckingEmailService(true);
+      try {
+        const response = await fetch("/api/send-admin-reset-email");
+        if (!response.ok) {
+          setIsEmailServiceConfigured(false);
+          setEmailServiceStatus(`Email API unavailable (HTTP ${response.status}).`);
+          return;
+        }
+
+        const payload = await response.json().catch(() => ({} as { configured?: boolean }));
+        if (payload.configured) {
+          setIsEmailServiceConfigured(true);
+          setEmailServiceStatus("Direct email sending is active.");
+        } else {
+          setIsEmailServiceConfigured(false);
+          setEmailServiceStatus("Email API is running but missing server config.");
+        }
+      } catch {
+        setIsEmailServiceConfigured(false);
+        setEmailServiceStatus("Email API unavailable in this deployment.");
+      } finally {
+        setIsCheckingEmailService(false);
+      }
+    };
+
+    void checkEmailService();
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -115,6 +150,7 @@ export default function AdminPage() {
     setPasswordError(false);
     setEmailDraftHref("");
     setResetLinkHref("");
+    setLastEmailError("");
     toast.success("Admin password access reset.");
   };
 
@@ -135,7 +171,17 @@ export default function AdminPage() {
 
   const sendResetEmail = async (resetLink: string) => {
     setIsSendingResetEmail(true);
+    setLastEmailError("");
     try {
+      if (!isEmailServiceConfigured) {
+        const fallbackMailto = buildMailtoHref(resetLink);
+        setEmailDraftHref(fallbackMailto);
+        const message = `Automatic email unavailable: ${emailServiceStatus}`;
+        setLastEmailError(message);
+        toast.error(`${message} Use the manual draft link below.`);
+        return;
+      }
+
       const response = await fetch("/api/send-admin-reset-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -145,16 +191,23 @@ export default function AdminPage() {
         }),
       });
 
+      const payload = await response.json().catch(() => ({} as { error?: string; id?: string }));
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({} as { error?: string }));
         throw new Error(payload.error || "Could not send email.");
       }
 
       setEmailDraftHref("");
-      toast.success("Password reset link sent to info@themagorium.com.");
+      setLastEmailError("");
+      toast.success(
+        payload.id
+          ? `Password reset link sent to info@themagorium.com (message ${payload.id}).`
+          : "Password reset link sent to info@themagorium.com.",
+      );
     } catch (error) {
       const fallbackMailto = buildMailtoHref(resetLink);
       setEmailDraftHref(fallbackMailto);
+      const message = error instanceof Error ? error.message : "Automatic email failed.";
+      setLastEmailError(message);
       toast.error(
         error instanceof Error
           ? `${error.message} Open the email draft link below to send manually.`
@@ -193,6 +246,7 @@ export default function AdminPage() {
     setShowSetPassword(false);
     setNewPasswordInput("");
     setConfirmNewPasswordInput("");
+    setLastEmailError("");
     toast.success("New admin password saved. Sending reset link email...");
     await sendResetEmail(generatedResetLink);
   };
@@ -212,7 +266,13 @@ export default function AdminPage() {
             <span className="text-primary">MAGORIUM</span>
           </h1>
           <p className="text-sm text-muted-foreground uppercase tracking-widest">Content Manager</p>
-          <p className="text-xs text-muted-foreground">Default password: <span className="font-medium text-foreground">Happiness2025</span></p>
+          <p className="text-xs text-muted-foreground">Default password: <span className="font-medium text-foreground">{DEFAULT_ADMIN_PASSWORD}</span></p>
+          <p className="text-xs text-muted-foreground">
+            Email service:{" "}
+            <span className={isCheckingEmailService ? "text-muted-foreground" : isEmailServiceConfigured ? "text-primary" : "text-destructive"}>
+              {emailServiceStatus}
+            </span>
+          </p>
           <div className="space-y-3">
             <input
               type="password"
@@ -290,6 +350,9 @@ export default function AdminPage() {
               >
                 Open manual email draft to info@themagorium.com
               </a>
+            )}
+            {lastEmailError && (
+              <p className="text-xs text-destructive">{lastEmailError}</p>
             )}
             {resetLinkHref && (
               <a

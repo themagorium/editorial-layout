@@ -1,9 +1,18 @@
-const DEFAULT_ADMIN_PASSWORD = "Happiness2025";
+export const DEFAULT_ADMIN_PASSWORD = "Happiness2025";
 const ADMIN_AUTH_SESSION_KEY = "magorium-admin-auth";
 const ADMIN_PASSWORD_STORAGE_KEY = "magorium-admin-password";
+const LEGACY_DEFAULT_PASSWORDS = ["Happiness2026", "Happiness2026!", "Happiness2025!", "Magorium2025"];
+
+function isKnownDefaultPassword(input: string): boolean {
+  const normalizedInput = input.replace(/\s+/g, "").toLowerCase();
+  const knownDefaults = [DEFAULT_ADMIN_PASSWORD, ...LEGACY_DEFAULT_PASSWORDS].map((password) =>
+    password.replace(/\s+/g, "").toLowerCase(),
+  );
+  return knownDefaults.includes(normalizedInput);
+}
 
 export function getAdminPassword(): string {
-  return localStorage.getItem(ADMIN_PASSWORD_STORAGE_KEY) || DEFAULT_ADMIN_PASSWORD;
+  return localStorage.getItem(ADMIN_PASSWORD_STORAGE_KEY)?.trim() || DEFAULT_ADMIN_PASSWORD;
 }
 
 export function verifyAdminPassword(input: string): boolean {
@@ -12,7 +21,7 @@ export function verifyAdminPassword(input: string): boolean {
     return false;
   }
 
-  if (normalizedInput === DEFAULT_ADMIN_PASSWORD) {
+  if (isKnownDefaultPassword(normalizedInput)) {
     return true;
   }
 
@@ -20,7 +29,14 @@ export function verifyAdminPassword(input: string): boolean {
 }
 
 export function setAdminPassword(newPassword: string): void {
-  localStorage.setItem(ADMIN_PASSWORD_STORAGE_KEY, newPassword.trim());
+  const normalizedPassword = newPassword.trim();
+  if (!normalizedPassword) {
+    localStorage.removeItem(ADMIN_PASSWORD_STORAGE_KEY);
+    sessionStorage.removeItem(ADMIN_AUTH_SESSION_KEY);
+    return;
+  }
+
+  localStorage.setItem(ADMIN_PASSWORD_STORAGE_KEY, normalizedPassword);
   sessionStorage.removeItem(ADMIN_AUTH_SESSION_KEY);
 }
 

@@ -8,6 +8,16 @@ type SendResetRequestBody = {
 const RESEND_API_URL = "https://api.resend.com/emails";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.ADMIN_RESET_FROM_EMAIL;
+
+  if (req.method === "GET") {
+    res.status(200).json({
+      configured: Boolean(resendApiKey && fromEmail),
+    });
+    return;
+  }
+
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed." });
     return;
@@ -18,9 +28,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(400).json({ error: "Missing required fields: to, resetLink." });
     return;
   }
-
-  const resendApiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.ADMIN_RESET_FROM_EMAIL;
 
   if (!resendApiKey || !fromEmail) {
     res.status(500).json({
@@ -43,13 +50,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }),
   });
 
+  const responseText = await response.text();
+  let responsePayload: { id?: string } | null = null;
+  try {
+    responsePayload = responseText ? (JSON.parse(responseText) as { id?: string }) : null;
+  } catch {
+    responsePayload = null;
+  }
   if (!response.ok) {
-    const errorPayload = await response.text();
     res.status(502).json({
-      error: `Email provider request failed: ${response.status} ${errorPayload}`,
+      error: `Email provider request failed: ${response.status} ${responseText}`,
     });
     return;
   }
 
-  res.status(200).json({ success: true });
+  res.status(200).json({ success: true, id: responsePayload?.id ?? null });
 }

@@ -54,8 +54,9 @@ export interface HeroItem {
 
 export interface ArticleBodyBlock {
   id: string;
-  type: "text" | "image" | "video";
+  type: "text" | "heading" | "image" | "video";
   content: string;
+  headingVariant?: "title" | "subsection";
   caption?: string;
   citation?: string;
 }

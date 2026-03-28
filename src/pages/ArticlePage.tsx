@@ -94,6 +94,14 @@ export default function ArticlePage() {
 }
 
 function BodyBlock({ block }: { block: ArticleBodyBlock }) {
+  if (block.type === "heading") {
+    return (
+      <h2 className="font-editorial text-2xl md:text-3xl font-bold text-foreground mt-10 mb-4 leading-tight">
+        {block.content}
+      </h2>
+    );
+  }
+
   if (block.type === "text") {
     return (
       <div

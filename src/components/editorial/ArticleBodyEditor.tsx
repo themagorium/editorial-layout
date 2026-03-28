@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import type { ArticleBodyBlock } from "@/lib/content-store";
-import { Plus, Trash2, Image, Video, Type, GripVertical } from "lucide-react";
+import { Trash2, Image, Video, Type, GripVertical, Heading } from "lucide-react";
 
 interface Props {
   blocks: ArticleBodyBlock[];
@@ -24,6 +24,14 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
   const addTextBlock = (atIndex?: number) => {
     const idx = atIndex ?? blocks.length;
     const newBlock: ArticleBodyBlock = { id: `b-${Date.now()}`, type: "text", content: "" };
+    const updated = [...blocks];
+    updated.splice(idx, 0, newBlock);
+    onChange(updated);
+  };
+
+  const addHeadingBlock = (atIndex?: number) => {
+    const idx = atIndex ?? blocks.length;
+    const newBlock: ArticleBodyBlock = { id: `b-${Date.now()}`, type: "heading", content: "" };
     const updated = [...blocks];
     updated.splice(idx, 0, newBlock);
     onChange(updated);
@@ -85,7 +93,13 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           <div className="flex items-center gap-2 mb-2">
             <GripVertical className="w-3 h-3 text-muted-foreground" />
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
-              {block.type === "text" ? "Text" : block.type === "image" ? "Image" : "Video"}
+              {block.type === "text"
+                ? "Text"
+                : block.type === "heading"
+                  ? "Heading"
+                  : block.type === "image"
+                    ? "Image"
+                    : "Video"}
             </span>
             <div className="ml-auto flex items-center gap-1">
               {idx > 0 && (
@@ -107,6 +121,15 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
               placeholder="Write your paragraph here..."
               rows={4}
               className="w-full bg-background text-foreground px-3 py-2 rounded text-sm font-sans resize-y"
+            />
+          )}
+
+          {block.type === "heading" && (
+            <input
+              value={block.content}
+              onChange={(e) => updateBlock(block.id, { content: e.target.value })}
+              placeholder="Section title / sub-heading"
+              className="w-full bg-background text-foreground px-3 py-2 rounded text-sm font-semibold"
             />
           )}
 
@@ -155,6 +178,12 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
         >
           <Type className="w-3 h-3" /> Add Text
+        </button>
+        <button
+          onClick={() => addHeadingBlock()}
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+        >
+          <Heading className="w-3 h-3" /> Add Heading
         </button>
         <button
           onClick={() => { pendingInsertIndex.current = blocks.length; imgRef.current?.click(); }}

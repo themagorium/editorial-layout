@@ -57,6 +57,7 @@ export interface ArticleBodyBlock {
   type: "text" | "heading" | "image" | "video";
   content: string;
   headingVariant?: "title" | "subsection";
+  textStyle?: "normal" | "bold" | "italic" | "bold-italic";
   caption?: string;
   citation?: string;
 }

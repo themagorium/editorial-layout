@@ -94,9 +94,23 @@ export default function ArticlePage() {
 }
 
 function BodyBlock({ block }: { block: ArticleBodyBlock }) {
+  const styledTextClass = [
+    block.textStyle === "bold" || block.textStyle === "bold-italic"
+      ? "font-semibold text-foreground"
+      : "text-foreground/90",
+    block.textStyle === "italic" || block.textStyle === "bold-italic" ? "italic font-serif" : "",
+  ].join(" ");
+
   if (block.type === "heading") {
+    const headingClass = [
+      "font-editorial text-2xl md:text-3xl text-foreground mt-10 mb-4 leading-tight",
+      block.textStyle === "bold" ? "font-bold" : "font-semibold",
+      block.textStyle === "italic" || block.textStyle === "bold-italic" ? "italic" : "",
+      block.textStyle === "bold-italic" ? "font-bold" : "",
+    ].join(" ");
+
     return (
-      <h2 className="font-editorial text-2xl md:text-3xl font-bold text-foreground mt-10 mb-4 leading-tight">
+      <h2 className={headingClass}>
         {block.content}
       </h2>
     );
@@ -105,7 +119,7 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
   if (block.type === "text") {
     return (
       <div
-        className="font-sans text-base md:text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap"
+        className={`font-sans text-base md:text-lg leading-relaxed whitespace-pre-wrap ${styledTextClass}`}
       >
         {block.content}
       </div>

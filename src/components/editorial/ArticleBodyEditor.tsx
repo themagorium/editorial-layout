@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import type { ArticleBodyBlock } from "@/lib/content-store";
-import { Trash2, Image, Video, Type, GripVertical, Heading } from "lucide-react";
+import { Trash2, Image, Video, Type, GripVertical, Heading, Bold, Italic } from "lucide-react";
 
 interface Props {
   blocks: ArticleBodyBlock[];
@@ -48,6 +48,29 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
 
   const updateBlock = (id: string, patch: Partial<ArticleBodyBlock>) => {
     onChange(blocks.map((b) => (b.id === id ? { ...b, ...patch } : b)));
+  };
+
+  const isStyleActive = (block: ArticleBodyBlock, style: "bold" | "italic") => {
+    if (!block.textStyle || block.textStyle === "normal") return false;
+    if (style === "bold") return block.textStyle === "bold" || block.textStyle === "bold-italic";
+    return block.textStyle === "italic" || block.textStyle === "bold-italic";
+  };
+
+  const toggleStyle = (block: ArticleBodyBlock, style: "bold" | "italic") => {
+    const hasBold = isStyleActive(block, "bold");
+    const hasItalic = isStyleActive(block, "italic");
+    const nextBold = style === "bold" ? !hasBold : hasBold;
+    const nextItalic = style === "italic" ? !hasItalic : hasItalic;
+
+    const nextStyle: ArticleBodyBlock["textStyle"] = nextBold && nextItalic
+      ? "bold-italic"
+      : nextBold
+        ? "bold"
+        : nextItalic
+          ? "italic"
+          : "normal";
+
+    updateBlock(block.id, { textStyle: nextStyle });
   };
 
   const removeBlock = (id: string) => {
@@ -115,22 +138,82 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           </div>
 
           {block.type === "text" && (
-            <textarea
-              value={block.content}
-              onChange={(e) => updateBlock(block.id, { content: e.target.value })}
-              placeholder="Write your paragraph here..."
-              rows={4}
-              className="w-full bg-background text-foreground px-3 py-2 rounded text-sm font-sans resize-y"
-            />
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => toggleStyle(block, "bold")}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${
+                    isStyleActive(block, "bold")
+                      ? "border-primary text-primary bg-primary/10"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Bold className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleStyle(block, "italic")}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${
+                    isStyleActive(block, "italic")
+                      ? "border-primary text-primary bg-primary/10"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Italic className="w-3 h-3" />
+                </button>
+              </div>
+              <textarea
+                value={block.content}
+                onChange={(e) => updateBlock(block.id, { content: e.target.value })}
+                placeholder="Write your paragraph here..."
+                rows={4}
+                className="w-full bg-background text-foreground px-3 py-2 rounded text-sm font-sans resize-y"
+              />
+            </div>
           )}
 
           {block.type === "heading" && (
-            <input
-              value={block.content}
-              onChange={(e) => updateBlock(block.id, { content: e.target.value })}
-              placeholder="Section title / sub-heading"
-              className="w-full bg-background text-foreground px-3 py-2 rounded text-sm font-semibold"
-            />
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => toggleStyle(block, "bold")}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${
+                    isStyleActive(block, "bold")
+                      ? "border-primary text-primary bg-primary/10"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Bold className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleStyle(block, "italic")}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${
+                    isStyleActive(block, "italic")
+                      ? "border-primary text-primary bg-primary/10"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Italic className="w-3 h-3" />
+                </button>
+                <select
+                  value={block.headingVariant || "subsection"}
+                  onChange={(e) => updateBlock(block.id, { headingVariant: e.target.value as "title" | "subsection" })}
+                  className="bg-background text-foreground px-2 py-1 rounded text-xs border border-border"
+                >
+                  <option value="title">Title</option>
+                  <option value="subsection">Sub-section</option>
+                </select>
+              </div>
+              <input
+                value={block.content}
+                onChange={(e) => updateBlock(block.id, { content: e.target.value })}
+                placeholder="Section title / sub-heading"
+                className="w-full bg-background text-foreground px-3 py-2 rounded text-sm font-semibold"
+              />
+            </div>
           )}
 
           {block.type === "image" && (

@@ -364,7 +364,17 @@ function AdminDashboard() {
 function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { heroes: HeroItem[]; setHeroes: (h: HeroItem[]) => void; filteredHeroes: HeroItem[]; currentEdition: string }) {
   const addHero = () => {
     setHeroes([
-      { id: `h-${Date.now()}`, title: "New Hero", subtitle: "", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) },
+      {
+        id: `h-${Date.now()}`,
+        title: "New Hero",
+        subtitle: "",
+        category: "Travel",
+        imageUrl: "",
+        author: "",
+        body: [],
+        date: new Date().toISOString().split("T")[0],
+        edition: currentEdition || new Date().toISOString().slice(0, 7),
+      },
       ...heroes,
     ]);
   };
@@ -389,12 +399,31 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
             />
             <div className="space-y-3">
               <input value={hero.title} onChange={(e) => update(hero.id, { title: e.target.value })} placeholder="Hero title" className="w-full bg-secondary text-foreground px-3 py-2 rounded font-serif text-lg" />
-              <input value={hero.subtitle} onChange={(e) => update(hero.id, { subtitle: e.target.value })} placeholder="Subtitle" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
-              <div className="flex gap-3">
+              <textarea
+                value={hero.subtitle}
+                onChange={(e) => update(hero.id, { subtitle: e.target.value })}
+                placeholder="Subtitle / deck"
+                rows={2}
+                className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none"
+              />
+              <div className="flex flex-wrap gap-3">
                 <select value={hero.category} onChange={(e) => update(hero.id, { category: e.target.value as Category })} className="bg-secondary text-foreground px-3 py-2 rounded text-sm">
                   {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
+                <input
+                  value={hero.author || ""}
+                  onChange={(e) => update(hero.id, { author: e.target.value })}
+                  placeholder="Writer / Journalist"
+                  className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
+                />
                 <input type="date" value={hero.date} onChange={(e) => update(hero.id, { date: e.target.value })} className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+              </div>
+              {/* Hero body editor */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <ArticleBodyEditor
+                  blocks={hero.body || []}
+                  onChange={(blocks) => update(hero.id, { body: blocks })}
+                />
               </div>
             </div>
           </div>

@@ -413,10 +413,25 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
                 <input
                   value={hero.author || ""}
                   onChange={(e) => update(hero.id, { author: e.target.value })}
-                  placeholder="Writer / Journalist"
+                  placeholder="Writer / Journalist Name"
                   className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
                 />
-                <input type="date" value={hero.date} onChange={(e) => update(hero.id, { date: e.target.value })} className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Published</span>
+                  <input
+                    type="date"
+                    value={hero.date}
+                    onChange={(e) => update(hero.id, { date: e.target.value })}
+                    className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => update(hero.id, { date: new Date().toISOString().split("T")[0] })}
+                    className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                  >
+                    Today
+                  </button>
+                </div>
               </div>
               {/* Hero body editor */}
               <div className="mt-4 pt-4 border-t border-border">
@@ -425,7 +440,7 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
                 </p>
                 <ArticleBodyEditor
                   blocks={hero.body || []}
-                  label="Hero Body"
+                  heading="Hero Body"
                   onChange={(blocks) => update(hero.id, { body: blocks })}
                 />
               </div>
@@ -472,7 +487,22 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
                   {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
                 <input value={article.author} onChange={(e) => update(article.id, { author: e.target.value })} placeholder="Author" className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
-                <input type="date" value={article.date} onChange={(e) => update(article.id, { date: e.target.value })} className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Published</span>
+                  <input
+                    type="date"
+                    value={article.date}
+                    onChange={(e) => update(article.id, { date: e.target.value })}
+                    className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => update(article.id, { date: new Date().toISOString().split("T")[0] })}
+                    className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                  >
+                    Today
+                  </button>
+                </div>
                 <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
                   <input type="checkbox" checked={article.featured || false} onChange={(e) => update(article.id, { featured: e.target.checked })} className="accent-primary" />
                   Featured

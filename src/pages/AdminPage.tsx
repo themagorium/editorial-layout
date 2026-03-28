@@ -38,6 +38,12 @@ import {
   clearAnalytics,
   type ContentStats,
 } from "@/lib/analytics";
+import {
+  isAdminAuthenticated,
+  setAdminAuthenticated,
+  verifyAdminPassword,
+  resetAdminPasswordAccess,
+} from "@/lib/admin-auth";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve) => {
@@ -54,24 +60,35 @@ function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[]
   return Array.from(editions).sort().reverse();
 }
 
-const ADMIN_PASSWORD = "Magorium2025";
-
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(() => {
-    return sessionStorage.getItem("magorium-admin-auth") === "true";
+    return isAdminAuthenticated();
   });
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === ADMIN_PASSWORD) {
+    if (verifyAdminPassword(passwordInput)) {
       setAuthenticated(true);
-      sessionStorage.setItem("magorium-admin-auth", "true");
+      setAdminAuthenticated(true);
       setPasswordError(false);
     } else {
       setPasswordError(true);
     }
+  };
+
+  const handleResetAccess = () => {
+    const confirmReset = window.confirm(
+      "Reset admin password access? This will sign out any current admin session and restore the default password.",
+    );
+    if (!confirmReset) return;
+
+    resetAdminPasswordAccess();
+    setAuthenticated(false);
+    setPasswordInput("");
+    setPasswordError(false);
+    toast.success("Admin password access reset.");
   };
 
   if (!authenticated) {
@@ -100,6 +117,13 @@ export default function AdminPage() {
               className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
             >
               Sign In
+            </button>
+            <button
+              type="button"
+              onClick={handleResetAccess}
+              className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Reset Admin Password Access
             </button>
           </div>
         </form>

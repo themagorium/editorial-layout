@@ -1,4 +1,4 @@
-const DEFAULT_ADMIN_PASSWORD = "Magorium2025";
+const DEFAULT_ADMIN_PASSWORD = "Happiness2026";
 const ADMIN_AUTH_SESSION_KEY = "magorium-admin-auth";
 const ADMIN_PASSWORD_STORAGE_KEY = "magorium-admin-password";
 

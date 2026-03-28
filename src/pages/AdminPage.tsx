@@ -70,6 +70,7 @@ export default function AdminPage() {
   const [showSetPassword, setShowSetPassword] = useState(false);
   const [newPasswordInput, setNewPasswordInput] = useState("");
   const [confirmNewPasswordInput, setConfirmNewPasswordInput] = useState("");
+  const [emailDraftHref, setEmailDraftHref] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +121,9 @@ export default function AdminPage() {
     const body = encodeURIComponent(
       `Admin password has been reset.\n\nNew password: ${newPasswordInput}\n\nPlease store this securely.`,
     );
-    window.location.href = `mailto:info@themagorium.com?subject=${subject}&body=${body}`;
+    const mailtoHref = `mailto:info@themagorium.com?subject=${subject}&body=${body}`;
+    setEmailDraftHref(mailtoHref);
+    window.location.href = mailtoHref;
 
     setShowSetPassword(false);
     setNewPasswordInput("");
@@ -196,6 +199,14 @@ export default function AdminPage() {
                   Save New Password + Draft Email
                 </button>
               </div>
+            )}
+            {emailDraftHref && (
+              <a
+                href={emailDraftHref}
+                className="block text-xs text-primary underline underline-offset-4"
+              >
+                Email new password to info@themagorium.com
+              </a>
             )}
           </div>
         </form>

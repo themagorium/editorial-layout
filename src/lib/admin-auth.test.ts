@@ -14,7 +14,7 @@ describe("admin auth access reset", () => {
   });
 
   it("accepts the default password by default", () => {
-    expect(verifyAdminPassword("Magorium2025")).toBe(true);
+    expect(verifyAdminPassword("Happiness2026")).toBe(true);
     expect(verifyAdminPassword("wrong-password")).toBe(false);
   });
 
@@ -26,7 +26,7 @@ describe("admin auth access reset", () => {
 
     expect(isAdminAuthenticated()).toBe(false);
     expect(verifyAdminPassword("new-secure-pass")).toBe(true);
-    expect(verifyAdminPassword("Magorium2025")).toBe(false);
+    expect(verifyAdminPassword("Happiness2026")).toBe(false);
   });
 
   it("resets stored password and active admin session", () => {
@@ -39,6 +39,6 @@ describe("admin auth access reset", () => {
 
     expect(isAdminAuthenticated()).toBe(false);
     expect(verifyAdminPassword("temporary-password")).toBe(false);
-    expect(verifyAdminPassword("Magorium2025")).toBe(true);
+    expect(verifyAdminPassword("Happiness2026")).toBe(true);
   });
 });

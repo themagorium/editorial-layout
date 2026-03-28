@@ -7,15 +7,20 @@ export function getAdminPassword(): string {
 }
 
 export function verifyAdminPassword(input: string): boolean {
-  if (input === DEFAULT_ADMIN_PASSWORD) {
+  const normalizedInput = input.trim();
+  if (!normalizedInput) {
+    return false;
+  }
+
+  if (normalizedInput === DEFAULT_ADMIN_PASSWORD) {
     return true;
   }
 
-  return input === getAdminPassword();
+  return normalizedInput === getAdminPassword();
 }
 
 export function setAdminPassword(newPassword: string): void {
-  localStorage.setItem(ADMIN_PASSWORD_STORAGE_KEY, newPassword);
+  localStorage.setItem(ADMIN_PASSWORD_STORAGE_KEY, newPassword.trim());
   sessionStorage.removeItem(ADMIN_AUTH_SESSION_KEY);
 }
 

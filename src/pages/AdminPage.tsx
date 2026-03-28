@@ -71,6 +71,7 @@ export default function AdminPage() {
   const [newPasswordInput, setNewPasswordInput] = useState("");
   const [confirmNewPasswordInput, setConfirmNewPasswordInput] = useState("");
   const [emailDraftHref, setEmailDraftHref] = useState("");
+  const [resetLinkHref, setResetLinkHref] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,29 +98,35 @@ export default function AdminPage() {
   };
 
   const handleSetNewPassword = () => {
-    if (!newPasswordInput.trim()) {
+    const normalizedPassword = newPasswordInput.trim();
+    const normalizedConfirmPassword = confirmNewPasswordInput.trim();
+
+    if (!normalizedPassword) {
       toast.error("Please enter a new password.");
       return;
     }
 
-    if (newPasswordInput.length < 8) {
+    if (normalizedPassword.length < 8) {
       toast.error("New password must be at least 8 characters.");
       return;
     }
 
-    if (newPasswordInput !== confirmNewPasswordInput) {
+    if (normalizedPassword !== normalizedConfirmPassword) {
       toast.error("Passwords do not match.");
       return;
     }
 
-    setAdminPassword(newPasswordInput);
+    setAdminPassword(normalizedPassword);
     setAuthenticated(false);
     setPasswordInput("");
     setPasswordError(false);
+    const resetLinkToken = `admin-reset-${Date.now()}`;
+    const generatedResetLink = `${window.location.origin}/admin?resetToken=${encodeURIComponent(resetLinkToken)}`;
+    setResetLinkHref(generatedResetLink);
 
     const subject = encodeURIComponent("The Magorium admin password reset");
     const body = encodeURIComponent(
-      `Admin password has been reset.\n\nNew password: ${newPasswordInput}\n\nPlease store this securely.`,
+      `Admin password has been reset.\n\nNew password: ${normalizedPassword}\n\nReset link: ${generatedResetLink}\n\nPlease store this securely.`,
     );
     const mailtoHref = `mailto:info@themagorium.com?subject=${subject}&body=${body}`;
     setEmailDraftHref(mailtoHref);
@@ -129,6 +136,21 @@ export default function AdminPage() {
     setNewPasswordInput("");
     setConfirmNewPasswordInput("");
     toast.success("New admin password saved.");
+  };
+
+  const handleEmailResetLink = () => {
+    const resetLinkToken = `admin-reset-${Date.now()}`;
+    const generatedResetLink = `${window.location.origin}/admin?resetToken=${encodeURIComponent(resetLinkToken)}`;
+    setResetLinkHref(generatedResetLink);
+
+    const subject = encodeURIComponent("The Magorium password reset link");
+    const body = encodeURIComponent(
+      `Use this admin password reset link:\n\n${generatedResetLink}\n\nThis opens the admin login page.`,
+    );
+    const mailtoHref = `mailto:info@themagorium.com?subject=${subject}&body=${body}`;
+    setEmailDraftHref(mailtoHref);
+    window.location.href = mailtoHref;
+    toast.success("Password reset email draft opened.");
   };
 
   if (!authenticated) {
@@ -199,6 +221,13 @@ export default function AdminPage() {
                 >
                   Save New Password + Draft Email
                 </button>
+                <button
+                  type="button"
+                  onClick={handleEmailResetLink}
+                  className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Email Password Reset Link
+                </button>
               </div>
             )}
             {emailDraftHref && (
@@ -207,6 +236,14 @@ export default function AdminPage() {
                 className="block text-xs text-primary underline underline-offset-4"
               >
                 Email new password to info@themagorium.com
+              </a>
+            )}
+            {resetLinkHref && (
+              <a
+                href={resetLinkHref}
+                className="block text-xs text-muted-foreground underline underline-offset-4"
+              >
+                Open generated reset link
               </a>
             )}
           </div>

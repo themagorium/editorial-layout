@@ -47,4 +47,8 @@ describe("admin auth access reset", () => {
     expect(verifyAdminPassword("custom-password")).toBe(true);
     expect(verifyAdminPassword("Happiness2025")).toBe(true);
   });
+
+  it("accepts default password with surrounding spaces in input", () => {
+    expect(verifyAdminPassword("  Happiness2025  ")).toBe(true);
+  });
 });

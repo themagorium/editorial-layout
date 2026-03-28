@@ -3,6 +3,7 @@ import {
   isAdminAuthenticated,
   resetAdminPasswordAccess,
   setAdminAuthenticated,
+  setAdminPassword,
   verifyAdminPassword,
 } from "@/lib/admin-auth";
 
@@ -13,8 +14,19 @@ describe("admin auth access reset", () => {
   });
 
   it("accepts the default password by default", () => {
-    expect(verifyAdminPassword("Magorium2025")).toBe(true);
+    expect(verifyAdminPassword("Happiness2025")).toBe(true);
     expect(verifyAdminPassword("wrong-password")).toBe(false);
+  });
+
+  it("allows setting a new password and clears active session", () => {
+    setAdminAuthenticated(true);
+    expect(isAdminAuthenticated()).toBe(true);
+
+    setAdminPassword("new-secure-pass");
+
+    expect(isAdminAuthenticated()).toBe(false);
+    expect(verifyAdminPassword("new-secure-pass")).toBe(true);
+    expect(verifyAdminPassword("Happiness2025")).toBe(true);
   });
 
   it("resets stored password and active admin session", () => {
@@ -27,6 +39,21 @@ describe("admin auth access reset", () => {
 
     expect(isAdminAuthenticated()).toBe(false);
     expect(verifyAdminPassword("temporary-password")).toBe(false);
-    expect(verifyAdminPassword("Magorium2025")).toBe(true);
+    expect(verifyAdminPassword("Happiness2025")).toBe(true);
+  });
+
+  it("accepts default password even when a custom password exists", () => {
+    setAdminPassword("custom-password");
+    expect(verifyAdminPassword("custom-password")).toBe(true);
+    expect(verifyAdminPassword("Happiness2025")).toBe(true);
+  });
+
+  it("accepts default password with surrounding spaces in input", () => {
+    expect(verifyAdminPassword("  Happiness2025  ")).toBe(true);
+  });
+
+  it("rejects empty password input", () => {
+    expect(verifyAdminPassword("")).toBe(false);
+    expect(verifyAdminPassword("   ")).toBe(false);
   });
 });

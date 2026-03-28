@@ -176,6 +176,7 @@ export default function AdminPage() {
               <div className="space-y-3 pt-2 text-left">
                 <p className="text-xs text-muted-foreground">
                   Set a new admin password and open an email draft to info@themagorium.com.
+                  This creates a draft in your email app and does not auto-send.
                 </p>
                 <input
                   type="password"

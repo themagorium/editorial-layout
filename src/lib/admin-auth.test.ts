@@ -51,4 +51,9 @@ describe("admin auth access reset", () => {
   it("accepts default password with surrounding spaces in input", () => {
     expect(verifyAdminPassword("  Happiness2025  ")).toBe(true);
   });
+
+  it("rejects empty password input", () => {
+    expect(verifyAdminPassword("")).toBe(false);
+    expect(verifyAdminPassword("   ")).toBe(false);
+  });
 });

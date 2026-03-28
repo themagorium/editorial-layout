@@ -72,6 +72,25 @@ export default function AdminPage() {
   const [confirmNewPasswordInput, setConfirmNewPasswordInput] = useState("");
   const [emailDraftHref, setEmailDraftHref] = useState("");
   const [resetLinkHref, setResetLinkHref] = useState("");
+  const [isSendingResetEmail, setIsSendingResetEmail] = useState(false);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const resetToken = url.searchParams.get("resetToken");
+    if (!resetToken) return;
+
+    resetAdminPasswordAccess();
+    setAuthenticated(false);
+    setPasswordInput("");
+    setPasswordError(false);
+    setShowSetPassword(false);
+    setEmailDraftHref("");
+    setResetLinkHref("");
+
+    url.searchParams.delete("resetToken");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+    toast.success("Reset link used. Default password is Happiness2025.");
+  }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,10 +113,59 @@ export default function AdminPage() {
     setAuthenticated(false);
     setPasswordInput("");
     setPasswordError(false);
+    setEmailDraftHref("");
+    setResetLinkHref("");
     toast.success("Admin password access reset.");
   };
 
-  const handleSetNewPassword = () => {
+  const createResetLink = () => {
+    const token = typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `admin-reset-${Date.now()}`;
+    return `${window.location.origin}/admin?resetToken=${encodeURIComponent(token)}`;
+  };
+
+  const buildMailtoHref = (resetLink: string) => {
+    const subject = encodeURIComponent("The Magorium password reset link");
+    const body = encodeURIComponent(
+      `Use this admin password reset link:\n\n${resetLink}\n\nThis opens the admin login page.`,
+    );
+    return `mailto:info@themagorium.com?subject=${subject}&body=${body}`;
+  };
+
+  const sendResetEmail = async (resetLink: string) => {
+    setIsSendingResetEmail(true);
+    try {
+      const response = await fetch("/api/send-admin-reset-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: "info@themagorium.com",
+          resetLink,
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({} as { error?: string }));
+        throw new Error(payload.error || "Could not send email.");
+      }
+
+      setEmailDraftHref("");
+      toast.success("Password reset link sent to info@themagorium.com.");
+    } catch (error) {
+      const fallbackMailto = buildMailtoHref(resetLink);
+      setEmailDraftHref(fallbackMailto);
+      toast.error(
+        error instanceof Error
+          ? `${error.message} Open the email draft link below to send manually.`
+          : "Automatic email failed. Open the email draft link below to send manually.",
+      );
+    } finally {
+      setIsSendingResetEmail(false);
+    }
+  };
+
+  const handleSetNewPassword = async () => {
     const normalizedPassword = newPasswordInput.trim();
     const normalizedConfirmPassword = confirmNewPasswordInput.trim();
 
@@ -120,37 +188,19 @@ export default function AdminPage() {
     setAuthenticated(false);
     setPasswordInput("");
     setPasswordError(false);
-    const resetLinkToken = `admin-reset-${Date.now()}`;
-    const generatedResetLink = `${window.location.origin}/admin?resetToken=${encodeURIComponent(resetLinkToken)}`;
+    const generatedResetLink = createResetLink();
     setResetLinkHref(generatedResetLink);
-
-    const subject = encodeURIComponent("The Magorium admin password reset");
-    const body = encodeURIComponent(
-      `Admin password has been reset.\n\nNew password: ${normalizedPassword}\n\nReset link: ${generatedResetLink}\n\nPlease store this securely.`,
-    );
-    const mailtoHref = `mailto:info@themagorium.com?subject=${subject}&body=${body}`;
-    setEmailDraftHref(mailtoHref);
-    window.location.href = mailtoHref;
-
     setShowSetPassword(false);
     setNewPasswordInput("");
     setConfirmNewPasswordInput("");
-    toast.success("New admin password saved.");
+    toast.success("New admin password saved. Sending reset link email...");
+    await sendResetEmail(generatedResetLink);
   };
 
-  const handleEmailResetLink = () => {
-    const resetLinkToken = `admin-reset-${Date.now()}`;
-    const generatedResetLink = `${window.location.origin}/admin?resetToken=${encodeURIComponent(resetLinkToken)}`;
+  const handleEmailResetLink = async () => {
+    const generatedResetLink = createResetLink();
     setResetLinkHref(generatedResetLink);
-
-    const subject = encodeURIComponent("The Magorium password reset link");
-    const body = encodeURIComponent(
-      `Use this admin password reset link:\n\n${generatedResetLink}\n\nThis opens the admin login page.`,
-    );
-    const mailtoHref = `mailto:info@themagorium.com?subject=${subject}&body=${body}`;
-    setEmailDraftHref(mailtoHref);
-    window.location.href = mailtoHref;
-    toast.success("Password reset email draft opened.");
+    await sendResetEmail(generatedResetLink);
   };
 
   if (!authenticated) {
@@ -162,6 +212,7 @@ export default function AdminPage() {
             <span className="text-primary">MAGORIUM</span>
           </h1>
           <p className="text-sm text-muted-foreground uppercase tracking-widest">Content Manager</p>
+          <p className="text-xs text-muted-foreground">Default password: <span className="font-medium text-foreground">Happiness2025</span></p>
           <div className="space-y-3">
             <input
               type="password"
@@ -197,8 +248,8 @@ export default function AdminPage() {
             {showSetPassword && (
               <div className="space-y-3 pt-2 text-left">
                 <p className="text-xs text-muted-foreground">
-                  Set a new admin password and open an email draft to info@themagorium.com.
-                  This creates a draft in your email app and does not auto-send.
+                  Set a new admin password and send a reset link to info@themagorium.com.
+                  If direct email fails, a manual draft link will appear below.
                 </p>
                 <input
                   type="password"
@@ -217,16 +268,18 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={handleSetNewPassword}
+                  disabled={isSendingResetEmail}
                   className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
                 >
-                  Save New Password + Draft Email
+                  {isSendingResetEmail ? "Sending..." : "Save New Password + Send Email"}
                 </button>
                 <button
                   type="button"
                   onClick={handleEmailResetLink}
+                  disabled={isSendingResetEmail}
                   className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Email Password Reset Link
+                  {isSendingResetEmail ? "Sending..." : "Email Password Reset Link"}
                 </button>
               </div>
             )}
@@ -235,7 +288,7 @@ export default function AdminPage() {
                 href={emailDraftHref}
                 className="block text-xs text-primary underline underline-offset-4"
               >
-                Email new password to info@themagorium.com
+                Open manual email draft to info@themagorium.com
               </a>
             )}
             {resetLinkHref && (

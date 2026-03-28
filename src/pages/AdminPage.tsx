@@ -43,6 +43,7 @@ import {
   setAdminAuthenticated,
   verifyAdminPassword,
   resetAdminPasswordAccess,
+  setAdminPassword,
 } from "@/lib/admin-auth";
 
 function fileToDataUrl(file: File): Promise<string> {
@@ -66,6 +67,9 @@ export default function AdminPage() {
   });
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState(false);
+  const [showSetPassword, setShowSetPassword] = useState(false);
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [confirmNewPasswordInput, setConfirmNewPasswordInput] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +93,39 @@ export default function AdminPage() {
     setPasswordInput("");
     setPasswordError(false);
     toast.success("Admin password access reset.");
+  };
+
+  const handleSetNewPassword = () => {
+    if (!newPasswordInput.trim()) {
+      toast.error("Please enter a new password.");
+      return;
+    }
+
+    if (newPasswordInput.length < 8) {
+      toast.error("New password must be at least 8 characters.");
+      return;
+    }
+
+    if (newPasswordInput !== confirmNewPasswordInput) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    setAdminPassword(newPasswordInput);
+    setAuthenticated(false);
+    setPasswordInput("");
+    setPasswordError(false);
+
+    const subject = encodeURIComponent("The Magorium admin password reset");
+    const body = encodeURIComponent(
+      `Admin password has been reset.\n\nNew password: ${newPasswordInput}\n\nPlease store this securely.`,
+    );
+    window.location.href = `mailto:info@themagorium.com?subject=${subject}&body=${body}`;
+
+    setShowSetPassword(false);
+    setNewPasswordInput("");
+    setConfirmNewPasswordInput("");
+    toast.success("New admin password saved.");
   };
 
   if (!authenticated) {
@@ -125,6 +162,41 @@ export default function AdminPage() {
             >
               Reset Admin Password Access
             </button>
+            <button
+              type="button"
+              onClick={() => setShowSetPassword((prev) => !prev)}
+              className="w-full h-10 rounded-md border border-primary text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+            >
+              {showSetPassword ? "Cancel New Password" : "Set New Admin Password"}
+            </button>
+            {showSetPassword && (
+              <div className="space-y-3 pt-2 text-left">
+                <p className="text-xs text-muted-foreground">
+                  Set a new admin password and open an email draft to info@themagorium.com.
+                </p>
+                <input
+                  type="password"
+                  value={newPasswordInput}
+                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                  placeholder="New password"
+                  className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <input
+                  type="password"
+                  value={confirmNewPasswordInput}
+                  onChange={(e) => setConfirmNewPasswordInput(e.target.value)}
+                  placeholder="Confirm new password"
+                  className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <button
+                  type="button"
+                  onClick={handleSetNewPassword}
+                  className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+                >
+                  Save New Password + Draft Email
+                </button>
+              </div>
+            )}
           </div>
         </form>
       </div>

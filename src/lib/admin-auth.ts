@@ -10,6 +10,11 @@ export function verifyAdminPassword(input: string): boolean {
   return input === getAdminPassword();
 }
 
+export function setAdminPassword(newPassword: string): void {
+  localStorage.setItem(ADMIN_PASSWORD_STORAGE_KEY, newPassword);
+  sessionStorage.removeItem(ADMIN_AUTH_SESSION_KEY);
+}
+
 export function isAdminAuthenticated(): boolean {
   return sessionStorage.getItem(ADMIN_AUTH_SESSION_KEY) === "true";
 }

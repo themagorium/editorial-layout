@@ -3,6 +3,7 @@ import {
   isAdminAuthenticated,
   resetAdminPasswordAccess,
   setAdminAuthenticated,
+  setAdminPassword,
   verifyAdminPassword,
 } from "@/lib/admin-auth";
 
@@ -15,6 +16,17 @@ describe("admin auth access reset", () => {
   it("accepts the default password by default", () => {
     expect(verifyAdminPassword("Magorium2025")).toBe(true);
     expect(verifyAdminPassword("wrong-password")).toBe(false);
+  });
+
+  it("allows setting a new password and clears active session", () => {
+    setAdminAuthenticated(true);
+    expect(isAdminAuthenticated()).toBe(true);
+
+    setAdminPassword("new-secure-pass");
+
+    expect(isAdminAuthenticated()).toBe(false);
+    expect(verifyAdminPassword("new-secure-pass")).toBe(true);
+    expect(verifyAdminPassword("Magorium2025")).toBe(false);
   });
 
   it("resets stored password and active admin session", () => {

@@ -1,7 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
-import { getHeroesByEdition, getArticlesByEdition, formatEditionLabel } from "@/lib/content-store";
+import AdPlacement from "@/components/editorial/AdPlacement";
+import { getAds, getHeroesByEdition, getArticlesByEdition, formatEditionLabel } from "@/lib/content-store";
 import { trackEvent } from "@/lib/analytics";
 
 export default function EditionPage() {
@@ -10,6 +11,11 @@ export default function EditionPage() {
 
   const heroes = getHeroesByEdition(edition).slice(0, 3);
   const articles = getArticlesByEdition(edition).slice(0, 4);
+  const ads = getAds();
+  const heroSidebarAd = ads.find((a) => a.position === "hero-sidebar");
+  const sidebarAd = ads.find((a) => a.position === "sidebar");
+  const midAd = ads.find((a) => a.position === "mid-feed");
+  const bottomAd = ads.find((a) => a.position === "bottom-banner");
   const label = formatEditionLabel(edition);
 
   if (heroes.length === 0 && articles.length === 0) {
@@ -41,40 +47,47 @@ export default function EditionPage() {
 
       {/* Heroes — 3 large cards */}
       <section className="container mx-auto px-4 mt-4 md:mt-6">
-        <div className="flex flex-col gap-6">
-          {heroes.map((hero) => (
-            <Link
-              key={hero.id}
-              to={`/article/${hero.id}`}
-              className="group relative overflow-hidden rounded cursor-pointer block"
-              onClick={() => trackEvent(hero.id, "hero", "click")}
-            >
-              <div className="aspect-[16/7] overflow-hidden">
-                <img
-                  src={hero.imageUrl}
-                  alt={hero.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                {hero.videoUrl && (
-                  <video
-                    src={hero.videoUrl}
-                    autoPlay muted loop playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
+          <div className="flex flex-col gap-6">
+            {heroes.map((hero) => (
+              <Link
+                key={hero.id}
+                to={`/article/${hero.id}`}
+                className="group relative overflow-hidden rounded cursor-pointer block"
+                onClick={() => trackEvent(hero.id, "hero", "click")}
+              >
+                <div className="aspect-[16/7] overflow-hidden">
+                  <img
+                    src={hero.imageUrl}
+                    alt={hero.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                )}
-                <div className="article-overlay absolute inset-0" />
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
-                <span className="category-pill">{hero.category}</span>
-                <h2 className="text-xl md:text-2xl font-semibold text-foreground mt-2 leading-snug font-editorial">
-                  {hero.title}
-                </h2>
-                <p className="font-sans text-sm text-muted-foreground mt-2 line-clamp-2">
-                  {hero.subtitle}
-                </p>
-              </div>
-            </Link>
-          ))}
+                  {hero.videoUrl && (
+                    <video
+                      src={hero.videoUrl}
+                      autoPlay muted loop playsInline
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
+                  <div className="article-overlay absolute inset-0" />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
+                  <span className="category-pill">{hero.category}</span>
+                  <h2 className="text-xl md:text-2xl font-semibold text-foreground mt-2 leading-snug font-editorial">
+                    {hero.title}
+                  </h2>
+                  <p className="font-sans text-sm text-muted-foreground mt-2 line-clamp-2">
+                    {hero.subtitle}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+          {heroSidebarAd && (
+            <aside className="w-full xl:sticky xl:top-24">
+              <AdPlacement ad={heroSidebarAd} className="w-full" />
+            </aside>
+          )}
         </div>
       </section>
 
@@ -115,7 +128,28 @@ export default function EditionPage() {
             </Link>
           ))}
         </div>
+        {midAd && (
+          <div className="mt-10">
+            <AdPlacement ad={midAd} className="w-full" />
+          </div>
+        )}
       </section>
+
+      {sidebarAd && (
+        <section className="container mx-auto px-4 mt-10">
+          <div className="flex justify-end">
+            <div className="w-full max-w-[300px]">
+              <AdPlacement ad={sidebarAd} className="w-full" />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {bottomAd && (
+        <section className="container mx-auto px-4 mt-12">
+          <AdPlacement ad={bottomAd} className="w-full" />
+        </section>
+      )}
 
       <EditorialFooter />
     </div>

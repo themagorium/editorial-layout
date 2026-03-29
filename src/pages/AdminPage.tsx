@@ -61,12 +61,12 @@ function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[]
 
 function createOctoberPatternBody(seed: string): ArticleBodyBlock[] {
   return [
-    { id: `${seed}-m1`, type: "image", content: "", caption: "Upload photo or video" },
     { id: `${seed}-t1`, type: "text", content: "Add first body paragraph" },
-    { id: `${seed}-m2`, type: "image", content: "", caption: "Upload photo or video" },
+    { id: `${seed}-m1`, type: "image", content: "", caption: "Upload photo or video" },
     { id: `${seed}-t2`, type: "text", content: "Add second body paragraph" },
-    { id: `${seed}-m3`, type: "image", content: "", caption: "Upload photo or video" },
+    { id: `${seed}-m2`, type: "image", content: "", caption: "Upload photo or video" },
     { id: `${seed}-t3`, type: "text", content: "Add third body paragraph" },
+    { id: `${seed}-m3`, type: "image", content: "", caption: "Upload photo or video" },
   ];
 }
 
@@ -492,7 +492,7 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
             onFeaturedChange={(value) => update(hero.id, { featured: value })}
             onImageChange={(value) => update(hero.id, { imageUrl: value })}
             onVideoChange={(value) => update(hero.id, { videoUrl: value })}
-            onBodyChange={(value) => update(hero.id, { body: value })}
+            onBodyChange={(value) => update(hero.id, { body: normalizeBodyFlow(value) })}
             onNormalizeBody={() =>
               update(hero.id, {
                 body: normalizeBodyFlow(hero.body || []),
@@ -544,7 +544,7 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
             onFeaturedChange={(value) => update(article.id, { featured: value })}
             onImageChange={(value) => update(article.id, { imageUrl: value })}
             onVideoChange={(value) => update(article.id, { videoUrl: value })}
-            onBodyChange={(value) => update(article.id, { body: value })}
+            onBodyChange={(value) => update(article.id, { body: normalizeBodyFlow(value) })}
             onNormalizeBody={() =>
               update(article.id, {
                 body: normalizeBodyFlow(article.body || []),

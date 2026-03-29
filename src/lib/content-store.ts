@@ -184,6 +184,7 @@ function normalizeBodyToOctoberPattern(
     ? mediaBlocks
     : [createMediaSeedBlock(baseId, imageUrl, videoUrl)];
 
+  // Always enforce October-style sequence: media -> text -> media -> text...
   if (textLikeBlocks.length === 0) {
     return createOctoberPatternBody(baseId, imageUrl, videoUrl);
   }
@@ -191,9 +192,16 @@ function normalizeBodyToOctoberPattern(
   const normalized: ArticleBodyBlock[] = [];
   textLikeBlocks.forEach((textBlock, index) => {
     const media = mediaPool[index % mediaPool.length];
-    normalized.push({ ...media, id: `${baseId}-auto-m-${index}` });
-    normalized.push(textBlock);
+    normalized.push({
+      ...media,
+      id: `${baseId}-auto-m-${index}`,
+    });
+    normalized.push({
+      ...textBlock,
+      id: `${baseId}-auto-t-${index}`,
+    });
   });
+
   return normalized;
 }
 

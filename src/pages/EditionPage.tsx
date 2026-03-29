@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import AdPlacement from "@/components/editorial/AdPlacement";
-import { getAds, getHeroesByEdition, getArticlesByEdition, formatEditionLabel } from "@/lib/content-store";
+import { buildContentPath, getAds, getHeroesByEdition, getArticlesByEdition, formatEditionLabel } from "@/lib/content-store";
 import { trackEvent } from "@/lib/analytics";
 
 export default function EditionPage() {
@@ -52,7 +52,7 @@ export default function EditionPage() {
             {heroes.map((hero) => (
               <Link
                 key={hero.id}
-                to={`/article/${hero.id}`}
+                to={buildContentPath(hero.id, hero.title)}
                 className="group relative overflow-hidden rounded cursor-pointer block"
                 onClick={() => trackEvent(hero.id, "hero", "click")}
               >
@@ -98,7 +98,7 @@ export default function EditionPage() {
           {articles.map((article) => (
             <Link
               key={article.id}
-              to={`/article/${article.id}`}
+              to={buildContentPath(article.id, article.title)}
               className="group cursor-pointer flex flex-row sm:flex-col gap-3 sm:gap-0"
               onClick={() => trackEvent(article.id, "article", "click")}
             >

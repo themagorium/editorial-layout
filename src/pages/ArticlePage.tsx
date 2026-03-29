@@ -1,33 +1,35 @@
 import { useParams, Link } from "react-router-dom";
-import { getArticles, getHeroes, resetToDefaults } from "@/lib/content-store";
+import { buildContentPath, contentIdentifierMatches, getArticles, getHeroes, resetToDefaults } from "@/lib/content-store";
 import type { ArticleBodyBlock } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { ArrowLeft } from "lucide-react";
+import { applyArticleSeo } from "@/lib/seo";
+import { useEffect } from "react";
 
 export default function ArticlePage() {
   const { id } = useParams<{ id: string }>();
   let articles = getArticles();
   let heroes = getHeroes();
-  let article = articles.find((a) => a.id === id);
+  let article = articles.find((a) => contentIdentifierMatches(a, id || ""));
 
   // Also search heroes — they share the same article detail page
-  let heroAsArticle = !article ? heroes.find((h) => h.id === id) : undefined;
+  let heroAsArticle = !article ? heroes.find((h) => contentIdentifierMatches(h, id || "")) : undefined;
 
   // If not found in either, reset localStorage and retry
   if (!article && !heroAsArticle) {
     resetToDefaults();
     articles = getArticles();
     heroes = getHeroes();
-    article = articles.find((a) => a.id === id);
-    heroAsArticle = !article ? heroes.find((h) => h.id === id) : undefined;
+    article = articles.find((a) => contentIdentifierMatches(a, id || ""));
+    heroAsArticle = !article ? heroes.find((h) => contentIdentifierMatches(h, id || "")) : undefined;
   }
 
   // Normalize hero into article-like shape for rendering
   const content = article || (heroAsArticle ? {
     id: heroAsArticle.id,
     title: heroAsArticle.title,
-    excerpt: heroAsArticle.subtitle,
+    excerpt: heroAsArticle.excerpt || heroAsArticle.subtitle,
     category: heroAsArticle.category,
     imageUrl: heroAsArticle.imageUrl,
     videoUrl: heroAsArticle.videoUrl,
@@ -49,6 +51,10 @@ export default function ArticlePage() {
       </div>
     );
   }
+
+  useEffect(() => {
+    applyArticleSeo(content);
+  }, [content.author, content.date, content.excerpt, content.id, content.imageUrl, content.title]);
 
   return (
     <div className="min-h-screen bg-background">

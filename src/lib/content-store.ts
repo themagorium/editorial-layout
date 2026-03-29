@@ -42,12 +42,15 @@ export const CATEGORIES: Category[] = [
 export interface HeroItem {
   id: string;
   title: string;
+  excerpt?: string;
+  legacySlugs?: string[];
   subtitle: string;
   category: Category;
   imageUrl: string;
   videoUrl?: string;
   author?: string;
   date: string;
+  featured?: boolean;
   edition: string;
   body?: ArticleBodyBlock[];
 }
@@ -66,6 +69,7 @@ export interface Article {
   id: string;
   title: string;
   excerpt: string;
+  legacySlugs?: string[];
   category: Category;
   imageUrl: string;
   videoUrl?: string;
@@ -85,6 +89,135 @@ export interface AdSlot {
   linkUrl?: string;
   width: number;
   height: number;
+}
+
+export function slugifyText(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function buildContentPath(id: string, title: string): string {
+  const titleSlug = slugifyText(title || id);
+  return `/articles/${titleSlug}--${id}`;
+}
+
+function tokenizeForMatch(value: string): string[] {
+  return slugifyText(value)
+    .split("-")
+    .filter((token) => token.length > 1);
+}
+
+function hasStrongTokenOverlap(title: string, candidateSlug: string): boolean {
+  const candidateTokens = tokenizeForMatch(candidateSlug);
+  if (candidateTokens.length < 2) return false;
+
+  const titleTokens = new Set(tokenizeForMatch(title));
+  const overlapCount = candidateTokens.filter((token) => titleTokens.has(token)).length;
+  return overlapCount >= 2 && overlapCount / candidateTokens.length >= 0.6;
+}
+
+export function contentIdentifierMatches(item: { id: string; title: string; legacySlugs?: string[] }, identifier: string): boolean {
+  const decoded = decodeURIComponent(identifier || "")
+    .trim()
+    .toLowerCase()
+    .split("?")[0]
+    .split("#")[0]
+    .replace(/^\/+|\/+$/g, "");
+  const candidate = decoded.split("/").pop() || decoded;
+  const itemId = item.id.toLowerCase();
+  const titleSlug = slugifyText(item.title || item.id);
+  const legacySlugs = (item.legacySlugs || []).map((slug) => slugifyText(slug));
+
+  if (!candidate) return false;
+  if (candidate === itemId) return true;
+  if (candidate === titleSlug) return true;
+  if (candidate === `${titleSlug}--${itemId}`) return true;
+  if (candidate.endsWith(`--${itemId}`)) return true;
+  if (legacySlugs.includes(candidate)) return true;
+  return hasStrongTokenOverlap(item.title, candidate);
+}
+
+export function createOctoberPatternBody(baseId: string, imageUrl?: string, videoUrl?: string): ArticleBodyBlock[] {
+  return [
+    {
+      id: `${baseId}-seed-text`,
+      type: "text",
+      content: "Add story text",
+    },
+    createMediaSeedBlock(baseId, imageUrl, videoUrl),
+  ];
+}
+
+function createMediaSeedBlock(baseId: string, imageUrl?: string, videoUrl?: string): ArticleBodyBlock {
+  if (videoUrl) {
+    return {
+      id: `${baseId}-seed-video`,
+      type: "video",
+      content: videoUrl,
+      caption: "Featured video",
+    };
+  }
+
+  return {
+    id: `${baseId}-seed-image`,
+    type: "image",
+    content: imageUrl || "",
+    caption: imageUrl ? "Featured image" : "Upload photo or video",
+  };
+}
+
+function normalizeBodyToOctoberPattern(
+  baseId: string,
+  body: ArticleBodyBlock[] | undefined,
+  imageUrl?: string,
+  videoUrl?: string,
+): ArticleBodyBlock[] {
+  const source = (body || []).filter(Boolean);
+  const textLikeBlocks = source.filter((b) => b.type !== "image" && b.type !== "video");
+  const mediaBlocks = source.filter((b) => b.type === "image" || b.type === "video");
+
+  const mediaPool = mediaBlocks.length > 0
+    ? mediaBlocks
+    : [createMediaSeedBlock(baseId, imageUrl, videoUrl)];
+
+  // Always enforce October-style sequence: text -> media -> text -> media...
+  if (textLikeBlocks.length === 0) {
+    return createOctoberPatternBody(baseId, imageUrl, videoUrl);
+  }
+
+  const normalized: ArticleBodyBlock[] = [];
+  textLikeBlocks.forEach((textBlock, index) => {
+    const media = mediaPool[index % mediaPool.length];
+    normalized.push({
+      ...textBlock,
+      id: `${baseId}-auto-t-${index}`,
+    });
+    normalized.push({
+      ...media,
+      id: `${baseId}-auto-m-${index}`,
+    });
+  });
+
+  return normalized;
+}
+
+function normalizeHero(hero: HeroItem): HeroItem {
+  return {
+    ...hero,
+    excerpt: hero.excerpt || hero.subtitle,
+    body: normalizeBodyToOctoberPattern(hero.id, hero.body, hero.imageUrl, hero.videoUrl),
+  };
+}
+
+function normalizeArticle(article: Article): Article {
+  return {
+    ...article,
+    body: normalizeBodyToOctoberPattern(article.id, article.body, article.imageUrl, article.videoUrl),
+  };
 }
 
 // ===================================================================
@@ -164,6 +297,7 @@ const DEFAULT_HEROES: HeroItem[] = [
   {
     id: "h-cv-summit",
     title: "Zurich's CV Summit: Capital Meets AI by the Lake",
+    legacySlugs: ["zurichs-crypto-meets-ai"],
     subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance",
     category: "Tech & AI",
     imageUrl: articleCvSummit,
@@ -397,7 +531,7 @@ const DEFAULT_ADS: AdSlot[] = [
 
 // ===== Storage & API =====
 // Bump this version whenever DEFAULT content changes to invalidate stale localStorage
-const CONTENT_VERSION = "3";
+const CONTENT_VERSION = "4";
 const STORAGE_KEYS = {
   heroes: "editorial_heroes",
   articles: "editorial_articles",
@@ -418,13 +552,15 @@ function ensureFreshDefaults() {
 export function getHeroes(): HeroItem[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.heroes);
-  return stored ? JSON.parse(stored) : DEFAULT_HEROES;
+  const rawHeroes = stored ? (JSON.parse(stored) as HeroItem[]) : DEFAULT_HEROES;
+  return rawHeroes.map(normalizeHero);
 }
 
 export function getArticles(): Article[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.articles);
-  return stored ? JSON.parse(stored) : DEFAULT_ARTICLES;
+  const rawArticles = stored ? (JSON.parse(stored) as Article[]) : DEFAULT_ARTICLES;
+  return rawArticles.map(normalizeArticle);
 }
 
 export function getAds(): AdSlot[] {
@@ -433,11 +569,11 @@ export function getAds(): AdSlot[] {
 }
 
 export function saveHeroes(heroes: HeroItem[]) {
-  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(heroes));
+  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(heroes.map(normalizeHero)));
 }
 
 export function saveArticles(articles: Article[]) {
-  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(articles));
+  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(articles.map(normalizeArticle)));
 }
 
 export function saveAds(ads: AdSlot[]) {
@@ -476,4 +612,101 @@ export function formatEditionLabel(edition: string): string {
   const [year, month] = edition.split("-");
   const date = new Date(parseInt(year), parseInt(month) - 1);
   return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
+
+function createMediaTextPatternBody(articleId: string): ArticleBodyBlock[] {
+  const now = Date.now();
+  return [
+    {
+      id: `${articleId}-m1-${now}`,
+      type: "image",
+      content: "",
+      caption: "",
+      citation: "",
+    },
+    {
+      id: `${articleId}-t1-${now + 1}`,
+      type: "text",
+      content: "",
+    },
+    {
+      id: `${articleId}-m2-${now + 2}`,
+      type: "image",
+      content: "",
+      caption: "",
+      citation: "",
+    },
+    {
+      id: `${articleId}-t2-${now + 3}`,
+      type: "text",
+      content: "",
+    },
+    {
+      id: `${articleId}-m3-${now + 4}`,
+      type: "image",
+      content: "",
+      caption: "",
+      citation: "",
+    },
+    {
+      id: `${articleId}-t3-${now + 5}`,
+      type: "text",
+      content: "",
+    },
+  ];
+}
+
+function normalizeBodyToMediaTextPattern(itemId: string, blocks?: ArticleBodyBlock[]): ArticleBodyBlock[] {
+  const source = (blocks || []).filter((b) => b && b.type !== "heading");
+  if (source.length === 0) return createMediaTextPatternBody(itemId);
+
+  const media = source.filter((b) => b.type === "image" || b.type === "video");
+  const text = source.filter((b) => b.type === "text");
+
+  const normalized: ArticleBodyBlock[] = [];
+  const pairs = Math.max(3, Math.min(6, Math.max(media.length, text.length)));
+  const now = Date.now();
+
+  for (let i = 0; i < pairs; i += 1) {
+    const mediaBlock = media[i] || {
+      id: `${itemId}-m-${now}-${i}`,
+      type: "image" as const,
+      content: "",
+      caption: "",
+      citation: "",
+    };
+    normalized.push({
+      id: mediaBlock.id || `${itemId}-m-${now}-${i}`,
+      type: mediaBlock.type === "video" ? "video" : "image",
+      content: mediaBlock.content || "",
+      caption: mediaBlock.caption || "",
+      citation: mediaBlock.citation || "",
+    });
+
+    const textBlock = text[i] || {
+      id: `${itemId}-t-${now}-${i}`,
+      type: "text" as const,
+      content: "",
+    };
+    normalized.push({
+      id: textBlock.id || `${itemId}-t-${now}-${i}`,
+      type: "text",
+      content: textBlock.content || "",
+      textStyle: textBlock.textStyle || "normal",
+    });
+  }
+
+  return normalized;
+}
+
+export function enforceEditionPattern(heroes: HeroItem[], articles: Article[]) {
+  const normalizedHeroes = heroes.map((hero) => ({
+    ...hero,
+    body: normalizeBodyToMediaTextPattern(hero.id, hero.body),
+  }));
+  const normalizedArticles = articles.map((article) => ({
+    ...article,
+    body: normalizeBodyToMediaTextPattern(article.id, article.body),
+  }));
+  return { heroes: normalizedHeroes, articles: normalizedArticles };
 }

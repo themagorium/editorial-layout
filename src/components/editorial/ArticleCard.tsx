@@ -1,4 +1,4 @@
-import type { Article } from "@/lib/content-store";
+import { buildContentPath, type Article } from "@/lib/content-store";
 import { Play } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { useEffect, useRef } from "react";
@@ -27,7 +27,7 @@ export default function ArticleCard({ article, variant = "medium" }: Props) {
 
   return (
     <Link
-      to={`/article/${article.id}`}
+      to={buildContentPath(article.id, article.title)}
       className={`group cursor-pointer animate-fade-in block ${isLarge ? "col-span-2 row-span-2" : ""}`}
       onClick={handleClick}
     >

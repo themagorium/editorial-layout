@@ -6,6 +6,7 @@ interface Props {
   blocks: ArticleBodyBlock[];
   onChange: (blocks: ArticleBodyBlock[]) => void;
   heading?: string;
+  preferredPattern?: boolean;
 }
 
 function fileToDataUrl(file: File): Promise<string> {
@@ -16,7 +17,7 @@ function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
-export default function ArticleBodyEditor({ blocks, onChange, heading = "Article Body" }: Props) {
+export default function ArticleBodyEditor({ blocks, onChange, heading = "Article Body", preferredPattern = false }: Props) {
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
   const pendingInsertIndex = useRef<number>(blocks.length);
@@ -44,6 +45,21 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
     const updated = [...blocks];
     updated.splice(idx, 0, newBlock);
     onChange(updated);
+  };
+
+  const ensurePreferredPattern = (type: "image" | "video", file: File) => {
+    const nextIndex = blocks.length;
+    if (nextIndex % 2 === 1) {
+      addTextBlock(nextIndex);
+      pendingInsertIndex.current = nextIndex + 1;
+    } else {
+      pendingInsertIndex.current = nextIndex;
+    }
+    if (type === "image") {
+      imgRef.current?.click();
+    } else {
+      vidRef.current?.click();
+    }
   };
 
   const updateBlock = (id: string, patch: Partial<ArticleBodyBlock>) => {
@@ -104,6 +120,12 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
       <div className="flex items-center justify-between">
         <h4 className="text-xs uppercase tracking-widest text-muted-foreground font-sans font-medium">{heading}</h4>
       </div>
+
+      {preferredPattern && (
+        <p className="text-[10px] text-muted-foreground font-sans">
+          Preferred pattern: <span className="text-foreground">Photo/Video → Text → Photo/Video → Text</span>
+        </p>
+      )}
 
       {blocks.length === 0 && (
         <p className="text-xs text-muted-foreground font-sans italic py-4 text-center border border-dashed border-border rounded">
@@ -258,6 +280,7 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
       <div className="flex gap-2 pt-1">
         <button
           onClick={() => addTextBlock()}
+          disabled={preferredPattern && blocks.length % 2 === 0}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
         >
           <Type className="w-3 h-3" /> Add Text
@@ -269,13 +292,29 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           <Heading className="w-3 h-3" /> Add Heading
         </button>
         <button
-          onClick={() => { pendingInsertIndex.current = blocks.length; imgRef.current?.click(); }}
+          onClick={() => {
+            if (preferredPattern) {
+              ensurePreferredPattern("image", {} as File);
+              return;
+            }
+            pendingInsertIndex.current = blocks.length;
+            imgRef.current?.click();
+          }}
+          disabled={preferredPattern && blocks.length % 2 === 1}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
         >
           <Image className="w-3 h-3" /> Add Image
         </button>
         <button
-          onClick={() => { pendingInsertIndex.current = blocks.length; vidRef.current?.click(); }}
+          onClick={() => {
+            if (preferredPattern) {
+              ensurePreferredPattern("video", {} as File);
+              return;
+            }
+            pendingInsertIndex.current = blocks.length;
+            vidRef.current?.click();
+          }}
+          disabled={preferredPattern && blocks.length % 2 === 1}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
         >
           <Video className="w-3 h-3" /> Add Video

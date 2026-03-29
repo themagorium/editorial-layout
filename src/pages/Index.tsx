@@ -3,7 +3,7 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import AdPlacement from "@/components/editorial/AdPlacement";
 
-import { getAds, getLatestEdition, getHeroesByEdition, getArticlesByEdition, formatEditionLabel } from "@/lib/content-store";
+import { getAds, getLatestEdition, getHeroesByEdition, getArticlesByEdition, formatEditionLabel, buildContentPath } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
@@ -11,7 +11,7 @@ import { trackEvent } from "@/lib/analytics";
 function HeroCard({ hero }: { hero: HeroItem }) {
   return (
     <Link
-      to={`/article/${hero.id}`}
+      to={buildContentPath(hero.id, hero.title)}
       className="group relative overflow-hidden rounded cursor-pointer block"
       onClick={() => trackEvent(hero.id, "hero", "click")}
     >
@@ -46,7 +46,7 @@ function HeroCard({ hero }: { hero: HeroItem }) {
 function ArticleCard({ article }: { article: Article }) {
   return (
     <Link
-      to={`/article/${article.id}`}
+      to={buildContentPath(article.id, article.title)}
       className="group cursor-pointer flex flex-row sm:flex-col gap-3 sm:gap-0"
       onClick={() => trackEvent(article.id, "article", "click")}
     >

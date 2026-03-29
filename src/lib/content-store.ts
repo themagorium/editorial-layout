@@ -42,6 +42,7 @@ export const CATEGORIES: Category[] = [
 export interface HeroItem {
   id: string;
   title: string;
+  excerpt?: string;
   subtitle: string;
   category: Category;
   imageUrl: string;
@@ -86,6 +87,32 @@ export interface AdSlot {
   linkUrl?: string;
   width: number;
   height: number;
+}
+
+export function slugifyText(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function buildContentPath(id: string, title: string): string {
+  const titleSlug = slugifyText(title || id);
+  return `/articles/${titleSlug}--${id}`;
+}
+
+export function contentIdentifierMatches(item: { id: string; title: string }, identifier: string): boolean {
+  const decoded = decodeURIComponent(identifier || "").trim().toLowerCase();
+  const itemId = item.id.toLowerCase();
+  const titleSlug = slugifyText(item.title || item.id);
+
+  if (!decoded) return false;
+  if (decoded === itemId) return true;
+  if (decoded === titleSlug) return true;
+  if (decoded === `${titleSlug}--${itemId}`) return true;
+  return decoded.endsWith(`--${itemId}`);
 }
 
 // ===================================================================

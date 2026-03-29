@@ -1,4 +1,6 @@
 import ContentPage from "./ContentPage";
+import { applyContributorsSeo } from "@/lib/seo";
+import { useEffect } from "react";
 
 export default function ContributorsPage() {
   const contributors = [
@@ -8,6 +10,10 @@ export default function ContributorsPage() {
     { name: "James Whitfield", role: "Sport & Lifestyle Editor", bio: "James covers motorsport, polo, sailing, and the luxury lifestyle ecosystem surrounding major sporting events. Based between London and Monaco." },
     { name: "Millie Sealana", role: "Art, Design & Technology Editor", bio: "Millie reports on contemporary art, design fairs, and the tech world's cultural impact. A regular contributor to ART SG, Art Basel, and the CV Summit." },
   ];
+
+  useEffect(() => {
+    applyContributorsSeo();
+  }, []);
 
   return (
     <ContentPage title="Contributors">

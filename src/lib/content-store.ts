@@ -143,12 +143,12 @@ export function contentIdentifierMatches(item: { id: string; title: string; lega
 
 export function createOctoberPatternBody(baseId: string, imageUrl?: string, videoUrl?: string): ArticleBodyBlock[] {
   return [
-    createMediaSeedBlock(baseId, imageUrl, videoUrl),
     {
       id: `${baseId}-seed-text`,
       type: "text",
       content: "Add story text",
     },
+    createMediaSeedBlock(baseId, imageUrl, videoUrl),
   ];
 }
 
@@ -184,7 +184,7 @@ function normalizeBodyToOctoberPattern(
     ? mediaBlocks
     : [createMediaSeedBlock(baseId, imageUrl, videoUrl)];
 
-  // Always enforce October-style sequence: media -> text -> media -> text...
+  // Always enforce October-style sequence: text -> media -> text -> media...
   if (textLikeBlocks.length === 0) {
     return createOctoberPatternBody(baseId, imageUrl, videoUrl);
   }
@@ -193,12 +193,12 @@ function normalizeBodyToOctoberPattern(
   textLikeBlocks.forEach((textBlock, index) => {
     const media = mediaPool[index % mediaPool.length];
     normalized.push({
-      ...media,
-      id: `${baseId}-auto-m-${index}`,
-    });
-    normalized.push({
       ...textBlock,
       id: `${baseId}-auto-t-${index}`,
+    });
+    normalized.push({
+      ...media,
+      id: `${baseId}-auto-m-${index}`,
     });
   });
 

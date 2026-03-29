@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
@@ -6,6 +6,7 @@ import { getEditions, formatEditionLabel, getHeroesByEdition, getArticlesByEditi
 import { Search, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { applyCollectionSeo } from "@/lib/seo";
 
 export default function ArchivePage() {
   const [searchParams] = useSearchParams();
@@ -36,6 +37,24 @@ export default function ArchivePage() {
       );
     });
   }, [search, editions]);
+
+  useEffect(() => {
+    const q = search.trim().toLowerCase();
+    if (q === "millie sealana" || q === "charlotte thames" || q === "staff" || q === "the magorium") {
+      applyCollectionSeo(
+        `Stories by ${search.trim()} | The Magorium`,
+        `Explore The Magorium stories by ${search.trim()}.`,
+        `/archive?category=${encodeURIComponent(search.trim())}`,
+      );
+      return;
+    }
+
+    applyCollectionSeo(
+      "Archive | The Magorium",
+      "Browse The Magorium archive by edition, author, and category.",
+      "/archive",
+    );
+  }, [search]);
 
   return (
     <div className="min-h-screen bg-background">

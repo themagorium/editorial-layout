@@ -12,7 +12,7 @@ import {
   CATEGORIES,
   formatEditionLabel,
 } from "@/lib/content-store";
-import type { HeroItem, Article, AdSlot, Category } from "@/lib/content-store";
+import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
 import {
   Trash2,
   Plus,

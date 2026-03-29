@@ -90,3 +90,68 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
   upsertLink("canonical", canonicalUrl);
   setStructuredData(content);
 }
+
+export function applyContributorsSeo() {
+  const canonicalUrl = `${SITE_URL}/contributors`;
+  const title = "Contributors | The Magorium";
+  const description =
+    "Meet The Magorium contributors including Millie Sealana, Charlotte Thames, and editorial staff covering luxury travel, art, fashion, culture, and sport.";
+
+  document.title = title;
+  upsertMeta("description", description);
+  upsertMeta("author", "The Magorium Editorial Staff");
+  upsertMeta("robots", "index,follow");
+
+  upsertMeta("og:title", title, true);
+  upsertMeta("og:description", description, true);
+  upsertMeta("og:type", "website", true);
+  upsertMeta("og:url", canonicalUrl, true);
+  upsertMeta("og:image", DEFAULT_OG_IMAGE, true);
+  upsertMeta("og:site_name", "The Magorium", true);
+
+  upsertMeta("twitter:title", title);
+  upsertMeta("twitter:description", description);
+  upsertMeta("twitter:image", DEFAULT_OG_IMAGE);
+
+  upsertLink("canonical", canonicalUrl);
+  removeStructuredDataScript();
+}
+
+export function applyCollectionSeo(title: string, description: string, path: string) {
+  const canonicalUrl = `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+
+  document.title = title;
+  upsertMeta("description", description);
+  upsertMeta("author", "The Magorium");
+  upsertMeta("robots", "index,follow");
+
+  upsertMeta("og:title", title, true);
+  upsertMeta("og:description", description, true);
+  upsertMeta("og:type", "website", true);
+  upsertMeta("og:url", canonicalUrl, true);
+  upsertMeta("og:image", DEFAULT_OG_IMAGE, true);
+  upsertMeta("og:site_name", "The Magorium", true);
+
+  upsertMeta("twitter:title", title);
+  upsertMeta("twitter:description", description);
+  upsertMeta("twitter:image", DEFAULT_OG_IMAGE);
+
+  upsertLink("canonical", canonicalUrl);
+  removeStructuredDataScript();
+}
+
+export function applyAuthorSeo(authorName: string, storyCount: number) {
+  const slug = authorName
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const canonicalPath = `/author/${slug || "staff"}`;
+  const title = `${authorName} | The Magorium`;
+  const description = `${storyCount} published ${
+    storyCount === 1 ? "story" : "stories"
+  } by ${authorName} on The Magorium.`;
+
+  applyCollectionSeo(title, description, canonicalPath);
+}

@@ -7,6 +7,7 @@ import { getAds, getLatestEdition, getHeroesByEdition, getArticlesByEdition, for
 import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
+import { applyHomeSeo } from "@/lib/seo";
 
 function HeroCard({ hero }: { hero: HeroItem }) {
   return (
@@ -89,6 +90,7 @@ export default function Index() {
     setArticles(getArticlesByEdition(edition).slice(0, 4));
     setAds(getAds());
     setEditionLabel(formatEditionLabel(edition));
+    applyHomeSeo();
   }, []);
 
   const hasAdMedia = (ad: AdSlot) => Boolean(ad.imageUrl || ad.videoUrl);

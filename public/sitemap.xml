@@ -4,6 +4,9 @@
     <loc>https://www.themagorium.com/</loc>
   </url>
   <url>
+    <loc>https://www.themagorium.com/magorium</loc>
+  </url>
+  <url>
     <loc>https://www.themagorium.com/archive</loc>
   </url>
   <url>
@@ -14,6 +17,12 @@
   </url>
   <url>
     <loc>https://www.themagorium.com/author/staff</loc>
+  </url>
+  <url>
+    <loc>https://www.themagorium.com/author/the-magorium-staff</loc>
+  </url>
+  <url>
+    <loc>https://www.themagorium.com/contributors</loc>
   </url>
   <url>
     <loc>https://www.themagorium.com/articles/super-bowl-lx-stadium-lights-bay-area-glamour--a2</loc>

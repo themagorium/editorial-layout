@@ -14,6 +14,7 @@ import ContributorsPage from "./pages/ContributorsPage";
 import PartnershipsPage from "./pages/PartnershipsPage";
 import TermsPage from "./pages/TermsPage";
 import CookiesPage from "./pages/CookiesPage";
+import BrandAliasPage from "./pages/BrandAliasPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/magorium" element={<BrandAliasPage />} />
           <Route path="/article/:id" element={<ArticlePage />} />
           <Route path="/articles/:id" element={<ArticlePage />} />
           <Route path="/hidden-menu/stories/:id" element={<ArticlePage />} />

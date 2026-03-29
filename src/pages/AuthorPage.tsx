@@ -15,9 +15,18 @@ type StorySummary = {
   author: string;
 };
 
-function normalizeAuthor(author: string) {
+export function normalizeAuthor(author: string) {
   const normalized = author.trim();
-  if (!normalized) return "The Magorium Staff";
+  if (!normalized) return "The Magorium Editorial Staff";
+  const slug = slugifyText(normalized);
+  const isStaffAlias =
+    slug === "magorium" ||
+    slug === "the-magorium" ||
+    slug === "staff" ||
+    slug === "the-magorium-staff" ||
+    slug === "magorium-staff" ||
+    slug === "the-magorium-editorial-staff";
+  if (isStaffAlias) return "The Magorium Editorial Staff";
   return normalized;
 }
 
@@ -49,7 +58,7 @@ export default function AuthorPage() {
 
   const authorName = useMemo(() => {
     const direct = allStories.find((s) => slugifyText(s.author) === slug)?.author;
-    return direct || "The Magorium Staff";
+    return direct || "The Magorium Editorial Staff";
   }, [allStories, slug]);
 
   const stories = useMemo(() => {

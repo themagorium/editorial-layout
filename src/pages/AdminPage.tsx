@@ -27,7 +27,7 @@ import {
   MapPin,
   Globe,
   Calendar,
-  ChevronDown,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -596,6 +596,8 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
       <div className="aspect-video bg-secondary rounded overflow-hidden flex items-center justify-center">
         {imageUrl ? (
           <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+        ) : videoUrl ? (
+          <video src={videoUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
         ) : (
           <Image className="w-8 h-8 text-muted-foreground" />
         )}
@@ -608,6 +610,28 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
           <Video className="w-3 h-3" /> Video
         </button>
       </div>
+      {(imageUrl || videoUrl) && (
+        <div className="flex gap-2">
+          {imageUrl && (
+            <button
+              type="button"
+              onClick={() => onImage("")}
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
+            >
+              <X className="w-3 h-3" /> Remove Photo
+            </button>
+          )}
+          {videoUrl && (
+            <button
+              type="button"
+              onClick={() => onVideo("")}
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
+            >
+              <X className="w-3 h-3" /> Remove Video
+            </button>
+          )}
+        </div>
+      )}
       {videoUrl && <p className="text-[10px] text-primary truncate">Video attached ✓</p>}
       <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
       <input ref={vidRef} type="file" accept="video/*" className="hidden" onChange={handleVideo} />

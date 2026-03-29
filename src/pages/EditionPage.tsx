@@ -18,6 +18,9 @@ export default function EditionPage() {
   const bottomAd = ads.find((a) => a.position === "bottom-banner");
   const label = formatEditionLabel(edition);
 
+  const hasHeroMedia = (hero: (typeof heroes)[number]) => Boolean(hero.imageUrl || hero.videoUrl);
+  const hasArticleMedia = (article: (typeof articles)[number]) => Boolean(article.imageUrl || article.videoUrl);
+
   if (heroes.length === 0 && articles.length === 0) {
     return (
       <div className="min-h-screen bg-background">
@@ -57,28 +60,40 @@ export default function EditionPage() {
                 onClick={() => trackEvent(hero.id, "hero", "click")}
               >
                 <div className="aspect-[16/7] overflow-hidden">
-                  <img
-                    src={hero.imageUrl}
-                    alt={hero.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  {hero.videoUrl && (
+                  {hero.imageUrl ? (
+                    <img
+                      src={hero.imageUrl}
+                      alt={hero.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : hero.videoUrl ? (
+                    <video
+                      src={hero.videoUrl}
+                      autoPlay muted loop playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-secondary" />
+                  )}
+                  {hero.imageUrl && hero.videoUrl && (
                     <video
                       src={hero.videoUrl}
                       autoPlay muted loop playsInline
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                   )}
-                  <div className="article-overlay absolute inset-0" />
+                  {hasHeroMedia(hero) && <div className="article-overlay absolute inset-0" />}
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
                   <span className="category-pill">{hero.category}</span>
                   <h2 className="text-xl md:text-2xl font-semibold text-foreground mt-2 leading-snug font-editorial">
                     {hero.title}
                   </h2>
-                  <p className="font-sans text-sm text-muted-foreground mt-2 line-clamp-2">
-                    {hero.subtitle}
-                  </p>
+                  {hero.subtitle?.trim() && (
+                    <p className="font-sans text-sm text-muted-foreground mt-2 line-clamp-2">
+                      {hero.subtitle}
+                    </p>
+                  )}
                 </div>
               </Link>
             ))}
@@ -103,27 +118,48 @@ export default function EditionPage() {
               onClick={() => trackEvent(article.id, "article", "click")}
             >
               <div className="relative overflow-hidden rounded aspect-square w-[7.2rem] sm:w-full sm:aspect-[4/3] flex-shrink-0">
-                <img
-                  src={article.imageUrl}
-                  alt={article.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="article-overlay absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                {article.imageUrl ? (
+                  <img
+                    src={article.imageUrl}
+                    alt={article.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : article.videoUrl ? (
+                  <video
+                    src={article.videoUrl}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-secondary" />
+                )}
+                {hasArticleMedia(article) && (
+                  <div className="article-overlay absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
               </div>
               <div className="sm:mt-3 flex flex-col justify-center">
                 <span className="category-pill text-[10px]">{article.category}</span>
                 <h3 className="font-editorial font-semibold mt-1 sm:mt-2 leading-snug group-hover:text-primary transition-colors text-sm sm:text-base md:text-lg">
                   {article.title}
                 </h3>
-                <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 hidden sm:block">
-                  {article.excerpt}
-                </p>
-                <div className="flex items-center gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
-                  <span>{article.author}</span>
-                  <span className="text-primary">·</span>
-                  <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
-                </div>
+                {article.excerpt?.trim() && (
+                  <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 hidden sm:block">
+                    {article.excerpt}
+                  </p>
+                )}
+                {(article.author?.trim() || article.date) && (
+                  <div className="flex items-center gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
+                    {article.author?.trim() && <span>{article.author}</span>}
+                    {article.author?.trim() && article.date && <span className="text-primary">·</span>}
+                    {article.date && (
+                      <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                    )}
+                  </div>
+                )}
               </div>
             </Link>
           ))}

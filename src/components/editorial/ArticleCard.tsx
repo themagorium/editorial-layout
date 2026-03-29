@@ -12,6 +12,11 @@ interface Props {
 export default function ArticleCard({ article, variant = "medium" }: Props) {
   const isLarge = variant === "large";
   const isSmall = variant === "small";
+  const hasImage = Boolean(article.imageUrl);
+  const hasVideo = Boolean(article.videoUrl);
+  const hasExcerpt = Boolean(article.excerpt?.trim());
+  const hasAuthor = Boolean(article.author?.trim());
+  const hasDate = Boolean(article.date);
   const tracked = useRef(false);
 
   useEffect(() => {
@@ -32,12 +37,18 @@ export default function ArticleCard({ article, variant = "medium" }: Props) {
       onClick={handleClick}
     >
       <div className={`relative overflow-hidden rounded ${isSmall ? "aspect-[4/3]" : isLarge ? "aspect-[16/10]" : "aspect-[3/2]"}`}>
-        <img
-          src={article.imageUrl}
-          alt={article.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
+        {hasImage ? (
+          <img
+            src={article.imageUrl}
+            alt={article.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : hasVideo ? (
+          <video src={article.videoUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-secondary" />
+        )}
         {article.videoUrl && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-14 h-14 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center text-primary">
@@ -53,16 +64,20 @@ export default function ArticleCard({ article, variant = "medium" }: Props) {
         <h3 className={`font-editorial font-semibold mt-2 leading-snug group-hover:text-primary transition-colors text-xl md:text-2xl`}>
           {article.title}
         </h3>
-        {!isSmall && (
+        {!isSmall && hasExcerpt && (
           <p className="font-sans text-sm text-muted-foreground mt-2 line-clamp-2">
             {article.excerpt}
           </p>
         )}
-        <div className="flex items-center gap-2 mt-2 text-xs font-sans text-muted-foreground">
-          <span>{article.author}</span>
-          <span className="text-primary">·</span>
-          <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
-        </div>
+        {(hasAuthor || hasDate) && (
+          <div className="flex items-center gap-2 mt-2 text-xs font-sans text-muted-foreground">
+            {hasAuthor && <span>{article.author}</span>}
+            {hasAuthor && hasDate && <span className="text-primary">·</span>}
+            {hasDate && (
+              <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+            )}
+          </div>
+        )}
       </div>
     </Link>
   );

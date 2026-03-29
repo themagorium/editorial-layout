@@ -27,6 +27,8 @@ export default function HeroCarousel({ heroes }: Props) {
 
   if (!heroes.length) return null;
   const hero = heroes[current];
+  const hasImage = Boolean(hero.imageUrl);
+  const hasVideo = Boolean(hero.videoUrl);
 
   const handleClick = () => {
     trackEvent(hero.id, "hero", "click");
@@ -34,12 +36,25 @@ export default function HeroCarousel({ heroes }: Props) {
 
   return (
     <div className="relative w-full aspect-[16/7] min-h-[400px] overflow-hidden group" onClick={handleClick}>
-      <img
-        src={hero.imageUrl}
-        alt={hero.title}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
-      />
-      {hero.videoUrl && (
+      {hasImage ? (
+        <img
+          src={hero.imageUrl}
+          alt={hero.title}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
+        />
+      ) : hasVideo ? (
+        <video
+          src={hero.videoUrl}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0 w-full h-full bg-secondary" />
+      )}
+      {hasImage && hasVideo && (
         <video
           src={hero.videoUrl}
           autoPlay
@@ -49,16 +64,18 @@ export default function HeroCarousel({ heroes }: Props) {
           className="absolute inset-0 w-full h-full object-cover"
         />
       )}
-      <div className="article-overlay absolute inset-0" />
+      {(hasImage || hasVideo) && <div className="article-overlay absolute inset-0" />}
 
       <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 z-10">
         <span className="category-pill mb-4">{hero.category}</span>
         <h2 className="text-xl md:text-2xl font-semibold text-foreground mt-3 max-w-3xl leading-snug font-editorial">
           {hero.title}
         </h2>
-        <p className="font-sans text-base md:text-lg text-muted-foreground mt-3 max-w-2xl">
-          {hero.subtitle}
-        </p>
+        {hero.subtitle?.trim() && (
+          <p className="font-sans text-base md:text-lg text-muted-foreground mt-3 max-w-2xl">
+            {hero.subtitle}
+          </p>
+        )}
       </div>
 
       {heroes.length > 1 && (

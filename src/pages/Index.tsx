@@ -9,6 +9,10 @@ import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 
 function HeroCard({ hero }: { hero: HeroItem }) {
+  const hasImage = Boolean(hero.imageUrl);
+  const hasVideo = Boolean(hero.videoUrl);
+  const hasSubtitle = Boolean(hero.subtitle?.trim());
+
   return (
     <Link
       to={`/article/${hero.id}`}
@@ -16,12 +20,22 @@ function HeroCard({ hero }: { hero: HeroItem }) {
       onClick={() => trackEvent(hero.id, "hero", "click")}
     >
       <div className="aspect-[3/4] sm:aspect-[16/9] md:aspect-[16/7] overflow-hidden">
-        <img
-          src={hero.imageUrl}
-          alt={hero.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        {hero.videoUrl && (
+        {hasImage ? (
+          <img
+            src={hero.imageUrl}
+            alt={hero.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : hasVideo ? (
+          <video
+            src={hero.videoUrl}
+            autoPlay muted loop playsInline
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-secondary" />
+        )}
+        {hasImage && hasVideo && (
           <video
             src={hero.videoUrl}
             autoPlay muted loop playsInline
@@ -35,15 +49,23 @@ function HeroCard({ hero }: { hero: HeroItem }) {
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground mt-2 leading-snug font-editorial">
           {hero.title}
         </h2>
-        <p className="font-sans text-sm md:text-base text-muted-foreground mt-2 line-clamp-3">
-          {hero.subtitle}
-        </p>
+        {hasSubtitle && (
+          <p className="font-sans text-sm md:text-base text-muted-foreground mt-2 line-clamp-3">
+            {hero.subtitle}
+          </p>
+        )}
       </div>
     </Link>
   );
 }
 
 function ArticleCard({ article }: { article: Article }) {
+  const hasImage = Boolean(article.imageUrl);
+  const hasVideo = Boolean(article.videoUrl);
+  const hasExcerpt = Boolean(article.excerpt?.trim());
+  const hasAuthor = Boolean(article.author?.trim());
+  const hasDate = Boolean(article.date);
+
   return (
     <Link
       to={`/article/${article.id}`}
@@ -51,12 +73,25 @@ function ArticleCard({ article }: { article: Article }) {
       onClick={() => trackEvent(article.id, "article", "click")}
     >
       <div className="relative overflow-hidden rounded aspect-square w-[7.2rem] sm:w-full sm:aspect-[4/3] flex-shrink-0">
-        <img
-          src={article.imageUrl}
-          alt={article.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
+        {hasImage ? (
+          <img
+            src={article.imageUrl}
+            alt={article.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : hasVideo ? (
+          <video
+            src={article.videoUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-secondary" />
+        )}
         <div className="article-overlay absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       <div className="sm:mt-3 flex flex-col justify-center">
@@ -64,14 +99,20 @@ function ArticleCard({ article }: { article: Article }) {
         <h3 className="font-editorial font-semibold mt-1 sm:mt-2 leading-snug group-hover:text-primary transition-colors text-sm sm:text-base md:text-lg">
           {article.title}
         </h3>
-        <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 hidden sm:block">
-          {article.excerpt}
-        </p>
-        <div className="flex items-center gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
-          <span>{article.author}</span>
-          <span className="text-primary">·</span>
-          <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
-        </div>
+        {hasExcerpt && (
+          <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 hidden sm:block">
+            {article.excerpt}
+          </p>
+        )}
+        {(hasAuthor || hasDate) && (
+          <div className="flex items-center gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
+            {hasAuthor && <span>{article.author}</span>}
+            {hasAuthor && hasDate && <span className="text-primary">·</span>}
+            {hasDate && (
+              <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+            )}
+          </div>
+        )}
       </div>
     </Link>
   );

@@ -50,14 +50,35 @@ export default function ArticlePage() {
     );
   }
 
+  const hasHeroImage = Boolean(content.imageUrl);
+  const hasHeroVideo = Boolean(content.videoUrl);
+  const hasExcerpt = Boolean(content.excerpt?.trim());
+  const hasAuthor = Boolean(content.author?.trim());
+  const hasDate = Boolean(content.date);
+
+  const visibleBody = (content.body || []).filter((block) => {
+    if (block.type === "text" || block.type === "heading") return Boolean(block.content?.trim());
+    if (block.type === "image" || block.type === "video") return Boolean(block.content);
+    return false;
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <EditorialHeader />
 
       {/* Hero image */}
       <div className="relative w-full aspect-[21/9] max-h-[500px] overflow-hidden">
-        <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover" />
-        <div className="article-overlay absolute inset-0" />
+        {hasHeroImage ? (
+          <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover" />
+        ) : hasHeroVideo ? (
+          <video src={content.videoUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-secondary" />
+        )}
+        {hasHeroImage && hasHeroVideo && (
+          <video src={content.videoUrl} autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover" />
+        )}
+        {(hasHeroImage || hasHeroVideo) && <div className="article-overlay absolute inset-0" />}
       </div>
 
       <article className="container mx-auto px-4 max-w-3xl py-10">
@@ -69,17 +90,21 @@ export default function ArticlePage() {
         <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mt-3">
           {content.title}
         </h1>
-        <p className="font-sans text-lg text-muted-foreground mt-4">{content.excerpt}</p>
-        <div className="flex items-center gap-3 mt-6 text-sm font-sans text-muted-foreground border-b border-border pb-6">
-          <span className="font-medium text-foreground">{content.author}</span>
-          <span className="text-primary">·</span>
-          <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
-        </div>
+        {hasExcerpt && <p className="font-sans text-lg text-muted-foreground mt-4">{content.excerpt}</p>}
+        {(hasAuthor || hasDate) && (
+          <div className="flex items-center gap-3 mt-6 text-sm font-sans text-muted-foreground border-b border-border pb-6">
+            {hasAuthor && <span className="font-medium text-foreground">{content.author}</span>}
+            {hasAuthor && hasDate && <span className="text-primary">·</span>}
+            {hasDate && (
+              <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+            )}
+          </div>
+        )}
 
         {/* Article body blocks */}
         <div className="mt-10 space-y-8">
-          {content.body && content.body.length > 0 ? (
-            content.body.map((block) => <BodyBlock key={block.id} block={block} />)
+          {visibleBody.length > 0 ? (
+            visibleBody.map((block) => <BodyBlock key={block.id} block={block} />)
           ) : (
             <p className="font-sans text-muted-foreground text-base leading-relaxed italic">
               Full article content coming soon...

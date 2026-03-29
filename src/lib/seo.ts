@@ -2,6 +2,7 @@ import { buildContentPath, type Article, type HeroItem } from "@/lib/content-sto
 
 const SITE_URL = "https://www.themagorium.com";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
+const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 
 function upsertMeta(name: string, content: string, property = false) {
   const attr = property ? "property" : "name";
@@ -29,8 +30,61 @@ function removeStructuredDataScript() {
   if (existing) existing.remove();
 }
 
-function setStructuredData(content: Article | (HeroItem & { excerpt?: string })) {
+function normalizeAuthorIdentity(author?: string) {
+  const trimmed = (author || "").trim();
+  if (!trimmed) return STAFF_AUTHOR_NAME;
+
+  const normalized = trimmed
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+  if (
+    normalized === "magorium" ||
+    normalized === "the magorium" ||
+    normalized === "staff" ||
+    normalized === "editorial staff" ||
+    normalized === "magorium staff" ||
+    normalized === "the magorium staff" ||
+    normalized === "the magorium editorial staff"
+  ) {
+    return STAFF_AUTHOR_NAME;
+  }
+
+  return trimmed;
+}
+
+function authorPath(authorName: string) {
+  if (authorName === STAFF_AUTHOR_NAME) return "/author/staff";
+  const slug = authorName
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `/author/${slug || "staff"}`;
+}
+
+function setStructuredData(
+  content: Article | (HeroItem & { excerpt?: string }),
+  canonicalUrl: string,
+  writerName: string,
+  description: string,
+) {
   removeStructuredDataScript();
+  const writerUrl = `${SITE_URL}${authorPath(writerName)}`;
+  const writerEntity = writerName === STAFF_AUTHOR_NAME
+    ? {
+      "@type": "Organization",
+      name: writerName,
+      url: writerUrl,
+    }
+    : {
+      "@type": "Person",
+      name: writerName,
+      url: writerUrl,
+    };
+
   const script = document.createElement("script");
   script.type = "application/ld+json";
   script.setAttribute("data-seo", "article-jsonld");
@@ -38,12 +92,11 @@ function setStructuredData(content: Article | (HeroItem & { excerpt?: string }))
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: content.title,
+    url: canonicalUrl,
     datePublished: content.date,
     dateModified: content.date,
-    author: {
-      "@type": "Person",
-      name: content.author || "The Magorium",
-    },
+    author: writerEntity,
+    creator: writerEntity,
     publisher: {
       "@type": "Organization",
       name: "The Magorium",
@@ -53,28 +106,43 @@ function setStructuredData(content: Article | (HeroItem & { excerpt?: string }))
       },
     },
     image: [content.imageUrl || DEFAULT_OG_IMAGE],
-    description:
-      "excerpt" in content
-        ? (content.excerpt || "").trim()
-        : (content.subtitle || "").trim(),
+    description,
+    articleSection: content.category,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${SITE_URL}/article/${content.id}`,
+      "@id": canonicalUrl,
     },
   });
   document.head.appendChild(script);
 }
 
 export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: string })) {
-  const description =
+  const writerName = normalizeAuthorIdentity(content.author);
+  const brandName = "The Magorium";
+  const writerUrl = `${SITE_URL}${authorPath(writerName)}`;
+  const storySummary =
     ("excerpt" in content ? content.excerpt : content.subtitle || "").trim() ||
     "Read this story on The Magorium.";
+  const description = `${storySummary} Written by ${writerName} for ${brandName}.`;
   const canonicalUrl = `${SITE_URL}${buildContentPath(content.id, content.title)}`;
-  const title = `${content.title} | The Magorium`;
+  const title = `${content.title} | ${brandName}`;
+  const keywords = [
+    brandName,
+    "The Magorium",
+    writerName,
+    content.category,
+    content.title,
+  ]
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .join(", ");
 
   document.title = title;
   upsertMeta("description", description);
-  upsertMeta("author", content.author || "The Magorium");
+  upsertMeta("author", writerName);
+  upsertMeta("article:author", writerUrl, true);
+  upsertMeta("article:publisher", brandName, true);
+  upsertMeta("keywords", keywords);
   upsertMeta("robots", "index,follow");
 
   upsertMeta("og:title", title, true);
@@ -82,13 +150,17 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
   upsertMeta("og:type", "article", true);
   upsertMeta("og:url", canonicalUrl, true);
   upsertMeta("og:image", content.imageUrl || DEFAULT_OG_IMAGE, true);
+  upsertMeta("og:site_name", brandName, true);
 
+  upsertMeta("twitter:card", "summary_large_image");
   upsertMeta("twitter:title", title);
   upsertMeta("twitter:description", description);
   upsertMeta("twitter:image", content.imageUrl || DEFAULT_OG_IMAGE);
+  upsertMeta("twitter:label1", "Written by");
+  upsertMeta("twitter:data1", writerName);
 
   upsertLink("canonical", canonicalUrl);
-  setStructuredData(content);
+  setStructuredData(content, canonicalUrl, writerName, description);
 }
 
 export function applyContributorsSeo() {

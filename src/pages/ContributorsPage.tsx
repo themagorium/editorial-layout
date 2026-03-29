@@ -1,6 +1,8 @@
 import ContentPage from "./ContentPage";
 import { applyContributorsSeo } from "@/lib/seo";
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { slugifyText } from "@/lib/content-store";
 
 export default function ContributorsPage() {
   const contributors = [
@@ -29,9 +31,17 @@ export default function ContributorsPage() {
       <div className="space-y-8 mt-8">
         {contributors.map((c) => (
           <div key={c.name} className="border-l-2 border-primary pl-5">
-            <h3 className="text-foreground font-semibold text-base font-editorial">{c.name}</h3>
+            <h3 className="text-foreground font-semibold text-base font-editorial">
+              {c.name}
+            </h3>
             <p className="text-xs uppercase tracking-widest text-primary mt-1">{c.role}</p>
             <p className="mt-2 text-sm">{c.bio}</p>
+            <Link
+              to={`/author/${slugifyText(c.name)}`}
+              className="mt-2 inline-block text-xs text-primary hover:underline"
+            >
+              View stories by {c.name}
+            </Link>
           </div>
         ))}
       </div>

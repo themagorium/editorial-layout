@@ -59,6 +59,17 @@ function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[]
   return Array.from(editions).sort().reverse();
 }
 
+function createOctoberPatternBody(seed: string): ArticleBodyBlock[] {
+  return [
+    { id: `${seed}-m1`, type: "image", content: "", caption: "Upload photo or video" },
+    { id: `${seed}-t1`, type: "text", content: "Add first body paragraph" },
+    { id: `${seed}-m2`, type: "image", content: "", caption: "Upload photo or video" },
+    { id: `${seed}-t2`, type: "text", content: "Add second body paragraph" },
+    { id: `${seed}-m3`, type: "image", content: "", caption: "Upload photo or video" },
+    { id: `${seed}-t3`, type: "text", content: "Add third body paragraph" },
+  ];
+}
+
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(() => {
     return isAdminAuthenticated();
@@ -231,18 +242,90 @@ function AdminDashboard() {
       return;
     }
 
+    const stamp = Date.now();
+
     // Create starter template content for new edition
     const starterHeroes: HeroItem[] = [
-      { id: `h-${Date.now()}-1`, title: "New Hero 1", subtitle: "Add your first hero story", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
-      { id: `h-${Date.now()}-2`, title: "New Hero 2", subtitle: "Add your second hero story", category: "Fashion", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
-      { id: `h-${Date.now()}-3`, title: "New Hero 3", subtitle: "Add your third hero story", category: "Art & Design", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      {
+        id: `h-${stamp}-1`,
+        title: "New Hero 1",
+        subtitle: "Add your first hero story",
+        category: "Travel",
+        imageUrl: "",
+        author: "Editor",
+        body: createOctoberPatternBody(`h-${stamp}-1`),
+        date: new Date().toISOString().split("T")[0],
+        edition: newEditionMonth,
+      },
+      {
+        id: `h-${stamp}-2`,
+        title: "New Hero 2",
+        subtitle: "Add your second hero story",
+        category: "Fashion",
+        imageUrl: "",
+        author: "Editor",
+        body: createOctoberPatternBody(`h-${stamp}-2`),
+        date: new Date().toISOString().split("T")[0],
+        edition: newEditionMonth,
+      },
+      {
+        id: `h-${stamp}-3`,
+        title: "New Hero 3",
+        subtitle: "Add your third hero story",
+        category: "Art & Design",
+        imageUrl: "",
+        author: "Editor",
+        body: createOctoberPatternBody(`h-${stamp}-3`),
+        date: new Date().toISOString().split("T")[0],
+        edition: newEditionMonth,
+      },
     ];
 
     const starterArticles: Article[] = [
-      { id: `a-${Date.now()}-1`, title: "New Article 1", excerpt: "Add your first article", category: "Yachting", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
-      { id: `a-${Date.now()}-2`, title: "New Article 2", excerpt: "Add your second article", category: "Sports", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
-      { id: `a-${Date.now()}-3`, title: "New Article 3", excerpt: "Add your third article", category: "Golf", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
-      { id: `a-${Date.now()}-4`, title: "New Article 4", excerpt: "Add your fourth article", category: "Tennis", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      {
+        id: `a-${stamp}-1`,
+        title: "New Article 1",
+        excerpt: "Add your first article",
+        category: "Yachting",
+        imageUrl: "",
+        author: "Editor",
+        body: createOctoberPatternBody(`a-${stamp}-1`),
+        date: new Date().toISOString().split("T")[0],
+        edition: newEditionMonth,
+      },
+      {
+        id: `a-${stamp}-2`,
+        title: "New Article 2",
+        excerpt: "Add your second article",
+        category: "Sports",
+        imageUrl: "",
+        author: "Editor",
+        body: createOctoberPatternBody(`a-${stamp}-2`),
+        date: new Date().toISOString().split("T")[0],
+        edition: newEditionMonth,
+      },
+      {
+        id: `a-${stamp}-3`,
+        title: "New Article 3",
+        excerpt: "Add your third article",
+        category: "Golf",
+        imageUrl: "",
+        author: "Editor",
+        body: createOctoberPatternBody(`a-${stamp}-3`),
+        date: new Date().toISOString().split("T")[0],
+        edition: newEditionMonth,
+      },
+      {
+        id: `a-${stamp}-4`,
+        title: "New Article 4",
+        excerpt: "Add your fourth article",
+        category: "Tennis",
+        imageUrl: "",
+        author: "Editor",
+        body: createOctoberPatternBody(`a-${stamp}-4`),
+        date: new Date().toISOString().split("T")[0],
+        edition: newEditionMonth,
+      },
     ];
 
     setHeroes([...heroes, ...starterHeroes]);

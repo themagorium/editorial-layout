@@ -762,15 +762,55 @@ function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
   );
 }
 
-function normalizeBodyFlow(blocks: ArticleBodyBlock[]): ArticleBodyBlock[] {
-  const textBlocks = blocks.filter((b) => b.type === "text" || b.type === "heading");
-  const mediaBlocks = blocks.filter((b) => b.type === "image" || b.type === "video");
+function normalizeBodyFlow(
+  blocks: ArticleBodyBlock[],
+  imageUrl?: string,
+  videoUrl?: string,
+): ArticleBodyBlock[] {
+  const source = blocks.filter(Boolean);
+  const textBlocks = source.filter((b) => b.type === "text" || b.type === "heading");
+  const mediaBlocks = source.filter((b) => b.type === "image" || b.type === "video");
   const ordered: ArticleBodyBlock[] = [];
 
-  const max = Math.max(textBlocks.length, mediaBlocks.length);
+  if (textBlocks.length === 0) {
+    ordered.push({ id: `auto-t-${Date.now()}`, type: "text", content: "Add body text" });
+    if (videoUrl) {
+      ordered.push({ id: `auto-v-${Date.now()}`, type: "video", content: videoUrl, caption: "Featured video" });
+    } else {
+      ordered.push({
+        id: `auto-i-${Date.now()}`,
+        type: "image",
+        content: imageUrl || "",
+        caption: imageUrl ? "Featured image" : "Upload photo or video",
+      });
+    }
+    return ordered;
+  }
+
+  const max = Math.max(textBlocks.length, mediaBlocks.length || 1);
   for (let i = 0; i < max; i += 1) {
-    if (mediaBlocks[i]) ordered.push(mediaBlocks[i]);
-    if (textBlocks[i]) ordered.push(textBlocks[i]);
+    if (textBlocks[i]) {
+      ordered.push(textBlocks[i]);
+    }
+    if (mediaBlocks[i]) {
+      ordered.push(mediaBlocks[i]);
+    } else if (i < textBlocks.length) {
+      if (videoUrl) {
+        ordered.push({
+          id: `auto-v-${Date.now()}-${i}`,
+          type: "video",
+          content: videoUrl,
+          caption: "Featured video",
+        });
+      } else {
+        ordered.push({
+          id: `auto-i-${Date.now()}-${i}`,
+          type: "image",
+          content: imageUrl || "",
+          caption: imageUrl ? "Featured image" : "Upload photo or video",
+        });
+      }
+    }
   }
 
   return ordered;

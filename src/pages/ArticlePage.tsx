@@ -7,6 +7,41 @@ import { ArrowLeft } from "lucide-react";
 import { applyArticleSeo } from "@/lib/seo";
 import { useEffect } from "react";
 
+const TEXT_PLACEHOLDERS = new Set([
+  "Add story text",
+  "Add first body paragraph",
+  "Add second body paragraph",
+  "Add third body paragraph",
+]);
+
+const CAPTION_PLACEHOLDERS = new Set([
+  "Upload photo or video",
+  "Featured image",
+  "Featured video",
+]);
+
+function isMeaningfulText(value?: string) {
+  const trimmed = (value || "").trim();
+  if (!trimmed) return false;
+  return !TEXT_PLACEHOLDERS.has(trimmed);
+}
+
+function isMeaningfulCaption(value?: string) {
+  const trimmed = (value || "").trim();
+  if (!trimmed) return false;
+  return !CAPTION_PLACEHOLDERS.has(trimmed);
+}
+
+function hasRealBodyContent(block: ArticleBodyBlock) {
+  if (block.type === "text" || block.type === "heading") {
+    return isMeaningfulText(block.content);
+  }
+  if (block.type === "image" || block.type === "video") {
+    return Boolean((block.content || "").trim());
+  }
+  return false;
+}
+
 export default function ArticlePage() {
   const { id } = useParams<{ id: string }>();
   let articles = getArticles();
@@ -84,8 +119,8 @@ export default function ArticlePage() {
 
         {/* Article body blocks */}
         <div className="mt-10 space-y-8">
-          {content.body && content.body.length > 0 ? (
-            content.body.map((block) => <BodyBlock key={block.id} block={block} />)
+          {content.body && content.body.filter(hasRealBodyContent).length > 0 ? (
+            content.body.filter(hasRealBodyContent).map((block) => <BodyBlock key={block.id} block={block} />)
           ) : (
             <p className="font-sans text-muted-foreground text-base leading-relaxed italic">
               Full article content coming soon...
@@ -137,7 +172,7 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
       <figure className="my-8 relative">
         <img src={block.content} alt={block.caption || ""} className="w-full rounded" loading="lazy" />
         <div className="flex items-start justify-between mt-2 gap-4">
-          {block.caption ? (
+          {isMeaningfulCaption(block.caption) ? (
             <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption>
           ) : <span />}
           {block.citation && (
@@ -153,7 +188,7 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
       <figure className="my-8 relative">
         <video src={block.content} controls className="w-full rounded" />
         <div className="flex items-start justify-between mt-2 gap-4">
-          {block.caption ? (
+          {isMeaningfulCaption(block.caption) ? (
             <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption>
           ) : <span />}
           {block.citation && (

@@ -2,8 +2,16 @@ import { useParams, Link } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import AdPlacement from "@/components/editorial/AdPlacement";
-import { buildContentPath, getAds, getHeroesByEdition, getArticlesByEdition, formatEditionLabel } from "@/lib/content-store";
+import {
+  buildContentPath,
+  getAds,
+  getHeroesByEdition,
+  getArticlesByEdition,
+  formatEditionLabel,
+  slugifyText,
+} from "@/lib/content-store";
 import { trackEvent } from "@/lib/analytics";
+import { canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 
 export default function EditionPage() {
   const { edition } = useParams<{ edition: string }>();
@@ -80,6 +88,17 @@ export default function EditionPage() {
                   <p className="font-sans text-sm text-muted-foreground mt-2 line-clamp-2">
                     {hero.subtitle}
                   </p>
+                  <div className="flex items-center gap-2 mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
+                    <Link
+                      to={getAuthorPath(hero.author)}
+                      className="hover:text-primary transition-colors relative z-20"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {canonicalAuthorName(hero.author)}
+                    </Link>
+                    <span className="text-primary">·</span>
+                    <span>{new Date(hero.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                  </div>
                 </div>
               </Link>
             ))}
@@ -121,7 +140,13 @@ export default function EditionPage() {
                   {article.excerpt}
                 </p>
                 <div className="flex items-center gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
-                  <span>{article.author}</span>
+                  <Link
+                    to={getAuthorPath(article.author)}
+                    className="hover:text-primary transition-colors relative z-20"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    {canonicalAuthorName(article.author)}
+                  </Link>
                   <span className="text-primary">·</span>
                   <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
                 </div>

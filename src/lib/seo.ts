@@ -42,7 +42,7 @@ function upsertStructuredDataScript(key: string, payload: unknown) {
   document.head.appendChild(script);
 }
 
-function normalizeAuthorIdentity(author?: string) {
+export function canonicalAuthorName(author?: string) {
   const trimmed = (author || "").trim();
   if (!trimmed) return STAFF_AUTHOR_NAME;
 
@@ -66,7 +66,8 @@ function normalizeAuthorIdentity(author?: string) {
   return trimmed;
 }
 
-function authorPath(authorName: string) {
+export function getAuthorPath(author?: string) {
+  const authorName = canonicalAuthorName(author);
   if (authorName === STAFF_AUTHOR_NAME) return "/author/staff";
   const slug = authorName
     .toLowerCase()
@@ -83,7 +84,7 @@ function setStructuredData(
   writerName: string,
   description: string,
 ) {
-  const writerUrl = `${SITE_URL}${authorPath(writerName)}`;
+  const writerUrl = `${SITE_URL}${getAuthorPath(writerName)}`;
   const writerEntity = writerName === STAFF_AUTHOR_NAME
     ? {
       "@type": "Organization",
@@ -191,9 +192,9 @@ export function applyHomeSeo() {
 }
 
 export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: string })) {
-  const writerName = normalizeAuthorIdentity(content.author);
+  const writerName = canonicalAuthorName(content.author);
   const brandName = BRAND_NAME;
-  const writerUrl = `${SITE_URL}${authorPath(writerName)}`;
+  const writerUrl = `${SITE_URL}${getAuthorPath(writerName)}`;
   const storySummary =
     ("excerpt" in content ? content.excerpt : content.subtitle || "").trim() ||
     "Read this story on The Magorium.";
@@ -290,17 +291,24 @@ export function applyCollectionSeo(title: string, description: string, path: str
 }
 
 export function applyAuthorSeo(authorName: string, storyCount: number) {
-  const slug = authorName
-    .toLowerCase()
-    .trim()
-    .replace(/['"]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  const canonicalPath = `/author/${slug || "staff"}`;
-  const title = `${authorName} | The Magorium`;
+  const canonicalAuthor = canonicalAuthorName(authorName);
+  const canonicalPath = getAuthorPath(canonicalAuthor);
+  const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+  const title = `${canonicalAuthor} | The Magorium`;
   const description = `${storyCount} published ${
     storyCount === 1 ? "story" : "stories"
-  } by ${authorName} on The Magorium.`;
+  } by ${canonicalAuthor} on The Magorium.`;
 
   applyCollectionSeo(title, description, canonicalPath);
+
+  upsertStructuredDataScript("author-jsonld", {
+    "@context": "https://schema.org",
+    "@type": canonicalAuthor === STAFF_AUTHOR_NAME ? "Organization" : "Person",
+    name: canonicalAuthor,
+    url: canonicalUrl,
+    mainEntityOfPage: {
+      "@type": "ProfilePage",
+      "@id": canonicalUrl,
+    },
+  });
 }

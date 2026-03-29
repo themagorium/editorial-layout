@@ -3,78 +3,102 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import AdPlacement from "@/components/editorial/AdPlacement";
 
-import { getAds, getLatestEdition, getHeroesByEdition, getArticlesByEdition, formatEditionLabel, buildContentPath } from "@/lib/content-store";
+import {
+  getAds,
+  getArticles,
+  getHeroes,
+  getLatestEdition,
+  getHeroesByEdition,
+  getArticlesByEdition,
+  formatEditionLabel,
+  buildContentPath,
+} from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
-import { applyHomeSeo } from "@/lib/seo";
+import { applyHomeSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 
 function HeroCard({ hero }: { hero: HeroItem }) {
+  const authorName = canonicalAuthorName(hero.author);
   return (
-    <Link
-      to={buildContentPath(hero.id, hero.title)}
-      className="group relative overflow-hidden rounded cursor-pointer block"
-      onClick={() => trackEvent(hero.id, "hero", "click")}
-    >
-      <div className="aspect-[3/4] sm:aspect-[16/9] md:aspect-[16/7] overflow-hidden">
-        <img
-          src={hero.imageUrl}
-          alt={hero.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        {hero.videoUrl && (
-          <video
-            src={hero.videoUrl}
-            autoPlay muted loop playsInline
-            className="absolute inset-0 w-full h-full object-cover"
+    <article>
+      <Link
+        to={buildContentPath(hero.id, hero.title)}
+        className="group relative overflow-hidden rounded cursor-pointer block"
+        onClick={() => trackEvent(hero.id, "hero", "click")}
+      >
+        <div className="aspect-[3/4] sm:aspect-[16/9] md:aspect-[16/7] overflow-hidden">
+          <img
+            src={hero.imageUrl}
+            alt={hero.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
-        )}
-        <div className="article-overlay absolute inset-0" />
+          {hero.videoUrl && (
+            <video
+              src={hero.videoUrl}
+              autoPlay muted loop playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+          <div className="article-overlay absolute inset-0" />
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8 z-10">
+          <span className="category-pill">{hero.category}</span>
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground mt-2 leading-snug font-editorial">
+            {hero.title}
+          </h2>
+          <p className="font-sans text-sm md:text-base text-muted-foreground mt-2 line-clamp-3">
+            {hero.subtitle}
+          </p>
+        </div>
+      </Link>
+      <div className="flex items-center gap-2 mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
+        <Link to={getAuthorPath(authorName)} className="text-primary hover:underline">
+          {authorName}
+        </Link>
+        <span className="text-primary">·</span>
+        <span>{new Date(hero.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8 z-10">
-        <span className="category-pill">{hero.category}</span>
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground mt-2 leading-snug font-editorial">
-          {hero.title}
-        </h2>
-        <p className="font-sans text-sm md:text-base text-muted-foreground mt-2 line-clamp-3">
-          {hero.subtitle}
-        </p>
-      </div>
-    </Link>
+    </article>
   );
 }
 
 function ArticleCard({ article }: { article: Article }) {
+  const authorName = canonicalAuthorName(article.author);
   return (
-    <Link
-      to={buildContentPath(article.id, article.title)}
-      className="group cursor-pointer flex flex-row sm:flex-col gap-3 sm:gap-0"
-      onClick={() => trackEvent(article.id, "article", "click")}
-    >
-      <div className="relative overflow-hidden rounded aspect-square w-[7.2rem] sm:w-full sm:aspect-[4/3] flex-shrink-0">
-        <img
-          src={article.imageUrl}
-          alt={article.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
-        <div className="article-overlay absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-      </div>
-      <div className="sm:mt-3 flex flex-col justify-center">
-        <span className="category-pill text-[10px]">{article.category}</span>
-        <h3 className="font-editorial font-semibold mt-1 sm:mt-2 leading-snug group-hover:text-primary transition-colors text-sm sm:text-base md:text-lg">
-          {article.title}
-        </h3>
-        <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 hidden sm:block">
-          {article.excerpt}
-        </p>
-        <div className="flex items-center gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
-          <span>{article.author}</span>
-          <span className="text-primary">·</span>
-          <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+    <article>
+      <Link
+        to={buildContentPath(article.id, article.title)}
+        className="group cursor-pointer flex flex-row sm:flex-col gap-3 sm:gap-0"
+        onClick={() => trackEvent(article.id, "article", "click")}
+      >
+        <div className="relative overflow-hidden rounded aspect-square w-[7.2rem] sm:w-full sm:aspect-[4/3] flex-shrink-0">
+          <img
+            src={article.imageUrl}
+            alt={article.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+          <div className="article-overlay absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
+        <div className="sm:mt-3 flex flex-col justify-center">
+          <span className="category-pill text-[10px]">{article.category}</span>
+          <h3 className="font-editorial font-semibold mt-1 sm:mt-2 leading-snug group-hover:text-primary transition-colors text-sm sm:text-base md:text-lg">
+            {article.title}
+          </h3>
+          <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 hidden sm:block">
+            {article.excerpt}
+          </p>
+        </div>
+      </Link>
+      <div className="flex items-center gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
+        <Link to={getAuthorPath(authorName)} className="text-primary hover:underline">
+          {authorName}
+        </Link>
+        <span className="text-primary">·</span>
+        <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
       </div>
-    </Link>
+    </article>
   );
 }
 
@@ -94,6 +118,13 @@ export default function Index() {
   }, []);
 
   const hasAdMedia = (ad: AdSlot) => Boolean(ad.imageUrl || ad.videoUrl);
+  const authorPages = Array.from(
+    new Set(
+      [...getHeroes().map((h) => h.author || ""), ...getArticles().map((a) => a.author || "")]
+        .map((name) => (name || "").trim())
+        .filter(Boolean),
+    ),
+  );
   const midAd = ads.find((a) => a.position === "mid-feed" && hasAdMedia(a));
   const bottomAd = ads.find((a) => a.position === "bottom-banner" && hasAdMedia(a));
   const heroSidebarAds = ads.filter((a) => a.position === "hero-sidebar" && hasAdMedia(a));
@@ -161,6 +192,23 @@ export default function Index() {
               <AdPlacement key={ad.id} ad={ad} className="w-full" />
             ))}
           </div>
+        </section>
+      )}
+
+      {/* Crawlable author links to strengthen writer/entity discovery */}
+      {authorPages.length > 0 && (
+        <section className="container mx-auto px-4 mt-10">
+          <nav aria-label="Contributors" className="flex flex-wrap gap-3">
+            {authorPages.map((author) => (
+              <Link
+                key={author}
+                to={getAuthorPath(author)}
+                className="text-xs font-sans text-primary hover:underline"
+              >
+                {canonicalAuthorName(author)}
+              </Link>
+            ))}
+          </nav>
         </section>
       )}
 

@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { buildContentPath, getArticles, getHeroes, slugifyText } from "@/lib/content-store";
-import { applyAuthorSeo } from "@/lib/seo";
+import { applyAuthorSeo, canonicalAuthorName } from "@/lib/seo";
 import { useEffect, useMemo } from "react";
 
 type StorySummary = {
@@ -16,18 +16,7 @@ type StorySummary = {
 };
 
 export function normalizeAuthor(author: string) {
-  const normalized = author.trim();
-  if (!normalized) return "The Magorium Editorial Staff";
-  const slug = slugifyText(normalized);
-  const isStaffAlias =
-    slug === "magorium" ||
-    slug === "the-magorium" ||
-    slug === "staff" ||
-    slug === "the-magorium-staff" ||
-    slug === "magorium-staff" ||
-    slug === "the-magorium-editorial-staff";
-  if (isStaffAlias) return "The Magorium Editorial Staff";
-  return normalized;
+  return canonicalAuthorName(author);
 }
 
 export default function AuthorPage() {

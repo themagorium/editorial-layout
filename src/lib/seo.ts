@@ -3,6 +3,8 @@ import { buildContentPath, type Article, type HeroItem } from "@/lib/content-sto
 const SITE_URL = "https://www.themagorium.com";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
+const BRAND_NAME = "The Magorium";
+const BRAND_ALIAS = "Magorium";
 
 function upsertMeta(name: string, content: string, property = false) {
   const attr = property ? "property" : "name";
@@ -25,9 +27,19 @@ function upsertLink(rel: string, href: string) {
   el.setAttribute("href", href);
 }
 
-function removeStructuredDataScript() {
-  const existing = document.head.querySelector('script[data-seo="article-jsonld"]');
-  if (existing) existing.remove();
+function removeStructuredDataScript(key?: string) {
+  const selector = key ? `script[data-seo="${key}"]` : "script[data-seo]";
+  const existingScripts = document.head.querySelectorAll(selector);
+  existingScripts.forEach((script) => script.remove());
+}
+
+function upsertStructuredDataScript(key: string, payload: unknown) {
+  removeStructuredDataScript(key);
+  const script = document.createElement("script");
+  script.type = "application/ld+json";
+  script.setAttribute("data-seo", key);
+  script.text = JSON.stringify(payload);
+  document.head.appendChild(script);
 }
 
 function normalizeAuthorIdentity(author?: string) {
@@ -71,7 +83,6 @@ function setStructuredData(
   writerName: string,
   description: string,
 ) {
-  removeStructuredDataScript();
   const writerUrl = `${SITE_URL}${authorPath(writerName)}`;
   const writerEntity = writerName === STAFF_AUTHOR_NAME
     ? {
@@ -85,10 +96,7 @@ function setStructuredData(
       url: writerUrl,
     };
 
-  const script = document.createElement("script");
-  script.type = "application/ld+json";
-  script.setAttribute("data-seo", "article-jsonld");
-  script.text = JSON.stringify({
+  upsertStructuredDataScript("article-jsonld", {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: content.title,
@@ -113,12 +121,78 @@ function setStructuredData(
       "@id": canonicalUrl,
     },
   });
-  document.head.appendChild(script);
+}
+
+function setHomeStructuredData() {
+  upsertStructuredDataScript("organization-jsonld", {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: BRAND_NAME,
+    alternateName: BRAND_ALIAS,
+    url: SITE_URL,
+    logo: {
+      "@type": "ImageObject",
+      url: `${SITE_URL}/favicon.png`,
+    },
+  });
+
+  upsertStructuredDataScript("website-jsonld", {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: BRAND_NAME,
+    alternateName: BRAND_ALIAS,
+    url: SITE_URL,
+    publisher: {
+      "@type": "Organization",
+      name: BRAND_NAME,
+      url: SITE_URL,
+    },
+  });
+}
+
+export function applyHomeSeo() {
+  const title = `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+  const description =
+    `${BRAND_NAME} (also known as ${BRAND_ALIAS}) is a premium curated lifestyle magazine covering luxury travel, art, fashion, culture, yachting, motorsport, and global events.`;
+  const keywords = [
+    BRAND_NAME,
+    BRAND_ALIAS,
+    "TheMagorium",
+    "Magorium magazine",
+    "luxury lifestyle magazine",
+    "luxury travel",
+    "art",
+    "fashion",
+    "motorsport",
+    "yachting",
+  ].join(", ");
+
+  document.title = title;
+  upsertMeta("description", description);
+  upsertMeta("author", BRAND_NAME);
+  upsertMeta("keywords", keywords);
+  upsertMeta("robots", "index,follow");
+
+  upsertMeta("og:title", title, true);
+  upsertMeta("og:description", description, true);
+  upsertMeta("og:type", "website", true);
+  upsertMeta("og:url", SITE_URL, true);
+  upsertMeta("og:image", DEFAULT_OG_IMAGE, true);
+  upsertMeta("og:site_name", BRAND_NAME, true);
+
+  upsertMeta("twitter:card", "summary_large_image");
+  upsertMeta("twitter:title", title);
+  upsertMeta("twitter:description", description);
+  upsertMeta("twitter:image", DEFAULT_OG_IMAGE);
+
+  upsertLink("canonical", SITE_URL);
+  removeStructuredDataScript();
+  setHomeStructuredData();
 }
 
 export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: string })) {
   const writerName = normalizeAuthorIdentity(content.author);
-  const brandName = "The Magorium";
+  const brandName = BRAND_NAME;
   const writerUrl = `${SITE_URL}${authorPath(writerName)}`;
   const storySummary =
     ("excerpt" in content ? content.excerpt : content.subtitle || "").trim() ||
@@ -160,18 +234,19 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
   upsertMeta("twitter:data1", writerName);
 
   upsertLink("canonical", canonicalUrl);
+  removeStructuredDataScript();
   setStructuredData(content, canonicalUrl, writerName, description);
 }
 
 export function applyContributorsSeo() {
   const canonicalUrl = `${SITE_URL}/contributors`;
-  const title = "Contributors | The Magorium";
+  const title = `Contributors | ${BRAND_NAME}`;
   const description =
     "Meet The Magorium contributors including Millie Sealana, Charlotte Thames, and editorial staff covering luxury travel, art, fashion, culture, and sport.";
 
   document.title = title;
   upsertMeta("description", description);
-  upsertMeta("author", "The Magorium Editorial Staff");
+  upsertMeta("author", STAFF_AUTHOR_NAME);
   upsertMeta("robots", "index,follow");
 
   upsertMeta("og:title", title, true);
@@ -179,7 +254,7 @@ export function applyContributorsSeo() {
   upsertMeta("og:type", "website", true);
   upsertMeta("og:url", canonicalUrl, true);
   upsertMeta("og:image", DEFAULT_OG_IMAGE, true);
-  upsertMeta("og:site_name", "The Magorium", true);
+  upsertMeta("og:site_name", BRAND_NAME, true);
 
   upsertMeta("twitter:title", title);
   upsertMeta("twitter:description", description);
@@ -187,6 +262,7 @@ export function applyContributorsSeo() {
 
   upsertLink("canonical", canonicalUrl);
   removeStructuredDataScript();
+  setHomeStructuredData();
 }
 
 export function applyCollectionSeo(title: string, description: string, path: string) {
@@ -194,7 +270,7 @@ export function applyCollectionSeo(title: string, description: string, path: str
 
   document.title = title;
   upsertMeta("description", description);
-  upsertMeta("author", "The Magorium");
+  upsertMeta("author", BRAND_NAME);
   upsertMeta("robots", "index,follow");
 
   upsertMeta("og:title", title, true);
@@ -202,7 +278,7 @@ export function applyCollectionSeo(title: string, description: string, path: str
   upsertMeta("og:type", "website", true);
   upsertMeta("og:url", canonicalUrl, true);
   upsertMeta("og:image", DEFAULT_OG_IMAGE, true);
-  upsertMeta("og:site_name", "The Magorium", true);
+  upsertMeta("og:site_name", BRAND_NAME, true);
 
   upsertMeta("twitter:title", title);
   upsertMeta("twitter:description", description);
@@ -210,6 +286,7 @@ export function applyCollectionSeo(title: string, description: string, path: str
 
   upsertLink("canonical", canonicalUrl);
   removeStructuredDataScript();
+  setHomeStructuredData();
 }
 
 export function applyAuthorSeo(authorName: string, storyCount: number) {

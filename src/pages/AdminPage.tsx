@@ -529,7 +529,7 @@ function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => v
               <div className="flex items-center gap-3">
                 <select 
                   value={ad.position} 
-                  onChange={(e) => update(ad.id, { position: e.target.value as any })} 
+                  onChange={(e) => update(ad.id, { position: e.target.value as AdSlot["position"] })} 
                   className="category-pill bg-secondary text-foreground border-none"
                 >
                   <option value="hero-sidebar">Hero Sidebar</option>

@@ -43,6 +43,7 @@ export interface HeroItem {
   id: string;
   title: string;
   excerpt?: string;
+  legacySlugs?: string[];
   subtitle: string;
   category: Category;
   imageUrl: string;
@@ -68,6 +69,7 @@ export interface Article {
   id: string;
   title: string;
   excerpt: string;
+  legacySlugs?: string[];
   category: Category;
   imageUrl: string;
   videoUrl?: string;
@@ -103,16 +105,40 @@ export function buildContentPath(id: string, title: string): string {
   return `/articles/${titleSlug}--${id}`;
 }
 
-export function contentIdentifierMatches(item: { id: string; title: string }, identifier: string): boolean {
-  const decoded = decodeURIComponent(identifier || "").trim().toLowerCase();
+function tokenizeForMatch(value: string): string[] {
+  return slugifyText(value)
+    .split("-")
+    .filter((token) => token.length > 1);
+}
+
+function hasStrongTokenOverlap(title: string, candidateSlug: string): boolean {
+  const candidateTokens = tokenizeForMatch(candidateSlug);
+  if (candidateTokens.length < 2) return false;
+
+  const titleTokens = new Set(tokenizeForMatch(title));
+  const overlapCount = candidateTokens.filter((token) => titleTokens.has(token)).length;
+  return overlapCount >= 2 && overlapCount / candidateTokens.length >= 0.6;
+}
+
+export function contentIdentifierMatches(item: { id: string; title: string; legacySlugs?: string[] }, identifier: string): boolean {
+  const decoded = decodeURIComponent(identifier || "")
+    .trim()
+    .toLowerCase()
+    .split("?")[0]
+    .split("#")[0]
+    .replace(/^\/+|\/+$/g, "");
+  const candidate = decoded.split("/").pop() || decoded;
   const itemId = item.id.toLowerCase();
   const titleSlug = slugifyText(item.title || item.id);
+  const legacySlugs = (item.legacySlugs || []).map((slug) => slugifyText(slug));
 
-  if (!decoded) return false;
-  if (decoded === itemId) return true;
-  if (decoded === titleSlug) return true;
-  if (decoded === `${titleSlug}--${itemId}`) return true;
-  return decoded.endsWith(`--${itemId}`);
+  if (!candidate) return false;
+  if (candidate === itemId) return true;
+  if (candidate === titleSlug) return true;
+  if (candidate === `${titleSlug}--${itemId}`) return true;
+  if (candidate.endsWith(`--${itemId}`)) return true;
+  if (legacySlugs.includes(candidate)) return true;
+  return hasStrongTokenOverlap(item.title, candidate);
 }
 
 // ===================================================================
@@ -192,6 +218,7 @@ const DEFAULT_HEROES: HeroItem[] = [
   {
     id: "h-cv-summit",
     title: "Zurich's CV Summit: Capital Meets AI by the Lake",
+    legacySlugs: ["zurichs-crypto-meets-ai"],
     subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance",
     category: "Tech & AI",
     imageUrl: articleCvSummit,

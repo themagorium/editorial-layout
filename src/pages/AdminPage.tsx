@@ -410,6 +410,11 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
             onImageChange={(value) => update(hero.id, { imageUrl: value })}
             onVideoChange={(value) => update(hero.id, { videoUrl: value })}
             onBodyChange={(value) => update(hero.id, { body: value })}
+            onNormalizeBody={() =>
+              update(hero.id, {
+                body: normalizeBodyFlow(hero.body || []),
+              })
+            }
           />
         </ContentCard>
       ))}
@@ -457,6 +462,11 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
             onImageChange={(value) => update(article.id, { imageUrl: value })}
             onVideoChange={(value) => update(article.id, { videoUrl: value })}
             onBodyChange={(value) => update(article.id, { body: value })}
+            onNormalizeBody={() =>
+              update(article.id, {
+                body: normalizeBodyFlow(article.body || []),
+              })
+            }
           />
         </ContentCard>
       ))}
@@ -484,6 +494,7 @@ function EditableStoryForm({
   onImageChange,
   onVideoChange,
   onBodyChange,
+  onNormalizeBody,
 }: {
   kind: "hero" | "article";
   title: string;
@@ -504,6 +515,7 @@ function EditableStoryForm({
   onImageChange: (value: string) => void;
   onVideoChange: (value: string) => void;
   onBodyChange: (value: any[]) => void;
+  onNormalizeBody: () => void;
 }) {
   const isArticle = kind === "article";
 
@@ -563,6 +575,18 @@ function EditableStoryForm({
           )}
         </div>
         <div className="mt-4 pt-4 border-t border-border">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
+              Preferred flow: {formatEditionLabel(date.slice(0, 7))} · photo/video → text → photo/video → text
+            </p>
+            <button
+              type="button"
+              onClick={onNormalizeBody}
+              className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+            >
+              Auto Arrange
+            </button>
+          </div>
           <ArticleBodyEditor
             blocks={body}
             heading={isArticle ? "Article Body" : "Hero Body"}
@@ -653,6 +677,20 @@ function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
       <Plus className="w-4 h-4" /> {label}
     </button>
   );
+}
+
+function normalizeBodyFlow(blocks: ArticleBodyBlock[]): ArticleBodyBlock[] {
+  const textBlocks = blocks.filter((b) => b.type === "text" || b.type === "heading");
+  const mediaBlocks = blocks.filter((b) => b.type === "image" || b.type === "video");
+  const ordered: ArticleBodyBlock[] = [];
+
+  const max = Math.max(textBlocks.length, mediaBlocks.length);
+  for (let i = 0; i < max; i += 1) {
+    if (mediaBlocks[i]) ordered.push(mediaBlocks[i]);
+    if (textBlocks[i]) ordered.push(textBlocks[i]);
+  }
+
+  return ordered;
 }
 
 function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {

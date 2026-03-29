@@ -5,6 +5,7 @@ const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 const BRAND_NAME = "The Magorium";
 const BRAND_ALIAS = "Magorium";
+const BRAND_ALIASES = [BRAND_ALIAS, "Magorum", "The Magorium"];
 
 function upsertMeta(name: string, content: string, property = false) {
   const attr = property ? "property" : "name";
@@ -129,7 +130,7 @@ function setHomeStructuredData() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: BRAND_NAME,
-    alternateName: BRAND_ALIAS,
+    alternateName: BRAND_ALIASES,
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
@@ -141,7 +142,7 @@ function setHomeStructuredData() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: BRAND_NAME,
-    alternateName: BRAND_ALIAS,
+    alternateName: BRAND_ALIASES,
     url: SITE_URL,
     publisher: {
       "@type": "Organization",
@@ -151,15 +152,22 @@ function setHomeStructuredData() {
   });
 }
 
-export function applyHomeSeo() {
-  const title = `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
-  const description =
-    `${BRAND_NAME} (also known as ${BRAND_ALIAS}) is a premium curated lifestyle magazine covering luxury travel, art, fashion, culture, yachting, motorsport, and global events.`;
+export function applyHomeSeo(queryHint?: string) {
+  const normalizedHint = (queryHint || "").trim();
+  const title = normalizedHint
+    ? `${normalizedHint} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`
+    : `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+  const description = normalizedHint
+    ? `${BRAND_NAME} is the official destination for searches like ${normalizedHint}, ${BRAND_ALIAS}, and Magorum. Discover luxury travel, art, fashion, culture, yachting, motorsport, and global events.`
+    : `${BRAND_NAME} (also searched as ${BRAND_ALIAS} or Magorum) is a premium curated lifestyle magazine covering luxury travel, art, fashion, culture, yachting, motorsport, and global events.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
+    "Magorum",
+    normalizedHint,
     "TheMagorium",
     "Magorium magazine",
+    "Magorum magazine",
     "luxury lifestyle magazine",
     "luxury travel",
     "art",

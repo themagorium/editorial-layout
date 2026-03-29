@@ -6,7 +6,7 @@ import { getEditions, formatEditionLabel, getHeroesByEdition, getArticlesByEditi
 import { Search, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { applyCollectionSeo } from "@/lib/seo";
+import { applyCollectionSeo, applyHomeSeo } from "@/lib/seo";
 
 export default function ArchivePage() {
   const [searchParams] = useSearchParams();
@@ -40,6 +40,11 @@ export default function ArchivePage() {
 
   useEffect(() => {
     const q = search.trim().toLowerCase();
+    if (q === "magorium" || q === "the magorium" || q === "magorum") {
+      applyHomeSeo();
+      return;
+    }
+
     if (q === "millie sealana" || q === "charlotte thames" || q === "staff" || q === "the magorium") {
       applyCollectionSeo(
         `Stories by ${search.trim()} | The Magorium`,

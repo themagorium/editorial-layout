@@ -37,7 +37,11 @@ function hasRealBodyContent(block: ArticleBodyBlock) {
     return isMeaningfulText(block.content);
   }
   if (block.type === "image" || block.type === "video") {
-    return Boolean((block.content || "").trim());
+    const content = (block.content || "").trim();
+    if (!content) return false;
+    // Hide legacy/broken non-media placeholders that were persisted as plain text.
+    if (/upload photo or video/i.test(content)) return false;
+    return true;
   }
   return false;
 }

@@ -12,10 +12,11 @@ export default function EditionPage() {
   const heroes = getHeroesByEdition(edition).slice(0, 3);
   const articles = getArticlesByEdition(edition).slice(0, 4);
   const ads = getAds();
-  const heroSidebarAd = ads.find((a) => a.position === "hero-sidebar");
-  const sidebarAd = ads.find((a) => a.position === "sidebar");
-  const midAd = ads.find((a) => a.position === "mid-feed");
-  const bottomAd = ads.find((a) => a.position === "bottom-banner");
+  const hasAdMedia = (ad?: { imageUrl?: string; videoUrl?: string }) => Boolean(ad?.imageUrl || ad?.videoUrl);
+  const heroSidebarAd = ads.find((a) => a.position === "hero-sidebar" && hasAdMedia(a));
+  const sidebarAd = ads.find((a) => a.position === "sidebar" && hasAdMedia(a));
+  const midAd = ads.find((a) => a.position === "mid-feed" && hasAdMedia(a));
+  const bottomAd = ads.find((a) => a.position === "bottom-banner" && hasAdMedia(a));
   const label = formatEditionLabel(edition);
 
   if (heroes.length === 0 && articles.length === 0) {

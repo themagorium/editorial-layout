@@ -23,8 +23,9 @@ export default function AdPlacement({ ad, className = "" }: Props) {
   };
 
   const hasMedia = Boolean(ad.imageUrl || ad.videoUrl);
+  if (!hasMedia) return null;
 
-  const content = hasMedia ? (
+  const content = (
     <a
       href={ad.linkUrl || "#"}
       target="_blank"
@@ -38,12 +39,6 @@ export default function AdPlacement({ ad, className = "" }: Props) {
         <img src={ad.imageUrl} alt={ad.label} className="w-full h-full object-cover" />
       )}
     </a>
-  ) : (
-    <div className="flex flex-col items-center justify-center gap-2 h-full text-muted-foreground">
-      <Megaphone className="w-6 h-6" />
-      <span className="text-xs font-sans uppercase tracking-widest">{ad.label}</span>
-      <span className="text-[10px] font-sans opacity-50">{ad.width}×{ad.height}</span>
-    </div>
   );
 
   return (

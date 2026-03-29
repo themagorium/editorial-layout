@@ -9,6 +9,11 @@ function isMedia(type: string) {
   return type === "image" || type === "video";
 }
 
+function hasRealBodyContent(block: { type: string; content: string }) {
+  if (isTextLike(block.type)) return Boolean((block.content || "").trim());
+  return Boolean((block.content || "").trim());
+}
+
 describe("October body pattern normalization", () => {
   it("forces all hero bodies to text/media alternation", () => {
     resetToDefaults();
@@ -45,6 +50,22 @@ describe("October body pattern normalization", () => {
           expect(isMedia(block.type)).toBe(true);
         }
       });
+    }
+  });
+
+  it("always has at least one renderable text block per story", () => {
+    resetToDefaults();
+    const heroes = getHeroes();
+    const articles = getArticles();
+
+    for (const hero of heroes) {
+      const body = (hero.body || []).filter(hasRealBodyContent);
+      expect(body.some((block) => isTextLike(block.type))).toBe(true);
+    }
+
+    for (const article of articles) {
+      const body = (article.body || []).filter(hasRealBodyContent);
+      expect(body.some((block) => isTextLike(block.type))).toBe(true);
     }
   });
 });

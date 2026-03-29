@@ -91,10 +91,11 @@ export default function Index() {
     setEditionLabel(formatEditionLabel(edition));
   }, []);
 
-  const midAd = ads.find((a) => a.position === "mid-feed");
-  const bottomAd = ads.find((a) => a.position === "bottom-banner");
-  const heroSidebarAds = ads.filter((a) => a.position === "hero-sidebar");
-  const sidebarAds = ads.filter((a) => a.position === "sidebar");
+  const hasAdMedia = (ad: AdSlot) => Boolean(ad.imageUrl || ad.videoUrl);
+  const midAd = ads.find((a) => a.position === "mid-feed" && hasAdMedia(a));
+  const bottomAd = ads.find((a) => a.position === "bottom-banner" && hasAdMedia(a));
+  const heroSidebarAds = ads.filter((a) => a.position === "hero-sidebar" && hasAdMedia(a));
+  const sidebarAds = ads.filter((a) => a.position === "sidebar" && hasAdMedia(a));
 
   return (
     <div className="min-h-screen bg-background">

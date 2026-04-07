@@ -568,12 +568,40 @@ export function getAds(): AdSlot[] {
   return stored ? JSON.parse(stored) : DEFAULT_ADS;
 }
 
+function hasRealBodyBlockContent(block: ArticleBodyBlock): boolean {
+  if (block.type === "text" || block.type === "heading") {
+    return Boolean((block.content || "").trim());
+  }
+  if (block.type === "image" || block.type === "video") {
+    return Boolean((block.content || "").trim());
+  }
+  return false;
+}
+
+function cleanBodyForStorage(body?: ArticleBodyBlock[]): ArticleBodyBlock[] | undefined {
+  if (!body || body.length === 0) return body;
+  const cleaned = body.filter(hasRealBodyBlockContent);
+  return cleaned.length > 0 ? cleaned : [];
+}
+
 export function saveHeroes(heroes: HeroItem[]) {
-  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(heroes.map(normalizeHero)));
+  const prepared = heroes.map((hero) =>
+    normalizeHero({
+      ...hero,
+      body: cleanBodyForStorage(hero.body),
+    }),
+  );
+  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(prepared));
 }
 
 export function saveArticles(articles: Article[]) {
-  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(articles.map(normalizeArticle)));
+  const prepared = articles.map((article) =>
+    normalizeArticle({
+      ...article,
+      body: cleanBodyForStorage(article.body),
+    }),
+  );
+  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(prepared));
 }
 
 export function saveAds(ads: AdSlot[]) {

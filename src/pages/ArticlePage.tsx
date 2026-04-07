@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { buildContentPath, contentIdentifierMatches, getArticles, getHeroes, resetToDefaults, slugifyText } from "@/lib/content-store";
+import { buildContentPath, contentIdentifierMatches, getArticles, getHeroes, slugifyText } from "@/lib/content-store";
 import type { ArticleBodyBlock } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
@@ -66,15 +66,6 @@ export default function ArticlePage() {
   // Also search heroes — they share the same article detail page
   let heroAsArticle = !article ? heroes.find((h) => contentIdentifierMatches(h, id || "")) : undefined;
 
-  // If not found in either, reset localStorage and retry
-  if (!article && !heroAsArticle) {
-    resetToDefaults();
-    articles = getArticles();
-    heroes = getHeroes();
-    article = articles.find((a) => contentIdentifierMatches(a, id || ""));
-    heroAsArticle = !article ? heroes.find((h) => contentIdentifierMatches(h, id || "")) : undefined;
-  }
-
   // Normalize hero into article-like shape for rendering
   const content = article || (heroAsArticle ? {
     id: heroAsArticle.id,
@@ -111,10 +102,12 @@ export default function ArticlePage() {
       <EditorialHeader />
 
       {/* Hero image */}
-      <div className="relative w-full aspect-[21/9] max-h-[500px] overflow-hidden">
-        <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover" />
-        <div className="article-overlay absolute inset-0" />
-      </div>
+      {(content.imageUrl || "").trim() && (
+        <div className="relative w-full aspect-[21/9] max-h-[500px] overflow-hidden">
+          <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover" />
+          <div className="article-overlay absolute inset-0" />
+        </div>
+      )}
 
       <article className="container mx-auto px-4 max-w-3xl py-10">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-sans mb-8">
@@ -139,13 +132,9 @@ export default function ArticlePage() {
 
         {/* Article body blocks */}
         <div className="mt-10 space-y-8">
-          {content.body && content.body.filter(hasRealBodyContent).length > 0 ? (
-            content.body.filter(hasRealBodyContent).map((block) => <BodyBlock key={block.id} block={block} />)
-          ) : (
-            <p className="font-sans text-muted-foreground text-base leading-relaxed italic">
-              Full article content coming soon...
-            </p>
-          )}
+          {content.body && content.body.filter(hasRealBodyContent).length > 0
+            ? content.body.filter(hasRealBodyContent).map((block) => <BodyBlock key={block.id} block={block} />)
+            : null}
         </div>
       </article>
 
@@ -188,33 +177,41 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
   }
 
   if (block.type === "image") {
+    const hasCaption = isMeaningfulCaption(block.caption);
+    const hasCitation = Boolean(block.citation);
     return (
       <figure className="my-8 relative">
         <img src={block.content} alt={block.caption || ""} className="w-full rounded" loading="lazy" />
-        <div className="flex items-start justify-between mt-2 gap-4">
-          {isMeaningfulCaption(block.caption) ? (
-            <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption>
-          ) : <span />}
-          {block.citation && (
-            <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap">{block.citation}</span>
-          )}
-        </div>
+        {(hasCaption || hasCitation) && (
+          <div className="flex items-start justify-between mt-2 gap-4">
+            {hasCaption ? (
+              <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption>
+            ) : null}
+            {hasCitation ? (
+              <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap">{block.citation}</span>
+            ) : null}
+          </div>
+        )}
       </figure>
     );
   }
 
   if (block.type === "video") {
+    const hasCaption = isMeaningfulCaption(block.caption);
+    const hasCitation = Boolean(block.citation);
     return (
       <figure className="my-8 relative">
         <video src={block.content} controls className="w-full rounded" />
-        <div className="flex items-start justify-between mt-2 gap-4">
-          {isMeaningfulCaption(block.caption) ? (
-            <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption>
-          ) : <span />}
-          {block.citation && (
-            <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap">{block.citation}</span>
-          )}
-        </div>
+        {(hasCaption || hasCitation) && (
+          <div className="flex items-start justify-between mt-2 gap-4">
+            {hasCaption ? (
+              <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption>
+            ) : null}
+            {hasCitation ? (
+              <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap">{block.citation}</span>
+            ) : null}
+          </div>
+        )}
       </figure>
     );
   }

@@ -492,10 +492,14 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
             onFeaturedChange={(value) => update(hero.id, { featured: value })}
             onImageChange={(value) => update(hero.id, { imageUrl: value })}
             onVideoChange={(value) => update(hero.id, { videoUrl: value })}
-            onBodyChange={(value) => update(hero.id, { body: normalizeBodyFlow(value) })}
+            onBodyChange={(value) =>
+              update(hero.id, {
+                body: normalizeBodyFlow(value, hero.imageUrl, hero.videoUrl),
+              })
+            }
             onNormalizeBody={() =>
               update(hero.id, {
-                body: normalizeBodyFlow(hero.body || []),
+                body: normalizeBodyFlow(hero.body || [], hero.imageUrl, hero.videoUrl),
               })
             }
           />
@@ -544,10 +548,14 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
             onFeaturedChange={(value) => update(article.id, { featured: value })}
             onImageChange={(value) => update(article.id, { imageUrl: value })}
             onVideoChange={(value) => update(article.id, { videoUrl: value })}
-            onBodyChange={(value) => update(article.id, { body: normalizeBodyFlow(value) })}
+            onBodyChange={(value) =>
+              update(article.id, {
+                body: normalizeBodyFlow(value, article.imageUrl, article.videoUrl),
+              })
+            }
             onNormalizeBody={() =>
               update(article.id, {
-                body: normalizeBodyFlow(article.body || []),
+                body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl),
               })
             }
           />

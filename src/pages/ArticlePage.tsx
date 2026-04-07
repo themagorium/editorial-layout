@@ -6,6 +6,7 @@ import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { ArrowLeft } from "lucide-react";
 import { applyArticleSeo } from "@/lib/seo";
 import { useEffect } from "react";
+import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 const TEXT_PLACEHOLDERS = new Set([
   "Add story text",
@@ -58,6 +59,7 @@ function normalizeBylineAuthor(author?: string) {
 }
 
 export default function ArticlePage() {
+  useSyncPublishedContent();
   const { id } = useParams<{ id: string }>();
   let articles = getArticles();
   let heroes = getHeroes();

@@ -17,6 +17,7 @@ import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { applyHomeSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
+import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 function HeroCard({ hero }: { hero: HeroItem }) {
   const authorName = canonicalAuthorName(hero.author);
@@ -103,6 +104,7 @@ function ArticleCard({ article }: { article: Article }) {
 }
 
 export default function Index() {
+  useSyncPublishedContent();
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<AdSlot[]>([]);

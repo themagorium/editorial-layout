@@ -8,6 +8,8 @@ import {
   saveHeroes,
   saveArticles,
   saveAds,
+  publishEditorialContent,
+  syncPublishedContentToLocalStorage,
   resetToDefaults,
   CATEGORIES,
   formatEditionLabel,
@@ -182,29 +184,56 @@ function AdminDashboard() {
   const [currentEdition, setCurrentEdition] = useState<string>("");
   const [showNewEdition, setShowNewEdition] = useState(false);
   const [newEditionMonth, setNewEditionMonth] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const initialHeroes = getHeroes();
-    const initialArticles = getArticles();
-    const initialAds = getAds();
+    let active = true;
+    const initialize = async () => {
+      await syncPublishedContentToLocalStorage();
+      if (!active) return;
+      const initialHeroes = getHeroes();
+      const initialArticles = getArticles();
+      const initialAds = getAds();
 
-    setHeroes(initialHeroes);
-    setArticles(initialArticles);
-    setAds(initialAds);
+      setHeroes(initialHeroes);
+      setArticles(initialArticles);
+      setAds(initialAds);
 
-    const initialEditions = getEditionsFromState(initialHeroes, initialArticles);
-    if (initialEditions.length > 0) setCurrentEdition(initialEditions[0]);
+      const initialEditions = getEditionsFromState(initialHeroes, initialArticles);
+      if (initialEditions.length > 0) setCurrentEdition(initialEditions[0]);
+    };
+
+    void initialize();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const editions = useMemo(() => getEditionsFromState(heroes, articles), [heroes, articles]);
   const filteredHeroes = currentEdition ? heroes.filter((h) => h.edition === currentEdition) : heroes;
   const filteredArticles = currentEdition ? articles.filter((a) => a.edition === currentEdition) : articles;
 
-  const save = () => {
-    saveHeroes(heroes);
-    saveArticles(articles);
-    saveAds(ads);
-    toast.success("Content saved successfully!");
+  const save = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      saveHeroes(heroes);
+      saveArticles(articles);
+      saveAds(ads);
+      const published = await publishEditorialContent({ heroes, articles, ads });
+      if (!published.success) {
+        const fallbackMessage = published.error || "Could not publish content to live";
+        toast.warning(`${fallbackMessage}. Local draft was still saved in this browser.`);
+        return;
+      }
+
+      toast.success("Content saved and published to live.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not save content";
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleReset = () => {
@@ -349,8 +378,12 @@ function AdminDashboard() {
             <button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 text-sm border border-border rounded text-muted-foreground hover:text-foreground transition-colors">
               <RotateCcw className="w-4 h-4" /> Reset
             </button>
-            <button onClick={save} className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity">
-              Save Changes
+            <button
+              onClick={save}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-70"
+            >
+              {isSaving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>

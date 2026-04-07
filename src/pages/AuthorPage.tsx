@@ -4,6 +4,7 @@ import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { buildContentPath, getArticles, getHeroes, slugifyText } from "@/lib/content-store";
 import { applyAuthorSeo, canonicalAuthorName } from "@/lib/seo";
 import { useEffect, useMemo } from "react";
+import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 type StorySummary = {
   id: string;
@@ -20,6 +21,7 @@ export function normalizeAuthor(author: string) {
 }
 
 export default function AuthorPage() {
+  useSyncPublishedContent();
   const { slug = "" } = useParams<{ slug: string }>();
   const allStories = useMemo<StorySummary[]>(() => {
     const articles = getArticles().map((a) => ({

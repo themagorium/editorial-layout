@@ -12,8 +12,10 @@ import {
 } from "@/lib/content-store";
 import { trackEvent } from "@/lib/analytics";
 import { canonicalAuthorName, getAuthorPath } from "@/lib/seo";
+import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 export default function EditionPage() {
+  useSyncPublishedContent();
   const { edition } = useParams<{ edition: string }>();
   if (!edition) return null;
 

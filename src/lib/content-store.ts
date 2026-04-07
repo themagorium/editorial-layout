@@ -91,6 +91,13 @@ export interface AdSlot {
   height: number;
 }
 
+export interface PublishedEditorialContent {
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+  publishedAt: string;
+}
+
 export function slugifyText(value: string): string {
   return value
     .toLowerCase()
@@ -539,6 +546,24 @@ const STORAGE_KEYS = {
   version: "editorial_content_version",
 };
 
+function isPublishedContentPayload(value: unknown): value is PublishedEditorialContent {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<PublishedEditorialContent>;
+  return (
+    Array.isArray(candidate.heroes) &&
+    Array.isArray(candidate.articles) &&
+    Array.isArray(candidate.ads) &&
+    typeof candidate.publishedAt === "string"
+  );
+}
+
+function writePublishedContentToLocalStorage(content: PublishedEditorialContent) {
+  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(content.heroes));
+  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(content.articles));
+  localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(content.ads));
+  localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
+}
+
 function ensureFreshDefaults() {
   const storedVersion = localStorage.getItem(STORAGE_KEYS.version);
   if (storedVersion !== CONTENT_VERSION) {
@@ -612,6 +637,81 @@ export function resetToDefaults() {
   localStorage.removeItem(STORAGE_KEYS.heroes);
   localStorage.removeItem(STORAGE_KEYS.articles);
   localStorage.removeItem(STORAGE_KEYS.ads);
+}
+
+export async function syncPublishedContentToLocalStorage() {
+  if (typeof window === "undefined") {
+    return { synced: false, configured: false };
+  }
+
+  try {
+    const response = await fetch("/api/content", { cache: "no-store" });
+    if (!response.ok) return { synced: false, configured: false };
+
+    const payload = (await response.json()) as {
+      ok?: boolean;
+      content?: unknown;
+    };
+
+    if (!payload.ok) {
+      return { synced: false, configured: false };
+    }
+
+    if (!isPublishedContentPayload(payload.content)) {
+      return { synced: false, configured: true };
+    }
+
+    writePublishedContentToLocalStorage(payload.content);
+    return {
+      synced: true,
+      configured: true,
+      publishedAt: payload.content.publishedAt,
+    };
+  } catch {
+    return { synced: false, configured: false };
+  }
+}
+
+export async function publishEditorialContent(
+  content: Omit<PublishedEditorialContent, "publishedAt">,
+  adminPassword?: string,
+) {
+  try {
+    const response = await fetch("/api/content", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(adminPassword ? { "x-admin-password": adminPassword } : {}),
+      },
+      body: JSON.stringify(content),
+    });
+
+    const payload = (await response.json().catch(() => ({}))) as {
+      ok?: boolean;
+      error?: string;
+      publishedAt?: string;
+    };
+
+    if (!response.ok || !payload.ok) {
+      return {
+        success: false,
+        configured: true,
+        error: payload.error || "Publish request failed.",
+      };
+    }
+
+    return {
+      success: true,
+      configured: true,
+      publishedAt: payload.publishedAt,
+    };
+  } catch {
+    return {
+      success: false,
+      configured: false,
+      error: "Network error while publishing content.",
+    };
+  }
 }
 
 export function getEditions(): string[] {

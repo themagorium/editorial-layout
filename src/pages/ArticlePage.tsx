@@ -1,93 +1,68 @@
 import { useParams, Link } from "react-router-dom";
-import { buildContentPath, contentIdentifierMatches, getArticles, getHeroes, resetToDefaults, slugifyText } from "@/lib/content-store";
+import { useEffect, useState } from "react";
+import { buildContentPath, getPublishedContentSnapshot, slugifyText } from "@/lib/content-store";
 import type { ArticleBodyBlock } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { ArrowLeft } from "lucide-react";
 import { applyArticleSeo } from "@/lib/seo";
-import { useEffect } from "react";
-
-const TEXT_PLACEHOLDERS = new Set([
-  "Add story text",
-  "Add first body paragraph",
-  "Add second body paragraph",
-  "Add third body paragraph",
-]);
-
-const CAPTION_PLACEHOLDERS = new Set([
-  "Upload photo or video",
-  "Featured image",
-  "Featured video",
-]);
-
-function isMeaningfulText(value?: string) {
-  const trimmed = (value || "").trim();
-  if (!trimmed) return false;
-  return !TEXT_PLACEHOLDERS.has(trimmed);
-}
-
-function isMeaningfulCaption(value?: string) {
-  const trimmed = (value || "").trim();
-  if (!trimmed) return false;
-  return !CAPTION_PLACEHOLDERS.has(trimmed);
-}
-
-function hasRealBodyContent(block: ArticleBodyBlock) {
-  if (block.type === "text" || block.type === "heading") {
-    return isMeaningfulText(block.content);
-  }
-  if (block.type === "image" || block.type === "video") {
-    const content = (block.content || "").trim();
-    if (!content) return false;
-    // Hide legacy/broken non-media placeholders that were persisted as plain text.
-    if (/upload photo or video/i.test(content)) return false;
-    return true;
-  }
-  return false;
-}
-
-function normalizeBylineAuthor(author?: string) {
-  const normalized = (author || "").trim();
-  if (!normalized) return "The Magorium Staff";
-  if (/^magorium$/i.test(normalized)) return "The Magorium Staff";
-  if (/^the\s+magorium$/i.test(normalized)) return "The Magorium Staff";
-  if (/^(staff|editorial staff|the magorium editorial staff)$/i.test(normalized)) {
-    return "The Magorium Staff";
-  }
-  return normalized;
-}
 
 export default function ArticlePage() {
   const { id } = useParams<{ id: string }>();
-  let articles = getArticles();
-  let heroes = getHeroes();
-  let article = articles.find((a) => contentIdentifierMatches(a, id || ""));
+  const [content, setContent] = useState<{
+    id: string;
+    title: string;
+    excerpt: string;
+    category: string;
+    imageUrl: string;
+    videoUrl?: string;
+    author: string;
+    date: string;
+    body?: ArticleBodyBlock[];
+    edition: string;
+  } | undefined>(undefined);
+  const [loaded, setLoaded] = useState(false);
 
-  // Also search heroes — they share the same article detail page
-  let heroAsArticle = !article ? heroes.find((h) => contentIdentifierMatches(h, id || "")) : undefined;
+  useEffect(() => {
+    let active = true;
+    getPublishedContentSnapshot()
+      .then((snapshot) => {
+        if (!active) return;
+        const article = snapshot.articles.find((a) => a.id === id);
+        const heroAsArticle = article ? undefined : snapshot.heroes.find((h) => h.id === id);
+        const normalized = article || (heroAsArticle ? {
+          id: heroAsArticle.id,
+          title: heroAsArticle.title,
+          excerpt: heroAsArticle.excerpt || heroAsArticle.subtitle,
+          category: heroAsArticle.category,
+          imageUrl: heroAsArticle.imageUrl,
+          videoUrl: heroAsArticle.videoUrl,
+          author: heroAsArticle.author || "The Magorium Staff",
+          date: heroAsArticle.date,
+          body: (heroAsArticle.body || []) as ArticleBodyBlock[],
+          edition: heroAsArticle.edition,
+        } : undefined);
+        setContent(normalized);
+        setLoaded(true);
+      })
+      .catch(() => {
+        if (!active) return;
+        setLoaded(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
-  // If not found in either, reset localStorage and retry
-  if (!article && !heroAsArticle) {
-    resetToDefaults();
-    articles = getArticles();
-    heroes = getHeroes();
-    article = articles.find((a) => contentIdentifierMatches(a, id || ""));
-    heroAsArticle = !article ? heroes.find((h) => contentIdentifierMatches(h, id || "")) : undefined;
+  if (!loaded) {
+    return (
+      <div className="min-h-screen bg-background">
+        <EditorialHeader />
+        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground font-sans">Loading...</div>
+        <EditorialFooter />
+      </div>
+    );
   }
-
-  // Normalize hero into article-like shape for rendering
-  const content = article || (heroAsArticle ? {
-    id: heroAsArticle.id,
-    title: heroAsArticle.title,
-    excerpt: heroAsArticle.excerpt || heroAsArticle.subtitle,
-    category: heroAsArticle.category,
-    imageUrl: heroAsArticle.imageUrl,
-    videoUrl: heroAsArticle.videoUrl,
-    author: heroAsArticle.author || "The Magorium Staff",
-    date: heroAsArticle.date,
-    body: (heroAsArticle.body || []) as ArticleBodyBlock[],
-    edition: heroAsArticle.edition,
-  } : undefined);
 
   if (!content) {
     return (
@@ -104,7 +79,7 @@ export default function ArticlePage() {
 
   useEffect(() => {
     applyArticleSeo(content);
-  }, [content.author, content.date, content.excerpt, content.id, content.imageUrl, content.title]);
+  }, [content]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -128,10 +103,10 @@ export default function ArticlePage() {
         <p className="font-sans text-lg text-muted-foreground mt-4">{content.excerpt}</p>
         <div className="flex items-center gap-3 mt-6 text-sm font-sans text-muted-foreground border-b border-border pb-6">
           <Link
-            to={`/author/${slugifyText(normalizeBylineAuthor(content.author)) || "staff"}`}
+            to={`/author/${slugifyText(content.author) || "staff"}`}
             className="font-medium text-foreground hover:text-primary transition-colors"
           >
-            {normalizeBylineAuthor(content.author)}
+            {content.author}
           </Link>
           <span className="text-primary">·</span>
           <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
@@ -139,8 +114,10 @@ export default function ArticlePage() {
 
         {/* Article body blocks */}
         <div className="mt-10 space-y-8">
-          {content.body && content.body.filter(hasRealBodyContent).length > 0 ? (
-            content.body.filter(hasRealBodyContent).map((block) => <BodyBlock key={block.id} block={block} />)
+          {content.body && content.body.filter((block) => (block.content || "").trim()).length > 0 ? (
+            content.body
+              .filter((block) => (block.content || "").trim())
+              .map((block) => <BodyBlock key={block.id} block={block} />)
           ) : (
             <p className="font-sans text-muted-foreground text-base leading-relaxed italic">
               Full article content coming soon...
@@ -155,32 +132,10 @@ export default function ArticlePage() {
 }
 
 function BodyBlock({ block }: { block: ArticleBodyBlock }) {
-  const styledTextClass = [
-    block.textStyle === "bold" || block.textStyle === "bold-italic"
-      ? "font-semibold text-foreground"
-      : "text-foreground/90",
-    block.textStyle === "italic" || block.textStyle === "bold-italic" ? "italic font-serif" : "",
-  ].join(" ");
-
-  if (block.type === "heading") {
-    const headingClass = [
-      "font-editorial text-2xl md:text-3xl text-foreground mt-10 mb-4 leading-tight",
-      block.textStyle === "bold" ? "font-bold" : "font-semibold",
-      block.textStyle === "italic" || block.textStyle === "bold-italic" ? "italic" : "",
-      block.textStyle === "bold-italic" ? "font-bold" : "",
-    ].join(" ");
-
-    return (
-      <h2 className={headingClass}>
-        {block.content}
-      </h2>
-    );
-  }
-
   if (block.type === "text") {
     return (
       <div
-        className={`font-sans text-base md:text-lg leading-relaxed whitespace-pre-wrap ${styledTextClass}`}
+        className="font-sans text-base md:text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap"
       >
         {block.content}
       </div>
@@ -192,7 +147,7 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
       <figure className="my-8 relative">
         <img src={block.content} alt={block.caption || ""} className="w-full rounded" loading="lazy" />
         <div className="flex items-start justify-between mt-2 gap-4">
-          {isMeaningfulCaption(block.caption) ? (
+          {block.caption ? (
             <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption>
           ) : <span />}
           {block.citation && (
@@ -208,7 +163,7 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
       <figure className="my-8 relative">
         <video src={block.content} controls className="w-full rounded" />
         <div className="flex items-start justify-between mt-2 gap-4">
-          {isMeaningfulCaption(block.caption) ? (
+          {block.caption ? (
             <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption>
           ) : <span />}
           {block.citation && (

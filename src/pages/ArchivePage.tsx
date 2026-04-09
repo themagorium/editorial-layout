@@ -1,41 +1,52 @@
-import { useMemo, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
-import { getEditions, formatEditionLabel, getHeroesByEdition, getArticlesByEdition } from "@/lib/content-store";
+import { getPublishedContentSnapshot, formatEditionLabel } from "@/lib/content-store";
 import { Search, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import { applyCollectionSeo } from "@/lib/seo";
 
 export default function ArchivePage() {
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get("category") || "";
   const [search, setSearch] = useState(categoryFilter);
+  const [editions, setEditions] = useState<Array<{
+    key: string;
+    label: string;
+    heroCount: number;
+    articleCount: number;
+    coverImage?: string;
+  }>>([]);
 
-  const editions = useMemo(() => {
-    return getEditions().map((ed) => ({
-      key: ed,
-      label: formatEditionLabel(ed),
-      heroCount: getHeroesByEdition(ed).slice(0, 3).length,
-      articleCount: getArticlesByEdition(ed).slice(0, 4).length,
-      // Use first hero image as cover
-      coverImage: getHeroesByEdition(ed)[0]?.imageUrl,
-    }));
+  useEffect(() => {
+    getPublishedContentSnapshot().then((snapshot) => {
+      const editionKeys = new Set<string>();
+      snapshot.heroes.forEach((h) => editionKeys.add(h.edition));
+      snapshot.articles.forEach((a) => editionKeys.add(a.edition));
+
+      const nextEditions = Array.from(editionKeys)
+        .sort()
+        .reverse()
+        .map((ed) => {
+          const heroes = snapshot.heroes.filter((h) => h.edition === ed);
+          const articles = snapshot.articles.filter((a) => a.edition === ed);
+          return {
+            key: ed,
+            label: formatEditionLabel(ed),
+            heroCount: heroes.slice(0, 3).length,
+            articleCount: articles.slice(0, 4).length,
+            coverImage: heroes[0]?.imageUrl,
+          };
+        });
+      setEditions(nextEditions);
+    });
   }, []);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return editions;
     const q = search.toLowerCase();
-    return editions.filter((e) => {
-      if (e.label.toLowerCase().includes(q)) return true;
-      const heroes = getHeroesByEdition(e.key);
-      const articles = getArticlesByEdition(e.key);
-      return (
-        heroes.some((h) => h.title.toLowerCase().includes(q) || h.category.toLowerCase().includes(q)) ||
-        articles.some((a) => a.title.toLowerCase().includes(q) || a.category.toLowerCase().includes(q) || a.author.toLowerCase().includes(q))
-      );
-    });
+    return editions.filter((e) => e.label.toLowerCase().includes(q));
   }, [search, editions]);
 
   useEffect(() => {

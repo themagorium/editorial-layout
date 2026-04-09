@@ -8,6 +8,7 @@ import {
   saveHeroes,
   saveArticles,
   saveAds,
+  publishContentSnapshot,
   resetToDefaults,
   CATEGORIES,
   formatEditionLabel,
@@ -57,17 +58,6 @@ function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[]
   heroes.forEach((h) => editions.add(h.edition));
   articles.forEach((a) => editions.add(a.edition));
   return Array.from(editions).sort().reverse();
-}
-
-function createOctoberPatternBody(seed: string): ArticleBodyBlock[] {
-  return [
-    { id: `${seed}-t1`, type: "text", content: "Add first body paragraph" },
-    { id: `${seed}-m1`, type: "image", content: "", caption: "Upload photo or video" },
-    { id: `${seed}-t2`, type: "text", content: "Add second body paragraph" },
-    { id: `${seed}-m2`, type: "image", content: "", caption: "Upload photo or video" },
-    { id: `${seed}-t3`, type: "text", content: "Add third body paragraph" },
-    { id: `${seed}-m3`, type: "image", content: "", caption: "Upload photo or video" },
-  ];
 }
 
 export default function AdminPage() {
@@ -200,11 +190,16 @@ function AdminDashboard() {
   const filteredHeroes = currentEdition ? heroes.filter((h) => h.edition === currentEdition) : heroes;
   const filteredArticles = currentEdition ? articles.filter((a) => a.edition === currentEdition) : articles;
 
-  const save = () => {
+  const save = async () => {
     saveHeroes(heroes);
     saveArticles(articles);
     saveAds(ads);
-    toast.success("Content saved successfully!");
+    try {
+      await publishContentSnapshot(heroes, articles, ads);
+      toast.success("Content published successfully.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to publish content.");
+    }
   };
 
   const handleReset = () => {
@@ -242,90 +237,18 @@ function AdminDashboard() {
       return;
     }
 
-    const stamp = Date.now();
-
     // Create starter template content for new edition
     const starterHeroes: HeroItem[] = [
-      {
-        id: `h-${stamp}-1`,
-        title: "New Hero 1",
-        subtitle: "Add your first hero story",
-        category: "Travel",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`h-${stamp}-1`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `h-${stamp}-2`,
-        title: "New Hero 2",
-        subtitle: "Add your second hero story",
-        category: "Fashion",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`h-${stamp}-2`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `h-${stamp}-3`,
-        title: "New Hero 3",
-        subtitle: "Add your third hero story",
-        category: "Art & Design",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`h-${stamp}-3`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
+      { id: `h-${Date.now()}-1`, title: "New Hero 1", subtitle: "Add your first hero story", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      { id: `h-${Date.now()}-2`, title: "New Hero 2", subtitle: "Add your second hero story", category: "Fashion", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      { id: `h-${Date.now()}-3`, title: "New Hero 3", subtitle: "Add your third hero story", category: "Art & Design", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
     ];
 
     const starterArticles: Article[] = [
-      {
-        id: `a-${stamp}-1`,
-        title: "New Article 1",
-        excerpt: "Add your first article",
-        category: "Yachting",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-1`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `a-${stamp}-2`,
-        title: "New Article 2",
-        excerpt: "Add your second article",
-        category: "Sports",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-2`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `a-${stamp}-3`,
-        title: "New Article 3",
-        excerpt: "Add your third article",
-        category: "Golf",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-3`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `a-${stamp}-4`,
-        title: "New Article 4",
-        excerpt: "Add your fourth article",
-        category: "Tennis",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-4`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
+      { id: `a-${Date.now()}-1`, title: "New Article 1", excerpt: "Add your first article", category: "Yachting", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      { id: `a-${Date.now()}-2`, title: "New Article 2", excerpt: "Add your second article", category: "Sports", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      { id: `a-${Date.now()}-3`, title: "New Article 3", excerpt: "Add your third article", category: "Golf", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
+      { id: `a-${Date.now()}-4`, title: "New Article 4", excerpt: "Add your fourth article", category: "Tennis", imageUrl: "", author: "Editor", date: new Date().toISOString().split("T")[0], edition: newEditionMonth },
     ];
 
     setHeroes([...heroes, ...starterHeroes]);
@@ -447,17 +370,7 @@ function AdminDashboard() {
 function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { heroes: HeroItem[]; setHeroes: (h: HeroItem[]) => void; filteredHeroes: HeroItem[]; currentEdition: string }) {
   const addHero = () => {
     setHeroes([
-      {
-        id: `h-${Date.now()}`,
-        title: "New Hero",
-        subtitle: "",
-        category: "Travel",
-        imageUrl: "",
-        author: "",
-        body: [],
-        date: new Date().toISOString().split("T")[0],
-        edition: currentEdition || new Date().toISOString().slice(0, 7),
-      },
+      { id: `h-${Date.now()}`, title: "New Hero", subtitle: "", category: "Travel", imageUrl: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) },
       ...heroes,
     ]);
   };
@@ -473,32 +386,24 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
       <AddButton onClick={addHero} label={`Add Hero to ${currentEdition ? formatEditionLabel(currentEdition) : 'Edition'}`} />
       {filteredHeroes.map((hero) => (
         <ContentCard key={hero.id} onRemove={() => remove(hero.id)}>
-          <EditableStoryForm
-            kind="hero"
-            title={hero.title}
-            summary={hero.subtitle}
-            category={hero.category}
-            author={hero.author || ""}
-            date={hero.date}
-            featured={hero.featured}
-            imageUrl={hero.imageUrl}
-            videoUrl={hero.videoUrl}
-            body={hero.body || []}
-            onTitleChange={(value) => update(hero.id, { title: value })}
-            onSummaryChange={(value) => update(hero.id, { subtitle: value })}
-            onCategoryChange={(value) => update(hero.id, { category: value })}
-            onAuthorChange={(value) => update(hero.id, { author: value })}
-            onDateChange={(value) => update(hero.id, { date: value })}
-            onFeaturedChange={(value) => update(hero.id, { featured: value })}
-            onImageChange={(value) => update(hero.id, { imageUrl: value })}
-            onVideoChange={(value) => update(hero.id, { videoUrl: value })}
-            onBodyChange={(value) => update(hero.id, { body: normalizeBodyFlow(value) })}
-            onNormalizeBody={() =>
-              update(hero.id, {
-                body: normalizeBodyFlow(hero.body || []),
-              })
-            }
-          />
+          <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+            <MediaUpload
+              imageUrl={hero.imageUrl}
+              videoUrl={hero.videoUrl}
+              onImage={(url) => update(hero.id, { imageUrl: url })}
+              onVideo={(url) => update(hero.id, { videoUrl: url })}
+            />
+            <div className="space-y-3">
+              <input value={hero.title} onChange={(e) => update(hero.id, { title: e.target.value })} placeholder="Hero title" className="w-full bg-secondary text-foreground px-3 py-2 rounded font-serif text-lg" />
+              <input value={hero.subtitle} onChange={(e) => update(hero.id, { subtitle: e.target.value })} placeholder="Subtitle" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
+              <div className="flex gap-3">
+                <select value={hero.category} onChange={(e) => update(hero.id, { category: e.target.value as Category })} className="bg-secondary text-foreground px-3 py-2 rounded text-sm">
+                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <input type="date" value={hero.date} onChange={(e) => update(hero.id, { date: e.target.value })} className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+              </div>
+            </div>
+          </div>
         </ContentCard>
       ))}
     </div>
@@ -525,158 +430,38 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
       <AddButton onClick={addArticle} label={`Add Article to ${currentEdition ? formatEditionLabel(currentEdition) : 'Edition'}`} />
       {filteredArticles.map((article) => (
         <ContentCard key={article.id} onRemove={() => remove(article.id)}>
-          <EditableStoryForm
-            kind="article"
-            title={article.title}
-            summary={article.excerpt}
-            category={article.category}
-            author={article.author}
-            date={article.date}
-            featured={article.featured}
-            imageUrl={article.imageUrl}
-            videoUrl={article.videoUrl}
-            body={article.body || []}
-            onTitleChange={(value) => update(article.id, { title: value })}
-            onSummaryChange={(value) => update(article.id, { excerpt: value })}
-            onCategoryChange={(value) => update(article.id, { category: value })}
-            onAuthorChange={(value) => update(article.id, { author: value })}
-            onDateChange={(value) => update(article.id, { date: value })}
-            onFeaturedChange={(value) => update(article.id, { featured: value })}
-            onImageChange={(value) => update(article.id, { imageUrl: value })}
-            onVideoChange={(value) => update(article.id, { videoUrl: value })}
-            onBodyChange={(value) => update(article.id, { body: normalizeBodyFlow(value) })}
-            onNormalizeBody={() =>
-              update(article.id, {
-                body: normalizeBodyFlow(article.body || []),
-              })
-            }
-          />
+          <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+            <MediaUpload
+              imageUrl={article.imageUrl}
+              videoUrl={article.videoUrl}
+              onImage={(url) => update(article.id, { imageUrl: url })}
+              onVideo={(url) => update(article.id, { videoUrl: url })}
+            />
+            <div className="space-y-3">
+              <input value={article.title} onChange={(e) => update(article.id, { title: e.target.value })} placeholder="Article title" className="w-full bg-secondary text-foreground px-3 py-2 rounded font-serif text-lg" />
+              <textarea value={article.excerpt} onChange={(e) => update(article.id, { excerpt: e.target.value })} placeholder="Excerpt" rows={2} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
+              <div className="flex flex-wrap gap-3">
+                <select value={article.category} onChange={(e) => update(article.id, { category: e.target.value as Category })} className="bg-secondary text-foreground px-3 py-2 rounded text-sm">
+                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <input value={article.author} onChange={(e) => update(article.id, { author: e.target.value })} placeholder="Author" className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+                <input type="date" value={article.date} onChange={(e) => update(article.id, { date: e.target.value })} className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+                <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                  <input type="checkbox" checked={article.featured || false} onChange={(e) => update(article.id, { featured: e.target.checked })} className="accent-primary" />
+                  Featured
+                </label>
+              </div>
+              {/* Article body editor */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <ArticleBodyEditor
+                  blocks={article.body || []}
+                  onChange={(blocks) => update(article.id, { body: blocks })}
+                />
+              </div>
+            </div>
+          </div>
         </ContentCard>
       ))}
-    </div>
-  );
-}
-
-function EditableStoryForm({
-  kind,
-  title,
-  summary,
-  category,
-  author,
-  date,
-  featured,
-  imageUrl,
-  videoUrl,
-  body,
-  onTitleChange,
-  onSummaryChange,
-  onCategoryChange,
-  onAuthorChange,
-  onDateChange,
-  onFeaturedChange,
-  onImageChange,
-  onVideoChange,
-  onBodyChange,
-  onNormalizeBody,
-}: {
-  kind: "hero" | "article";
-  title: string;
-  summary: string;
-  category: Category;
-  author: string;
-  date: string;
-  featured?: boolean;
-  imageUrl?: string;
-  videoUrl?: string;
-  body: any[];
-  onTitleChange: (value: string) => void;
-  onSummaryChange: (value: string) => void;
-  onCategoryChange: (value: Category) => void;
-  onAuthorChange: (value: string) => void;
-  onDateChange: (value: string) => void;
-  onFeaturedChange: (value: boolean) => void;
-  onImageChange: (value: string) => void;
-  onVideoChange: (value: string) => void;
-  onBodyChange: (value: any[]) => void;
-  onNormalizeBody: () => void;
-}) {
-  const isArticle = kind === "article";
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
-      <MediaUpload
-        imageUrl={imageUrl}
-        videoUrl={videoUrl}
-        onImage={onImageChange}
-        onVideo={onVideoChange}
-      />
-      <div className="space-y-3">
-        <input
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          placeholder={isArticle ? "Article title" : "Hero title"}
-          className="w-full bg-secondary text-foreground px-3 py-2 rounded font-serif text-lg"
-        />
-        <textarea
-          value={summary}
-          onChange={(e) => onSummaryChange(e.target.value)}
-          placeholder={isArticle ? "Excerpt" : "Subtitle / deck"}
-          rows={2}
-          className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none"
-        />
-        <div className="flex flex-wrap gap-3">
-          <select value={category} onChange={(e) => onCategoryChange(e.target.value as Category)} className="bg-secondary text-foreground px-3 py-2 rounded text-sm">
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <input
-            value={author}
-            onChange={(e) => onAuthorChange(e.target.value)}
-            placeholder="Writer / Journalist Name"
-            className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
-          />
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Published</span>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => onDateChange(e.target.value)}
-              className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
-            />
-            <button
-              type="button"
-              onClick={() => onDateChange(new Date().toISOString().split("T")[0])}
-              className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-            >
-              Today
-            </button>
-          </div>
-          {isArticle && (
-            <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-              <input type="checkbox" checked={featured || false} onChange={(e) => onFeaturedChange(e.target.checked)} className="accent-primary" />
-              Featured
-            </label>
-          )}
-        </div>
-        <div className="mt-4 pt-4 border-t border-border">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
-              Preferred flow: {formatEditionLabel(date.slice(0, 7))} · photo/video → text → photo/video → text
-            </p>
-            <button
-              type="button"
-              onClick={onNormalizeBody}
-              className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-            >
-              Auto Arrange
-            </button>
-          </div>
-          <ArticleBodyEditor
-            blocks={body}
-            heading={isArticle ? "Article Body" : "Hero Body"}
-            onChange={onBodyChange}
-          />
-        </div>
-      </div>
     </div>
   );
 }
@@ -760,60 +545,6 @@ function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
       <Plus className="w-4 h-4" /> {label}
     </button>
   );
-}
-
-function normalizeBodyFlow(
-  blocks: ArticleBodyBlock[],
-  imageUrl?: string,
-  videoUrl?: string,
-): ArticleBodyBlock[] {
-  const source = blocks.filter(Boolean);
-  const textBlocks = source.filter((b) => b.type === "text" || b.type === "heading");
-  const mediaBlocks = source.filter((b) => b.type === "image" || b.type === "video");
-  const ordered: ArticleBodyBlock[] = [];
-
-  if (textBlocks.length === 0) {
-    ordered.push({ id: `auto-t-${Date.now()}`, type: "text", content: "Add body text" });
-    if (videoUrl) {
-      ordered.push({ id: `auto-v-${Date.now()}`, type: "video", content: videoUrl, caption: "Featured video" });
-    } else {
-      ordered.push({
-        id: `auto-i-${Date.now()}`,
-        type: "image",
-        content: imageUrl || "",
-        caption: imageUrl ? "Featured image" : "Upload photo or video",
-      });
-    }
-    return ordered;
-  }
-
-  const max = Math.max(textBlocks.length, mediaBlocks.length || 1);
-  for (let i = 0; i < max; i += 1) {
-    if (textBlocks[i]) {
-      ordered.push(textBlocks[i]);
-    }
-    if (mediaBlocks[i]) {
-      ordered.push(mediaBlocks[i]);
-    } else if (i < textBlocks.length) {
-      if (videoUrl) {
-        ordered.push({
-          id: `auto-v-${Date.now()}-${i}`,
-          type: "video",
-          content: videoUrl,
-          caption: "Featured video",
-        });
-      } else {
-        ordered.push({
-          id: `auto-i-${Date.now()}-${i}`,
-          type: "image",
-          content: imageUrl || "",
-          caption: imageUrl ? "Featured image" : "Upload photo or video",
-        });
-      }
-    }
-  }
-
-  return ordered;
 }
 
 function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {

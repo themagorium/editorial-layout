@@ -3,7 +3,7 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import AdPlacement from "@/components/editorial/AdPlacement";
 
-import { getAds, getLatestEdition, getHeroesByEdition, getArticlesByEdition, formatEditionLabel, buildContentPath } from "@/lib/content-store";
+import { getPublishedContentSnapshot, formatEditionLabel, buildContentPath } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
@@ -85,12 +85,19 @@ export default function Index() {
   const [editionLabel, setEditionLabel] = useState("");
 
   useEffect(() => {
-    const edition = getLatestEdition();
-    setHeroes(getHeroesByEdition(edition).slice(0, 3));
-    setArticles(getArticlesByEdition(edition).slice(0, 4));
-    setAds(getAds());
-    setEditionLabel(formatEditionLabel(edition));
-    applyHomeSeo();
+    getPublishedContentSnapshot()
+      .then((snapshot) => {
+        const editions = new Set<string>();
+        snapshot.heroes.forEach((h) => editions.add(h.edition));
+        snapshot.articles.forEach((a) => editions.add(a.edition));
+        const latestEdition = Array.from(editions).sort().reverse()[0] || "2026-02";
+
+        setHeroes(snapshot.heroes.filter((h) => h.edition === latestEdition).slice(0, 3));
+        setArticles(snapshot.articles.filter((a) => a.edition === latestEdition).slice(0, 4));
+        setAds(snapshot.ads);
+        setEditionLabel(formatEditionLabel(latestEdition));
+        applyHomeSeo();
+      });
   }, []);
 
   const hasAdMedia = (ad: AdSlot) => Boolean(ad.imageUrl || ad.videoUrl);

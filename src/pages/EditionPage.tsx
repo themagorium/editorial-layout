@@ -1,16 +1,48 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
-import { getHeroesByEdition, getArticlesByEdition, formatEditionLabel } from "@/lib/content-store";
+import { getPublishedContentSnapshot, formatEditionLabel } from "@/lib/content-store";
+import type { HeroItem, Article } from "@/lib/content-store";
 import { trackEvent } from "@/lib/analytics";
 
 export default function EditionPage() {
   const { edition } = useParams<{ edition: string }>();
   if (!edition) return null;
 
-  const heroes = getHeroesByEdition(edition).slice(0, 3);
-  const articles = getArticlesByEdition(edition).slice(0, 4);
+  const [heroes, setHeroes] = useState<HeroItem[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    getPublishedContentSnapshot()
+      .then((snapshot) => {
+        if (!active) return;
+        setHeroes(snapshot.heroes.filter((h) => h.edition === edition).slice(0, 3));
+        setArticles(snapshot.articles.filter((a) => a.edition === edition).slice(0, 4));
+        setLoaded(true);
+      })
+      .catch(() => {
+        if (!active) return;
+        setLoaded(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [edition]);
+
   const label = formatEditionLabel(edition);
+
+  if (!loaded) {
+    return (
+      <div className="min-h-screen bg-background">
+        <EditorialHeader />
+        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground font-sans">Loading...</div>
+        <EditorialFooter />
+      </div>
+    );
+  }
 
   if (heroes.length === 0 && articles.length === 0) {
     return (

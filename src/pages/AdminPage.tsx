@@ -8,6 +8,7 @@ import {
   saveHeroes,
   saveArticles,
   saveAds,
+  publishContentSnapshot,
   resetToDefaults,
   CATEGORIES,
   formatEditionLabel,
@@ -189,11 +190,16 @@ function AdminDashboard() {
   const filteredHeroes = currentEdition ? heroes.filter((h) => h.edition === currentEdition) : heroes;
   const filteredArticles = currentEdition ? articles.filter((a) => a.edition === currentEdition) : articles;
 
-  const save = () => {
+  const save = async () => {
     saveHeroes(heroes);
     saveArticles(articles);
     saveAds(ads);
-    toast.success("Content saved successfully!");
+    try {
+      await publishContentSnapshot(heroes, articles, ads);
+      toast.success("Content published successfully.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to publish content.");
+    }
   };
 
   const handleReset = () => {

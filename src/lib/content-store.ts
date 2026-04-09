@@ -396,6 +396,7 @@ const DEFAULT_ADS: AdSlot[] = [
 // ===== Storage & API =====
 // Bump this version whenever DEFAULT content changes to invalidate stale localStorage
 const CONTENT_VERSION = "3";
+const PUBLISHED_CONTENT_ENDPOINT = "/api/published-content";
 const STORAGE_KEYS = {
   heroes: "editorial_heroes",
   articles: "editorial_articles",
@@ -442,6 +443,47 @@ export function saveAds(ads: AdSlot[]) {
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(ads));
 }
 
+export async function publishContentSnapshot(heroes: HeroItem[], articles: Article[], ads: AdSlot[]) {
+  const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ heroes, articles, ads }),
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({} as { error?: string }));
+    throw new Error(payload.error || "Publishing failed.");
+  }
+}
+
+export async function getPublishedContentSnapshot(): Promise<{
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+}> {
+  if (typeof window === "undefined") {
+    return DEFAULT_PUBLISHED_CONTENT;
+  }
+  try {
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT);
+    if (!response.ok) return DEFAULT_PUBLISHED_CONTENT;
+    const payload = await response.json().catch(() => null as unknown as {
+      heroes?: HeroItem[];
+      articles?: Article[];
+      ads?: AdSlot[];
+    } | null);
+    if (!payload || !Array.isArray(payload.heroes) || !Array.isArray(payload.articles) || !Array.isArray(payload.ads)) {
+      return DEFAULT_PUBLISHED_CONTENT;
+    }
+    return {
+      heroes: payload.heroes,
+      articles: payload.articles,
+      ads: payload.ads,
+    };
+  } catch {
+    return DEFAULT_PUBLISHED_CONTENT;
+  }
+}
+
 export function resetToDefaults() {
   localStorage.removeItem(STORAGE_KEYS.heroes);
   localStorage.removeItem(STORAGE_KEYS.articles);
@@ -475,3 +517,14 @@ export function formatEditionLabel(edition: string): string {
   const date = new Date(parseInt(year), parseInt(month) - 1);
   return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
+
+// Server-published snapshot fallback defaults
+export const DEFAULT_PUBLISHED_CONTENT: {
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+} = {
+  heroes: DEFAULT_HEROES,
+  articles: DEFAULT_ARTICLES,
+  ads: DEFAULT_ADS,
+};

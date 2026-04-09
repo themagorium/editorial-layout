@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { getArticles, getHeroes, resetToDefaults } from "@/lib/content-store";
+import { useEffect, useState } from "react";
+import { getPublishedContentSnapshot } from "@/lib/content-store";
 import type { ArticleBodyBlock } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
@@ -7,35 +8,60 @@ import { ArrowLeft } from "lucide-react";
 
 export default function ArticlePage() {
   const { id } = useParams<{ id: string }>();
-  let articles = getArticles();
-  let heroes = getHeroes();
-  let article = articles.find((a) => a.id === id);
+  const [content, setContent] = useState<{
+    id: string;
+    title: string;
+    excerpt: string;
+    category: string;
+    imageUrl: string;
+    videoUrl?: string;
+    author: string;
+    date: string;
+    body?: ArticleBodyBlock[];
+    edition: string;
+  } | undefined>(undefined);
+  const [loaded, setLoaded] = useState(false);
 
-  // Also search heroes — they share the same article detail page
-  let heroAsArticle = !article ? heroes.find((h) => h.id === id) : undefined;
+  useEffect(() => {
+    let active = true;
+    getPublishedContentSnapshot()
+      .then((snapshot) => {
+        if (!active) return;
+        const article = snapshot.articles.find((a) => a.id === id);
+        const heroAsArticle = article ? undefined : snapshot.heroes.find((h) => h.id === id);
+        const normalized = article || (heroAsArticle ? {
+          id: heroAsArticle.id,
+          title: heroAsArticle.title,
+          excerpt: heroAsArticle.subtitle,
+          category: heroAsArticle.category,
+          imageUrl: heroAsArticle.imageUrl,
+          videoUrl: heroAsArticle.videoUrl,
+          author: heroAsArticle.author || "The Magorium",
+          date: heroAsArticle.date,
+          body: (heroAsArticle.body || []) as ArticleBodyBlock[],
+          edition: heroAsArticle.edition,
+        } : undefined);
+        setContent(normalized);
+        setLoaded(true);
+      })
+      .catch(() => {
+        if (!active) return;
+        setLoaded(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
-  // If not found in either, reset localStorage and retry
-  if (!article && !heroAsArticle) {
-    resetToDefaults();
-    articles = getArticles();
-    heroes = getHeroes();
-    article = articles.find((a) => a.id === id);
-    heroAsArticle = !article ? heroes.find((h) => h.id === id) : undefined;
+  if (!loaded) {
+    return (
+      <div className="min-h-screen bg-background">
+        <EditorialHeader />
+        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground font-sans">Loading...</div>
+        <EditorialFooter />
+      </div>
+    );
   }
-
-  // Normalize hero into article-like shape for rendering
-  const content = article || (heroAsArticle ? {
-    id: heroAsArticle.id,
-    title: heroAsArticle.title,
-    excerpt: heroAsArticle.subtitle,
-    category: heroAsArticle.category,
-    imageUrl: heroAsArticle.imageUrl,
-    videoUrl: heroAsArticle.videoUrl,
-    author: heroAsArticle.author || "The Magorium",
-    date: heroAsArticle.date,
-    body: (heroAsArticle.body || []) as ArticleBodyBlock[],
-    edition: heroAsArticle.edition,
-  } : undefined);
 
   if (!content) {
     return (

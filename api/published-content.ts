@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { kv } from "@vercel/kv";
+import { verifyPublishToken } from "./lib/publish-token";
 
 type PublishedPayload = {
   heroes?: unknown[];
@@ -10,10 +10,34 @@ type PublishedPayload = {
 
 const CONTENT_KEY = "magorium:published-content:v1";
 
+async function getKvClient() {
+  const { kv } = await import("@vercel/kv");
+  return kv;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "GET") {
-    const payload = await kv.get<PublishedPayload>(CONTENT_KEY);
-    res.status(200).json({ payload: payload ?? null });
+    try {
+      const kv = await getKvClient();
+      const payload = await kv.get<PublishedPayload>(CONTENT_KEY);
+      if (!payload) {
+        res.status(200).json({ payload: null });
+        return;
+      }
+
+      res.status(200).json({
+        heroes: Array.isArray(payload.heroes) ? payload.heroes : [],
+        articles: Array.isArray(payload.articles) ? payload.articles : [],
+        ads: Array.isArray(payload.ads) ? payload.ads : [],
+        updatedAt: payload.updatedAt ?? null,
+      });
+      return;
+    } catch (error) {
+      res.status(500).json({
+        error: "Published content store is unavailable.",
+        details: error instanceof Error ? error.message : "Unknown error.",
+      });
+    }
     return;
   }
 
@@ -25,7 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const adminPassword = process.env.ADMIN_PASSWORD;
   const authHeader = req.headers.authorization || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-  if (!adminPassword || token !== adminPassword) {
+  if (!adminPassword || !verifyPublishToken(token, adminPassword)) {
     res.status(401).json({ error: "Unauthorized." });
     return;
   }
@@ -43,6 +67,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     updatedAt: new Date().toISOString(),
   };
 
-  await kv.set(CONTENT_KEY, payload);
-  res.status(200).json({ success: true, updatedAt: payload.updatedAt });
+  try {
+    const kv = await getKvClient();
+    await kv.set(CONTENT_KEY, payload);
+    res.status(200).json({ success: true, updatedAt: payload.updatedAt });
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to write published content.",
+      details: error instanceof Error ? error.message : "Unknown error.",
+    });
+  }
 }

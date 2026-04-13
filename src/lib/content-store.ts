@@ -397,6 +397,7 @@ const DEFAULT_ADS: AdSlot[] = [
 // Bump this version whenever DEFAULT content changes to invalidate stale localStorage
 const CONTENT_VERSION = "3";
 const PUBLISHED_CONTENT_ENDPOINT = "/api/published-content";
+const ADMIN_PUBLISH_TOKEN_KEY = "magorium-admin-token";
 const STORAGE_KEYS = {
   heroes: "editorial_heroes",
   articles: "editorial_articles",
@@ -444,9 +445,17 @@ export function saveAds(ads: AdSlot[]) {
 }
 
 export async function publishContentSnapshot(heroes: HeroItem[], articles: Article[], ads: AdSlot[]) {
+  const token = localStorage.getItem(ADMIN_PUBLISH_TOKEN_KEY)?.trim() || sessionStorage.getItem(ADMIN_PUBLISH_TOKEN_KEY)?.trim();
+  if (!token) {
+    throw new Error("Unauthorized. Please sign in to publish.");
+  }
+
   const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify({ heroes, articles, ads }),
   });
   if (!response.ok) {
@@ -467,17 +476,28 @@ export async function getPublishedContentSnapshot(): Promise<{
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT);
     if (!response.ok) return DEFAULT_PUBLISHED_CONTENT;
     const payload = await response.json().catch(() => null as unknown as {
+      payload?: {
+        heroes?: HeroItem[];
+        articles?: Article[];
+        ads?: AdSlot[];
+      } | null;
       heroes?: HeroItem[];
       articles?: Article[];
       ads?: AdSlot[];
     } | null);
-    if (!payload || !Array.isArray(payload.heroes) || !Array.isArray(payload.articles) || !Array.isArray(payload.ads)) {
+    const normalizedPayload = payload?.payload && typeof payload.payload === "object" ? payload.payload : payload;
+    if (
+      !normalizedPayload ||
+      !Array.isArray(normalizedPayload.heroes) ||
+      !Array.isArray(normalizedPayload.articles) ||
+      !Array.isArray(normalizedPayload.ads)
+    ) {
       return DEFAULT_PUBLISHED_CONTENT;
     }
     return {
-      heroes: payload.heroes,
-      articles: payload.articles,
-      ads: payload.ads,
+      heroes: normalizedPayload.heroes,
+      articles: normalizedPayload.articles,
+      ads: normalizedPayload.ads,
     };
   } catch {
     return DEFAULT_PUBLISHED_CONTENT;

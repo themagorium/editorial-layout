@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import handler from "../../api/admin-login";
+import { verifyPublishToken } from "../../api/lib/publish-token";
 
 describe("admin-login API", () => {
   it("authenticates using ADMIN_PASSWORD env var", async () => {
@@ -26,7 +27,10 @@ describe("admin-login API", () => {
 
     await handler(req, res);
     expect(statusCode).toBe(200);
-    expect(jsonBody).toEqual({ success: true });
+    expect(jsonBody).toMatchObject({ success: true });
+    const token = (jsonBody as { token?: string }).token;
+    expect(typeof token).toBe("string");
+    expect(verifyPublishToken(token || "", "secret")).toBe(true);
 
     if (previous === undefined) {
       delete process.env.ADMIN_PASSWORD;

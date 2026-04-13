@@ -41,6 +41,7 @@ import {
 } from "@/lib/analytics";
 import {
   isAdminAuthenticated,
+  setAdminPublishToken,
   setAdminAuthenticated,
   resetAdminPasswordAccess,
 } from "@/lib/admin-auth";
@@ -92,10 +93,11 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: passwordInput }),
       });
-      const payload = await response.json().catch(() => ({} as { success?: boolean }));
-      if (response.ok && payload.success) {
+      const payload = await response.json().catch(() => ({} as { success?: boolean; token?: string }));
+      if (response.ok && payload.success && typeof payload.token === "string") {
         setAuthenticated(true);
         setAdminAuthenticated(true);
+        setAdminPublishToken(payload.token);
         setPasswordError(false);
         return;
       }

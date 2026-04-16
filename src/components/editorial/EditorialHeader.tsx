@@ -20,8 +20,17 @@ export default function EditorialHeader() {
               where curated becomes legend
             </p>
           </Link>
-          {isAdmin && (
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
+            {!isAdmin && (
+              <Link
+                to="/archive"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-sans text-muted-foreground hover:text-primary transition-colors border border-border rounded hover:border-primary"
+              >
+                <Archive className="w-4 h-4" />
+                Archive
+              </Link>
+            )}
+            {isAdmin && (
               <Link
                 to="/"
                 className="flex items-center gap-2 px-4 py-2 text-sm font-sans text-muted-foreground hover:text-primary transition-colors border border-border rounded hover:border-primary"
@@ -29,8 +38,8 @@ export default function EditorialHeader() {
                 <Settings className="w-4 h-4" />
                 View Site
               </Link>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Category nav */}

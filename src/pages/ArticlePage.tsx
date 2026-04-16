@@ -8,6 +8,15 @@ import { ArrowLeft } from "lucide-react";
 
 export default function ArticlePage() {
   const { id } = useParams<{ id: string }>();
+  const decodedIdentifier = decodeURIComponent(id || "");
+  const normalizedIdentifier = decodedIdentifier
+    .trim()
+    .toLowerCase()
+    .split("?")[0]
+    .split("#")[0]
+    .replace(/^\/+|\/+$/g, "");
+  const routeCandidate = normalizedIdentifier.split("/").pop() || normalizedIdentifier;
+  const slugTail = routeCandidate.includes("--") ? routeCandidate.split("--").pop() || routeCandidate : routeCandidate;
   const [content, setContent] = useState<{
     id: string;
     title: string;
@@ -27,8 +36,16 @@ export default function ArticlePage() {
     getPublishedContentSnapshot()
       .then((snapshot) => {
         if (!active) return;
-        const article = snapshot.articles.find((a) => a.id === id);
-        const heroAsArticle = article ? undefined : snapshot.heroes.find((h) => h.id === id);
+        const article = snapshot.articles.find((a) => {
+          const itemId = a.id.toLowerCase();
+          return itemId === routeCandidate || itemId === slugTail;
+        });
+        const heroAsArticle = article
+          ? undefined
+          : snapshot.heroes.find((h) => {
+            const itemId = h.id.toLowerCase();
+            return itemId === routeCandidate || itemId === slugTail;
+          });
         const normalized = article || (heroAsArticle ? {
           id: heroAsArticle.id,
           title: heroAsArticle.title,
@@ -51,7 +68,7 @@ export default function ArticlePage() {
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [routeCandidate, slugTail]);
 
   if (!loaded) {
     return (

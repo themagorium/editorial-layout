@@ -540,7 +540,7 @@ const DEFAULT_ADS: AdSlot[] = [
 // ===== Storage & API =====
 // Bump this version whenever DEFAULT content changes to invalidate stale localStorage
 const CONTENT_VERSION = "4";
-const PUBLISHED_CONTENT_ENDPOINT = "/api/published-content";
+const PUBLISHED_CONTENT_ENDPOINT = "/api/content";
 const STORAGE_KEYS = {
   heroes: "editorial_heroes",
   articles: "editorial_articles",
@@ -633,6 +633,13 @@ export function saveArticles(articles: Article[]) {
 
 export function saveAds(ads: AdSlot[]) {
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(ads));
+}
+
+export function restoreDefaultContentBackup() {
+  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(DEFAULT_HEROES.map(normalizeHero)));
+  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(DEFAULT_ARTICLES.map(normalizeArticle)));
+  localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(DEFAULT_ADS));
+  localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
 }
 
 export async function publishContentSnapshot(heroes: HeroItem[], articles: Article[], ads: AdSlot[]) {

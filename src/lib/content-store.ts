@@ -539,6 +539,7 @@ const DEFAULT_ADS: AdSlot[] = [
 // ===== Storage & API =====
 // Bump this version whenever DEFAULT content changes to invalidate stale localStorage
 const CONTENT_VERSION = "4";
+const PUBLISHED_CONTENT_ENDPOINT = "/api/published-content";
 const STORAGE_KEYS = {
   heroes: "editorial_heroes",
   articles: "editorial_articles",
@@ -631,6 +632,57 @@ export function saveArticles(articles: Article[]) {
 
 export function saveAds(ads: AdSlot[]) {
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(ads));
+}
+
+export async function publishContentSnapshot(heroes: HeroItem[], articles: Article[], ads: AdSlot[]) {
+  const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ heroes, articles, ads }),
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({} as { error?: string }));
+    throw new Error(payload.error || "Publishing failed.");
+  }
+}
+
+export const DEFAULT_PUBLISHED_CONTENT: {
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+} = {
+  heroes: DEFAULT_HEROES.map(normalizeHero),
+  articles: DEFAULT_ARTICLES.map(normalizeArticle),
+  ads: DEFAULT_ADS,
+};
+
+export async function getPublishedContentSnapshot(): Promise<{
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+}> {
+  if (typeof window === "undefined") {
+    return DEFAULT_PUBLISHED_CONTENT;
+  }
+  try {
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT);
+    if (!response.ok) return DEFAULT_PUBLISHED_CONTENT;
+    const payload = await response.json().catch(() => null as unknown as {
+      heroes?: HeroItem[];
+      articles?: Article[];
+      ads?: AdSlot[];
+    } | null);
+    if (!payload || !Array.isArray(payload.heroes) || !Array.isArray(payload.articles) || !Array.isArray(payload.ads)) {
+      return DEFAULT_PUBLISHED_CONTENT;
+    }
+    return {
+      heroes: payload.heroes.map(normalizeHero),
+      articles: payload.articles.map(normalizeArticle),
+      ads: payload.ads,
+    };
+  } catch {
+    return DEFAULT_PUBLISHED_CONTENT;
+  }
 }
 
 export function resetToDefaults() {

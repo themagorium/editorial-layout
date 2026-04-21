@@ -611,11 +611,31 @@ function cleanBodyForStorage(body?: ArticleBodyBlock[]): ArticleBodyBlock[] | un
   return cleaned.length > 0 ? cleaned : [];
 }
 
+function dedupeBodyByMediaContent(body?: ArticleBodyBlock[]): ArticleBodyBlock[] | undefined {
+  if (!body || body.length === 0) return body;
+  const seenMediaContent = new Set<string>();
+  const deduped: ArticleBodyBlock[] = [];
+
+  for (const block of body) {
+    if (!block) continue;
+    if (block.type === "image" || block.type === "video") {
+      const mediaKey = `${block.type}:${(block.content || "").trim()}`;
+      if (!block.content || seenMediaContent.has(mediaKey)) {
+        continue;
+      }
+      seenMediaContent.add(mediaKey);
+    }
+    deduped.push(block);
+  }
+
+  return deduped;
+}
+
 export function saveHeroes(heroes: HeroItem[]) {
   const prepared = heroes.map((hero) =>
     normalizeHero({
       ...hero,
-      body: cleanBodyForStorage(hero.body),
+      body: cleanBodyForStorage(dedupeBodyByMediaContent(hero.body)),
     }),
   );
   localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(prepared));
@@ -625,7 +645,7 @@ export function saveArticles(articles: Article[]) {
   const prepared = articles.map((article) =>
     normalizeArticle({
       ...article,
-      body: cleanBodyForStorage(article.body),
+      body: cleanBodyForStorage(dedupeBodyByMediaContent(article.body)),
     }),
   );
   localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(prepared));

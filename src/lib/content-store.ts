@@ -657,6 +657,10 @@ export const DEFAULT_PUBLISHED_CONTENT: {
   ads: DEFAULT_ADS,
 };
 
+function hasPublishedStoryContent(content: { heroes: HeroItem[]; articles: Article[] }) {
+  return content.heroes.length > 0 || content.articles.length > 0;
+}
+
 export async function getPublishedContentSnapshot(): Promise<{
   heroes: HeroItem[];
   articles: Article[];
@@ -666,7 +670,7 @@ export async function getPublishedContentSnapshot(): Promise<{
     return DEFAULT_PUBLISHED_CONTENT;
   }
   try {
-    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT);
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, { cache: "no-store" });
     if (!response.ok) return DEFAULT_PUBLISHED_CONTENT;
     const payload = await response.json().catch(() => null as unknown as {
       heroes?: HeroItem[];
@@ -687,11 +691,15 @@ export async function getPublishedContentSnapshot(): Promise<{
     if (!raw || !Array.isArray(raw.heroes) || !Array.isArray(raw.articles) || !Array.isArray(raw.ads)) {
       return DEFAULT_PUBLISHED_CONTENT;
     }
-    return {
+    const normalized = {
       heroes: raw.heroes.map(normalizeHero),
       articles: raw.articles.map(normalizeArticle),
       ads: raw.ads,
     };
+    if (!hasPublishedStoryContent(normalized)) {
+      return DEFAULT_PUBLISHED_CONTENT;
+    }
+    return normalized;
   } catch {
     return DEFAULT_PUBLISHED_CONTENT;
   }
@@ -726,6 +734,9 @@ export async function syncPublishedContentToLocalStorage() {
 
     const published = payload.content ?? payload.payload;
     if (!isPublishedContentPayload(published)) {
+      return { synced: false, configured: true };
+    }
+    if (!hasPublishedStoryContent(published)) {
       return { synced: false, configured: true };
     }
 

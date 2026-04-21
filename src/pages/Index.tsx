@@ -10,6 +10,7 @@ import {
   getLatestEdition,
   getHeroesByEdition,
   getArticlesByEdition,
+  getPublishedContentSnapshot,
   formatEditionLabel,
   buildContentPath,
 } from "@/lib/content-store";
@@ -111,12 +112,23 @@ export default function Index() {
   const [editionLabel, setEditionLabel] = useState("");
 
   useEffect(() => {
-    const edition = getLatestEdition();
-    setHeroes(getHeroesByEdition(edition).slice(0, 3));
-    setArticles(getArticlesByEdition(edition).slice(0, 4));
-    setAds(getAds());
-    setEditionLabel(formatEditionLabel(edition));
-    applyHomeSeo();
+    let active = true;
+    getPublishedContentSnapshot().then((snapshot) => {
+      if (!active) return;
+      const editions = new Set<string>();
+      snapshot.heroes.forEach((h) => editions.add(h.edition));
+      snapshot.articles.forEach((a) => editions.add(a.edition));
+      const latestEdition = Array.from(editions).sort().reverse()[0] || getLatestEdition();
+
+      setHeroes(snapshot.heroes.filter((h) => h.edition === latestEdition).slice(0, 3));
+      setArticles(snapshot.articles.filter((a) => a.edition === latestEdition).slice(0, 4));
+      setAds(snapshot.ads.length > 0 ? snapshot.ads : getAds());
+      setEditionLabel(formatEditionLabel(latestEdition));
+      applyHomeSeo();
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const hasAdMedia = (ad: AdSlot) => Boolean(ad.imageUrl || ad.videoUrl);

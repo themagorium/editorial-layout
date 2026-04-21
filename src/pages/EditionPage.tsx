@@ -1,15 +1,14 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import AdPlacement from "@/components/editorial/AdPlacement";
 import {
   buildContentPath,
-  getAds,
-  getHeroesByEdition,
-  getArticlesByEdition,
+  getPublishedContentSnapshot,
   formatEditionLabel,
-  slugifyText,
 } from "@/lib/content-store";
+import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { trackEvent } from "@/lib/analytics";
 import { canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
@@ -19,15 +18,46 @@ export default function EditionPage() {
   const { edition } = useParams<{ edition: string }>();
   if (!edition) return null;
 
-  const heroes = getHeroesByEdition(edition).slice(0, 3);
-  const articles = getArticlesByEdition(edition).slice(0, 4);
-  const ads = getAds();
+  const [heroes, setHeroes] = useState<HeroItem[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [ads, setAds] = useState<AdSlot[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    getPublishedContentSnapshot()
+      .then((snapshot) => {
+        if (!active) return;
+        setHeroes(snapshot.heroes.filter((h) => h.edition === edition).slice(0, 3));
+        setArticles(snapshot.articles.filter((a) => a.edition === edition).slice(0, 4));
+        setAds(snapshot.ads);
+        setLoaded(true);
+      })
+      .catch(() => {
+        if (!active) return;
+        setLoaded(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [edition]);
+
   const hasAdMedia = (ad?: { imageUrl?: string; videoUrl?: string }) => Boolean(ad?.imageUrl || ad?.videoUrl);
   const heroSidebarAd = ads.find((a) => a.position === "hero-sidebar" && hasAdMedia(a));
   const sidebarAd = ads.find((a) => a.position === "sidebar" && hasAdMedia(a));
   const midAd = ads.find((a) => a.position === "mid-feed" && hasAdMedia(a));
   const bottomAd = ads.find((a) => a.position === "bottom-banner" && hasAdMedia(a));
   const label = formatEditionLabel(edition);
+
+  if (!loaded) {
+    return (
+      <div className="min-h-screen bg-background">
+        <EditorialHeader />
+        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground font-sans">Loading...</div>
+        <EditorialFooter />
+      </div>
+    );
+  }
 
   if (heroes.length === 0 && articles.length === 0) {
     return (

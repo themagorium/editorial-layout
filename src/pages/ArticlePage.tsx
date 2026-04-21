@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { buildContentPath, contentIdentifierMatches, getArticles, getHeroes, slugifyText } from "@/lib/content-store";
+import { contentIdentifierMatches, getArticles, getHeroes, slugifyText } from "@/lib/content-store";
 import type { ArticleBodyBlock } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";

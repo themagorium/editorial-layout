@@ -635,6 +635,13 @@ export function saveAds(ads: AdSlot[]) {
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(ads));
 }
 
+export function restoreDefaultContentBackup() {
+  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(DEFAULT_HEROES.map(normalizeHero)));
+  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(DEFAULT_ARTICLES.map(normalizeArticle)));
+  localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(DEFAULT_ADS));
+  localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
+}
+
 export async function publishContentSnapshot(heroes: HeroItem[], articles: Article[], ads: AdSlot[]) {
   const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
     method: "POST",

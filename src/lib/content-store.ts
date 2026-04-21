@@ -96,6 +96,7 @@ export interface PublishedEditorialContent {
   articles: Article[];
   ads: AdSlot[];
   publishedAt: string;
+  updatedAt?: string;
 }
 
 export function slugifyText(value: string): string {
@@ -671,14 +672,25 @@ export async function getPublishedContentSnapshot(): Promise<{
       heroes?: HeroItem[];
       articles?: Article[];
       ads?: AdSlot[];
+      payload?: {
+        heroes?: HeroItem[];
+        articles?: Article[];
+        ads?: AdSlot[];
+      };
+      content?: {
+        heroes?: HeroItem[];
+        articles?: Article[];
+        ads?: AdSlot[];
+      };
     } | null);
-    if (!payload || !Array.isArray(payload.heroes) || !Array.isArray(payload.articles) || !Array.isArray(payload.ads)) {
+    const raw = payload?.payload || payload?.content || payload;
+    if (!raw || !Array.isArray(raw.heroes) || !Array.isArray(raw.articles) || !Array.isArray(raw.ads)) {
       return DEFAULT_PUBLISHED_CONTENT;
     }
     return {
-      heroes: payload.heroes.map(normalizeHero),
-      articles: payload.articles.map(normalizeArticle),
-      ads: payload.ads,
+      heroes: raw.heroes.map(normalizeHero),
+      articles: raw.articles.map(normalizeArticle),
+      ads: raw.ads,
     };
   } catch {
     return DEFAULT_PUBLISHED_CONTENT;
@@ -697,27 +709,31 @@ export async function syncPublishedContentToLocalStorage() {
   }
 
   try {
-    const response = await fetch("/api/content", { cache: "no-store" });
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, { cache: "no-store" });
     if (!response.ok) return { synced: false, configured: false };
 
     const payload = (await response.json()) as {
       ok?: boolean;
+      success?: boolean;
       content?: unknown;
+      payload?: unknown;
     };
 
-    if (!payload.ok) {
+    const ok = payload.ok ?? payload.success ?? false;
+    if (!ok) {
       return { synced: false, configured: false };
     }
 
-    if (!isPublishedContentPayload(payload.content)) {
+    const published = payload.content ?? payload.payload;
+    if (!isPublishedContentPayload(published)) {
       return { synced: false, configured: true };
     }
 
-    writePublishedContentToLocalStorage(payload.content);
+    writePublishedContentToLocalStorage(published);
     return {
       synced: true,
       configured: true,
-      publishedAt: payload.content.publishedAt,
+      publishedAt: published.publishedAt,
     };
   } catch {
     return { synced: false, configured: false };
@@ -729,7 +745,7 @@ export async function publishEditorialContent(
   adminPassword?: string,
 ) {
   try {
-    const response = await fetch("/api/content", {
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -740,11 +756,14 @@ export async function publishEditorialContent(
 
     const payload = (await response.json().catch(() => ({}))) as {
       ok?: boolean;
+      success?: boolean;
       error?: string;
       publishedAt?: string;
+      updatedAt?: string;
     };
 
-    if (!response.ok || !payload.ok) {
+    const ok = payload.ok ?? payload.success ?? false;
+    if (!response.ok || !ok) {
       return {
         success: false,
         configured: true,
@@ -755,7 +774,7 @@ export async function publishEditorialContent(
     return {
       success: true,
       configured: true,
-      publishedAt: payload.publishedAt,
+      publishedAt: payload.publishedAt || payload.updatedAt,
     };
   } catch {
     return {

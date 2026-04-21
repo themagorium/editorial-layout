@@ -59,10 +59,15 @@ type PublishPayload = {
   ads: AdPayload[];
 };
 
+type StoredPayload = PublishPayload & {
+  publishedAt: string;
+  updatedAt?: string;
+};
+
 const CONTENT_KEY = "magorium:published-content:v1";
 const ADMIN_PASSWORD_KEY = "ADMIN_PASSWORD";
 
-let memoryFallback: (PublishPayload & { updatedAt: string }) | null = null;
+let memoryFallback: StoredPayload | null = null;
 
 function getConfiguredAdminPassword() {
   return process.env[ADMIN_PASSWORD_KEY];
@@ -119,12 +124,12 @@ function authorized(req: VercelRequest): boolean {
 
 async function getStoredContent() {
   if (isKvConfigured()) {
-    return (await kv.get<(PublishPayload & { updatedAt: string }) | null>(CONTENT_KEY)) || null;
+    return (await kv.get<StoredPayload | null>(CONTENT_KEY)) || null;
   }
   return memoryFallback;
 }
 
-async function setStoredContent(content: PublishPayload & { updatedAt: string }) {
+async function setStoredContent(content: StoredPayload) {
   if (isKvConfigured()) {
     await kv.set(CONTENT_KEY, content);
     return;
@@ -136,14 +141,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "GET") {
     try {
       const content = await getStoredContent();
+      const normalizedContent = content
+        ? {
+            ...content,
+            publishedAt: content.publishedAt || content.updatedAt || new Date(0).toISOString(),
+            updatedAt: content.updatedAt || content.publishedAt,
+          }
+        : null;
       res.status(200).json({
+        ok: true,
         success: true,
         configured: isKvConfigured(),
-        content,
+        content: normalizedContent,
+        payload: normalizedContent,
       });
       return;
     } catch (error) {
       res.status(500).json({
+        ok: false,
         success: false,
         configured: isKvConfigured(),
         error: error instanceof Error ? error.message : "Failed to load published content.",
@@ -164,19 +179,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
       const content = sanitizePayload(req.body);
-      const updatedAt = new Date().toISOString();
+      const publishedAt = new Date().toISOString();
       await setStoredContent({
         ...content,
-        updatedAt,
+        publishedAt,
+        updatedAt: publishedAt,
       });
       res.status(200).json({
+        ok: true,
         success: true,
         configured: isKvConfigured(),
-        updatedAt,
+        publishedAt,
+        updatedAt: publishedAt,
       });
       return;
     } catch (error) {
       res.status(500).json({
+        ok: false,
         success: false,
         configured: isKvConfigured(),
         error: error instanceof Error ? error.message : "Failed to publish content.",
@@ -186,6 +205,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   res.status(405).json({
+    ok: false,
     success: false,
     configured: isKvConfigured(),
     error: "Method not allowed.",

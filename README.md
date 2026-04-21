@@ -66,7 +66,7 @@ Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and 
 
 ## Publishing Admin edits to live
 
-This project supports shared "published" content for all visitors via `/api/content`.
+This project supports shared "published" content for all visitors via `/api/published-content`.
 
 - **Admin Save** publishes heroes/articles/ads through the API.
 - Live pages sync published payload first (if available) and then render.

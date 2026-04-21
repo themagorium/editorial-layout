@@ -5,6 +5,7 @@ const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 const BRAND_NAME = "The Magorium";
 const BRAND_ALIAS = "Magorium";
+const BRAND_ALIASES = [BRAND_ALIAS, "Magorum", "The Magorium"];
 
 function upsertMeta(name: string, content: string, property = false) {
   const attr = property ? "property" : "name";
@@ -42,7 +43,7 @@ function upsertStructuredDataScript(key: string, payload: unknown) {
   document.head.appendChild(script);
 }
 
-function normalizeAuthorIdentity(author?: string) {
+export function canonicalAuthorName(author?: string) {
   const trimmed = (author || "").trim();
   if (!trimmed) return STAFF_AUTHOR_NAME;
 
@@ -66,7 +67,8 @@ function normalizeAuthorIdentity(author?: string) {
   return trimmed;
 }
 
-function authorPath(authorName: string) {
+export function getAuthorPath(author?: string) {
+  const authorName = canonicalAuthorName(author);
   if (authorName === STAFF_AUTHOR_NAME) return "/author/staff";
   const slug = authorName
     .toLowerCase()
@@ -83,7 +85,7 @@ function setStructuredData(
   writerName: string,
   description: string,
 ) {
-  const writerUrl = `${SITE_URL}${authorPath(writerName)}`;
+  const writerUrl = `${SITE_URL}${getAuthorPath(writerName)}`;
   const writerEntity = writerName === STAFF_AUTHOR_NAME
     ? {
       "@type": "Organization",
@@ -128,7 +130,7 @@ function setHomeStructuredData() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: BRAND_NAME,
-    alternateName: BRAND_ALIAS,
+    alternateName: BRAND_ALIASES,
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
@@ -140,7 +142,7 @@ function setHomeStructuredData() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: BRAND_NAME,
-    alternateName: BRAND_ALIAS,
+    alternateName: BRAND_ALIASES,
     url: SITE_URL,
     publisher: {
       "@type": "Organization",
@@ -150,15 +152,22 @@ function setHomeStructuredData() {
   });
 }
 
-export function applyHomeSeo() {
-  const title = `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
-  const description =
-    `${BRAND_NAME} (also known as ${BRAND_ALIAS}) is a premium curated lifestyle magazine covering luxury travel, art, fashion, culture, yachting, motorsport, and global events.`;
+export function applyHomeSeo(queryHint?: string) {
+  const normalizedHint = (queryHint || "").trim();
+  const title = normalizedHint
+    ? `${normalizedHint} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`
+    : `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+  const description = normalizedHint
+    ? `${BRAND_NAME} is the official destination for searches like ${normalizedHint}, ${BRAND_ALIAS}, and Magorum. Discover luxury travel, art, fashion, culture, yachting, motorsport, and global events.`
+    : `${BRAND_NAME} (also searched as ${BRAND_ALIAS} or Magorum) is a premium curated lifestyle magazine covering luxury travel, art, fashion, culture, yachting, motorsport, and global events.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
+    "Magorum",
+    normalizedHint,
     "TheMagorium",
     "Magorium magazine",
+    "Magorum magazine",
     "luxury lifestyle magazine",
     "luxury travel",
     "art",
@@ -191,9 +200,9 @@ export function applyHomeSeo() {
 }
 
 export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: string })) {
-  const writerName = normalizeAuthorIdentity(content.author);
+  const writerName = canonicalAuthorName(content.author);
   const brandName = BRAND_NAME;
-  const writerUrl = `${SITE_URL}${authorPath(writerName)}`;
+  const writerUrl = `${SITE_URL}${getAuthorPath(writerName)}`;
   const storySummary =
     ("excerpt" in content ? content.excerpt : content.subtitle || "").trim() ||
     "Read this story on The Magorium.";
@@ -290,17 +299,24 @@ export function applyCollectionSeo(title: string, description: string, path: str
 }
 
 export function applyAuthorSeo(authorName: string, storyCount: number) {
-  const slug = authorName
-    .toLowerCase()
-    .trim()
-    .replace(/['"]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  const canonicalPath = `/author/${slug || "staff"}`;
-  const title = `${authorName} | The Magorium`;
+  const canonicalAuthor = canonicalAuthorName(authorName);
+  const canonicalPath = getAuthorPath(canonicalAuthor);
+  const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+  const title = `${canonicalAuthor} | The Magorium`;
   const description = `${storyCount} published ${
     storyCount === 1 ? "story" : "stories"
-  } by ${authorName} on The Magorium.`;
+  } by ${canonicalAuthor} on The Magorium.`;
 
   applyCollectionSeo(title, description, canonicalPath);
+
+  upsertStructuredDataScript("author-jsonld", {
+    "@context": "https://schema.org",
+    "@type": canonicalAuthor === STAFF_AUTHOR_NAME ? "Organization" : "Person",
+    name: canonicalAuthor,
+    url: canonicalUrl,
+    mainEntityOfPage: {
+      "@type": "ProfilePage",
+      "@id": canonicalUrl,
+    },
+  });
 }

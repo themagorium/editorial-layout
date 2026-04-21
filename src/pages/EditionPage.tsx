@@ -2,16 +2,25 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
-import { getPublishedContentSnapshot, formatEditionLabel, buildContentPath } from "@/lib/content-store";
-import type { HeroItem, Article } from "@/lib/content-store";
+import AdPlacement from "@/components/editorial/AdPlacement";
+import {
+  buildContentPath,
+  getPublishedContentSnapshot,
+  formatEditionLabel,
+} from "@/lib/content-store";
+import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { trackEvent } from "@/lib/analytics";
+import { canonicalAuthorName, getAuthorPath } from "@/lib/seo";
+import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 export default function EditionPage() {
+  useSyncPublishedContent();
   const { edition } = useParams<{ edition: string }>();
   if (!edition) return null;
 
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
+  const [ads, setAds] = useState<AdSlot[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -21,6 +30,7 @@ export default function EditionPage() {
         if (!active) return;
         setHeroes(snapshot.heroes.filter((h) => h.edition === edition).slice(0, 3));
         setArticles(snapshot.articles.filter((a) => a.edition === edition).slice(0, 4));
+        setAds(snapshot.ads);
         setLoaded(true);
       })
       .catch(() => {
@@ -32,6 +42,11 @@ export default function EditionPage() {
     };
   }, [edition]);
 
+  const hasAdMedia = (ad?: { imageUrl?: string; videoUrl?: string }) => Boolean(ad?.imageUrl || ad?.videoUrl);
+  const heroSidebarAd = ads.find((a) => a.position === "hero-sidebar" && hasAdMedia(a));
+  const sidebarAd = ads.find((a) => a.position === "sidebar" && hasAdMedia(a));
+  const midAd = ads.find((a) => a.position === "mid-feed" && hasAdMedia(a));
+  const bottomAd = ads.find((a) => a.position === "bottom-banner" && hasAdMedia(a));
   const label = formatEditionLabel(edition);
 
   if (!loaded) {
@@ -73,40 +88,58 @@ export default function EditionPage() {
 
       {/* Heroes — 3 large cards */}
       <section className="container mx-auto px-4 mt-4 md:mt-6">
-        <div className="flex flex-col gap-6">
-          {heroes.map((hero) => (
-            <Link
-              key={hero.id}
-              to={buildContentPath(hero.id, hero.title)}
-              className="group relative overflow-hidden rounded cursor-pointer block"
-              onClick={() => trackEvent(hero.id, "hero", "click")}
-            >
-              <div className="aspect-[16/7] overflow-hidden">
-                <img
-                  src={hero.imageUrl}
-                  alt={hero.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                {hero.videoUrl && (
-                  <video
-                    src={hero.videoUrl}
-                    autoPlay muted loop playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
+          <div className="flex flex-col gap-6">
+            {heroes.map((hero) => (
+              <Link
+                key={hero.id}
+                to={buildContentPath(hero.id, hero.title)}
+                className="group relative overflow-hidden rounded cursor-pointer block"
+                onClick={() => trackEvent(hero.id, "hero", "click")}
+              >
+                <div className="aspect-[16/7] overflow-hidden">
+                  <img
+                    src={hero.imageUrl}
+                    alt={hero.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                )}
-                <div className="article-overlay absolute inset-0" />
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
-                <span className="category-pill">{hero.category}</span>
-                <h2 className="text-xl md:text-2xl font-semibold text-foreground mt-2 leading-snug font-editorial">
-                  {hero.title}
-                </h2>
-                <p className="font-sans text-sm text-muted-foreground mt-2 line-clamp-2">
-                  {hero.subtitle}
-                </p>
-              </div>
-            </Link>
-          ))}
+                  {hero.videoUrl && (
+                    <video
+                      src={hero.videoUrl}
+                      autoPlay muted loop playsInline
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
+                  <div className="article-overlay absolute inset-0" />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
+                  <span className="category-pill">{hero.category}</span>
+                  <h2 className="text-xl md:text-2xl font-semibold text-foreground mt-2 leading-snug font-editorial">
+                    {hero.title}
+                  </h2>
+                  <p className="font-sans text-sm text-muted-foreground mt-2 line-clamp-2">
+                    {hero.subtitle}
+                  </p>
+                  <div className="flex items-center gap-2 mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
+                    <Link
+                      to={getAuthorPath(hero.author)}
+                      className="hover:text-primary transition-colors relative z-20"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {canonicalAuthorName(hero.author)}
+                    </Link>
+                    <span className="text-primary">·</span>
+                    <span>{new Date(hero.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+          {heroSidebarAd && (
+            <aside className="w-full xl:sticky xl:top-24">
+              <AdPlacement ad={heroSidebarAd} className="w-full" />
+            </aside>
+          )}
         </div>
       </section>
 
@@ -139,7 +172,13 @@ export default function EditionPage() {
                   {article.excerpt}
                 </p>
                 <div className="flex items-center gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs font-sans text-muted-foreground">
-                  <span>{article.author}</span>
+                  <Link
+                    to={getAuthorPath(article.author)}
+                    className="hover:text-primary transition-colors relative z-20"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    {canonicalAuthorName(article.author)}
+                  </Link>
                   <span className="text-primary">·</span>
                   <span>{new Date(article.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
                 </div>
@@ -147,7 +186,28 @@ export default function EditionPage() {
             </Link>
           ))}
         </div>
+        {midAd && (
+          <div className="mt-10">
+            <AdPlacement ad={midAd} className="w-full" />
+          </div>
+        )}
       </section>
+
+      {sidebarAd && (
+        <section className="container mx-auto px-4 mt-10">
+          <div className="flex justify-end">
+            <div className="w-full max-w-[300px]">
+              <AdPlacement ad={sidebarAd} className="w-full" />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {bottomAd && (
+        <section className="container mx-auto px-4 mt-12">
+          <AdPlacement ad={bottomAd} className="w-full" />
+        </section>
+      )}
 
       <EditorialFooter />
     </div>

@@ -91,6 +91,14 @@ export interface AdSlot {
   height: number;
 }
 
+export interface PublishedEditorialContent {
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+  publishedAt: string;
+  updatedAt?: string;
+}
+
 export function slugifyText(value: string): string {
   return value
     .toLowerCase()
@@ -540,6 +548,24 @@ const STORAGE_KEYS = {
   version: "editorial_content_version",
 };
 
+function isPublishedContentPayload(value: unknown): value is PublishedEditorialContent {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<PublishedEditorialContent>;
+  return (
+    Array.isArray(candidate.heroes) &&
+    Array.isArray(candidate.articles) &&
+    Array.isArray(candidate.ads) &&
+    typeof candidate.publishedAt === "string"
+  );
+}
+
+function writePublishedContentToLocalStorage(content: PublishedEditorialContent) {
+  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(content.heroes));
+  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(content.articles));
+  localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(content.ads));
+  localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
+}
+
 function ensureFreshDefaults() {
   const storedVersion = localStorage.getItem(STORAGE_KEYS.version);
   if (storedVersion !== CONTENT_VERSION) {
@@ -569,12 +595,40 @@ export function getAds(): AdSlot[] {
   return stored ? JSON.parse(stored) : DEFAULT_ADS;
 }
 
+function hasRealBodyBlockContent(block: ArticleBodyBlock): boolean {
+  if (block.type === "text" || block.type === "heading") {
+    return Boolean((block.content || "").trim());
+  }
+  if (block.type === "image" || block.type === "video") {
+    return Boolean((block.content || "").trim());
+  }
+  return false;
+}
+
+function cleanBodyForStorage(body?: ArticleBodyBlock[]): ArticleBodyBlock[] | undefined {
+  if (!body || body.length === 0) return body;
+  const cleaned = body.filter(hasRealBodyBlockContent);
+  return cleaned.length > 0 ? cleaned : [];
+}
+
 export function saveHeroes(heroes: HeroItem[]) {
-  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(heroes.map(normalizeHero)));
+  const prepared = heroes.map((hero) =>
+    normalizeHero({
+      ...hero,
+      body: cleanBodyForStorage(hero.body),
+    }),
+  );
+  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(prepared));
 }
 
 export function saveArticles(articles: Article[]) {
-  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(articles.map(normalizeArticle)));
+  const prepared = articles.map((article) =>
+    normalizeArticle({
+      ...article,
+      body: cleanBodyForStorage(article.body),
+    }),
+  );
+  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(prepared));
 }
 
 export function saveAds(ads: AdSlot[]) {
@@ -603,6 +657,10 @@ export const DEFAULT_PUBLISHED_CONTENT: {
   ads: DEFAULT_ADS,
 };
 
+function hasPublishedStoryContent(content: { heroes: HeroItem[]; articles: Article[] }) {
+  return content.heroes.length > 0 || content.articles.length > 0;
+}
+
 export async function getPublishedContentSnapshot(): Promise<{
   heroes: HeroItem[];
   articles: Article[];
@@ -612,21 +670,36 @@ export async function getPublishedContentSnapshot(): Promise<{
     return DEFAULT_PUBLISHED_CONTENT;
   }
   try {
-    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT);
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, { cache: "no-store" });
     if (!response.ok) return DEFAULT_PUBLISHED_CONTENT;
     const payload = await response.json().catch(() => null as unknown as {
       heroes?: HeroItem[];
       articles?: Article[];
       ads?: AdSlot[];
+      payload?: {
+        heroes?: HeroItem[];
+        articles?: Article[];
+        ads?: AdSlot[];
+      };
+      content?: {
+        heroes?: HeroItem[];
+        articles?: Article[];
+        ads?: AdSlot[];
+      };
     } | null);
-    if (!payload || !Array.isArray(payload.heroes) || !Array.isArray(payload.articles) || !Array.isArray(payload.ads)) {
+    const raw = payload?.payload || payload?.content || payload;
+    if (!raw || !Array.isArray(raw.heroes) || !Array.isArray(raw.articles) || !Array.isArray(raw.ads)) {
       return DEFAULT_PUBLISHED_CONTENT;
     }
-    return {
-      heroes: payload.heroes.map(normalizeHero),
-      articles: payload.articles.map(normalizeArticle),
-      ads: payload.ads,
+    const normalized = {
+      heroes: raw.heroes.map(normalizeHero),
+      articles: raw.articles.map(normalizeArticle),
+      ads: raw.ads,
     };
+    if (!hasPublishedStoryContent(normalized)) {
+      return DEFAULT_PUBLISHED_CONTENT;
+    }
+    return normalized;
   } catch {
     return DEFAULT_PUBLISHED_CONTENT;
   }
@@ -636,6 +709,91 @@ export function resetToDefaults() {
   localStorage.removeItem(STORAGE_KEYS.heroes);
   localStorage.removeItem(STORAGE_KEYS.articles);
   localStorage.removeItem(STORAGE_KEYS.ads);
+}
+
+export async function syncPublishedContentToLocalStorage() {
+  if (typeof window === "undefined") {
+    return { synced: false, configured: false };
+  }
+
+  try {
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, { cache: "no-store" });
+    if (!response.ok) return { synced: false, configured: false };
+
+    const payload = (await response.json()) as {
+      ok?: boolean;
+      success?: boolean;
+      content?: unknown;
+      payload?: unknown;
+    };
+
+    const ok = payload.ok ?? payload.success ?? false;
+    if (!ok) {
+      return { synced: false, configured: false };
+    }
+
+    const published = payload.content ?? payload.payload;
+    if (!isPublishedContentPayload(published)) {
+      return { synced: false, configured: true };
+    }
+    if (!hasPublishedStoryContent(published)) {
+      return { synced: false, configured: true };
+    }
+
+    writePublishedContentToLocalStorage(published);
+    return {
+      synced: true,
+      configured: true,
+      publishedAt: published.publishedAt,
+    };
+  } catch {
+    return { synced: false, configured: false };
+  }
+}
+
+export async function publishEditorialContent(
+  content: Omit<PublishedEditorialContent, "publishedAt">,
+  adminPassword?: string,
+) {
+  try {
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(adminPassword ? { "x-admin-password": adminPassword } : {}),
+      },
+      body: JSON.stringify(content),
+    });
+
+    const payload = (await response.json().catch(() => ({}))) as {
+      ok?: boolean;
+      success?: boolean;
+      error?: string;
+      publishedAt?: string;
+      updatedAt?: string;
+    };
+
+    const ok = payload.ok ?? payload.success ?? false;
+    if (!response.ok || !ok) {
+      return {
+        success: false,
+        configured: true,
+        error: payload.error || "Publish request failed.",
+      };
+    }
+
+    return {
+      success: true,
+      configured: true,
+      publishedAt: payload.publishedAt || payload.updatedAt,
+    };
+  } catch {
+    return {
+      success: false,
+      configured: false,
+      error: "Network error while publishing content.",
+    };
+  }
 }
 
 export function getEditions(): string[] {

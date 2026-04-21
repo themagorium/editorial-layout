@@ -64,6 +64,25 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
 
+## Publishing Admin edits to live
+
+This project supports shared "published" content for all visitors via `/api/published-content`.
+
+- **Admin Save** publishes heroes/articles/ads through the API.
+- Live pages sync published payload first (if available) and then render.
+- If publish storage is not configured, the app falls back to browser-local drafts.
+
+### Required env vars
+
+- `ADMIN_PASSWORD` (already used for admin login and now also required to authorize publish writes)
+
+### Optional env vars for shared persistence
+
+- `KV_REST_API_URL`
+- `KV_REST_API_TOKEN`
+
+Without KV, publish API responds as unconfigured and no shared live payload is stored.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!

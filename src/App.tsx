@@ -28,6 +28,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/magorium" element={<BrandAliasPage />} />
+          <Route path="/magorum" element={<BrandAliasPage />} />
+          <Route path="/the-magorium" element={<BrandAliasPage />} />
           <Route path="/article/:id" element={<ArticlePage />} />
           <Route path="/articles/:id" element={<ArticlePage />} />
           <Route path="/hidden-menu/stories/:id" element={<ArticlePage />} />

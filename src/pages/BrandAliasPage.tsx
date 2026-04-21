@@ -2,10 +2,14 @@ import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { applyHomeSeo } from "@/lib/seo";
 
-export default function BrandAliasPage() {
+type BrandAliasPageProps = {
+  queryHint?: string;
+};
+
+export default function BrandAliasPage({ queryHint }: BrandAliasPageProps) {
   useEffect(() => {
-    applyHomeSeo();
-  }, []);
+    applyHomeSeo(queryHint);
+  }, [queryHint]);
 
   return <Navigate to="/" replace />;
 }

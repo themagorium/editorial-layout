@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { getPublishedContentSnapshot, formatEditionLabel } from "@/lib/content-store";
 import { Search, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { applyCollectionSeo } from "@/lib/seo";
+import { applyCollectionSeo, applyHomeSeo } from "@/lib/seo";
+import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 export default function ArchivePage() {
+  useSyncPublishedContent();
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get("category") || "";
   const [search, setSearch] = useState(categoryFilter);
@@ -17,10 +19,13 @@ export default function ArchivePage() {
     heroCount: number;
     articleCount: number;
     coverImage?: string;
+    searchableText: string;
   }>>([]);
 
   useEffect(() => {
+    let active = true;
     getPublishedContentSnapshot().then((snapshot) => {
+      if (!active) return;
       const editionKeys = new Set<string>();
       snapshot.heroes.forEach((h) => editionKeys.add(h.edition));
       snapshot.articles.forEach((a) => editionKeys.add(a.edition));
@@ -31,26 +36,46 @@ export default function ArchivePage() {
         .map((ed) => {
           const heroes = snapshot.heroes.filter((h) => h.edition === ed);
           const articles = snapshot.articles.filter((a) => a.edition === ed);
+          const searchableText = [
+            ed,
+            formatEditionLabel(ed),
+            ...heroes.map((h) => `${h.title} ${h.category}`),
+            ...articles.map((a) => `${a.title} ${a.category} ${a.author}`),
+          ]
+            .join(" ")
+            .toLowerCase();
+
           return {
             key: ed,
             label: formatEditionLabel(ed),
             heroCount: heroes.slice(0, 3).length,
             articleCount: articles.slice(0, 4).length,
             coverImage: heroes[0]?.imageUrl,
+            searchableText,
           };
         });
+
       setEditions(nextEditions);
     });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return editions;
     const q = search.toLowerCase();
-    return editions.filter((e) => e.label.toLowerCase().includes(q));
+    return editions.filter((e) => e.searchableText.includes(q));
   }, [search, editions]);
 
   useEffect(() => {
     const q = search.trim().toLowerCase();
+    if (q === "magorium" || q === "the magorium" || q === "magorum") {
+      applyHomeSeo();
+      return;
+    }
+
     if (q === "millie sealana" || q === "charlotte thames" || q === "staff" || q === "the magorium") {
       applyCollectionSeo(
         `Stories by ${search.trim()} | The Magorium`,

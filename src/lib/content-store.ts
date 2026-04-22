@@ -581,7 +581,16 @@ const STORAGE_KEYS = {
   articles: "editorial_articles",
   ads: "editorial_ads",
   version: "editorial_content_version",
+  localDraft: "editorial_has_local_draft",
 };
+
+function markLocalDraftAvailable() {
+  localStorage.setItem(STORAGE_KEYS.localDraft, "1");
+}
+
+function clearLocalDraftFlag() {
+  localStorage.removeItem(STORAGE_KEYS.localDraft);
+}
 
 function isPublishedContentPayload(value: unknown): value is PublishedEditorialContent {
   if (!value || typeof value !== "object") return false;
@@ -599,6 +608,7 @@ function writePublishedContentToLocalStorage(content: PublishedEditorialContent)
   localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(content.articles));
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(content.ads));
   localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
+  clearLocalDraftFlag();
 }
 
 function ensureFreshDefaults() {
@@ -607,6 +617,7 @@ function ensureFreshDefaults() {
     localStorage.removeItem(STORAGE_KEYS.heroes);
     localStorage.removeItem(STORAGE_KEYS.articles);
     localStorage.removeItem(STORAGE_KEYS.ads);
+    clearLocalDraftFlag();
     localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
   }
 }
@@ -673,6 +684,7 @@ export function saveHeroes(heroes: HeroItem[]) {
       body: cleanBodyForStorage(dedupeBodyByMediaContent(hero.body)),
     }),
   );
+  markLocalDraftAvailable();
   localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(prepared));
 }
 
@@ -683,14 +695,17 @@ export function saveArticles(articles: Article[]) {
       body: cleanBodyForStorage(dedupeBodyByMediaContent(article.body)),
     }),
   );
+  markLocalDraftAvailable();
   localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(prepared));
 }
 
 export function saveAds(ads: AdSlot[]) {
+  markLocalDraftAvailable();
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(ads));
 }
 
 export function restoreDefaultContentBackup() {
+  markLocalDraftAvailable();
   localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(DEFAULT_HEROES.map(normalizeHero)));
   localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(DEFAULT_ARTICLES.map(normalizeArticle)));
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(DEFAULT_ADS));
@@ -721,6 +736,16 @@ export const DEFAULT_PUBLISHED_CONTENT: {
 
 function hasLocalEditsAvailable() {
   if (typeof window === "undefined") return false;
+  ensureFreshDefaults();
+  const hasDraftFlag = localStorage.getItem(STORAGE_KEYS.localDraft) === "1";
+  if (!hasDraftFlag) return false;
+  const hasHeroes = Boolean(localStorage.getItem(STORAGE_KEYS.heroes));
+  const hasArticles = Boolean(localStorage.getItem(STORAGE_KEYS.articles));
+  return hasHeroes || hasArticles;
+}
+
+function hasCachedSnapshotAvailable() {
+  if (typeof window === "undefined") return false;
   const hasHeroes = Boolean(localStorage.getItem(STORAGE_KEYS.heroes));
   const hasArticles = Boolean(localStorage.getItem(STORAGE_KEYS.articles));
   return hasHeroes || hasArticles;
@@ -738,6 +763,7 @@ export async function getPublishedContentSnapshot(): Promise<{
   if (typeof window === "undefined") {
     return DEFAULT_PUBLISHED_CONTENT;
   }
+  ensureFreshDefaults();
   if (hasLocalEditsAvailable()) {
     return {
       heroes: getHeroes(),
@@ -747,7 +773,16 @@ export async function getPublishedContentSnapshot(): Promise<{
   }
   try {
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, { cache: "no-store" });
-    if (!response.ok) return DEFAULT_PUBLISHED_CONTENT;
+    if (!response.ok) {
+      if (hasCachedSnapshotAvailable()) {
+        return {
+          heroes: getHeroes(),
+          articles: getArticles(),
+          ads: getAds(),
+        };
+      }
+      return DEFAULT_PUBLISHED_CONTENT;
+    }
     const payload = await response.json().catch(() => null as unknown as {
       heroes?: HeroItem[];
       articles?: Article[];
@@ -765,6 +800,13 @@ export async function getPublishedContentSnapshot(): Promise<{
     } | null);
     const raw = payload?.payload || payload?.content || payload;
     if (!raw || !Array.isArray(raw.heroes) || !Array.isArray(raw.articles) || !Array.isArray(raw.ads)) {
+      if (hasCachedSnapshotAvailable()) {
+        return {
+          heroes: getHeroes(),
+          articles: getArticles(),
+          ads: getAds(),
+        };
+      }
       return DEFAULT_PUBLISHED_CONTENT;
     }
     const normalized = {
@@ -773,10 +815,24 @@ export async function getPublishedContentSnapshot(): Promise<{
       ads: raw.ads,
     };
     if (!hasPublishedStoryContent(normalized)) {
+      if (hasCachedSnapshotAvailable()) {
+        return {
+          heroes: getHeroes(),
+          articles: getArticles(),
+          ads: getAds(),
+        };
+      }
       return DEFAULT_PUBLISHED_CONTENT;
     }
     return normalized;
   } catch {
+    if (hasCachedSnapshotAvailable()) {
+      return {
+        heroes: getHeroes(),
+        articles: getArticles(),
+        ads: getAds(),
+      };
+    }
     return DEFAULT_PUBLISHED_CONTENT;
   }
 }
@@ -785,12 +841,14 @@ export function resetToDefaults() {
   localStorage.removeItem(STORAGE_KEYS.heroes);
   localStorage.removeItem(STORAGE_KEYS.articles);
   localStorage.removeItem(STORAGE_KEYS.ads);
+  clearLocalDraftFlag();
 }
 
 export async function syncPublishedContentToLocalStorage() {
   if (typeof window === "undefined") {
     return { synced: false, configured: false };
   }
+  ensureFreshDefaults();
   if (hasLocalEditsAvailable()) {
     return { synced: false, configured: false };
   }

@@ -587,7 +587,23 @@ const HERO_DEFAULT_BY_ID = new Map(DEFAULT_HEROES.map((hero) => [hero.id, hero])
 const ARTICLE_DEFAULT_BY_ID = new Map(DEFAULT_ARTICLES.map((article) => [article.id, article]));
 
 function shouldUpgradeLegacyHeroCopy(hero: HeroItem) {
+  const firstText = (hero.body || []).find((block) => block.type === "text")?.content || "";
+  if (
+    hero.id === "h-sailgp" &&
+    firstText.startsWith(
+      "The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history.",
+    )
+  ) {
+    return true;
+  }
   if (hero.id === "h-cv-summit" && hero.title === "Zurich's CV Summit: Capital Meets AI by the Lake") {
+    return true;
+  }
+  if (
+    hero.id === "h-cv-summit" &&
+    hero.subtitle ===
+      "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance"
+  ) {
     return true;
   }
   if (
@@ -596,14 +612,34 @@ function shouldUpgradeLegacyHeroCopy(hero: HeroItem) {
   ) {
     return true;
   }
+  if (hero.id === "h-f1-austin" && hero.date === "2025-10-20") {
+    return true;
+  }
   return false;
 }
 
 function shouldUpgradeLegacyArticleCopy(article: Article) {
+  const firstText = (article.body || []).find((block) => block.type === "text")?.content || "";
   if (article.id === "v1-cambiaso" && article.title === "Cambiaso x Cambiaso: The Hurlingham Open") {
     return true;
   }
+  if (
+    article.id === "v1-cambiaso" &&
+    firstText.startsWith(
+      "The Hurlingham Open marked a historic moment as Adolfo Cambiaso and his son Poroto took to the field together",
+    )
+  ) {
+    return true;
+  }
   if (article.id === "v1-engadin" && article.title === "Winter Awaits the Engadin") {
+    return true;
+  }
+  if (
+    article.id === "v1-engadin" &&
+    firstText.startsWith(
+      "The Engadin Valley awakens in October with the first dustings of snow on the Bernina peaks.",
+    )
+  ) {
     return true;
   }
   return false;

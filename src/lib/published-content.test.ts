@@ -214,4 +214,44 @@ describe("published content snapshot", () => {
       date: "2025-10-06",
     });
   });
+
+  it("upgrades legacy SailGP hero body copy to restored edited version", async () => {
+    localStorage.setItem(
+      "editorial_heroes",
+      JSON.stringify([
+        {
+          ...createHero("h-sailgp"),
+          title: "SailGP from Geneva to Cadiz",
+          subtitle:
+            "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany",
+          author: "Charlotte Thames",
+          edition: "2025-10",
+          body: [
+            {
+              id: "legacy-sg-b1",
+              type: "text",
+              content:
+                "The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history. With the Jet d'Eau as a backdrop and the Alps framing the horizon, eight national teams battled across two days of intense F50 catamaran racing in conditions that tested tactics as much as speed.",
+            },
+          ],
+        },
+      ]),
+    );
+    localStorage.setItem("editorial_articles", JSON.stringify([]));
+    localStorage.setItem("editorial_ads", JSON.stringify([]));
+    localStorage.setItem("editorial_content_version", "4");
+    localStorage.setItem("editorial_has_local_draft", "1");
+
+    const snapshot = await getPublishedContentSnapshot();
+    const sailGp = snapshot.heroes.find((hero) => hero.id === "h-sailgp");
+    expect(sailGp).toMatchObject({
+      title: "SailGP from Geneva to Cadiz",
+      body: expect.arrayContaining([
+        expect.objectContaining({
+          content:
+            "Last week's Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany in its first final and first win. Switzerland hosted SailGP for the first time, and the local crowd got more than just a glimpse of world-class foiling — they saw history.",
+        }),
+      ]),
+    });
+  });
 });

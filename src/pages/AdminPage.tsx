@@ -5,6 +5,7 @@ import {
   getHeroes,
   getArticles,
   getAds,
+  restoreDefaultContentBackup,
   saveHeroes,
   saveArticles,
   saveAds,
@@ -244,6 +245,44 @@ function AdminDashboard() {
     toast.success("Reset to defaults.");
   };
 
+  const handleRestoreBackup = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      restoreDefaultContentBackup();
+      const restoredHeroes = getHeroes();
+      const restoredArticles = getArticles();
+      const restoredAds = getAds();
+
+      setHeroes(restoredHeroes);
+      setArticles(restoredArticles);
+      setAds(restoredAds);
+
+      const restoredEditions = getEditionsFromState(restoredHeroes, restoredArticles);
+      if (restoredEditions.length > 0) {
+        setCurrentEdition(restoredEditions[0]);
+      }
+
+      const published = await publishEditorialContent({
+        heroes: restoredHeroes,
+        articles: restoredArticles,
+        ads: restoredAds,
+      });
+      if (!published.success) {
+        const fallbackMessage = published.error || "Could not publish restored backup to live";
+        toast.warning(`${fallbackMessage}. Backup was restored locally in this browser.`);
+        return;
+      }
+
+      toast.success("Baseline backup restored and published.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not restore backup";
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const deleteCurrentEdition = () => {
     if (!currentEdition) return;
 
@@ -377,6 +416,13 @@ function AdminDashboard() {
           <div className="flex gap-3">
             <button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 text-sm border border-border rounded text-muted-foreground hover:text-foreground transition-colors">
               <RotateCcw className="w-4 h-4" /> Reset
+            </button>
+            <button
+              onClick={handleRestoreBackup}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-4 py-2 text-sm border border-primary rounded text-primary hover:bg-primary/10 transition-colors disabled:opacity-70"
+            >
+              <RotateCcw className="w-4 h-4" /> Restore Backup
             </button>
             <button
               onClick={save}
@@ -527,7 +573,7 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
             onVideoChange={(value) => update(hero.id, { videoUrl: value })}
             onBodyChange={(value) =>
               update(hero.id, {
-                body: normalizeBodyFlow(value, hero.imageUrl, hero.videoUrl),
+                body: value,
               })
             }
             onNormalizeBody={() =>
@@ -583,7 +629,7 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
             onVideoChange={(value) => update(article.id, { videoUrl: value })}
             onBodyChange={(value) =>
               update(article.id, {
-                body: normalizeBodyFlow(value, article.imageUrl, article.videoUrl),
+                body: value,
               })
             }
             onNormalizeBody={() =>

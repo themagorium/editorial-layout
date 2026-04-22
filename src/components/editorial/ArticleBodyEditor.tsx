@@ -17,6 +17,35 @@ function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
+function normalizeWithPreferredPattern(blocks: ArticleBodyBlock[]): ArticleBodyBlock[] {
+  const source = blocks.filter(Boolean);
+  const textBlocks = source.filter((b) => b.type === "text" || b.type === "heading");
+  const mediaBlocks = source.filter((b) => b.type === "image" || b.type === "video");
+  const normalized: ArticleBodyBlock[] = [];
+
+  if (textBlocks.length === 0 && mediaBlocks.length === 0) {
+    return [];
+  }
+
+  if (textBlocks.length === 0) {
+    normalized.push({ id: `pattern-t-${Date.now()}`, type: "text", content: "" });
+  }
+
+  const max = Math.max(textBlocks.length, mediaBlocks.length);
+  for (let i = 0; i < max; i += 1) {
+    if (textBlocks[i]) {
+      normalized.push(textBlocks[i]);
+    } else if (i === 0 && normalized.length === 0) {
+      normalized.push({ id: `pattern-t-${Date.now()}-${i}`, type: "text", content: "" });
+    }
+    if (mediaBlocks[i]) {
+      normalized.push(mediaBlocks[i]);
+    }
+  }
+
+  return normalized;
+}
+
 export default function ArticleBodyEditor({ blocks, onChange, heading = "Article Body", preferredPattern = false }: Props) {
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
@@ -90,7 +119,8 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
   };
 
   const removeBlock = (id: string) => {
-    onChange(blocks.filter((b) => b.id !== id));
+    const next = blocks.filter((b) => b.id !== id);
+    onChange(preferredPattern ? normalizeWithPreferredPattern(next) : next);
   };
 
   const moveBlock = (id: string, direction: -1 | 1) => {
@@ -100,7 +130,7 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
     if (newIdx < 0 || newIdx >= blocks.length) return;
     const updated = [...blocks];
     [updated[idx], updated[newIdx]] = [updated[newIdx], updated[idx]];
-    onChange(updated);
+    onChange(preferredPattern ? normalizeWithPreferredPattern(updated) : updated);
   };
 
   const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {

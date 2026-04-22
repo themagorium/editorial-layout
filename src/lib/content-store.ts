@@ -299,10 +299,42 @@ const DEFAULT_HEROES: HeroItem[] = [
     date: "2025-10-04",
     edition: "2025-10",
     body: [
-      { id: "sg-b1", type: "text", content: "The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history. With the Jet d'Eau as a backdrop and the Alps framing the horizon, eight national teams battled across two days of intense F50 catamaran racing in conditions that tested tactics as much as speed." },
-      { id: "sg-b2", type: "text", content: "Germany's stunning breakthrough victory — their first podium finish in SailGP history — was the story of the weekend. Skippered with clinical precision, the German crew exploited the lake's notoriously fickle winds to outmanoeuvre favourites Australia and Great Britain in a dramatic final race that came down to the last leg." },
-      { id: "sg-b3", type: "text", content: "The event's luxury ecosystem matched the racing drama. Rolex hospitality suites along the Quai du Mont-Blanc hosted collectors, brand ambassadors, and the sailing world's elite. Private yacht viewings from the lake offered an intimate perspective on the F50s hitting 100 km/h just metres from shore — a visceral combination of speed, danger, and beauty." },
-      { id: "sg-b4", type: "text", content: "From Geneva, the SailGP circuit heads to Cadiz, where the Atlantic winds and Andalusian light promise an entirely different spectacle. But for those who witnessed the Lake Geneva event, this was SailGP at its most refined — where the sport's future met one of Europe's most elegant cities." },
+      {
+        id: "sg-b1",
+        type: "text",
+        content:
+          "Last week's Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany in its first final and first win. Switzerland hosted SailGP for the first time, and the local crowd got more than just a glimpse of world-class foiling — they saw history.",
+      },
+      {
+        id: "sg-b2",
+        type: "text",
+        content:
+          "Being a freshwater venue, the conditions were challenging as teams were used to coastal and sea venues. Light winds forced teams to rethink tactics. The unpredictability of winds and shifting conditions meant that each start and positioning made a difference. SailGP commentators said the difference between success and failure was razor thin.",
+      },
+      {
+        id: "sg-b3",
+        type: "text",
+        content:
+          "The F50 catamarans require a certain wind threshold (about 28 km/h) to consistently stay foiling. In Geneva, wind speeds were often below that threshold, forcing boats to operate more in displacement mode, with hulls in the water, during parts of the race.",
+      },
+      {
+        id: "sg-b4",
+        type: "text",
+        content:
+          "Across day one and day two, New Zealand and Spain showed their strengths with wins in earlier races. Spain, led by Diego Botin and arriving from wins in San Francisco and New York, looked ready. The Black Foils, with Peter Burling at the helm, also came out strong by foiling early and securing key points.",
+      },
+      {
+        id: "sg-b5",
+        type: "text",
+        content:
+          "By the Final, Switzerland, led by Seb Schneiter and one of the league's youngest teams, had strong support from home fans but was penalized for an early start that cost them the win. Germany's victory came from precision and execution from start to finish. In fickle conditions where strategy had to adapt constantly, Germany reached its first final and first win, highlighting parity across teams.",
+      },
+      {
+        id: "sg-b6",
+        type: "text",
+        content:
+          "Next up in the run-up before the season finals is Cadiz, on Spanish home waters.",
+      },
     ],
   },
   {

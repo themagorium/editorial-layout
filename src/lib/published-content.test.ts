@@ -77,6 +77,30 @@ describe("published content snapshot", () => {
     expect(snapshot.articles[0]?.id).toBe("remote-article");
   });
 
+  it("keeps local snapshot when an admin draft marker exists", async () => {
+    localStorage.setItem("editorial_heroes", JSON.stringify([createHero("draft-hero")]));
+    localStorage.setItem("editorial_articles", JSON.stringify([createArticle("draft-article")]));
+    localStorage.setItem("editorial_ads", JSON.stringify([]));
+    localStorage.setItem("editorial_content_version", "4");
+    localStorage.setItem("editorial_has_local_draft", "1");
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        content: {
+          heroes: [createHero("remote-hero", "2026-01")],
+          articles: [createArticle("remote-article", "2026-01")],
+          ads: [],
+        },
+      }),
+    }) as unknown as typeof fetch;
+
+    const snapshot = await getPublishedContentSnapshot();
+    expect(snapshot.heroes[0]?.id).toBe("draft-hero");
+    expect(snapshot.articles[0]?.id).toBe("draft-article");
+  });
+
   it("falls back to cached local snapshot when API is unreachable", async () => {
     localStorage.setItem("editorial_heroes", JSON.stringify([createHero("cached-hero")]));
     localStorage.setItem("editorial_articles", JSON.stringify([createArticle("cached-article")]));

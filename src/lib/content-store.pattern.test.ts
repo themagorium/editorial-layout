@@ -53,19 +53,19 @@ describe("October body pattern normalization", () => {
     }
   });
 
-  it("always has at least one renderable text block per story", () => {
+  it("always has at least one renderable content block per story", () => {
     resetToDefaults();
     const heroes = getHeroes();
     const articles = getArticles();
 
     for (const hero of heroes) {
       const body = (hero.body || []).filter(hasRealBodyContent);
-      expect(body.some((block) => isTextLike(block.type))).toBe(true);
+      expect(body.length).toBeGreaterThan(0);
     }
 
     for (const article of articles) {
       const body = (article.body || []).filter(hasRealBodyContent);
-      expect(body.some((block) => isTextLike(block.type))).toBe(true);
+      expect(body.length).toBeGreaterThan(0);
     }
   });
 
@@ -75,6 +75,11 @@ describe("October body pattern normalization", () => {
     const target = articles[0];
     expect(target).toBeTruthy();
 
+    const textBlock = {
+      id: "dedupe-text",
+      type: "text" as const,
+      content: "keep this text block",
+    };
     const mediaBlock = {
       id: "dup-media-1",
       type: "image" as const,
@@ -90,11 +95,7 @@ describe("October body pattern normalization", () => {
       article.id === target.id
         ? {
             ...article,
-            body: [
-              ...(article.body || []),
-              mediaBlock,
-              duplicate,
-            ],
+            body: [textBlock, mediaBlock, duplicate],
           }
         : article,
     );

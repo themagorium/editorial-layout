@@ -1,6 +1,7 @@
 // ===== Image Imports =====
 import heroOlympics from "@/assets/hero-olympics.jpg";
 import heroMilanFashion from "@/assets/hero-milan-fashion.jpg";
+import heroWhiteTurf from "@/assets/hero-white-turf.jpg";
 import heroSothebys from "@/assets/hero-sothebys.jpg";
 import articleRioCarnival from "@/assets/article-rio-carnival.jpg";
 import articleSuperbowl from "@/assets/article-superbowl.jpg";
@@ -27,6 +28,10 @@ import articleEngadin from "@/assets/article-engadin.jpg";
 import articleCambiasoPhoto1 from "@/assets/article-cambiaso-photo1.jpg";
 import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.jpg";
 import articlePfw from "@/assets/article-pfw.jpg";
+import articleMonacoGP from "@/assets/article-monaco-gp.jpg";
+import articleArtBasel from "@/assets/article-art-basel.jpg";
+import articleCannes from "@/assets/article-cannes.jpg";
+import articleAscot from "@/assets/article-ascot.jpg";
 
 // ===== Types =====
 export type Category = 

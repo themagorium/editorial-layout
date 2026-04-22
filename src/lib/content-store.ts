@@ -188,25 +188,28 @@ function normalizeBodyToOctoberPattern(
   const textLikeBlocks = source.filter((b) => b.type !== "image" && b.type !== "video");
   const mediaBlocks = source.filter((b) => b.type === "image" || b.type === "video");
 
-  const mediaPool = mediaBlocks.length > 0
-    ? mediaBlocks
-    : [createMediaSeedBlock(baseId, imageUrl, videoUrl)];
-
   // Always enforce October-style sequence: text -> media -> text -> media...
   if (textLikeBlocks.length === 0) {
     return createOctoberPatternBody(baseId, imageUrl, videoUrl);
   }
 
+  const primarySeedMedia = createMediaSeedBlock(baseId, imageUrl, videoUrl);
+  const emptySeedMedia = createMediaSeedBlock(baseId, undefined, undefined);
+
   const normalized: ArticleBodyBlock[] = [];
   textLikeBlocks.forEach((textBlock, index) => {
-    const media = mediaPool[index % mediaPool.length];
     normalized.push({
       ...textBlock,
       id: `${baseId}-auto-t-${index}`,
     });
+    const media = mediaBlocks[index] || (index === 0 ? primarySeedMedia : emptySeedMedia);
     normalized.push({
       ...media,
       id: `${baseId}-auto-m-${index}`,
+      // Never duplicate hero/article lead media into every generated slot.
+      content: mediaBlocks[index]?.content || (index === 0 ? media.content : ""),
+      caption: mediaBlocks[index]?.caption || (index === 0 ? media.caption : ""),
+      citation: mediaBlocks[index]?.citation || "",
     });
   });
 
@@ -296,10 +299,42 @@ const DEFAULT_HEROES: HeroItem[] = [
     date: "2025-10-04",
     edition: "2025-10",
     body: [
-      { id: "sg-b1", type: "text", content: "The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history. With the Jet d'Eau as a backdrop and the Alps framing the horizon, eight national teams battled across two days of intense F50 catamaran racing in conditions that tested tactics as much as speed." },
-      { id: "sg-b2", type: "text", content: "Germany's stunning breakthrough victory — their first podium finish in SailGP history — was the story of the weekend. Skippered with clinical precision, the German crew exploited the lake's notoriously fickle winds to outmanoeuvre favourites Australia and Great Britain in a dramatic final race that came down to the last leg." },
-      { id: "sg-b3", type: "text", content: "The event's luxury ecosystem matched the racing drama. Rolex hospitality suites along the Quai du Mont-Blanc hosted collectors, brand ambassadors, and the sailing world's elite. Private yacht viewings from the lake offered an intimate perspective on the F50s hitting 100 km/h just metres from shore — a visceral combination of speed, danger, and beauty." },
-      { id: "sg-b4", type: "text", content: "From Geneva, the SailGP circuit heads to Cadiz, where the Atlantic winds and Andalusian light promise an entirely different spectacle. But for those who witnessed the Lake Geneva event, this was SailGP at its most refined — where the sport's future met one of Europe's most elegant cities." },
+      {
+        id: "sg-b1",
+        type: "text",
+        content:
+          "Last week's Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany in its first final and first win. Switzerland hosted SailGP for the first time, and the local crowd got more than just a glimpse of world-class foiling — they saw history.",
+      },
+      {
+        id: "sg-b2",
+        type: "text",
+        content:
+          "Being a freshwater venue, the conditions were challenging as teams were used to coastal and sea venues. Light winds forced teams to rethink tactics. The unpredictability of winds and shifting conditions meant that each start and positioning made a difference. SailGP commentators said the difference between success and failure was razor thin.",
+      },
+      {
+        id: "sg-b3",
+        type: "text",
+        content:
+          "The F50 catamarans require a certain wind threshold (about 28 km/h) to consistently stay foiling. In Geneva, wind speeds were often below that threshold, forcing boats to operate more in displacement mode, with hulls in the water, during parts of the race.",
+      },
+      {
+        id: "sg-b4",
+        type: "text",
+        content:
+          "Across day one and day two, New Zealand and Spain showed their strengths with wins in earlier races. Spain, led by Diego Botin and arriving from wins in San Francisco and New York, looked ready. The Black Foils, with Peter Burling at the helm, also came out strong by foiling early and securing key points.",
+      },
+      {
+        id: "sg-b5",
+        type: "text",
+        content:
+          "By the Final, Switzerland, led by Seb Schneiter and one of the league's youngest teams, had strong support from home fans but was penalized for an early start that cost them the win. Germany's victory came from precision and execution from start to finish. In fickle conditions where strategy had to adapt constantly, Germany reached its first final and first win, highlighting parity across teams.",
+      },
+      {
+        id: "sg-b6",
+        type: "text",
+        content:
+          "Next up in the run-up before the season finals is Cadiz, on Spanish home waters.",
+      },
     ],
   },
   {
@@ -611,11 +646,31 @@ function cleanBodyForStorage(body?: ArticleBodyBlock[]): ArticleBodyBlock[] | un
   return cleaned.length > 0 ? cleaned : [];
 }
 
+function dedupeBodyByMediaContent(body?: ArticleBodyBlock[]): ArticleBodyBlock[] | undefined {
+  if (!body || body.length === 0) return body;
+  const seenMediaContent = new Set<string>();
+  const deduped: ArticleBodyBlock[] = [];
+
+  for (const block of body) {
+    if (!block) continue;
+    if (block.type === "image" || block.type === "video") {
+      const mediaKey = `${block.type}:${(block.content || "").trim()}`;
+      if (!block.content || seenMediaContent.has(mediaKey)) {
+        continue;
+      }
+      seenMediaContent.add(mediaKey);
+    }
+    deduped.push(block);
+  }
+
+  return deduped;
+}
+
 export function saveHeroes(heroes: HeroItem[]) {
   const prepared = heroes.map((hero) =>
     normalizeHero({
       ...hero,
-      body: cleanBodyForStorage(hero.body),
+      body: cleanBodyForStorage(dedupeBodyByMediaContent(hero.body)),
     }),
   );
   localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(prepared));
@@ -625,7 +680,7 @@ export function saveArticles(articles: Article[]) {
   const prepared = articles.map((article) =>
     normalizeArticle({
       ...article,
-      body: cleanBodyForStorage(article.body),
+      body: cleanBodyForStorage(dedupeBodyByMediaContent(article.body)),
     }),
   );
   localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(prepared));
@@ -664,6 +719,13 @@ export const DEFAULT_PUBLISHED_CONTENT: {
   ads: DEFAULT_ADS,
 };
 
+function hasLocalEditsAvailable() {
+  if (typeof window === "undefined") return false;
+  const hasHeroes = Boolean(localStorage.getItem(STORAGE_KEYS.heroes));
+  const hasArticles = Boolean(localStorage.getItem(STORAGE_KEYS.articles));
+  return hasHeroes || hasArticles;
+}
+
 function hasPublishedStoryContent(content: { heroes: HeroItem[]; articles: Article[] }) {
   return content.heroes.length > 0 || content.articles.length > 0;
 }
@@ -675,6 +737,13 @@ export async function getPublishedContentSnapshot(): Promise<{
 }> {
   if (typeof window === "undefined") {
     return DEFAULT_PUBLISHED_CONTENT;
+  }
+  if (hasLocalEditsAvailable()) {
+    return {
+      heroes: getHeroes(),
+      articles: getArticles(),
+      ads: getAds(),
+    };
   }
   try {
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, { cache: "no-store" });
@@ -720,6 +789,9 @@ export function resetToDefaults() {
 
 export async function syncPublishedContentToLocalStorage() {
   if (typeof window === "undefined") {
+    return { synced: false, configured: false };
+  }
+  if (hasLocalEditsAvailable()) {
     return { synced: false, configured: false };
   }
 

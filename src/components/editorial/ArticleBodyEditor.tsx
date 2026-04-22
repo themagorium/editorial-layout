@@ -90,7 +90,8 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
   };
 
   const removeBlock = (id: string) => {
-    onChange(blocks.filter((b) => b.id !== id));
+    const next = blocks.filter((b) => b.id !== id);
+    onChange(next);
   };
 
   const moveBlock = (id: string, direction: -1 | 1) => {

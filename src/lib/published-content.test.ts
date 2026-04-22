@@ -141,4 +141,77 @@ describe("published content snapshot", () => {
     expect(storedHeroes[0]?.id).toBe("fresh-hero");
     expect(storedArticles[0]?.id).toBe("fresh-article");
   });
+
+  it("upgrades legacy October 2025 story copy to restored authored versions", async () => {
+    localStorage.setItem(
+      "editorial_heroes",
+      JSON.stringify([
+        {
+          ...createHero("h-cv-summit"),
+          title: "Zurich's CV Summit: Capital Meets AI by the Lake",
+          subtitle:
+            "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance",
+          author: "Millie Sealana",
+          edition: "2025-10",
+        },
+        {
+          ...createHero("h-f1-austin"),
+          title: "F1 Returns to the Circuit of the Americas",
+          subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe",
+          author: "Charlotte Thames",
+          date: "2025-10-20",
+          edition: "2025-10",
+        },
+      ]),
+    );
+    localStorage.setItem(
+      "editorial_articles",
+      JSON.stringify([
+        {
+          ...createArticle("v1-cambiaso"),
+          title: "Cambiaso x Cambiaso: The Hurlingham Open",
+          excerpt:
+            "Father and son reunite on the historic turf of Buenos Aires as La Natividad La Dolfina begin their Triple Crown campaign.",
+          author: "Millie Sealana",
+          edition: "2025-10",
+        },
+        {
+          ...createArticle("v1-engadin"),
+          title: "Winter Awaits the Engadin",
+          excerpt:
+            "As the first snows dust the peaks, the Engadin Valley prepares for another season of Alpine luxury — from St. Moritz's frozen lake to Pontresina's quiet elegance.",
+          author: "Charlotte Thames",
+          date: "2025-10-20",
+          edition: "2025-10",
+        },
+      ]),
+    );
+    localStorage.setItem("editorial_ads", JSON.stringify([]));
+    localStorage.setItem("editorial_content_version", "4");
+    localStorage.setItem("editorial_has_local_draft", "1");
+
+    const snapshot = await getPublishedContentSnapshot();
+    const cvHero = snapshot.heroes.find((hero) => hero.id === "h-cv-summit");
+    const f1Hero = snapshot.heroes.find((hero) => hero.id === "h-f1-austin");
+    const cambiasoArticle = snapshot.articles.find((article) => article.id === "v1-cambiaso");
+    const engadinArticle = snapshot.articles.find((article) => article.id === "v1-engadin");
+
+    expect(cvHero).toMatchObject({
+      title: "Zurich's CV Summit: Capital Meets AI Coding by the Lake",
+      author: "Millie Sealana",
+    });
+    expect(f1Hero).toMatchObject({
+      subtitle: "Just on the heels of Singapore, F1 heads to Austin's tech haven — where Russell amazed and Hamilton raced for Roscoe.",
+      date: "2025-10-06",
+    });
+    expect(cambiasoArticle).toMatchObject({
+      title: "Cambiaso x Cambiaso: Hurlingham and a New Legacy Begins",
+    });
+    expect(cambiasoArticle?.body?.some((block) => block.type === "text" && /Proxima parada, Tortugas/i.test(block.content))).toBe(true);
+    expect(engadinArticle).toMatchObject({
+      title: "Engadin Awaits the Winter",
+      author: "Millie Sealana",
+      date: "2025-10-06",
+    });
+  });
 });

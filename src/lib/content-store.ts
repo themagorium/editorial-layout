@@ -217,17 +217,19 @@ function normalizeBodyToOctoberPattern(
 }
 
 function normalizeHero(hero: HeroItem): HeroItem {
+  const upgraded = upgradeLegacyHeroCopy(hero);
   return {
-    ...hero,
-    excerpt: hero.excerpt || hero.subtitle,
-    body: normalizeBodyToOctoberPattern(hero.id, hero.body, hero.imageUrl, hero.videoUrl),
+    ...upgraded,
+    excerpt: upgraded.excerpt || upgraded.subtitle,
+    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, upgraded.imageUrl, upgraded.videoUrl),
   };
 }
 
 function normalizeArticle(article: Article): Article {
+  const upgraded = upgradeLegacyArticleCopy(article);
   return {
-    ...article,
-    body: normalizeBodyToOctoberPattern(article.id, article.body, article.imageUrl, article.videoUrl),
+    ...upgraded,
+    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, upgraded.imageUrl, upgraded.videoUrl),
   };
 }
 
@@ -339,35 +341,37 @@ const DEFAULT_HEROES: HeroItem[] = [
   },
   {
     id: "h-cv-summit",
-    title: "Zurich's CV Summit: Capital Meets AI by the Lake",
+    title: "Zurich's CV Summit: Capital Meets AI Coding by the Lake",
     legacySlugs: ["zurichs-crypto-meets-ai"],
-    subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance",
+    subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance around infrastructure.",
     category: "Tech & AI",
     imageUrl: articleCvSummit,
     author: "Millie Sealana",
     date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "cv-b1", type: "text", content: "CV Summit 2025 at Zurich's historic Kongresshaus marked a turning point for the European tech conference circuit. Over 3,000 founders, investors, and corporate innovators gathered on the shores of Lake Zurich for two days of programming that abandoned crypto hype in favour of serious discourse on AI, deep tech, and sustainable venture capital." },
-      { id: "cv-b2", type: "text", content: "The headline panel — featuring partners from Sequoia, Andreessen Horowitz, and Balderton Capital — addressed the recalibration of European venture funding. The message was clear: capital is flowing, but it's flowing to companies with real revenue, real technology, and real defensibility. The era of narrative-driven valuations is over." },
-      { id: "cv-b3", type: "text", content: "Zurich itself proved the perfect host. The Kongresshaus, a 1930s lakeside landmark, provided an intimate setting that encouraged the kind of corridor conversations that larger conferences struggle to facilitate. Evening receptions at the Baur au Lac and the Dolder Grand extended the networking into Zurich's most exclusive spaces." },
-      { id: "cv-b4", type: "text", content: "For The Magorium, CV Summit represents a broader trend: the convergence of technology and luxury. AI-driven personalisation, blockchain provenance for luxury goods, and the digitisation of the art market were recurring themes — confirming that the tech and luxury worlds are no longer parallel tracks, but increasingly the same conversation." },
+      { id: "cv-b1", type: "text", content: "CV Summit 2025 took place at the Kongresshaus Zurich, uniting more than 3,000 technology leaders, investors, institutions, and innovators. With 190 speakers, the summit underscored its role as a catalyst event for defining the new era of finance and technology. This year's edition occupied its familiar space as part alpine think-tank, part deal-floor, part Swiss-precision diplomacy — but the shift from spectacle to substance was unmistakable." },
+      { id: "cv-b2", type: "text", content: "The agenda spanned four tracks: Blockchain (innovation and infrastructure), Institutions & Digital Assets (banking, capital markets, and compliant adoption), Wealth Management (digital-era investment), and Artificial Intelligence (acceleration of financial evolution). Switzerland's neutrality and governance were repeatedly invoked as stabilizing anchors in an increasingly volatile global environment." },
+      { id: "cv-b3", type: "text", content: "Blockchain and AI are reshaping wealth, asset management, banking, and payments. Olaf Hannemann, Co-Founder of CV VC, captured the Summit's spirit: \"Innovation has never been as fast as today, but will never be as slow ever again.\" Panelists explored autonomous financial agents where AI-driven systems are capable of transacting, investing, and paying on behalf of humans." },
+      { id: "cv-b4", type: "text", content: "Roger Bayston, Head of Digital Assets at Franklin Templeton, stated: \"We've been building blockchain-integrated solutions since 2017. Our presence at CV Summit reflects our belief that tokenized products, composable infrastructure, and tools like intraday yield are the future of finance.\" " },
+      { id: "cv-b5", type: "text", content: "After years of noise and over-funded experimentation, the most interesting ideas emerged from those building slowly, deliberately, with clarity of purpose — a return to fundamentals. The community is recalibrating itself: quieter, sharper, ready for a more disciplined era of innovation." },
     ],
   },
   {
     id: "h-f1-austin",
     title: "F1 Returns to the Circuit of the Americas",
-    subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe",
+    subtitle: "Just on the heels of Singapore, F1 heads to Austin's tech haven — where Russell amazed and Hamilton raced for Roscoe.",
     category: "Motorsport",
     imageUrl: articleF1Americas,
     author: "Charlotte Thames",
-    date: "2025-10-20",
+    date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "f1-b1", type: "text", content: "The United States Grand Prix at the Circuit of the Americas delivered one of the season's most compelling weekends. Austin — the tech capital of the American South — welcomed Formula 1 with its unique blend of innovation culture, Southern hospitality, and an atmosphere that no other circuit on the calendar can replicate." },
-      { id: "f1-b2", type: "text", content: "George Russell's masterful drive from fourth on the grid to victory was the headline, but the weekend belonged to Lewis Hamilton. In what many speculated could be among his final races at COTA, Hamilton's relentless charge through the field — accompanied by his beloved bulldog Roscoe in the paddock — provided the emotional heart of the event." },
-      { id: "f1-b3", type: "text", content: "Off the track, Austin during F1 weekend transforms into a luxury destination that rivals Monaco and Singapore. The Paddock Club hospitality, the celebrity-heavy grid walks, and the after-race concerts — this year headlined by a surprise Beyoncé appearance — confirmed COTA's position as the most culturally significant race on the American calendar." },
-      { id: "f1-b4", type: "text", content: "The Circuit of the Americas itself, with its dramatic Turn 1 climb and the sweeping esses that reference Silverstone and Suzuka, remains one of the finest purpose-built tracks in modern F1. As the sport's American expansion continues with races in Miami and Las Vegas, Austin's COTA retains its authenticity — a circuit built by racing fans, for racing fans." },
+      { id: "f1-b1", type: "text", content: "Just on the heels of the Singapore Grand Prix, which is notorious for being one of the toughest races physically for Formula 1 drivers as it was declared the first 'heat hazard' race of the year, meaning drivers either had to use a cooling vest or add extra ballast to their car. Max Verstappen chose not to." },
+      { id: "f1-b2", type: "text", content: "In Singapore, the finals were tight as George Russell amazed the entire F1 paddock with a faultless display of skill from qualifying to the final race. McLaren finished as Formula 1's top team at the Singapore Grand Prix on a challenging day for the 1,2,3 finish of George Russell, Mercedes Benz AMG; Max Verstappen, Red Bull Racing; and Lando Norris, McLaren." },
+      { id: "f1-b3", type: "text", content: "Hamilton dropped to eighth, while Oliver Bearman was ninth for Haas and Carlos Sainz, Jr., after his first podium win with Williams in Azerbaijan took a point in 10th as he had to start near the back of the grid for a technical infringement." },
+      { id: "f1-b4", type: "text", content: "Lewis said he \"raced for Roscoe.\" Hamilton, just coming back from the terrible blow of losing his companion of the heart, Roscoe, was visibly affected as the entire F1 community witnessed. His innate reflexive well-honed driving skills compensated for his personal ordeal. Our hearts go out to Hamilton for the upcoming races." },
+      { id: "f1-b5", type: "text", content: "Next up, F1 returns to American soil in Austin. If having Kygo and Garth Brooks as the event's concert headliners is any indication of the disparity even in tech world Austin, the fans will undoubtedly be dazzled once again by the dramatic speed and strategy of Formula 1 racing. The official track record of 1:36.16 was set by Charles Leclerc in 2019." },
     ],
   },
 ];
@@ -505,18 +509,24 @@ const DEFAULT_ARTICLES: Article[] = [
   // ========== OCTOBER 2025 ========== (Editor's Picks: Polo, PFW, Kusama, Marrakech)
   {
     id: "v1-cambiaso",
-    title: "Cambiaso x Cambiaso: The Hurlingham Open",
-    excerpt: "Father and son reunite on the historic turf of Buenos Aires as La Natividad La Dolfina begin their Triple Crown campaign.",
+    title: "Cambiaso x Cambiaso: Hurlingham and a New Legacy Begins",
+    excerpt: "The 132nd Hurlingham Open: La Natividad La Dolfina establish a new standard under pressure, bringing father and son back on home soil.",
     category: "Equestrian",
     imageUrl: articleCambiaso,
     author: "Millie Sealana",
     date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "cam-b1", type: "text", content: "The Hurlingham Open marked a historic moment as Adolfo Cambiaso and his son Poroto took to the field together for La Natividad La Dolfina. The Buenos Aires crowd witnessed polo royalty as the greatest player of all time shared the turf with the next generation." },
-      { id: "cam-b2", type: "image", content: articleCambiasoPhoto1, caption: "Adolfo and Poroto Cambiaso on the field at Hurlingham", citation: "AAP/Getty Images" },
-      { id: "cam-b3", type: "text", content: "The Triple Crown campaign begins here at Hurlingham, continues through Tortugas, and culminates at the prestigious Palermo Open in December. For the Cambiaso dynasty, this season represents more than competition — it's a passing of the torch." },
-      { id: "cam-b4", type: "image", content: articleCambiasoPhoto2, caption: "La Natividad La Dolfina celebrating after the match", citation: "AAP/Getty Images" },
+      { id: "polo-b1", type: "text", content: "The 132nd Hurlingham Open unfolded with two teams forced to rethink their assumptions rather than rely on routine. On the historic turf at Hurlingham, La Natividad La Dolfina, in their first title since the merger of the two teams, delivered a win that didn't hinge on overpowering their opponent, but on interpreting a match that evolved in real time. It brought father and son, Adolfo and Poroto Cambiaso back on home soil." },
+      { id: "polo-b2", type: "text", content: "Their 12–9 result over UAE Polo signaled far more than a strong showing at the start of the Triple Crown. It revealed a team learning to operate as a single unit, navigating momentum shifts with the kind of clarity that only comes from maturity, trust, and an unspoken internal rhythm." },
+      { id: "polo-b3", type: "text", content: "The opening chukkers felt controlled but uncertain — not chaotic, but undefined. UAE Polo entered with a familiar structure: tight spacing, disciplined rotation, and a pace that made the early exchanges feel almost cautious. Their approach limited open lanes and challenged La Natividad La Dolfina to search for patterns rather than impose them." },
+      { id: "polo-b4", type: "text", content: "Camilo \"Jeta\" Castagnola emerged as the primary reference point. His goals — eight in total — shifted the momentum and prevented the game from slipping back into equilibrium. Accuracy created separation and composure controlled tempo." },
+      { id: "polo-b5", type: "image", content: articleCambiasoPhoto1, caption: "Cambiaso's Signature Influence", citation: "© Hurlingham Polo Association" },
+      { id: "polo-b6", type: "text", content: "Adolfo Cambiaso provided the layer of interpretation needed — steering tempo, adjusting field shape, and adding the two goals that mattered more for their timing than for their numbers. Poroto Cambiaso linked the lines with fluidity, smoothing transitions from recovery to attack and ensuring the momentum held steady during the match's most volatile periods." },
+      { id: "polo-b7", type: "text", content: "UAE Polo did not retreat. They played with a controlled edge, forcing La Natividad La Dolfina into full concentration. Their strongest sequences came at moments when the match felt poised to turn — and one late collision involving Lucas Monteverde briefly froze the stadium." },
+      { id: "polo-b8", type: "image", content: articleCambiasoPhoto2, caption: "Cambiaso's Signature Influence", citation: "© Hurlingham Polo Association" },
+      { id: "polo-b9", type: "text", content: "This victory did not lean on history or reputation. It felt like a team constructing an identity from the inside out — one built on controlled acceleration, coordinated defensive shifts, and disciplined decision-making under tension." },
+      { id: "polo-b10", type: "text", content: "With Hurlingham complete, the tour moves toward Tortugas and Palermo. La Natividad La Dolfina demonstrated their capacity to adapt, absorb pressure, and convert opportunity. It is the kind of win that shapes a season not through spectacle, but through clarity. The road to the Triple Crown is underway. Proxima parada, Tortugas." },
     ],
   },
   {
@@ -550,17 +560,18 @@ const DEFAULT_ARTICLES: Article[] = [
   },
   {
     id: "v1-engadin",
-    title: "Winter Awaits the Engadin",
-    excerpt: "As the first snows dust the peaks, the Engadin Valley prepares for another season of Alpine luxury — from St. Moritz's frozen lake to Pontresina's quiet elegance.",
+    title: "Engadin Awaits the Winter",
+    excerpt: "There is no other region in the world like the Engadin — from St. Moritz to Davos Klosters. The lakes freeze, the light shifts, and the valley transforms.",
     category: "Travel",
     imageUrl: articleEngadin,
-    author: "Charlotte Thames",
-    date: "2025-10-20",
+    author: "Millie Sealana",
+    date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "eng-b1", type: "text", content: "The Engadin Valley awakens in October with the first dustings of snow on the Bernina peaks. St. Moritz, the valley's glamorous anchor, begins its transformation from summer hiking destination to the world's most storied winter playground. The Palace Hotel opens its doors, the frozen lake awaits its polo ponies, and the Cresta Run prepares for another season of aristocratic speed." },
-      { id: "eng-b2", type: "text", content: "Yet beyond St. Moritz's glitter lies the quieter elegance of Pontresina, Sils Maria, and the upper valley villages. Here, cross-country skiers trace the frozen lakes, horse-drawn carriages carry guests through snow-laden forests, and the Kronenhof's spa offers Alpine wellness at its most refined. The Engadin is not merely a ski destination — it is winter elevated to an art form." },
-      { id: "eng-b3", type: "text", content: "For the discerning traveler, October is the moment of anticipation: securing tables at Chesa Veglia, booking the coveted suites, and watching the valley transform. Winter awaits the Engadin — and the Engadin awaits the world." },
+      { id: "eng-b1", type: "text", content: "The Engadin in late autumn is a quiet pause before the endless myriad of choices for skiers and non skiers alike. There is no other region in the world like the Engadin, from St. Moritz to Davos Klosters to the quieter towns of Scuol and Arosa. Winter is non stop with everything from A-to-Z. The lakes freeze from the edges inward, the light shifts to a colder blue, and the valley begins its quiet transformation into the winter playground the world knows so well." },
+      { id: "eng-b2", type: "text", content: "St. Moritz is already rehearsing for its defining months: opening with FIS World Cup in action, Snow Polo, the White Turf races and the International Concours of Elegance (ICE). Everywhere is preparing for the gorgeous diamond-like snow to come. The private chalet gatherings, the art, the design, the discreet international arrivals that shape the season." },
+      { id: "eng-b3", type: "text", content: "What differentiates the Engadin from any other alpine destination is not scale — it is choreography. Every winter unfolds like a curated performance, layered with tradition but never static. This year, the mood is unmistakably elevated: more intimate, more global, and somehow sharper, as if the valley is preparing for an inflection point." },
+      { id: "eng-b4", type: "text", content: "Winter has yet to arrive. But you can feel it approaching with anticipation." },
     ],
   },
 ];
@@ -571,6 +582,63 @@ const DEFAULT_ADS: AdSlot[] = [
   { id: "ad3", label: "Bottom Banner", position: "bottom-banner", width: 970, height: 250 },
   { id: "ad4", label: "Sidebar Ad", position: "sidebar", width: 300, height: 600 },
 ];
+
+const HERO_DEFAULT_BY_ID = new Map(DEFAULT_HEROES.map((hero) => [hero.id, hero]));
+const ARTICLE_DEFAULT_BY_ID = new Map(DEFAULT_ARTICLES.map((article) => [article.id, article]));
+
+function shouldUpgradeLegacyHeroCopy(hero: HeroItem) {
+  if (hero.id === "h-cv-summit" && hero.title === "Zurich's CV Summit: Capital Meets AI by the Lake") {
+    return true;
+  }
+  if (
+    hero.id === "h-f1-austin" &&
+    hero.subtitle === "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe"
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function shouldUpgradeLegacyArticleCopy(article: Article) {
+  if (article.id === "v1-cambiaso" && article.title === "Cambiaso x Cambiaso: The Hurlingham Open") {
+    return true;
+  }
+  if (article.id === "v1-engadin" && article.title === "Winter Awaits the Engadin") {
+    return true;
+  }
+  return false;
+}
+
+function upgradeLegacyHeroCopy(hero: HeroItem): HeroItem {
+  if (!shouldUpgradeLegacyHeroCopy(hero)) return hero;
+  const canonical = HERO_DEFAULT_BY_ID.get(hero.id);
+  if (!canonical) return hero;
+  return {
+    ...hero,
+    title: canonical.title,
+    subtitle: canonical.subtitle,
+    excerpt: canonical.excerpt,
+    author: canonical.author,
+    date: canonical.date,
+    legacySlugs: canonical.legacySlugs,
+    body: canonical.body,
+  };
+}
+
+function upgradeLegacyArticleCopy(article: Article): Article {
+  if (!shouldUpgradeLegacyArticleCopy(article)) return article;
+  const canonical = ARTICLE_DEFAULT_BY_ID.get(article.id);
+  if (!canonical) return article;
+  return {
+    ...article,
+    title: canonical.title,
+    excerpt: canonical.excerpt,
+    author: canonical.author,
+    date: canonical.date,
+    legacySlugs: canonical.legacySlugs,
+    body: canonical.body,
+  };
+}
 
 // ===== Storage & API =====
 // Bump this version whenever DEFAULT content changes to invalidate stale localStorage

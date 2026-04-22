@@ -188,25 +188,28 @@ function normalizeBodyToOctoberPattern(
   const textLikeBlocks = source.filter((b) => b.type !== "image" && b.type !== "video");
   const mediaBlocks = source.filter((b) => b.type === "image" || b.type === "video");
 
-  const mediaPool = mediaBlocks.length > 0
-    ? mediaBlocks
-    : [createMediaSeedBlock(baseId, imageUrl, videoUrl)];
-
   // Always enforce October-style sequence: text -> media -> text -> media...
   if (textLikeBlocks.length === 0) {
     return createOctoberPatternBody(baseId, imageUrl, videoUrl);
   }
 
+  const primarySeedMedia = createMediaSeedBlock(baseId, imageUrl, videoUrl);
+  const emptySeedMedia = createMediaSeedBlock(baseId, undefined, undefined);
+
   const normalized: ArticleBodyBlock[] = [];
   textLikeBlocks.forEach((textBlock, index) => {
-    const media = mediaPool[index % mediaPool.length];
     normalized.push({
       ...textBlock,
       id: `${baseId}-auto-t-${index}`,
     });
+    const media = mediaBlocks[index] || (index === 0 ? primarySeedMedia : emptySeedMedia);
     normalized.push({
       ...media,
       id: `${baseId}-auto-m-${index}`,
+      // Never duplicate hero/article lead media into every generated slot.
+      content: mediaBlocks[index]?.content || (index === 0 ? media.content : ""),
+      caption: mediaBlocks[index]?.caption || (index === 0 ? media.caption : ""),
+      citation: mediaBlocks[index]?.citation || "",
     });
   });
 
@@ -684,6 +687,13 @@ export const DEFAULT_PUBLISHED_CONTENT: {
   ads: DEFAULT_ADS,
 };
 
+function hasLocalEditsAvailable() {
+  if (typeof window === "undefined") return false;
+  const hasHeroes = Boolean(localStorage.getItem(STORAGE_KEYS.heroes));
+  const hasArticles = Boolean(localStorage.getItem(STORAGE_KEYS.articles));
+  return hasHeroes || hasArticles;
+}
+
 function hasPublishedStoryContent(content: { heroes: HeroItem[]; articles: Article[] }) {
   return content.heroes.length > 0 || content.articles.length > 0;
 }
@@ -695,6 +705,13 @@ export async function getPublishedContentSnapshot(): Promise<{
 }> {
   if (typeof window === "undefined") {
     return DEFAULT_PUBLISHED_CONTENT;
+  }
+  if (hasLocalEditsAvailable()) {
+    return {
+      heroes: getHeroes(),
+      articles: getArticles(),
+      ads: getAds(),
+    };
   }
   try {
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, { cache: "no-store" });
@@ -740,6 +757,9 @@ export function resetToDefaults() {
 
 export async function syncPublishedContentToLocalStorage() {
   if (typeof window === "undefined") {
+    return { synced: false, configured: false };
+  }
+  if (hasLocalEditsAvailable()) {
     return { synced: false, configured: false };
   }
 

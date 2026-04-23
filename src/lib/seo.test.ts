@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   applyArticleSeo,
   applyAuthorSeo,
+  applyHomeSeo,
   canonicalAuthorName,
   getAuthorPath,
   resolveAuthorNameFromSlug,
@@ -58,5 +59,21 @@ describe("seo author helpers", () => {
     expect(canonical?.getAttribute("href")).toBe("https://www.themagorium.com/author/millie-sealana");
     expect(payload.name).toBe("Millie Sealana");
     expect(payload.url).toBe("https://www.themagorium.com/author/millie-sealana");
+  });
+
+  it("applies home seo with brand alias and misspelling signals", () => {
+    applyHomeSeo("magoriom");
+    const title = document.title;
+    const canonical = document.head.querySelector('link[rel="canonical"]');
+    const description = document.head.querySelector('meta[name="description"]');
+    const keywords = document.head.querySelector('meta[name="keywords"]');
+    const orgSchema = document.head.querySelector('script[data-seo="organization-jsonld"]');
+    const payload = orgSchema ? (JSON.parse(orgSchema.textContent || "{}") as { alternateName?: string[] }) : {};
+
+    expect(title).toContain("magoriom | The Magorium");
+    expect(canonical?.getAttribute("href")).toBe("https://www.themagorium.com");
+    expect(description?.getAttribute("content")).toContain("Magoriom");
+    expect(keywords?.getAttribute("content")).toContain("Magoriom");
+    expect(payload.alternateName).toContain("Magoriom");
   });
 });

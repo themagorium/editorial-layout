@@ -29,6 +29,10 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/magorium" element={<BrandAliasPage />} />
           <Route path="/magorum" element={<BrandAliasPage />} />
+          <Route path="/margorium" element={<BrandAliasPage />} />
+          <Route path="/magoriom" element={<BrandAliasPage />} />
+          <Route path="/magoriumm" element={<BrandAliasPage />} />
+          <Route path="/megorium" element={<BrandAliasPage />} />
           <Route path="/the-magorium" element={<BrandAliasPage />} />
           <Route path="/article/:id" element={<ArticlePage />} />
           <Route path="/articles/:id" element={<ArticlePage />} />

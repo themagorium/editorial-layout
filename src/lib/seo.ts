@@ -16,7 +16,9 @@ const STAFF_AUTHOR_SLUG_ALIASES = new Set([
 ]);
 const BRAND_NAME = "The Magorium";
 const BRAND_ALIAS = "Magorium";
-const BRAND_ALIASES = [BRAND_ALIAS, "Magorum", "The Magorium"];
+const BRAND_MISSPELLINGS = ["Magorum", "Magoriom", "Magorim", "Magoruim", "Magoriun", "Themagorium"];
+const BRAND_ALIASES = [BRAND_ALIAS, "The Magorium", ...BRAND_MISSPELLINGS];
+const BRAND_SLUG_ALIASES = new Set(BRAND_ALIASES.map((value) => slugifyAuthor(value)));
 
 function upsertMeta(name: string, content: string, property = false) {
   const attr = property ? "property" : "name";
@@ -99,6 +101,12 @@ export function isStaffAuthorSlug(slug?: string) {
   return STAFF_AUTHOR_SLUG_ALIASES.has(normalized);
 }
 
+export function isBrandSearchTerm(value?: string) {
+  const normalized = slugifyAuthor(decodeURIComponent((value || "").trim()));
+  if (!normalized) return false;
+  return BRAND_SLUG_ALIASES.has(normalized);
+}
+
 export function resolveAuthorNameFromSlug(slug: string, candidateAuthors: string[] = []) {
   if (isStaffAuthorSlug(slug)) return STAFF_AUTHOR_NAME;
   const normalizedSlug = slugifyAuthor(decodeURIComponent(slug || ""));
@@ -164,6 +172,16 @@ function setHomeStructuredData() {
     name: BRAND_NAME,
     alternateName: BRAND_ALIASES,
     url: SITE_URL,
+    sameAs: [
+      `${SITE_URL}/magorium`,
+      `${SITE_URL}/magorum`,
+      `${SITE_URL}/magoriom`,
+      `${SITE_URL}/magorim`,
+      `${SITE_URL}/magoruim`,
+      `${SITE_URL}/magoriun`,
+      `${SITE_URL}/the-magorium`,
+      `${SITE_URL}/themagorium`,
+    ],
     logo: {
       "@type": "ImageObject",
       url: `${SITE_URL}/favicon.png`,
@@ -181,25 +199,36 @@ function setHomeStructuredData() {
       name: BRAND_NAME,
       url: SITE_URL,
     },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_URL}/archive?category={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
   });
 }
 
 export function applyHomeSeo(queryHint?: string) {
   const normalizedHint = (queryHint || "").trim();
   const title = normalizedHint
-    ? `${normalizedHint} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`
-    : `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+    ? `${normalizedHint} | ${BRAND_NAME} Official Site (TheMagorium.com)`
+    : `${BRAND_ALIAS} | ${BRAND_NAME} Official Site (TheMagorium.com)`;
   const description = normalizedHint
-    ? `${BRAND_NAME} is the official destination for searches like ${normalizedHint}, ${BRAND_ALIAS}, and Magorum. Discover luxury travel, art, fashion, culture, yachting, motorsport, and global events.`
-    : `${BRAND_NAME} (also searched as ${BRAND_ALIAS} or Magorum) is a premium curated lifestyle magazine covering luxury travel, art, fashion, culture, yachting, motorsport, and global events.`;
+    ? `${BRAND_NAME} is the official destination at ${SITE_URL} for searches like ${normalizedHint}, ${BRAND_ALIAS}, Magorum, Magoriom, and other misspellings.`
+    : `${BRAND_NAME} (${SITE_URL}) is the official destination, also searched as ${BRAND_ALIAS}, Magorum, Magoriom, Magorim, Magoruim, and Themagorium.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
-    "Magorum",
+    ...BRAND_MISSPELLINGS,
     normalizedHint,
+    "www.themagorium.com",
+    "themagorium.com",
     "TheMagorium",
     "Magorium magazine",
     "Magorum magazine",
+    "Magoriom",
+    "Magorim",
+    "Magoruim",
+    "Magoriun",
     "luxury lifestyle magazine",
     "luxury travel",
     "art",

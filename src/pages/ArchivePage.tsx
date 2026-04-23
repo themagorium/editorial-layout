@@ -5,7 +5,7 @@ import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { getPublishedContentSnapshot, formatEditionLabel } from "@/lib/content-store";
 import { Search, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { applyCollectionSeo, applyHomeSeo } from "@/lib/seo";
+import { applyCollectionSeo, applyHomeSeo, isBrandAliasQuery } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 export default function ArchivePage() {
@@ -71,7 +71,7 @@ export default function ArchivePage() {
 
   useEffect(() => {
     const q = search.trim().toLowerCase();
-    if (q === "magorium" || q === "the magorium" || q === "magorum") {
+    if (isBrandAliasQuery(q)) {
       applyHomeSeo();
       return;
     }

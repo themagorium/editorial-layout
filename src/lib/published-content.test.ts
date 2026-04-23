@@ -197,9 +197,25 @@ describe("published content snapshot", () => {
     const engadinArticle = snapshot.articles.find((article) => article.id === "v1-engadin");
 
     expect(cvHero).toMatchObject({
-      title: "Zurich's CV Summit: Capital Meets AI Coding by the Lake",
+      title: "CV Summit 2025 - Kongresshaus Zurich (September 23-24, 2025)",
       author: "Millie Sealana",
     });
+    expect(
+      cvHero?.body?.some(
+        (block) =>
+          block.type === "heading" &&
+          /The AI-Blockchain Convergence/i.test(block.content),
+      ),
+    ).toBe(true);
+    expect(
+      cvHero?.body?.some(
+        (block) =>
+          block.type === "text" &&
+          /The Magorium observed throughout, witnessing this transformation toward endurance over spectacle\./i.test(
+            block.content,
+          ),
+      ),
+    ).toBe(true);
     expect(f1Hero).toMatchObject({
       title: "F1 returns to American soil in the tech haven of Austin.",
       subtitle:

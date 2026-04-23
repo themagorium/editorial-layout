@@ -339,4 +339,38 @@ describe("published content snapshot", () => {
     );
     expect(snapshot.articles.some((article) => article.id === "v1-engadin")).toBe(true);
   });
+
+  it("backfills critical stories when snapshot is partially missing", async () => {
+    localStorage.setItem(
+      "editorial_heroes",
+      JSON.stringify([
+        {
+          ...createHero("some-other-hero"),
+          title: "Unrelated hero",
+          edition: "2025-10",
+        },
+      ]),
+    );
+    localStorage.setItem(
+      "editorial_articles",
+      JSON.stringify([
+        {
+          ...createArticle("some-other-article"),
+          title: "Unrelated article",
+          edition: "2025-10",
+        },
+      ]),
+    );
+    localStorage.setItem("editorial_ads", JSON.stringify([]));
+    localStorage.setItem("editorial_content_version", "4");
+    localStorage.setItem("editorial_has_local_draft", "1");
+
+    const snapshot = await getPublishedContentSnapshot();
+
+    expect(snapshot.heroes.some((hero) => hero.id === "h-cv-summit")).toBe(true);
+    expect(snapshot.heroes.some((hero) => hero.id === "h-f1-austin")).toBe(true);
+    expect(snapshot.heroes.some((hero) => hero.id === "h-sailgp")).toBe(true);
+    expect(snapshot.articles.some((article) => article.id === "v1-cambiaso")).toBe(true);
+    expect(snapshot.articles.some((article) => article.id === "v1-engadin")).toBe(true);
+  });
 });

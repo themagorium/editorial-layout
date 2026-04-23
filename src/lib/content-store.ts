@@ -576,6 +576,7 @@ const DEFAULT_ARTICLES: Article[] = [
   {
     id: "v1-engadin",
     title: "Engadin Awaits the Winter",
+    legacySlugs: ["winter-awaits-the-engadin"],
     excerpt: "There is no other region in the world like the Engadin — from St. Moritz to Davos Klosters. The lakes freeze, the light shifts, and the valley transforms.",
     category: "Travel",
     imageUrl: articleEngadin,
@@ -603,51 +604,32 @@ const ARTICLE_DEFAULT_BY_ID = new Map(DEFAULT_ARTICLES.map((article) => [article
 const CRITICAL_HERO_IDS = ["h-sailgp", "h-cv-summit", "h-f1-austin"] as const;
 const CRITICAL_ARTICLE_IDS = ["v1-cambiaso", "v1-engadin"] as const;
 
-function upsertCriticalHeroFallbacks(heroes: HeroItem[], options?: { forceWhenMissingAll?: boolean }): HeroItem[] {
+function upsertCriticalHeroFallbacks(heroes: HeroItem[]): HeroItem[] {
   const next = [...heroes];
-  if (!options?.forceWhenMissingAll && next.length > 0) {
-    return next;
-  }
   for (const id of CRITICAL_HERO_IDS) {
     if (next.some((hero) => hero.id === id)) continue;
     const fallback = HERO_DEFAULT_BY_ID.get(id);
     if (!fallback) continue;
-    const insertAt = next.findIndex((hero) => hero.edition === fallback.edition);
-    if (insertAt === -1) {
-      next.push(fallback);
-    } else {
-      next.splice(insertAt, 0, fallback);
-    }
+    next.push(fallback);
   }
   return next;
 }
 
-function upsertCriticalArticleFallbacks(articles: Article[], options?: { forceWhenMissingAll?: boolean }) {
+function upsertCriticalArticleFallbacks(articles: Article[]) {
   const next = [...articles];
-  if (!options?.forceWhenMissingAll && next.length > 0) {
-    return next;
-  }
   for (const id of CRITICAL_ARTICLE_IDS) {
     if (next.some((article) => article.id === id)) continue;
     const fallback = ARTICLE_DEFAULT_BY_ID.get(id);
     if (!fallback) continue;
-    const insertAt = next.findIndex((article) => article.edition === fallback.edition);
-    if (insertAt === -1) {
-      next.push(fallback);
-    } else {
-      next.splice(insertAt, 0, fallback);
-    }
+    next.push(fallback);
   }
   return next;
 }
 
 function applyCriticalStoryBackfill(content: { heroes: HeroItem[]; articles: Article[] }) {
-  const shouldForceBackfill = content.heroes.length === 0 && content.articles.length === 0;
   return {
-    heroes: upsertCriticalHeroFallbacks(content.heroes, { forceWhenMissingAll: shouldForceBackfill }),
-    articles: upsertCriticalArticleFallbacks(content.articles, {
-      forceWhenMissingAll: shouldForceBackfill,
-    }),
+    heroes: upsertCriticalHeroFallbacks(content.heroes),
+    articles: upsertCriticalArticleFallbacks(content.articles),
   };
 }
 
@@ -828,9 +810,7 @@ export function getHeroes(): HeroItem[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.heroes);
   const rawHeroes = stored ? (JSON.parse(stored) as HeroItem[]) : DEFAULT_HEROES;
-  const backfilledHeroes = upsertCriticalHeroFallbacks(rawHeroes, {
-    forceWhenMissingAll: rawHeroes.length === 0 && Boolean(stored),
-  });
+  const backfilledHeroes = upsertCriticalHeroFallbacks(rawHeroes);
   return backfilledHeroes.map(normalizeHero);
 }
 
@@ -838,9 +818,7 @@ export function getArticles(): Article[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.articles);
   const rawArticles = stored ? (JSON.parse(stored) as Article[]) : DEFAULT_ARTICLES;
-  const backfilledArticles = upsertCriticalArticleFallbacks(rawArticles, {
-    forceWhenMissingAll: rawArticles.length === 0 && Boolean(stored),
-  });
+  const backfilledArticles = upsertCriticalArticleFallbacks(rawArticles);
   return backfilledArticles.map(normalizeArticle);
 }
 

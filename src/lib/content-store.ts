@@ -576,6 +576,7 @@ const DEFAULT_ADS: AdSlot[] = [
 // Bump this version whenever DEFAULT content changes to invalidate stale localStorage
 const CONTENT_VERSION = "4";
 const PUBLISHED_CONTENT_ENDPOINT = "/api/content";
+const ADMIN_PUBLISH_TOKEN_KEY = "magorium-admin-token";
 const STORAGE_KEYS = {
   heroes: "editorial_heroes",
   articles: "editorial_articles",
@@ -697,10 +698,26 @@ export function restoreDefaultContentBackup() {
   localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
 }
 
+function getAdminPublishCredentialFromBrowserStorage(): string | null {
+  if (typeof window === "undefined") return null;
+  const sessionValue = sessionStorage.getItem(ADMIN_PUBLISH_TOKEN_KEY)?.trim();
+  if (sessionValue) return sessionValue;
+  const localValue = localStorage.getItem(ADMIN_PUBLISH_TOKEN_KEY)?.trim();
+  return localValue || null;
+}
+
 export async function publishContentSnapshot(heroes: HeroItem[], articles: Article[], ads: AdSlot[]) {
+  const credential = getAdminPublishCredentialFromBrowserStorage();
+  if (!credential) {
+    throw new Error("Unauthorized. Please sign in to publish.");
+  }
+
   const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${credential}`,
+    },
     body: JSON.stringify({ heroes, articles, ads }),
   });
   if (!response.ok) {
@@ -832,14 +849,23 @@ export async function syncPublishedContentToLocalStorage() {
 
 export async function publishEditorialContent(
   content: Omit<PublishedEditorialContent, "publishedAt">,
-  adminPassword?: string,
+  adminPasswordOrToken?: string,
 ) {
   try {
+    const authValue = (adminPasswordOrToken || getAdminPublishCredentialFromBrowserStorage() || "").trim();
+    if (!authValue) {
+      return {
+        success: false,
+        configured: true,
+        error: "Admin session expired. Please sign in again to publish live.",
+      };
+    }
+
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(adminPassword ? { "x-admin-password": adminPassword } : {}),
+        Authorization: `Bearer ${authValue}`,
       },
       body: JSON.stringify(content),
     });

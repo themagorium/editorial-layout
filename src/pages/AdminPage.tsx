@@ -42,7 +42,9 @@ import {
   type ContentStats,
 } from "@/lib/analytics";
 import {
+  getAdminPublishToken,
   isAdminAuthenticated,
+  setAdminPublishToken,
   setAdminAuthenticated,
   resetAdminPasswordAccess,
 } from "@/lib/admin-auth";
@@ -105,10 +107,11 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: passwordInput }),
       });
-      const payload = await response.json().catch(() => ({} as { success?: boolean }));
-      if (response.ok && payload.success) {
+      const payload = await response.json().catch(() => ({} as { success?: boolean; token?: string }));
+      if (response.ok && payload.success && typeof payload.token === "string") {
         setAuthenticated(true);
         setAdminAuthenticated(true);
+        setAdminPublishToken(payload.token);
         setPasswordError(false);
         return;
       }
@@ -221,7 +224,12 @@ function AdminDashboard() {
       saveHeroes(heroes);
       saveArticles(articles);
       saveAds(ads);
-      const published = await publishEditorialContent({ heroes, articles, ads });
+      const publishToken = getAdminPublishToken();
+      if (!publishToken) {
+        toast.error("Admin session expired. Please sign in again to publish live.");
+        return;
+      }
+      const published = await publishEditorialContent({ heroes, articles, ads }, publishToken);
       if (!published.success) {
         const fallbackMessage = published.error || "Could not publish content to live";
         toast.warning(`${fallbackMessage}. Local draft was still saved in this browser.`);
@@ -263,11 +271,16 @@ function AdminDashboard() {
         setCurrentEdition(restoredEditions[0]);
       }
 
+      const publishToken = getAdminPublishToken();
+      if (!publishToken) {
+        toast.error("Admin session expired. Please sign in again to publish live.");
+        return;
+      }
       const published = await publishEditorialContent({
         heroes: restoredHeroes,
         articles: restoredArticles,
         ads: restoredAds,
-      });
+      }, publishToken);
       if (!published.success) {
         const fallbackMessage = published.error || "Could not publish restored backup to live";
         toast.warning(`${fallbackMessage}. Backup was restored locally in this browser.`);

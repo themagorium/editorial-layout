@@ -108,10 +108,12 @@ export default function AdminPage() {
         body: JSON.stringify({ password: passwordInput }),
       });
       const payload = await response.json().catch(() => ({} as { success?: boolean; token?: string }));
-      if (response.ok && payload.success && typeof payload.token === "string") {
+      const normalizedPassword = passwordInput.trim();
+      if (response.ok && payload.success) {
         setAuthenticated(true);
         setAdminAuthenticated(true);
-        setAdminPublishToken(payload.token);
+        setAdminPublishToken(typeof payload.token === "string" ? payload.token : normalizedPassword);
+        setPasswordInput("");
         setPasswordError(false);
         return;
       }

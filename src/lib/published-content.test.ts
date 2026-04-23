@@ -318,4 +318,25 @@ describe("published content snapshot", () => {
     expect(cambiaso?.body?.some((block) => block.type === "text" && /Next stop, Tortugas/i.test(block.content))).toBe(true);
     expect(cambiaso?.body?.some((block) => block.type === "heading" && /A Season Opening With Intention/i.test(block.content))).toBe(true);
   });
+
+  it("backfills critical October stories when missing from stored snapshot", async () => {
+    localStorage.setItem("editorial_heroes", JSON.stringify([]));
+    localStorage.setItem("editorial_articles", JSON.stringify([]));
+    localStorage.setItem("editorial_ads", JSON.stringify([]));
+    localStorage.setItem("editorial_content_version", "4");
+    localStorage.setItem("editorial_has_local_draft", "1");
+
+    const snapshot = await getPublishedContentSnapshot();
+
+    expect(snapshot.heroes.some((hero) => hero.id === "h-cv-summit")).toBe(true);
+    expect(snapshot.heroes.some((hero) => hero.id === "h-f1-austin")).toBe(true);
+    expect(snapshot.heroes.some((hero) => hero.id === "h-sailgp")).toBe(true);
+
+    const cambiaso = snapshot.articles.find((article) => article.id === "v1-cambiaso");
+    expect(cambiaso).toBeTruthy();
+    expect(cambiaso?.title).toBe(
+      "132nd Hurlingham Open: La Natividad La Dolfina Establish A New Standard Under Pressure",
+    );
+    expect(snapshot.articles.some((article) => article.id === "v1-engadin")).toBe(true);
+  });
 });

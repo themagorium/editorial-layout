@@ -600,6 +600,56 @@ const DEFAULT_ADS: AdSlot[] = [
 
 const HERO_DEFAULT_BY_ID = new Map(DEFAULT_HEROES.map((hero) => [hero.id, hero]));
 const ARTICLE_DEFAULT_BY_ID = new Map(DEFAULT_ARTICLES.map((article) => [article.id, article]));
+const CRITICAL_HERO_IDS = ["h-sailgp", "h-cv-summit", "h-f1-austin"] as const;
+const CRITICAL_ARTICLE_IDS = ["v1-cambiaso", "v1-engadin"] as const;
+
+function upsertCriticalHeroFallbacks(heroes: HeroItem[], options?: { forceWhenMissingAll?: boolean }): HeroItem[] {
+  const next = [...heroes];
+  if (!options?.forceWhenMissingAll && next.length > 0) {
+    return next;
+  }
+  for (const id of CRITICAL_HERO_IDS) {
+    if (next.some((hero) => hero.id === id)) continue;
+    const fallback = HERO_DEFAULT_BY_ID.get(id);
+    if (!fallback) continue;
+    const insertAt = next.findIndex((hero) => hero.edition === fallback.edition);
+    if (insertAt === -1) {
+      next.push(fallback);
+    } else {
+      next.splice(insertAt, 0, fallback);
+    }
+  }
+  return next;
+}
+
+function upsertCriticalArticleFallbacks(articles: Article[], options?: { forceWhenMissingAll?: boolean }) {
+  const next = [...articles];
+  if (!options?.forceWhenMissingAll && next.length > 0) {
+    return next;
+  }
+  for (const id of CRITICAL_ARTICLE_IDS) {
+    if (next.some((article) => article.id === id)) continue;
+    const fallback = ARTICLE_DEFAULT_BY_ID.get(id);
+    if (!fallback) continue;
+    const insertAt = next.findIndex((article) => article.edition === fallback.edition);
+    if (insertAt === -1) {
+      next.push(fallback);
+    } else {
+      next.splice(insertAt, 0, fallback);
+    }
+  }
+  return next;
+}
+
+function applyCriticalStoryBackfill(content: { heroes: HeroItem[]; articles: Article[] }) {
+  const shouldForceBackfill = content.heroes.length === 0 && content.articles.length === 0;
+  return {
+    heroes: upsertCriticalHeroFallbacks(content.heroes, { forceWhenMissingAll: shouldForceBackfill }),
+    articles: upsertCriticalArticleFallbacks(content.articles, {
+      forceWhenMissingAll: shouldForceBackfill,
+    }),
+  };
+}
 
 function shouldUpgradeLegacyHeroCopy(hero: HeroItem) {
   const firstText = (hero.body || []).find((block) => block.type === "text")?.content || "";
@@ -738,8 +788,12 @@ function isPublishedContentPayload(value: unknown): value is PublishedEditorialC
 }
 
 function writePublishedContentToLocalStorage(content: PublishedEditorialContent) {
-  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(content.heroes));
-  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(content.articles));
+  const backfilled = applyCriticalStoryBackfill({
+    heroes: content.heroes,
+    articles: content.articles,
+  });
+  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(backfilled.heroes));
+  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(backfilled.articles));
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(content.ads));
   localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
   clearLocalDraftFlag();
@@ -760,14 +814,20 @@ export function getHeroes(): HeroItem[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.heroes);
   const rawHeroes = stored ? (JSON.parse(stored) as HeroItem[]) : DEFAULT_HEROES;
-  return rawHeroes.map(normalizeHero);
+  const backfilledHeroes = upsertCriticalHeroFallbacks(rawHeroes, {
+    forceWhenMissingAll: rawHeroes.length === 0 && Boolean(stored),
+  });
+  return backfilledHeroes.map(normalizeHero);
 }
 
 export function getArticles(): Article[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.articles);
   const rawArticles = stored ? (JSON.parse(stored) as Article[]) : DEFAULT_ARTICLES;
-  return rawArticles.map(normalizeArticle);
+  const backfilledArticles = upsertCriticalArticleFallbacks(rawArticles, {
+    forceWhenMissingAll: rawArticles.length === 0 && Boolean(stored),
+  });
+  return backfilledArticles.map(normalizeArticle);
 }
 
 export function getAds(): AdSlot[] {
@@ -959,9 +1019,13 @@ export async function getPublishedContentSnapshot(): Promise<{
       }
       return DEFAULT_PUBLISHED_CONTENT;
     }
+    const backfilled = applyCriticalStoryBackfill({
+      heroes: raw.heroes,
+      articles: raw.articles,
+    });
     const normalized = {
-      heroes: raw.heroes.map(normalizeHero),
-      articles: raw.articles.map(normalizeArticle),
+      heroes: backfilled.heroes.map(normalizeHero),
+      articles: backfilled.articles.map(normalizeArticle),
       ads: raw.ads,
     };
     if (!hasPublishedStoryContent(normalized)) {

@@ -509,24 +509,36 @@ const DEFAULT_ARTICLES: Article[] = [
   // ========== OCTOBER 2025 ========== (Editor's Picks: Polo, PFW, Kusama, Marrakech)
   {
     id: "v1-cambiaso",
-    title: "Cambiaso x Cambiaso: Hurlingham and a New Legacy Begins",
-    excerpt: "The 132nd Hurlingham Open: La Natividad La Dolfina establish a new standard under pressure, bringing father and son back on home soil.",
+    title: "132nd Hurlingham Open: La Natividad La Dolfina Establish A New Standard Under Pressure",
+    excerpt: "The 132nd Hurlingham Open unfolded with two teams whom are are forced to rethink their assumptions rather than rely on routine.",
     category: "Equestrian",
     imageUrl: articleCambiaso,
     author: "Millie Sealana",
     date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "polo-b1", type: "text", content: "The 132nd Hurlingham Open unfolded with two teams forced to rethink their assumptions rather than rely on routine. On the historic turf at Hurlingham, La Natividad La Dolfina, in their first title since the merger of the two teams, delivered a win that didn't hinge on overpowering their opponent, but on interpreting a match that evolved in real time. It brought father and son, Adolfo and Poroto Cambiaso back on home soil." },
+      { id: "polo-b1", type: "text", content: "The 132nd Hurlingham Open unfolded with two teams whom are are forced to rethink their assumptions rather than rely on routine. On the historic turf at Hurlingham, La Natividad La Dolfina, in their first title since the merger of the two teams, delivered a win that didn’t hinge on overpowering their opponent, but on interpreting a match that evolved in real time. It brought father and son, Adolfo and Poroto Cambiaso back on home soil." },
       { id: "polo-b2", type: "text", content: "Their 12–9 result over UAE Polo signaled far more than a strong showing at the start of the Triple Crown. It revealed a team learning to operate as a single unit, navigating momentum shifts with the kind of clarity that only comes from maturity, trust, and an unspoken internal rhythm." },
-      { id: "polo-b3", type: "text", content: "The opening chukkers felt controlled but uncertain — not chaotic, but undefined. UAE Polo entered with a familiar structure: tight spacing, disciplined rotation, and a pace that made the early exchanges feel almost cautious. Their approach limited open lanes and challenged La Natividad La Dolfina to search for patterns rather than impose them." },
-      { id: "polo-b4", type: "text", content: "Camilo \"Jeta\" Castagnola emerged as the primary reference point. His goals — eight in total — shifted the momentum and prevented the game from slipping back into equilibrium. Accuracy created separation and composure controlled tempo." },
-      { id: "polo-b5", type: "image", content: articleCambiasoPhoto1, caption: "Cambiaso's Signature Influence", citation: "© Hurlingham Polo Association" },
-      { id: "polo-b6", type: "text", content: "Adolfo Cambiaso provided the layer of interpretation needed — steering tempo, adjusting field shape, and adding the two goals that mattered more for their timing than for their numbers. Poroto Cambiaso linked the lines with fluidity, smoothing transitions from recovery to attack and ensuring the momentum held steady during the match's most volatile periods." },
-      { id: "polo-b7", type: "text", content: "UAE Polo did not retreat. They played with a controlled edge, forcing La Natividad La Dolfina into full concentration. Their strongest sequences came at moments when the match felt poised to turn — and one late collision involving Lucas Monteverde briefly froze the stadium." },
-      { id: "polo-b8", type: "image", content: articleCambiasoPhoto2, caption: "Cambiaso's Signature Influence", citation: "© Hurlingham Polo Association" },
-      { id: "polo-b9", type: "text", content: "This victory did not lean on history or reputation. It felt like a team constructing an identity from the inside out — one built on controlled acceleration, coordinated defensive shifts, and disciplined decision-making under tension." },
-      { id: "polo-b10", type: "text", content: "With Hurlingham complete, the tour moves toward Tortugas and Palermo. La Natividad La Dolfina demonstrated their capacity to adapt, absorb pressure, and convert opportunity. It is the kind of win that shapes a season not through spectacle, but through clarity. The road to the Triple Crown is underway. Proxima parada, Tortugas." },
+      { id: "polo-b3", type: "image", content: articleCambiasoPhoto1, caption: "Photo: La Dolfina" },
+      { id: "polo-b4", type: "heading", content: "A Beginning Without Clear Lines", textStyle: "bold" },
+      { id: "polo-b5", type: "text", content: "The opening chukkers felt controlled but uncertain — not chaotic, but undefined. UAE Polo entered with a familiar structure: tight spacing, disciplined rotation, and a pace that made the early exchanges feel almost cautious. Their approach limited open lanes and challenged La Natividad La Dolfina to search for patterns rather than impose them." },
+      { id: "polo-b6", type: "text", content: "Both sides tested, waited, and absorbed. The match resembled a strategic conversation where each team attempted to read the other’s intentions before revealing their own." },
+      { id: "polo-b7", type: "image", content: articleCambiasoPhoto2, caption: "Photo: La Dolfina" },
+      { id: "polo-b8", type: "text", content: "Camilo “Jeta” Castagnola emerged as the primary reference point. His goals — eight in total —shifting the momentum to not dip back into equilibrium. Accuracy created separation and composure controlled tempo. Bartolomé Castagnola Jr. anchored the defensive side of the equation, absorbing UAE’s heaviest attacks" },
+      { id: "polo-b9", type: "heading", content: "Cambiaso’s Signature Influence", textStyle: "bold" },
+      { id: "polo-b10", type: "text", content: "Adolfo Cambiaso provided the layer of interpretation needed — steering tempo, adjusting field shape, and adding the two goals that mattered more for timing than for their numbers." },
+      { id: "polo-b11", type: "text", content: "Poroto Cambiaso linked the lines with fluidity, smoothing transitions from recovery to attack and ensuring the momentum held steady during the match’s most volatile periods." },
+      { id: "polo-b12", type: "text", content: "Together, the four created a sense of cohesion that felt more intentional with each passing chukker." },
+      { id: "polo-b13", type: "heading", content: "UAE’s Challenge and the Defining Moment", textStyle: "bold" },
+      { id: "polo-b14", type: "text", content: "UAE Polo did not retreat. They played with a controlled edge, forcing La Natividad La Dolfina into full concentration. Their strongest sequences came at moments when the match felt poised to turn — and one late collision involving Lucas Monteverde briefly froze the stadium. A penalty there could have tightened the score and reintroduced pressure. A neutral restart. Ensued." },
+      { id: "polo-b15", type: "text", content: "La Natividad La Dolfina won the toss-in immediately. Momentum shifted definitively." },
+      { id: "polo-b16", type: "text", content: "It was a reminder that in matches balanced this tightly, outcomes are shaped not by a single incident, but by how quickly a team can capitalize on the window it creates." },
+      { id: "polo-b17", type: "heading", content: "A Team Defining Itself", textStyle: "bold" },
+      { id: "polo-b18", type: "text", content: "This victory did not lean on history or reputation. It felt like a team constructing an identity from the inside out — one built on: controlled acceleration, coordinated defensive shift and disciplined decision-making under tension" },
+      { id: "polo-b19", type: "image", content: articleCambiasoPhoto2, caption: "Photo: La Dolfina" },
+      { id: "polo-b20", type: "heading", content: "A Season Opening With Intention", textStyle: "bold" },
+      { id: "polo-b21", type: "text", content: "With Hurlingham complete, the tour moves toward Tortugas and Palermo. La Natividad La Dolfina demonstrated their capacity to adapt, absorb pressure, and convert opportunity." },
+      { id: "polo-b22", type: "text", content: "It is the kind of win that shapes a season not through spectacle, but through clarity. The road to the Triple Crown is underway. Next stop, Tortugas." },
     ],
   },
   {
@@ -621,6 +633,9 @@ function shouldUpgradeLegacyHeroCopy(hero: HeroItem) {
 function shouldUpgradeLegacyArticleCopy(article: Article) {
   const firstText = (article.body || []).find((block) => block.type === "text")?.content || "";
   if (article.id === "v1-cambiaso" && article.title === "Cambiaso x Cambiaso: The Hurlingham Open") {
+    return true;
+  }
+  if (article.id === "v1-cambiaso" && article.title === "Cambiaso x Cambiaso: Hurlingham and a New Legacy Begins") {
     return true;
   }
   if (

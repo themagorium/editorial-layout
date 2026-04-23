@@ -201,7 +201,10 @@ describe("published content snapshot", () => {
       author: "Millie Sealana",
     });
     expect(f1Hero).toMatchObject({
-      subtitle: "Just on the heels of Singapore, F1 heads to Austin's tech haven — where Russell amazed and Hamilton raced for Roscoe.",
+      title: "F1 returns to American soil in the tech haven of Austin.",
+      subtitle:
+        "The Singapore Grand Prix is notorious for being one of the toughest races physically for Formula 1 drivers.",
+      author: "Charlotte Thames",
       date: "2025-10-06",
     });
     expect(cambiasoArticle).toMatchObject({

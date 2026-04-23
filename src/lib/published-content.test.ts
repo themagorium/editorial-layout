@@ -205,13 +205,98 @@ describe("published content snapshot", () => {
       date: "2025-10-06",
     });
     expect(cambiasoArticle).toMatchObject({
-      title: "Cambiaso x Cambiaso: Hurlingham and a New Legacy Begins",
+      title: "132nd Hurlingham Open: La Natividad La Dolfina Establish A New Standard Under Pressure",
     });
-    expect(cambiasoArticle?.body?.some((block) => block.type === "text" && /Proxima parada, Tortugas/i.test(block.content))).toBe(true);
+    expect(
+      cambiasoArticle?.body?.some(
+        (block) =>
+          block.type === "text" &&
+          /The road to the Triple Crown is underway\. Next stop, Tortugas\./i.test(block.content),
+      ),
+    ).toBe(true);
     expect(engadinArticle).toMatchObject({
       title: "Engadin Awaits the Winter",
       author: "Millie Sealana",
       date: "2025-10-06",
     });
+  });
+
+  it("upgrades legacy SailGP hero body copy to restored edited version", async () => {
+    localStorage.setItem(
+      "editorial_heroes",
+      JSON.stringify([
+        {
+          ...createHero("h-sailgp"),
+          title: "SailGP from Geneva to Cadiz",
+          subtitle:
+            "Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany",
+          author: "Charlotte Thames",
+          edition: "2025-10",
+          body: [
+            {
+              id: "legacy-sg-b1",
+              type: "text",
+              content:
+                "The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history. With the Jet d'Eau as a backdrop and the Alps framing the horizon, eight national teams battled across two days of intense F50 catamaran racing in conditions that tested tactics as much as speed.",
+            },
+          ],
+        },
+      ]),
+    );
+    localStorage.setItem("editorial_articles", JSON.stringify([]));
+    localStorage.setItem("editorial_ads", JSON.stringify([]));
+    localStorage.setItem("editorial_content_version", "4");
+    localStorage.setItem("editorial_has_local_draft", "1");
+
+    const snapshot = await getPublishedContentSnapshot();
+    const sailGp = snapshot.heroes.find((hero) => hero.id === "h-sailgp");
+    expect(sailGp).toMatchObject({
+      title: "SailGP from Geneva to Cadiz",
+      body: expect.arrayContaining([
+        expect.objectContaining({
+          content:
+            "Last week's Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany in its first final and first win. Switzerland hosted SailGP for the first time, and the local crowd got more than just a glimpse of world-class foiling — they saw history.",
+        }),
+      ]),
+    });
+  });
+
+  it("upgrades both known legacy Cambiaso variants to the authored Hurlingham copy", async () => {
+    localStorage.setItem(
+      "editorial_heroes",
+      JSON.stringify([]),
+    );
+    localStorage.setItem(
+      "editorial_articles",
+      JSON.stringify([
+        {
+          ...createArticle("v1-cambiaso"),
+          title: "Cambiaso x Cambiaso: Hurlingham and a New Legacy Begins",
+          excerpt:
+            "The 132nd Hurlingham Open: La Natividad La Dolfina establish a new standard under pressure, bringing father and son back on home soil.",
+          author: "Millie Sealana",
+          edition: "2025-10",
+          body: [
+            {
+              id: "legacy-new-b1",
+              type: "text",
+              content:
+                "The 132nd Hurlingham Open unfolded with two teams forced to rethink their assumptions rather than rely on routine. On the historic turf at Hurlingham, La Natividad La Dolfina, in their first title since the merger of the two teams, delivered a win that didn't hinge on overpowering their opponent, but on interpreting a match that evolved in real time. It brought father and son, Adolfo and Poroto Cambiaso back on home soil.",
+            },
+          ],
+        },
+      ]),
+    );
+    localStorage.setItem("editorial_ads", JSON.stringify([]));
+    localStorage.setItem("editorial_content_version", "4");
+    localStorage.setItem("editorial_has_local_draft", "1");
+
+    const snapshot = await getPublishedContentSnapshot();
+    const cambiaso = snapshot.articles.find((article) => article.id === "v1-cambiaso");
+    expect(cambiaso).toMatchObject({
+      title: "132nd Hurlingham Open: La Natividad La Dolfina Establish A New Standard Under Pressure",
+    });
+    expect(cambiaso?.body?.some((block) => block.type === "text" && /Next stop, Tortugas/i.test(block.content))).toBe(true);
+    expect(cambiaso?.body?.some((block) => block.type === "heading" && /A Season Opening With Intention/i.test(block.content))).toBe(true);
   });
 });

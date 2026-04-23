@@ -925,6 +925,7 @@ export async function publishContentSnapshot(heroes: HeroItem[], articles: Artic
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${credential}`,
+      "x-admin-password": credential,
     },
     body: JSON.stringify({ heroes, articles, ads }),
   });
@@ -1121,6 +1122,7 @@ export async function publishEditorialContent(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authValue}`,
+        "x-admin-password": authValue,
       },
       body: JSON.stringify(content),
     });

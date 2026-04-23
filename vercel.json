@@ -1,4 +1,21 @@
 {
+  "redirects": [
+    {
+      "source": "/articles/winter-awaits-the-engadin--v1-engadin",
+      "destination": "/articles/engadin-awaits-the-winter--v1-engadin",
+      "permanent": true
+    },
+    {
+      "source": "/article/winter-awaits-the-engadin--v1-engadin",
+      "destination": "/articles/engadin-awaits-the-winter--v1-engadin",
+      "permanent": true
+    },
+    {
+      "source": "/hidden-menu/stories/winter-awaits-the-engadin--v1-engadin",
+      "destination": "/articles/engadin-awaits-the-winter--v1-engadin",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }

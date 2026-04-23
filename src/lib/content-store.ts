@@ -359,19 +359,21 @@ const DEFAULT_HEROES: HeroItem[] = [
   },
   {
     id: "h-f1-austin",
-    title: "F1 Returns to the Circuit of the Americas",
-    subtitle: "Just on the heels of Singapore, F1 heads to Austin's tech haven — where Russell amazed and Hamilton raced for Roscoe.",
+    title: "F1 returns to American soil in the tech haven of Austin.",
+    subtitle: "The Singapore Grand Prix is notorious for being one of the toughest races physically for Formula 1 drivers.",
     category: "Motorsport",
     imageUrl: articleF1Americas,
     author: "Charlotte Thames",
     date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "f1-b1", type: "text", content: "Just on the heels of the Singapore Grand Prix, which is notorious for being one of the toughest races physically for Formula 1 drivers as it was declared the first 'heat hazard' race of the year, meaning drivers either had to use a cooling vest or add extra ballast to their car. Max Verstappen chose not to." },
-      { id: "f1-b2", type: "text", content: "In Singapore, the finals were tight as George Russell amazed the entire F1 paddock with a faultless display of skill from qualifying to the final race. McLaren finished as Formula 1's top team at the Singapore Grand Prix on a challenging day for the 1,2,3 finish of George Russell, Mercedes Benz AMG; Max Verstappen, Red Bull Racing; and Lando Norris, McLaren." },
-      { id: "f1-b3", type: "text", content: "Hamilton dropped to eighth, while Oliver Bearman was ninth for Haas and Carlos Sainz, Jr., after his first podium win with Williams in Azerbaijan took a point in 10th as he had to start near the back of the grid for a technical infringement." },
-      { id: "f1-b4", type: "text", content: "Lewis said he \"raced for Roscoe.\" Hamilton, just coming back from the terrible blow of losing his companion of the heart, Roscoe, was visibly affected as the entire F1 community witnessed. His innate reflexive well-honed driving skills compensated for his personal ordeal. Our hearts go out to Hamilton for the upcoming races." },
-      { id: "f1-b5", type: "text", content: "Next up, F1 returns to American soil in Austin. If having Kygo and Garth Brooks as the event's concert headliners is any indication of the disparity even in tech world Austin, the fans will undoubtedly be dazzled once again by the dramatic speed and strategy of Formula 1 racing. The official track record of 1:36.16 was set by Charles Leclerc in 2019." },
+      { id: "f1-b1", type: "text", content: "F1 returns to American soil in the tech haven of Austin." },
+      { id: "f1-b2", type: "text", content: "The Singapore Grand Prix is notorious for being one of the toughest races physically for Formula 1 drivers as it was declared the first ‘heat hazard’ race of the year, meaning drivers either had to use a cooling vest or add extra ballast to their car. Max Verstappen chose not to." },
+      { id: "f1-b3", type: "text", content: "The finals were tight as George Russell amazed the entire F1 paddock with a faultless display of skill from qualifying to the final race." },
+      { id: "f1-b4", type: "text", content: "McLaren finished as Formula 1's top team at the Singapore Grand Prix on a challenging day for the 1,2, 3 finish of George Russell, Mercedes Benz AMG; Max Verstappen, Red Bull racing; and Lando Norris, McLaren." },
+      { id: "f1-b5", type: "text", content: "Hamilton dropped to eighth, while Oliver Bearman was ninth for Haas and Carlos Sainz, Jr., after his win after his first podium win with Williams in Azerbaijian took a point in 10th as he had to start near the back of the grid for a technical infringement." },
+      { id: "f1-b6", type: "text", content: "Lewis said he “raced for Roscoe”. Hamilton, just coming back from the terrible blow of losing his companion of the heart, Roscoe, was visibly affected as the entire F1 community witnessed. His innate reflexive well-honed driving skills compensated for his personal ordeal. Our hearts go out to Hamilton for the upcoming races." },
+      { id: "f1-b7", type: "text", content: "Next up, F1 returns to American soil in Austin. If having Kygo and Garth Brooks as the event’s concert headliners is any indication of the disparity even in tech world Austin, the fans will undoubtedly be dazzled once again by the dramatic speed and strategy of Formula 1 racing. The official track record of 1:36.16 was set by Charles LeClerc in 2019. We will see if Carlos Sainz and his new Williams team along with the tech support of Atlassian, can on their secondary home of Austin take another podium." },
     ],
   },
 ];
@@ -599,6 +601,16 @@ const HERO_DEFAULT_BY_ID = new Map(DEFAULT_HEROES.map((hero) => [hero.id, hero])
 const ARTICLE_DEFAULT_BY_ID = new Map(DEFAULT_ARTICLES.map((article) => [article.id, article]));
 
 function shouldUpgradeLegacyHeroCopy(hero: HeroItem) {
+  const firstText = (hero.body || []).find((block) => block.type === "text")?.content || "";
+  const normalizedAuthor = (hero.author || "").trim().toLowerCase();
+  if (
+    hero.id === "h-sailgp" &&
+    firstText.startsWith(
+      "The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history.",
+    )
+  ) {
+    return true;
+  }
   if (hero.id === "h-cv-summit" && hero.title === "Zurich's CV Summit: Capital Meets AI by the Lake") {
     return true;
   }
@@ -606,6 +618,34 @@ function shouldUpgradeLegacyHeroCopy(hero: HeroItem) {
     hero.id === "h-f1-austin" &&
     hero.subtitle === "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe"
   ) {
+    return true;
+  }
+  if (
+    hero.id === "h-f1-austin" &&
+    hero.subtitle === "Just on the heels of Singapore, F1 heads to Austin's tech haven — where Russell amazed and Hamilton raced for Roscoe."
+  ) {
+    return true;
+  }
+  if (hero.id === "h-f1-austin" && hero.date === "2025-10-20") {
+    return true;
+  }
+  if (
+    hero.id === "h-f1-austin" &&
+    firstText.startsWith(
+      "The United States Grand Prix at the Circuit of the Americas delivered one of the season's most compelling weekends.",
+    )
+  ) {
+    return true;
+  }
+  if (
+    hero.id === "h-f1-austin" &&
+    firstText.startsWith(
+      "Just on the heels of the Singapore Grand Prix, which is notorious for being one of the toughest races physically",
+    )
+  ) {
+    return true;
+  }
+  if (hero.id === "h-f1-austin" && normalizedAuthor !== "charlotte thames") {
     return true;
   }
   return false;

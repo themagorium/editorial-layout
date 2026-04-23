@@ -217,17 +217,19 @@ function normalizeBodyToOctoberPattern(
 }
 
 function normalizeHero(hero: HeroItem): HeroItem {
+  const upgraded = upgradeLegacyHeroCopy(hero);
   return {
-    ...hero,
-    excerpt: hero.excerpt || hero.subtitle,
-    body: normalizeBodyToOctoberPattern(hero.id, hero.body, hero.imageUrl, hero.videoUrl),
+    ...upgraded,
+    excerpt: upgraded.excerpt || upgraded.subtitle,
+    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, upgraded.imageUrl, upgraded.videoUrl),
   };
 }
 
 function normalizeArticle(article: Article): Article {
+  const upgraded = upgradeLegacyArticleCopy(article);
   return {
-    ...article,
-    body: normalizeBodyToOctoberPattern(article.id, article.body, article.imageUrl, article.videoUrl),
+    ...upgraded,
+    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, upgraded.imageUrl, upgraded.videoUrl),
   };
 }
 
@@ -339,35 +341,40 @@ const DEFAULT_HEROES: HeroItem[] = [
   },
   {
     id: "h-cv-summit",
-    title: "Zurich's CV Summit: Capital Meets AI by the Lake",
+    title: "CV Summit 2025 - Kongresshaus Zurich (September 23-24, 2025)",
     legacySlugs: ["zurichs-crypto-meets-ai"],
-    subtitle: "CV Summit 2025 at the Kongresshaus united 3,000+ tech leaders, investors and innovators — shifting from spectacle to substance",
+    subtitle: "A Recalibration Toward Endurance",
     category: "Tech & AI",
     imageUrl: articleCvSummit,
     author: "Millie Sealana",
     date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "cv-b1", type: "text", content: "CV Summit 2025 at Zurich's historic Kongresshaus marked a turning point for the European tech conference circuit. Over 3,000 founders, investors, and corporate innovators gathered on the shores of Lake Zurich for two days of programming that abandoned crypto hype in favour of serious discourse on AI, deep tech, and sustainable venture capital." },
-      { id: "cv-b2", type: "text", content: "The headline panel — featuring partners from Sequoia, Andreessen Horowitz, and Balderton Capital — addressed the recalibration of European venture funding. The message was clear: capital is flowing, but it's flowing to companies with real revenue, real technology, and real defensibility. The era of narrative-driven valuations is over." },
-      { id: "cv-b3", type: "text", content: "Zurich itself proved the perfect host. The Kongresshaus, a 1930s lakeside landmark, provided an intimate setting that encouraged the kind of corridor conversations that larger conferences struggle to facilitate. Evening receptions at the Baur au Lac and the Dolder Grand extended the networking into Zurich's most exclusive spaces." },
-      { id: "cv-b4", type: "text", content: "For The Magorium, CV Summit represents a broader trend: the convergence of technology and luxury. AI-driven personalisation, blockchain provenance for luxury goods, and the digitisation of the art market were recurring themes — confirming that the tech and luxury worlds are no longer parallel tracks, but increasingly the same conversation." },
+      { id: "cv-b1", type: "heading", content: "A Recalibration Toward Endurance", textStyle: "bold" },
+      { id: "cv-b2", type: "text", content: "CV Summit 2025 brought together thousands of delegates and 190 speakers at Kongresshaus Zurich, confirming blockchain and AI as the infrastructure of a new \"Wealth³\" era where programmable money, tokenized assets, and AI-powered agents are transforming financial systems. This year's edition occupied its familiar space as part alpine think-tank, part deal-floor, part Swiss-precision diplomacy — but the shift from spectacle to substance was unmistakable. Conversations moved from \"what's next\" to \"what endures.\" Olaf Hannemann, Co-Founder of CV VC, captured the spirit: \"Innovation has never been as fast as today, but will never be as slow ever again.\"" },
+      { id: "cv-b3", type: "heading", content: "The AI-Blockchain Convergence", textStyle: "bold" },
+      { id: "cv-b4", type: "text", content: "Across all stages, panelists explored autonomous financial agents—AI-driven systems capable of transacting, investing, and paying on behalf of humans—sparking debate on governance and accountability. Over 80 banks and financial institutions attended, alongside major blockchain platforms (Ethereum, Internet Computer, Canton Network, VeChain) and AI leaders (Google, Microsoft, Palantir). Franklin Templeton's Sandy Kaul and Roger Bayston revealed wealth management's shift from account-based to wallet-based systems, while Serge Kaulitz of Luzerner Kantonal Bank showcased Bitcoin and Ethereum as loan collateral. Philipp Rickenbacher, Chairman of CV VC, declared: \"Innovation does not happen incrementally. It only happens in big steps.\"" },
+      { id: "cv-b5", type: "heading", content: "The Swiss Way Returns", textStyle: "bold" },
+      { id: "cv-b6", type: "text", content: "Switzerland reaffirmed its leadership as home to 1,700+ blockchain-focused entities. Mathias Ruch, Founder & CEO of CV VC, reflected: \"Our vision was to bring bankers into the same room as builders. Five years ago, that was a bold bet. Today, it's the most natural conversation in the industry.\" After years of noise and over-funded experimentation, the most interesting ideas emerged from those building slowly, deliberately, with clarity of purpose — a return to fundamentals. The community is recalibrating itself: quieter, sharper, ready for a more disciplined era of innovation. The Magorium observed throughout, witnessing this transformation toward endurance over spectacle." },
     ],
   },
   {
     id: "h-f1-austin",
-    title: "F1 Returns to the Circuit of the Americas",
-    subtitle: "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe",
+    title: "F1 returns to American soil in the tech haven of Austin.",
+    subtitle: "The Singapore Grand Prix is notorious for being one of the toughest races physically for Formula 1 drivers.",
     category: "Motorsport",
     imageUrl: articleF1Americas,
     author: "Charlotte Thames",
-    date: "2025-10-20",
+    date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "f1-b1", type: "text", content: "The United States Grand Prix at the Circuit of the Americas delivered one of the season's most compelling weekends. Austin — the tech capital of the American South — welcomed Formula 1 with its unique blend of innovation culture, Southern hospitality, and an atmosphere that no other circuit on the calendar can replicate." },
-      { id: "f1-b2", type: "text", content: "George Russell's masterful drive from fourth on the grid to victory was the headline, but the weekend belonged to Lewis Hamilton. In what many speculated could be among his final races at COTA, Hamilton's relentless charge through the field — accompanied by his beloved bulldog Roscoe in the paddock — provided the emotional heart of the event." },
-      { id: "f1-b3", type: "text", content: "Off the track, Austin during F1 weekend transforms into a luxury destination that rivals Monaco and Singapore. The Paddock Club hospitality, the celebrity-heavy grid walks, and the after-race concerts — this year headlined by a surprise Beyoncé appearance — confirmed COTA's position as the most culturally significant race on the American calendar." },
-      { id: "f1-b4", type: "text", content: "The Circuit of the Americas itself, with its dramatic Turn 1 climb and the sweeping esses that reference Silverstone and Suzuka, remains one of the finest purpose-built tracks in modern F1. As the sport's American expansion continues with races in Miami and Las Vegas, Austin's COTA retains its authenticity — a circuit built by racing fans, for racing fans." },
+      { id: "f1-b1", type: "text", content: "F1 returns to American soil in the tech haven of Austin." },
+      { id: "f1-b2", type: "text", content: "The Singapore Grand Prix is notorious for being one of the toughest races physically for Formula 1 drivers as it was declared the first ‘heat hazard’ race of the year, meaning drivers either had to use a cooling vest or add extra ballast to their car. Max Verstappen chose not to." },
+      { id: "f1-b3", type: "text", content: "The finals were tight as George Russell amazed the entire F1 paddock with a faultless display of skill from qualifying to the final race." },
+      { id: "f1-b4", type: "text", content: "McLaren finished as Formula 1's top team at the Singapore Grand Prix on a challenging day for the 1,2, 3 finish of George Russell, Mercedes Benz AMG; Max Verstappen, Red Bull racing; and Lando Norris, McLaren." },
+      { id: "f1-b5", type: "text", content: "Hamilton dropped to eighth, while Oliver Bearman was ninth for Haas and Carlos Sainz, Jr., after his win after his first podium win with Williams in Azerbaijian took a point in 10th as he had to start near the back of the grid for a technical infringement." },
+      { id: "f1-b6", type: "text", content: "Lewis said he “raced for Roscoe”. Hamilton, just coming back from the terrible blow of losing his companion of the heart, Roscoe, was visibly affected as the entire F1 community witnessed. His innate reflexive well-honed driving skills compensated for his personal ordeal. Our hearts go out to Hamilton for the upcoming races." },
+      { id: "f1-b7", type: "text", content: "Next up, F1 returns to American soil in Austin. If having Kygo and Garth Brooks as the event’s concert headliners is any indication of the disparity even in tech world Austin, the fans will undoubtedly be dazzled once again by the dramatic speed and strategy of Formula 1 racing. The official track record of 1:36.16 was set by Charles LeClerc in 2019. We will see if Carlos Sainz and his new Williams team along with the tech support of Atlassian, can on their secondary home of Austin take another podium." },
     ],
   },
 ];
@@ -505,18 +512,36 @@ const DEFAULT_ARTICLES: Article[] = [
   // ========== OCTOBER 2025 ========== (Editor's Picks: Polo, PFW, Kusama, Marrakech)
   {
     id: "v1-cambiaso",
-    title: "Cambiaso x Cambiaso: The Hurlingham Open",
-    excerpt: "Father and son reunite on the historic turf of Buenos Aires as La Natividad La Dolfina begin their Triple Crown campaign.",
+    title: "132nd Hurlingham Open: La Natividad La Dolfina Establish A New Standard Under Pressure",
+    excerpt: "The 132nd Hurlingham Open unfolded with two teams whom are are forced to rethink their assumptions rather than rely on routine.",
     category: "Equestrian",
     imageUrl: articleCambiaso,
     author: "Millie Sealana",
     date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "cam-b1", type: "text", content: "The Hurlingham Open marked a historic moment as Adolfo Cambiaso and his son Poroto took to the field together for La Natividad La Dolfina. The Buenos Aires crowd witnessed polo royalty as the greatest player of all time shared the turf with the next generation." },
-      { id: "cam-b2", type: "image", content: articleCambiasoPhoto1, caption: "Adolfo and Poroto Cambiaso on the field at Hurlingham", citation: "AAP/Getty Images" },
-      { id: "cam-b3", type: "text", content: "The Triple Crown campaign begins here at Hurlingham, continues through Tortugas, and culminates at the prestigious Palermo Open in December. For the Cambiaso dynasty, this season represents more than competition — it's a passing of the torch." },
-      { id: "cam-b4", type: "image", content: articleCambiasoPhoto2, caption: "La Natividad La Dolfina celebrating after the match", citation: "AAP/Getty Images" },
+      { id: "polo-b1", type: "text", content: "The 132nd Hurlingham Open unfolded with two teams whom are are forced to rethink their assumptions rather than rely on routine. On the historic turf at Hurlingham, La Natividad La Dolfina, in their first title since the merger of the two teams, delivered a win that didn’t hinge on overpowering their opponent, but on interpreting a match that evolved in real time. It brought father and son, Adolfo and Poroto Cambiaso back on home soil." },
+      { id: "polo-b2", type: "text", content: "Their 12–9 result over UAE Polo signaled far more than a strong showing at the start of the Triple Crown. It revealed a team learning to operate as a single unit, navigating momentum shifts with the kind of clarity that only comes from maturity, trust, and an unspoken internal rhythm." },
+      { id: "polo-b3", type: "image", content: articleCambiasoPhoto1, caption: "Photo: La Dolfina" },
+      { id: "polo-b4", type: "heading", content: "A Beginning Without Clear Lines", textStyle: "bold" },
+      { id: "polo-b5", type: "text", content: "The opening chukkers felt controlled but uncertain — not chaotic, but undefined. UAE Polo entered with a familiar structure: tight spacing, disciplined rotation, and a pace that made the early exchanges feel almost cautious. Their approach limited open lanes and challenged La Natividad La Dolfina to search for patterns rather than impose them." },
+      { id: "polo-b6", type: "text", content: "Both sides tested, waited, and absorbed. The match resembled a strategic conversation where each team attempted to read the other’s intentions before revealing their own." },
+      { id: "polo-b7", type: "image", content: articleCambiasoPhoto2, caption: "Photo: La Dolfina" },
+      { id: "polo-b8", type: "text", content: "Camilo “Jeta” Castagnola emerged as the primary reference point. His goals — eight in total —shifting the momentum to not dip back into equilibrium. Accuracy created separation and composure controlled tempo. Bartolomé Castagnola Jr. anchored the defensive side of the equation, absorbing UAE’s heaviest attacks" },
+      { id: "polo-b9", type: "heading", content: "Cambiaso’s Signature Influence", textStyle: "bold" },
+      { id: "polo-b10", type: "text", content: "Adolfo Cambiaso provided the layer of interpretation needed — steering tempo, adjusting field shape, and adding the two goals that mattered more for timing than for their numbers." },
+      { id: "polo-b11", type: "text", content: "Poroto Cambiaso linked the lines with fluidity, smoothing transitions from recovery to attack and ensuring the momentum held steady during the match’s most volatile periods." },
+      { id: "polo-b12", type: "text", content: "Together, the four created a sense of cohesion that felt more intentional with each passing chukker." },
+      { id: "polo-b13", type: "heading", content: "UAE’s Challenge and the Defining Moment", textStyle: "bold" },
+      { id: "polo-b14", type: "text", content: "UAE Polo did not retreat. They played with a controlled edge, forcing La Natividad La Dolfina into full concentration. Their strongest sequences came at moments when the match felt poised to turn — and one late collision involving Lucas Monteverde briefly froze the stadium. A penalty there could have tightened the score and reintroduced pressure. A neutral restart. Ensued." },
+      { id: "polo-b15", type: "text", content: "La Natividad La Dolfina won the toss-in immediately. Momentum shifted definitively." },
+      { id: "polo-b16", type: "text", content: "It was a reminder that in matches balanced this tightly, outcomes are shaped not by a single incident, but by how quickly a team can capitalize on the window it creates." },
+      { id: "polo-b17", type: "heading", content: "A Team Defining Itself", textStyle: "bold" },
+      { id: "polo-b18", type: "text", content: "This victory did not lean on history or reputation. It felt like a team constructing an identity from the inside out — one built on: controlled acceleration, coordinated defensive shift and disciplined decision-making under tension" },
+      { id: "polo-b19", type: "image", content: articleCambiasoPhoto2, caption: "Photo: La Dolfina" },
+      { id: "polo-b20", type: "heading", content: "A Season Opening With Intention", textStyle: "bold" },
+      { id: "polo-b21", type: "text", content: "With Hurlingham complete, the tour moves toward Tortugas and Palermo. La Natividad La Dolfina demonstrated their capacity to adapt, absorb pressure, and convert opportunity." },
+      { id: "polo-b22", type: "text", content: "It is the kind of win that shapes a season not through spectacle, but through clarity. The road to the Triple Crown is underway. Next stop, Tortugas." },
     ],
   },
   {
@@ -550,17 +575,18 @@ const DEFAULT_ARTICLES: Article[] = [
   },
   {
     id: "v1-engadin",
-    title: "Winter Awaits the Engadin",
-    excerpt: "As the first snows dust the peaks, the Engadin Valley prepares for another season of Alpine luxury — from St. Moritz's frozen lake to Pontresina's quiet elegance.",
+    title: "Engadin Awaits the Winter",
+    excerpt: "There is no other region in the world like the Engadin — from St. Moritz to Davos Klosters. The lakes freeze, the light shifts, and the valley transforms.",
     category: "Travel",
     imageUrl: articleEngadin,
-    author: "Charlotte Thames",
-    date: "2025-10-20",
+    author: "Millie Sealana",
+    date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "eng-b1", type: "text", content: "The Engadin Valley awakens in October with the first dustings of snow on the Bernina peaks. St. Moritz, the valley's glamorous anchor, begins its transformation from summer hiking destination to the world's most storied winter playground. The Palace Hotel opens its doors, the frozen lake awaits its polo ponies, and the Cresta Run prepares for another season of aristocratic speed." },
-      { id: "eng-b2", type: "text", content: "Yet beyond St. Moritz's glitter lies the quieter elegance of Pontresina, Sils Maria, and the upper valley villages. Here, cross-country skiers trace the frozen lakes, horse-drawn carriages carry guests through snow-laden forests, and the Kronenhof's spa offers Alpine wellness at its most refined. The Engadin is not merely a ski destination — it is winter elevated to an art form." },
-      { id: "eng-b3", type: "text", content: "For the discerning traveler, October is the moment of anticipation: securing tables at Chesa Veglia, booking the coveted suites, and watching the valley transform. Winter awaits the Engadin — and the Engadin awaits the world." },
+      { id: "eng-b1", type: "text", content: "The Engadin in late autumn is a quiet pause before the endless myriad of choices for skiers and non skiers alike. There is no other region in the world like the Engadin, from St. Moritz to Davos Klosters to the quieter towns of Scuol and Arosa. Winter is non stop with everything from A-to-Z. The lakes freeze from the edges inward, the light shifts to a colder blue, and the valley begins its quiet transformation into the winter playground the world knows so well." },
+      { id: "eng-b2", type: "text", content: "St. Moritz is already rehearsing for its defining months: opening with FIS World Cup in action, Snow Polo, the White Turf races and the International Concours of Elegance (ICE). Everywhere is preparing for the gorgeous diamond-like snow to come. The private chalet gatherings, the art, the design, the discreet international arrivals that shape the season." },
+      { id: "eng-b3", type: "text", content: "What differentiates the Engadin from any other alpine destination is not scale — it is choreography. Every winter unfolds like a curated performance, layered with tradition but never static. This year, the mood is unmistakably elevated: more intimate, more global, and somehow sharper, as if the valley is preparing for an inflection point." },
+      { id: "eng-b4", type: "text", content: "Winter has yet to arrive. But you can feel it approaching with anticipation." },
     ],
   },
 ];
@@ -572,16 +598,183 @@ const DEFAULT_ADS: AdSlot[] = [
   { id: "ad4", label: "Sidebar Ad", position: "sidebar", width: 300, height: 600 },
 ];
 
+const HERO_DEFAULT_BY_ID = new Map(DEFAULT_HEROES.map((hero) => [hero.id, hero]));
+const ARTICLE_DEFAULT_BY_ID = new Map(DEFAULT_ARTICLES.map((article) => [article.id, article]));
+const CRITICAL_HERO_IDS = ["h-sailgp", "h-cv-summit", "h-f1-austin"] as const;
+const CRITICAL_ARTICLE_IDS = ["v1-cambiaso", "v1-engadin"] as const;
+
+function upsertCriticalHeroFallbacks(heroes: HeroItem[], options?: { forceWhenMissingAll?: boolean }): HeroItem[] {
+  const next = [...heroes];
+  if (!options?.forceWhenMissingAll && next.length > 0) {
+    return next;
+  }
+  for (const id of CRITICAL_HERO_IDS) {
+    if (next.some((hero) => hero.id === id)) continue;
+    const fallback = HERO_DEFAULT_BY_ID.get(id);
+    if (!fallback) continue;
+    const insertAt = next.findIndex((hero) => hero.edition === fallback.edition);
+    if (insertAt === -1) {
+      next.push(fallback);
+    } else {
+      next.splice(insertAt, 0, fallback);
+    }
+  }
+  return next;
+}
+
+function upsertCriticalArticleFallbacks(articles: Article[], options?: { forceWhenMissingAll?: boolean }) {
+  const next = [...articles];
+  if (!options?.forceWhenMissingAll && next.length > 0) {
+    return next;
+  }
+  for (const id of CRITICAL_ARTICLE_IDS) {
+    if (next.some((article) => article.id === id)) continue;
+    const fallback = ARTICLE_DEFAULT_BY_ID.get(id);
+    if (!fallback) continue;
+    const insertAt = next.findIndex((article) => article.edition === fallback.edition);
+    if (insertAt === -1) {
+      next.push(fallback);
+    } else {
+      next.splice(insertAt, 0, fallback);
+    }
+  }
+  return next;
+}
+
+function applyCriticalStoryBackfill(content: { heroes: HeroItem[]; articles: Article[] }) {
+  const shouldForceBackfill = content.heroes.length === 0 && content.articles.length === 0;
+  return {
+    heroes: upsertCriticalHeroFallbacks(content.heroes, { forceWhenMissingAll: shouldForceBackfill }),
+    articles: upsertCriticalArticleFallbacks(content.articles, {
+      forceWhenMissingAll: shouldForceBackfill,
+    }),
+  };
+}
+
+function shouldUpgradeLegacyHeroCopy(hero: HeroItem) {
+  const firstText = (hero.body || []).find((block) => block.type === "text")?.content || "";
+  const normalizedAuthor = (hero.author || "").trim().toLowerCase();
+  if (
+    hero.id === "h-sailgp" &&
+    firstText.startsWith(
+      "The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history.",
+    )
+  ) {
+    return true;
+  }
+  if (hero.id === "h-cv-summit" && hero.title === "Zurich's CV Summit: Capital Meets AI by the Lake") {
+    return true;
+  }
+  if (
+    hero.id === "h-f1-austin" &&
+    hero.subtitle === "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe"
+  ) {
+    return true;
+  }
+  if (
+    hero.id === "h-f1-austin" &&
+    hero.subtitle === "Just on the heels of Singapore, F1 heads to Austin's tech haven — where Russell amazed and Hamilton raced for Roscoe."
+  ) {
+    return true;
+  }
+  if (hero.id === "h-f1-austin" && hero.date === "2025-10-20") {
+    return true;
+  }
+  if (
+    hero.id === "h-f1-austin" &&
+    firstText.startsWith(
+      "The United States Grand Prix at the Circuit of the Americas delivered one of the season's most compelling weekends.",
+    )
+  ) {
+    return true;
+  }
+  if (
+    hero.id === "h-f1-austin" &&
+    firstText.startsWith(
+      "Just on the heels of the Singapore Grand Prix, which is notorious for being one of the toughest races physically",
+    )
+  ) {
+    return true;
+  }
+  if (hero.id === "h-f1-austin" && normalizedAuthor !== "charlotte thames") {
+    return true;
+  }
+  return false;
+}
+
+function shouldUpgradeLegacyArticleCopy(article: Article) {
+  const firstText = (article.body || []).find((block) => block.type === "text")?.content || "";
+  if (article.id === "v1-cambiaso" && article.title === "Cambiaso x Cambiaso: The Hurlingham Open") {
+    return true;
+  }
+  if (article.id === "v1-cambiaso" && article.title === "Cambiaso x Cambiaso: Hurlingham and a New Legacy Begins") {
+    return true;
+  }
+  if (
+    article.id === "v1-cambiaso" &&
+    firstText.startsWith(
+      "The Hurlingham Open marked a historic moment as Adolfo Cambiaso and his son Poroto took to the field together",
+    )
+  ) {
+    return true;
+  }
+  if (article.id === "v1-engadin" && article.title === "Winter Awaits the Engadin") {
+    return true;
+  }
+  return false;
+}
+
+function upgradeLegacyHeroCopy(hero: HeroItem): HeroItem {
+  if (!shouldUpgradeLegacyHeroCopy(hero)) return hero;
+  const canonical = HERO_DEFAULT_BY_ID.get(hero.id);
+  if (!canonical) return hero;
+  return {
+    ...hero,
+    title: canonical.title,
+    subtitle: canonical.subtitle,
+    excerpt: canonical.excerpt,
+    author: canonical.author,
+    date: canonical.date,
+    legacySlugs: canonical.legacySlugs,
+    body: canonical.body,
+  };
+}
+
+function upgradeLegacyArticleCopy(article: Article): Article {
+  if (!shouldUpgradeLegacyArticleCopy(article)) return article;
+  const canonical = ARTICLE_DEFAULT_BY_ID.get(article.id);
+  if (!canonical) return article;
+  return {
+    ...article,
+    title: canonical.title,
+    excerpt: canonical.excerpt,
+    author: canonical.author,
+    date: canonical.date,
+    legacySlugs: canonical.legacySlugs,
+    body: canonical.body,
+  };
+}
+
 // ===== Storage & API =====
 // Bump this version whenever DEFAULT content changes to invalidate stale localStorage
 const CONTENT_VERSION = "4";
 const PUBLISHED_CONTENT_ENDPOINT = "/api/content";
+const ADMIN_PUBLISH_TOKEN_KEY = "magorium-admin-token";
 const STORAGE_KEYS = {
   heroes: "editorial_heroes",
   articles: "editorial_articles",
   ads: "editorial_ads",
   version: "editorial_content_version",
+  localDraft: "editorial_has_local_draft",
 };
+
+function markLocalDraftAvailable() {
+  localStorage.setItem(STORAGE_KEYS.localDraft, "1");
+}
+
+function clearLocalDraftFlag() {
+  localStorage.removeItem(STORAGE_KEYS.localDraft);
+}
 
 function isPublishedContentPayload(value: unknown): value is PublishedEditorialContent {
   if (!value || typeof value !== "object") return false;
@@ -595,10 +788,15 @@ function isPublishedContentPayload(value: unknown): value is PublishedEditorialC
 }
 
 function writePublishedContentToLocalStorage(content: PublishedEditorialContent) {
-  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(content.heroes));
-  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(content.articles));
+  const backfilled = applyCriticalStoryBackfill({
+    heroes: content.heroes,
+    articles: content.articles,
+  });
+  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(backfilled.heroes));
+  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(backfilled.articles));
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(content.ads));
   localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
+  clearLocalDraftFlag();
 }
 
 function ensureFreshDefaults() {
@@ -607,6 +805,7 @@ function ensureFreshDefaults() {
     localStorage.removeItem(STORAGE_KEYS.heroes);
     localStorage.removeItem(STORAGE_KEYS.articles);
     localStorage.removeItem(STORAGE_KEYS.ads);
+    clearLocalDraftFlag();
     localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
   }
 }
@@ -615,14 +814,20 @@ export function getHeroes(): HeroItem[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.heroes);
   const rawHeroes = stored ? (JSON.parse(stored) as HeroItem[]) : DEFAULT_HEROES;
-  return rawHeroes.map(normalizeHero);
+  const backfilledHeroes = upsertCriticalHeroFallbacks(rawHeroes, {
+    forceWhenMissingAll: rawHeroes.length === 0 && Boolean(stored),
+  });
+  return backfilledHeroes.map(normalizeHero);
 }
 
 export function getArticles(): Article[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.articles);
   const rawArticles = stored ? (JSON.parse(stored) as Article[]) : DEFAULT_ARTICLES;
-  return rawArticles.map(normalizeArticle);
+  const backfilledArticles = upsertCriticalArticleFallbacks(rawArticles, {
+    forceWhenMissingAll: rawArticles.length === 0 && Boolean(stored),
+  });
+  return backfilledArticles.map(normalizeArticle);
 }
 
 export function getAds(): AdSlot[] {
@@ -673,6 +878,7 @@ export function saveHeroes(heroes: HeroItem[]) {
       body: cleanBodyForStorage(dedupeBodyByMediaContent(hero.body)),
     }),
   );
+  markLocalDraftAvailable();
   localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(prepared));
 }
 
@@ -683,24 +889,43 @@ export function saveArticles(articles: Article[]) {
       body: cleanBodyForStorage(dedupeBodyByMediaContent(article.body)),
     }),
   );
+  markLocalDraftAvailable();
   localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(prepared));
 }
 
 export function saveAds(ads: AdSlot[]) {
+  markLocalDraftAvailable();
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(ads));
 }
 
 export function restoreDefaultContentBackup() {
+  markLocalDraftAvailable();
   localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(DEFAULT_HEROES.map(normalizeHero)));
   localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(DEFAULT_ARTICLES.map(normalizeArticle)));
   localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(DEFAULT_ADS));
   localStorage.setItem(STORAGE_KEYS.version, CONTENT_VERSION);
 }
 
+function getAdminPublishCredentialFromBrowserStorage(): string | null {
+  if (typeof window === "undefined") return null;
+  const sessionValue = sessionStorage.getItem(ADMIN_PUBLISH_TOKEN_KEY)?.trim();
+  if (sessionValue) return sessionValue;
+  const localValue = localStorage.getItem(ADMIN_PUBLISH_TOKEN_KEY)?.trim();
+  return localValue || null;
+}
+
 export async function publishContentSnapshot(heroes: HeroItem[], articles: Article[], ads: AdSlot[]) {
+  const credential = getAdminPublishCredentialFromBrowserStorage();
+  if (!credential) {
+    throw new Error("Unauthorized. Please sign in to publish.");
+  }
+
   const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${credential}`,
+    },
     body: JSON.stringify({ heroes, articles, ads }),
   });
   if (!response.ok) {
@@ -721,6 +946,16 @@ export const DEFAULT_PUBLISHED_CONTENT: {
 
 function hasLocalEditsAvailable() {
   if (typeof window === "undefined") return false;
+  ensureFreshDefaults();
+  const hasDraftFlag = localStorage.getItem(STORAGE_KEYS.localDraft) === "1";
+  if (!hasDraftFlag) return false;
+  const hasHeroes = Boolean(localStorage.getItem(STORAGE_KEYS.heroes));
+  const hasArticles = Boolean(localStorage.getItem(STORAGE_KEYS.articles));
+  return hasHeroes || hasArticles;
+}
+
+function hasCachedSnapshotAvailable() {
+  if (typeof window === "undefined") return false;
   const hasHeroes = Boolean(localStorage.getItem(STORAGE_KEYS.heroes));
   const hasArticles = Boolean(localStorage.getItem(STORAGE_KEYS.articles));
   return hasHeroes || hasArticles;
@@ -738,6 +973,7 @@ export async function getPublishedContentSnapshot(): Promise<{
   if (typeof window === "undefined") {
     return DEFAULT_PUBLISHED_CONTENT;
   }
+  ensureFreshDefaults();
   if (hasLocalEditsAvailable()) {
     return {
       heroes: getHeroes(),
@@ -747,7 +983,16 @@ export async function getPublishedContentSnapshot(): Promise<{
   }
   try {
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, { cache: "no-store" });
-    if (!response.ok) return DEFAULT_PUBLISHED_CONTENT;
+    if (!response.ok) {
+      if (hasCachedSnapshotAvailable()) {
+        return {
+          heroes: getHeroes(),
+          articles: getArticles(),
+          ads: getAds(),
+        };
+      }
+      return DEFAULT_PUBLISHED_CONTENT;
+    }
     const payload = await response.json().catch(() => null as unknown as {
       heroes?: HeroItem[];
       articles?: Article[];
@@ -765,18 +1010,43 @@ export async function getPublishedContentSnapshot(): Promise<{
     } | null);
     const raw = payload?.payload || payload?.content || payload;
     if (!raw || !Array.isArray(raw.heroes) || !Array.isArray(raw.articles) || !Array.isArray(raw.ads)) {
+      if (hasCachedSnapshotAvailable()) {
+        return {
+          heroes: getHeroes(),
+          articles: getArticles(),
+          ads: getAds(),
+        };
+      }
       return DEFAULT_PUBLISHED_CONTENT;
     }
+    const backfilled = applyCriticalStoryBackfill({
+      heroes: raw.heroes,
+      articles: raw.articles,
+    });
     const normalized = {
-      heroes: raw.heroes.map(normalizeHero),
-      articles: raw.articles.map(normalizeArticle),
+      heroes: backfilled.heroes.map(normalizeHero),
+      articles: backfilled.articles.map(normalizeArticle),
       ads: raw.ads,
     };
     if (!hasPublishedStoryContent(normalized)) {
+      if (hasCachedSnapshotAvailable()) {
+        return {
+          heroes: getHeroes(),
+          articles: getArticles(),
+          ads: getAds(),
+        };
+      }
       return DEFAULT_PUBLISHED_CONTENT;
     }
     return normalized;
   } catch {
+    if (hasCachedSnapshotAvailable()) {
+      return {
+        heroes: getHeroes(),
+        articles: getArticles(),
+        ads: getAds(),
+      };
+    }
     return DEFAULT_PUBLISHED_CONTENT;
   }
 }
@@ -785,12 +1055,14 @@ export function resetToDefaults() {
   localStorage.removeItem(STORAGE_KEYS.heroes);
   localStorage.removeItem(STORAGE_KEYS.articles);
   localStorage.removeItem(STORAGE_KEYS.ads);
+  clearLocalDraftFlag();
 }
 
 export async function syncPublishedContentToLocalStorage() {
   if (typeof window === "undefined") {
     return { synced: false, configured: false };
   }
+  ensureFreshDefaults();
   if (hasLocalEditsAvailable()) {
     return { synced: false, configured: false };
   }
@@ -832,14 +1104,23 @@ export async function syncPublishedContentToLocalStorage() {
 
 export async function publishEditorialContent(
   content: Omit<PublishedEditorialContent, "publishedAt">,
-  adminPassword?: string,
+  adminPasswordOrToken?: string,
 ) {
   try {
+    const authValue = (adminPasswordOrToken || getAdminPublishCredentialFromBrowserStorage() || "").trim();
+    if (!authValue) {
+      return {
+        success: false,
+        configured: true,
+        error: "Admin session expired. Please sign in again to publish live.",
+      };
+    }
+
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(adminPassword ? { "x-admin-password": adminPassword } : {}),
+        Authorization: `Bearer ${authValue}`,
       },
       body: JSON.stringify(content),
     });

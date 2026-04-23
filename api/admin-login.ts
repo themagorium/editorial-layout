@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { createPublishToken } from "./lib/publish-token";
 
 type LoginRequestBody = {
   password?: string;
@@ -28,5 +29,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  res.status(200).json({ success: true });
+  const { token, expiresAt } = createPublishToken(adminPassword);
+  res.status(200).json({ success: true, token, expiresAt });
 }

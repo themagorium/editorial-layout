@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { kv } from "@vercel/kv";
+import { verifyPublishToken } from "./lib/publish-token";
 
 type BodyBlock = {
   id: string;
@@ -112,14 +113,15 @@ function authorized(req: VercelRequest): boolean {
   const configured = getConfiguredAdminPassword();
   if (!configured) return false;
 
-  const directHeader = req.headers["x-admin-password"];
-  const providedDirect = Array.isArray(directHeader) ? directHeader[0] : directHeader;
-  if ((providedDirect || "").trim() === configured) return true;
-
   const authHeader = req.headers.authorization || req.headers.Authorization;
   const normalizedAuth = Array.isArray(authHeader) ? authHeader[0] : authHeader;
   const bearer = (normalizedAuth || "").replace(/^Bearer\s+/i, "").trim();
-  return bearer === configured;
+  if (bearer && verifyPublishToken(bearer, configured)) return true;
+
+  const directHeader = req.headers["x-admin-password"];
+  const providedDirect = Array.isArray(directHeader) ? directHeader[0] : directHeader;
+  if ((providedDirect || "").trim() === configured) return true;
+  return false;
 }
 
 async function getStoredContent() {

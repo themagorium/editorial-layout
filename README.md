@@ -66,7 +66,7 @@ Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and 
 
 ## Publishing Admin edits to live
 
-This project supports shared "published" content for all visitors via `/api/published-content`.
+This project supports shared "published" content for all visitors via `/api/content`.
 
 - **Admin Save** publishes heroes/articles/ads through the API.
 - Live pages sync published payload first (if available) and then render.
@@ -74,7 +74,7 @@ This project supports shared "published" content for all visitors via `/api/publ
 
 ### Required env vars
 
-- `ADMIN_PASSWORD` (already used for admin login and now also required to authorize publish writes)
+- `ADMIN_PASSWORD` (used for admin login and to mint signed publish tokens for live publish writes)
 
 ### Optional env vars for shared persistence
 

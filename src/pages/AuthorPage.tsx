@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { buildContentPath, getArticles, getHeroes, slugifyText } from "@/lib/content-store";
-import { applyAuthorSeo, canonicalAuthorName } from "@/lib/seo";
+import { applyAuthorSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useEffect, useMemo } from "react";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
@@ -23,6 +23,7 @@ export function normalizeAuthor(author: string) {
 export default function AuthorPage() {
   useSyncPublishedContent();
   const { slug = "" } = useParams<{ slug: string }>();
+  const slugCandidate = useMemo(() => decodeURIComponent((slug || "").trim().toLowerCase()), [slug]);
   const allStories = useMemo<StorySummary[]>(() => {
     const articles = getArticles().map((a) => ({
       id: a.id,
@@ -48,9 +49,10 @@ export default function AuthorPage() {
   }, []);
 
   const authorName = useMemo(() => {
-    const direct = allStories.find((s) => slugifyText(s.author) === slug)?.author;
-    return direct || "The Magorium Editorial Staff";
-  }, [allStories, slug]);
+    const direct = allStories.find((s) => slugifyText(s.author) === slugCandidate)?.author;
+    if (direct) return direct;
+    return canonicalAuthorName(slugCandidate.replace(/-/g, " "));
+  }, [allStories, slugCandidate]);
 
   const stories = useMemo(() => {
     const targetSlug = slugifyText(authorName);
@@ -70,6 +72,14 @@ export default function AuthorPage() {
         <Link to="/archive" className="text-xs font-sans text-muted-foreground hover:text-primary transition-colors">
           ← Back to Archive
         </Link>
+        <p className="mt-4">
+          <Link
+            to={getAuthorPath(authorName)}
+            className="text-xs font-sans text-primary hover:underline"
+          >
+            Canonical author page
+          </Link>
+        </p>
         <h1 className="font-editorial text-4xl md:text-5xl mt-4 text-foreground">{authorName}</h1>
         <p className="text-sm text-muted-foreground font-sans mt-3">
           {stories.length} published {stories.length === 1 ? "story" : "stories"} on The Magorium

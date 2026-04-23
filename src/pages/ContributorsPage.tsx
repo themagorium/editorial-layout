@@ -2,7 +2,7 @@ import ContentPage from "./ContentPage";
 import { applyContributorsSeo } from "@/lib/seo";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { slugifyText } from "@/lib/content-store";
+import { getAuthorPath } from "@/lib/seo";
 
 export default function ContributorsPage() {
   const contributors = [
@@ -37,7 +37,7 @@ export default function ContributorsPage() {
             <p className="text-xs uppercase tracking-widest text-primary mt-1">{c.role}</p>
             <p className="mt-2 text-sm">{c.bio}</p>
             <Link
-              to={`/author/${slugifyText(c.name)}`}
+              to={getAuthorPath(c.name)}
               className="mt-2 inline-block text-xs text-primary hover:underline"
             >
               View stories by {c.name}

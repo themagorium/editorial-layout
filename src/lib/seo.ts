@@ -3,6 +3,17 @@ import { buildContentPath, type Article, type HeroItem } from "@/lib/content-sto
 const SITE_URL = "https://www.themagorium.com";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
+const STAFF_AUTHOR_SLUG = "staff";
+const STAFF_AUTHOR_SLUG_ALIASES = new Set([
+  STAFF_AUTHOR_SLUG,
+  "the-magorium-staff",
+  "the-magorium-editorial-staff",
+  "magorium-staff",
+  "magorium-editorial-staff",
+  "editorial-staff",
+  "the-magorium",
+  "magorium",
+]);
 const BRAND_NAME = "The Magorium";
 const BRAND_ALIAS = "Magorium";
 const BRAND_ALIASES = [BRAND_ALIAS, "Magorum", "The Magorium"];
@@ -67,16 +78,37 @@ export function canonicalAuthorName(author?: string) {
   return trimmed;
 }
 
-export function getAuthorPath(author?: string) {
-  const authorName = canonicalAuthorName(author);
-  if (authorName === STAFF_AUTHOR_NAME) return "/author/staff";
-  const slug = authorName
+function slugifyAuthor(value: string) {
+  return value
     .toLowerCase()
     .trim()
     .replace(/['"]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  return `/author/${slug || "staff"}`;
+}
+
+export function authorSlug(author?: string) {
+  const authorName = canonicalAuthorName(author);
+  if (authorName === STAFF_AUTHOR_NAME) return STAFF_AUTHOR_SLUG;
+  return slugifyAuthor(authorName) || STAFF_AUTHOR_SLUG;
+}
+
+export function isStaffAuthorSlug(slug?: string) {
+  const normalized = slugifyAuthor(decodeURIComponent(slug || ""));
+  if (!normalized) return true;
+  return STAFF_AUTHOR_SLUG_ALIASES.has(normalized);
+}
+
+export function resolveAuthorNameFromSlug(slug: string, candidateAuthors: string[] = []) {
+  if (isStaffAuthorSlug(slug)) return STAFF_AUTHOR_NAME;
+  const normalizedSlug = slugifyAuthor(decodeURIComponent(slug || ""));
+  const canonicalCandidates = Array.from(new Set(candidateAuthors.map((name) => canonicalAuthorName(name))));
+  const directMatch = canonicalCandidates.find((name) => authorSlug(name) === normalizedSlug);
+  return directMatch || STAFF_AUTHOR_NAME;
+}
+
+export function getAuthorPath(author?: string) {
+  return `/author/${authorSlug(author)}`;
 }
 
 function setStructuredData(

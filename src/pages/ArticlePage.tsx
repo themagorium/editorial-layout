@@ -4,7 +4,7 @@ import type { ArticleBodyBlock } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { ArrowLeft } from "lucide-react";
-import { applyArticleSeo } from "@/lib/seo";
+import { applyArticleSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useEffect } from "react";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
@@ -47,17 +47,6 @@ function hasRealBodyContent(block: ArticleBodyBlock) {
   return false;
 }
 
-function normalizeBylineAuthor(author?: string) {
-  const normalized = (author || "").trim();
-  if (!normalized) return "The Magorium Staff";
-  if (/^magorium$/i.test(normalized)) return "The Magorium Staff";
-  if (/^the\s+magorium$/i.test(normalized)) return "The Magorium Staff";
-  if (/^(staff|editorial staff|the magorium editorial staff)$/i.test(normalized)) {
-    return "The Magorium Staff";
-  }
-  return normalized;
-}
-
 export default function ArticlePage() {
   useSyncPublishedContent();
   const { id } = useParams<{ id: string }>();
@@ -81,6 +70,9 @@ export default function ArticlePage() {
     body: (heroAsArticle.body || []) as ArticleBodyBlock[],
     edition: heroAsArticle.edition,
   } : undefined);
+
+  const authorName = canonicalAuthorName(content?.author);
+  const authorPath = getAuthorPath(authorName);
 
   if (!content) {
     return (
@@ -123,10 +115,10 @@ export default function ArticlePage() {
         <p className="font-sans text-lg text-muted-foreground mt-4">{content.excerpt}</p>
         <div className="flex items-center gap-3 mt-6 text-sm font-sans text-muted-foreground border-b border-border pb-6">
           <Link
-            to={`/author/${slugifyText(normalizeBylineAuthor(content.author)) || "staff"}`}
+            to={authorPath}
             className="font-medium text-foreground hover:text-primary transition-colors"
           >
-            {normalizeBylineAuthor(content.author)}
+            {authorName}
           </Link>
           <span className="text-primary">·</span>
           <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>

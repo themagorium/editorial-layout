@@ -928,11 +928,13 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) onImage(await fileToDataUrl(file));
+    e.target.value = "";
   };
 
   const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) onVideo(await fileToDataUrl(file));
+    e.target.value = "";
   };
 
   return (
@@ -945,10 +947,10 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
         )}
       </div>
       <div className="flex gap-2">
-        <button onClick={() => imgRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+        <button type="button" onClick={() => imgRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
           <Upload className="w-3 h-3" /> Photo
         </button>
-        <button onClick={() => vidRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+        <button type="button" onClick={() => vidRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
           <Video className="w-3 h-3" /> Video
         </button>
       </div>

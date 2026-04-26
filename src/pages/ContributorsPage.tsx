@@ -1,17 +1,45 @@
 import ContentPage from "./ContentPage";
 import { applyContributorsSeo, canonicalAuthorName } from "@/lib/seo";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { buildContentPath, getPublishedContentSnapshot, slugifyText } from "@/lib/content-store";
 
+type ContributorProfile = {
+  name: string;
+  role: string;
+  bio: string;
+  storyCount: number;
+};
+
+const CONTRIBUTOR_PROFILE_BY_NAME: Record<string, Omit<ContributorProfile, "name" | "storyCount">> = {
+  "Elena Voss": {
+    role: "Fashion & Couture Editor",
+    bio: "Former fashion director at Condé Nast Traveller. Elena covers haute couture, ready-to-wear, and the intersection of fashion and cultural identity from Paris, Milan, and London.",
+  },
+  "Marcus Chen": {
+    role: "Culture & Music Correspondent",
+    bio: "Award-winning arts journalist based in Rio de Janeiro. Marcus brings an insider's perspective to festivals, carnivals, and the global music scene.",
+  },
+  "Charlotte Thames": {
+    role: "Travel & Luxury Editor",
+    bio: "Charlotte writes about the world's most compelling destinations, luxury hospitality, and the evolving definition of modern travel. Previously at Financial Times HTSI.",
+  },
+  "James Whitfield": {
+    role: "Sport & Lifestyle Editor",
+    bio: "James covers motorsport, polo, sailing, and the luxury lifestyle ecosystem surrounding major sporting events. Based between London and Monaco.",
+  },
+  "Millie Sealana": {
+    role: "Art, Design & Technology Editor",
+    bio: "Millie reports on contemporary art, design fairs, and the tech world's cultural impact. A regular contributor to ART SG, Art Basel, and the CV Summit.",
+  },
+  "The Magorium Editorial Staff": {
+    role: "Editorial Desk",
+    bio: "The Magorium editorial staff produces collaborative reporting and curated coverage across luxury travel, art, fashion, culture, and global sport.",
+  },
+};
+
 export default function ContributorsPage() {
-  const contributors = [
-    { name: "Elena Voss", role: "Fashion & Couture Editor", bio: "Former fashion director at Condé Nast Traveller. Elena covers haute couture, ready-to-wear, and the intersection of fashion and cultural identity from Paris, Milan, and London." },
-    { name: "Marcus Chen", role: "Culture & Music Correspondent", bio: "Award-winning arts journalist based in Rio de Janeiro. Marcus brings an insider's perspective to festivals, carnivals, and the global music scene." },
-    { name: "Charlotte Thames", role: "Travel & Luxury Editor", bio: "Charlotte writes about the world's most compelling destinations, luxury hospitality, and the evolving definition of modern travel. Previously at Financial Times HTSI." },
-    { name: "James Whitfield", role: "Sport & Lifestyle Editor", bio: "James covers motorsport, polo, sailing, and the luxury lifestyle ecosystem surrounding major sporting events. Based between London and Monaco." },
-    { name: "Millie Sealana", role: "Art, Design & Technology Editor", bio: "Millie reports on contemporary art, design fairs, and the tech world's cultural impact. A regular contributor to ART SG, Art Basel, and the CV Summit." },
-  ];
+  const [contributors, setContributors] = useState<ContributorProfile[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -31,8 +59,31 @@ export default function ContributorsPage() {
         storyPathsByContributor[key] = [...(storyPathsByContributor[key] || []), path];
       });
 
+      const knownNames = Object.keys(CONTRIBUTOR_PROFILE_BY_NAME);
+      const discoveredNames = Object.keys(storyPathsByContributor);
+      const contributorNames = Array.from(
+        new Set([...knownNames, ...discoveredNames].map((name) => canonicalAuthorName(name))),
+      );
+      const contributorProfiles = contributorNames
+        .map((name) => {
+          const profile = CONTRIBUTOR_PROFILE_BY_NAME[name];
+          return {
+            name,
+            role: profile?.role || "Contributing Writer",
+            bio:
+              profile?.bio ||
+              "Contributor to The Magorium covering luxury lifestyle, culture, travel, and global events.",
+            storyCount: storyPathsByContributor[name]?.length || 0,
+          };
+        })
+        .sort((a, b) => {
+          if (b.storyCount !== a.storyCount) return b.storyCount - a.storyCount;
+          return a.name.localeCompare(b.name);
+        });
+      setContributors(contributorProfiles);
+
       applyContributorsSeo(
-        contributors.map((contributor) => contributor.name),
+        contributorNames,
         storyPathsByContributor,
       );
     };
@@ -62,6 +113,9 @@ export default function ContributorsPage() {
             </h3>
             <p className="text-xs uppercase tracking-widest text-primary mt-1">{c.role}</p>
             <p className="mt-2 text-sm">{c.bio}</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {c.storyCount} published {c.storyCount === 1 ? "story" : "stories"}
+            </p>
             <Link
               to={`/author/${slugifyText(c.name)}`}
               className="mt-2 inline-block text-xs text-primary hover:underline"

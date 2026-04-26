@@ -47,6 +47,11 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
     onChange(updated);
   };
 
+  const replaceMediaBlock = async (id: string, file: File) => {
+    const url = await fileToDataUrl(file);
+    updateBlock(id, { content: url });
+  };
+
   const ensurePreferredPattern = (type: "image" | "video", file: File) => {
     const nextIndex = blocks.length;
     if (nextIndex % 2 === 1) {
@@ -149,12 +154,12 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
             </span>
             <div className="ml-auto flex items-center gap-1">
               {idx > 0 && (
-                <button onClick={() => moveBlock(block.id, -1)} className="p-1 text-muted-foreground hover:text-foreground text-xs">↑</button>
+                <button type="button" onClick={() => moveBlock(block.id, -1)} className="p-1 text-muted-foreground hover:text-foreground text-xs">↑</button>
               )}
               {idx < blocks.length - 1 && (
-                <button onClick={() => moveBlock(block.id, 1)} className="p-1 text-muted-foreground hover:text-foreground text-xs">↓</button>
+                <button type="button" onClick={() => moveBlock(block.id, 1)} className="p-1 text-muted-foreground hover:text-foreground text-xs">↓</button>
               )}
-              <button onClick={() => removeBlock(block.id)} className="p-1 text-muted-foreground hover:text-destructive">
+              <button type="button" onClick={() => removeBlock(block.id)} className="p-1 text-muted-foreground hover:text-destructive">
                 <Trash2 className="w-3 h-3" />
               </button>
             </div>
@@ -242,6 +247,36 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           {block.type === "image" && (
             <div className="space-y-2">
               {block.content && <img src={block.content} alt="" className="w-full max-h-48 object-cover rounded" />}
+              <div className="flex gap-2">
+                <label className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors cursor-pointer">
+                  Replace Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        void replaceMediaBlock(block.id, file);
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => updateBlock(block.id, { content: "" })}
+                  className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+              <input
+                value={block.content || ""}
+                onChange={(e) => updateBlock(block.id, { content: e.target.value })}
+                placeholder="Image URL or data URI"
+                className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
+              />
               <input
                 value={block.caption || ""}
                 onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
@@ -260,6 +295,36 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           {block.type === "video" && (
             <div className="space-y-2">
               {block.content && <video src={block.content} className="w-full max-h-48 rounded" controls />}
+              <div className="flex gap-2">
+                <label className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors cursor-pointer">
+                  Replace Video
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        void replaceMediaBlock(block.id, file);
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => updateBlock(block.id, { content: "" })}
+                  className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+              <input
+                value={block.content || ""}
+                onChange={(e) => updateBlock(block.id, { content: e.target.value })}
+                placeholder="Video URL or data URI"
+                className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
+              />
               <input
                 value={block.caption || ""}
                 onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
@@ -280,6 +345,7 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
       {/* Add block buttons */}
       <div className="flex gap-2 pt-1">
         <button
+          type="button"
           onClick={() => addTextBlock()}
           disabled={preferredPattern && blocks.length % 2 === 0}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
@@ -287,12 +353,14 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           <Type className="w-3 h-3" /> Add Text
         </button>
         <button
+          type="button"
           onClick={() => addHeadingBlock()}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
         >
           <Heading className="w-3 h-3" /> Add Heading
         </button>
         <button
+          type="button"
           onClick={() => {
             if (preferredPattern) {
               ensurePreferredPattern("image", {} as File);
@@ -307,6 +375,7 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           <Image className="w-3 h-3" /> Add Image
         </button>
         <button
+          type="button"
           onClick={() => {
             if (preferredPattern) {
               ensurePreferredPattern("video", {} as File);

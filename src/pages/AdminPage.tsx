@@ -928,15 +928,21 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) onImage(await fileToDataUrl(file));
+    e.target.value = "";
   };
 
   const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) onVideo(await fileToDataUrl(file));
+    e.target.value = "";
   };
 
   return (
     <div className="space-y-2">
+      <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
+        <span>Featured Media</span>
+        <span>Click Photo or Video to Upload</span>
+      </div>
       <div className="aspect-video bg-secondary rounded overflow-hidden flex items-center justify-center">
         {imageUrl ? (
           <img src={imageUrl} alt="" className="w-full h-full object-cover" />
@@ -945,13 +951,16 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
         )}
       </div>
       <div className="flex gap-2">
-        <button onClick={() => imgRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+        <button type="button" onClick={() => imgRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
           <Upload className="w-3 h-3" /> Photo
         </button>
-        <button onClick={() => vidRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+        <button type="button" onClick={() => vidRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
           <Video className="w-3 h-3" /> Video
         </button>
       </div>
+      <p className="text-[10px] text-muted-foreground font-sans">
+        Supported uploads: image/* and video/* files from your device.
+      </p>
       {videoUrl && <p className="text-[10px] text-primary truncate">Video attached ✓</p>}
       <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
       <input ref={vidRef} type="file" accept="video/*" className="hidden" onChange={handleVideo} />

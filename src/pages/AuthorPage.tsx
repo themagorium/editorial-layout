@@ -48,8 +48,18 @@ export default function AuthorPage() {
   }, []);
 
   const authorName = useMemo(() => {
-    const direct = allStories.find((s) => slugifyText(s.author) === slug)?.author;
-    return direct || "The Magorium Editorial Staff";
+    const normalizedSlug = slugifyText(slug || "");
+    const direct = allStories.find((s) => slugifyText(s.author) === normalizedSlug)?.author;
+    if (direct) return direct;
+    if (normalizedSlug === "staff" || normalizedSlug === "the-magorium-staff") {
+      return "The Magorium Editorial Staff";
+    }
+    // Decode unknown slugs into a readable byline so deep links still resolve to author archives.
+    const guessed = (slug || "")
+      .replace(/-/g, " ")
+      .trim()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+    return guessed || "The Magorium Editorial Staff";
   }, [allStories, slug]);
 
   const stories = useMemo(() => {

@@ -939,6 +939,10 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
 
   return (
     <div className="space-y-2">
+      <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
+        <span>Featured Media</span>
+        <span>Click Photo or Video to Upload</span>
+      </div>
       <div className="aspect-video bg-secondary rounded overflow-hidden flex items-center justify-center">
         {imageUrl ? (
           <img src={imageUrl} alt="" className="w-full h-full object-cover" />
@@ -954,6 +958,9 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
           <Video className="w-3 h-3" /> Video
         </button>
       </div>
+      <p className="text-[10px] text-muted-foreground font-sans">
+        Supported uploads: image/* and video/* files from your device.
+      </p>
       {videoUrl && <p className="text-[10px] text-primary truncate">Video attached ✓</p>}
       <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
       <input ref={vidRef} type="file" accept="video/*" className="hidden" onChange={handleVideo} />

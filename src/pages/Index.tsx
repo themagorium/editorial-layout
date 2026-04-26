@@ -17,7 +17,7 @@ import {
 import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
-import { applyHomeSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
+import { applyHomeSeo, applyMagoriumBrandSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 function HeroCard({ hero }: { hero: HeroItem }) {
@@ -125,6 +125,7 @@ export default function Index() {
       setAds(snapshot.ads.length > 0 ? snapshot.ads : getAds());
       setEditionLabel(formatEditionLabel(latestEdition));
       applyHomeSeo();
+      applyMagoriumBrandSeo("/magorium");
     });
     return () => {
       active = false;

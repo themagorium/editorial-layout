@@ -302,12 +302,22 @@ export function applyAuthorSeo(authorName: string, storyCount: number) {
   const canonicalAuthor = canonicalAuthorName(authorName);
   const canonicalPath = getAuthorPath(canonicalAuthor);
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-  const title = `${canonicalAuthor} | The Magorium`;
+  const title = `${canonicalAuthor} | ${BRAND_NAME} Journalist & Author Archive`;
   const description = `${storyCount} published ${
     storyCount === 1 ? "story" : "stories"
-  } by ${canonicalAuthor} on The Magorium.`;
+  } by ${canonicalAuthor} on ${BRAND_NAME}. Read journalist and author coverage across luxury travel, art, fashion, culture, and sport.`;
+  const keywords = [
+    canonicalAuthor,
+    `${canonicalAuthor} journalist`,
+    `${canonicalAuthor} author`,
+    `${canonicalAuthor} ${BRAND_ALIAS}`,
+    `${canonicalAuthor} ${BRAND_NAME}`,
+    `${BRAND_NAME} contributors`,
+    `${BRAND_ALIAS} contributors`,
+  ].join(", ");
 
   applyCollectionSeo(title, description, canonicalPath);
+  upsertMeta("keywords", keywords);
 
   upsertStructuredDataScript("author-jsonld", {
     "@context": "https://schema.org",
@@ -319,4 +329,43 @@ export function applyAuthorSeo(authorName: string, storyCount: number) {
       "@id": canonicalUrl,
     },
   });
+}
+
+export function applyMagoriumBrandSeo(path = "/magorium") {
+  const canonicalPath = path.startsWith("/") ? path : `/${path}`;
+  const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+  const title = `${BRAND_ALIAS} | ${BRAND_NAME} Official Brand & Search Hub`;
+  const description =
+    `${BRAND_NAME} is the official destination for searches including ${BRAND_ALIAS}, Magorum, and TheMagorium. Explore every issue, article, hero story, and contributor profile.`;
+  const keywords = [
+    BRAND_NAME,
+    BRAND_ALIAS,
+    "Magorum",
+    "TheMagorium",
+    "Magorium journalists",
+    "Magorium authors",
+    "Magorium archive",
+  ].join(", ");
+
+  document.title = title;
+  upsertMeta("description", description);
+  upsertMeta("author", BRAND_NAME);
+  upsertMeta("keywords", keywords);
+  upsertMeta("robots", "index,follow");
+
+  upsertMeta("og:title", title, true);
+  upsertMeta("og:description", description, true);
+  upsertMeta("og:type", "website", true);
+  upsertMeta("og:url", canonicalUrl, true);
+  upsertMeta("og:image", DEFAULT_OG_IMAGE, true);
+  upsertMeta("og:site_name", BRAND_NAME, true);
+
+  upsertMeta("twitter:card", "summary_large_image");
+  upsertMeta("twitter:title", title);
+  upsertMeta("twitter:description", description);
+  upsertMeta("twitter:image", DEFAULT_OG_IMAGE);
+
+  upsertLink("canonical", canonicalUrl);
+  removeStructuredDataScript();
+  setHomeStructuredData();
 }

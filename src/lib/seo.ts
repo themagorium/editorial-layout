@@ -298,7 +298,7 @@ export function applyCollectionSeo(title: string, description: string, path: str
   setHomeStructuredData();
 }
 
-export function applyAuthorSeo(authorName: string, storyCount: number) {
+export function applyAuthorSeo(authorName: string, storyCount: number, storyPaths: string[] = []) {
   const canonicalAuthor = canonicalAuthorName(authorName);
   const canonicalPath = getAuthorPath(canonicalAuthor);
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
@@ -329,6 +329,18 @@ export function applyAuthorSeo(authorName: string, storyCount: number) {
       "@id": canonicalUrl,
     },
   });
+
+  if (storyPaths.length > 0) {
+    upsertStructuredDataScript("author-itemlist-jsonld", {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      itemListElement: storyPaths.slice(0, 50).map((path, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${SITE_URL}${path}`,
+      })),
+    });
+  }
 }
 
 export function applyMagoriumBrandSeo(path = "/magorium") {

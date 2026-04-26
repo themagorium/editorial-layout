@@ -1,8 +1,8 @@
 import ContentPage from "./ContentPage";
-import { applyContributorsSeo } from "@/lib/seo";
+import { applyContributorsSeo, canonicalAuthorName } from "@/lib/seo";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { slugifyText } from "@/lib/content-store";
+import { buildContentPath, getPublishedContentSnapshot, slugifyText } from "@/lib/content-store";
 
 export default function ContributorsPage() {
   const contributors = [
@@ -14,7 +14,33 @@ export default function ContributorsPage() {
   ];
 
   useEffect(() => {
-    applyContributorsSeo();
+    let active = true;
+    const hydrate = async () => {
+      const snapshot = await getPublishedContentSnapshot();
+      if (!active) return;
+
+      const storyPathsByContributor: Record<string, string[]> = {};
+      snapshot.articles.forEach((article) => {
+        const key = canonicalAuthorName(article.author);
+        const path = buildContentPath(article.id, article.title);
+        storyPathsByContributor[key] = [...(storyPathsByContributor[key] || []), path];
+      });
+      snapshot.heroes.forEach((hero) => {
+        const key = canonicalAuthorName(hero.author);
+        const path = buildContentPath(hero.id, hero.title);
+        storyPathsByContributor[key] = [...(storyPathsByContributor[key] || []), path];
+      });
+
+      applyContributorsSeo(
+        contributors.map((contributor) => contributor.name),
+        storyPathsByContributor,
+      );
+    };
+
+    void hydrate();
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (

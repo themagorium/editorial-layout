@@ -59,7 +59,10 @@ function toArticleStoryItem(article: Article): StoryItem {
   };
 }
 
-export default function StoryFeedPage({ seoHint, canonicalAliasPath = "/magorium" }: StoryFeedPageProps) {
+export default function StoryFeedPage({
+  seoHint,
+  canonicalAliasPath = "/magorium",
+}: StoryFeedPageProps) {
   useSyncPublishedContent();
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -87,8 +90,11 @@ export default function StoryFeedPage({ seoHint, canonicalAliasPath = "/magorium
       setHeroes(latestHeroes);
       setArticles(latestArticles);
       setEditionLabel(latestEdition ? formatEditionLabel(latestEdition) : "");
+      const storyPaths = [...latestHeroes, ...latestArticles].map((item) =>
+        buildContentPath(item.id, item.title),
+      );
       setLoaded(true);
-      applyHomeSeo(seoHint);
+      applyHomeSeo(seoHint, storyPaths);
       applyMagoriumBrandSeo(canonicalAliasPath);
     };
 

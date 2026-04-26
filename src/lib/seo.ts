@@ -118,11 +118,32 @@ function setStructuredData(
     image: [content.imageUrl || DEFAULT_OG_IMAGE],
     description,
     articleSection: content.category,
+    about: [writerEntity],
+    isPartOf: {
+      "@type": "WebSite",
+      name: BRAND_NAME,
+      url: SITE_URL,
+    },
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": canonicalUrl,
     },
   });
+}
+
+function normalizeContributorStoryPaths(
+  contributorStoryPaths: Record<string, string[]>,
+): Record<string, string[]> {
+  const normalizedMap: Record<string, string[]> = {};
+  Object.entries(contributorStoryPaths).forEach(([authorName, storyPaths]) => {
+    const canonicalName = canonicalAuthorName(authorName);
+    const existingPaths = normalizedMap[canonicalName] || [];
+    const normalizedPaths = storyPaths
+      .filter(Boolean)
+      .map((path) => (path.startsWith("/") ? path : `/${path}`));
+    normalizedMap[canonicalName] = Array.from(new Set([...existingPaths, ...normalizedPaths]));
+  });
+  return normalizedMap;
 }
 
 function setHomeStructuredData(storyPaths: string[] = []) {
@@ -259,15 +280,35 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
   setStructuredData(content, canonicalUrl, writerName, description);
 }
 
-export function applyContributorsSeo() {
+export function applyContributorsSeo(
+  contributorNames: string[] = [],
+  contributorStoryPaths: Record<string, string[]> = {},
+) {
   const canonicalUrl = `${SITE_URL}/contributors`;
   const title = `Contributors | ${BRAND_NAME}`;
+  const normalizedStoryPaths = normalizeContributorStoryPaths(contributorStoryPaths);
+  const canonicalContributorNames = Array.from(
+    new Set([
+      ...contributorNames.map((name) => canonicalAuthorName(name)),
+      ...Object.keys(normalizedStoryPaths),
+    ]),
+  );
   const description =
-    "Meet The Magorium contributors including Millie Sealana, Charlotte Thames, and editorial staff covering luxury travel, art, fashion, culture, and sport.";
+    "Meet The Magorium contributors including Millie Sealana, Charlotte Thames, and editorial staff covering luxury travel, art, fashion, culture, and sport. Discover stories by each writer and journalist.";
+  const keywords = [
+    "The Magorium contributors",
+    "Magorium journalists",
+    "Magorium writers",
+    "Magorium authors",
+    ...canonicalContributorNames,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   document.title = title;
   upsertMeta("description", description);
   upsertMeta("author", STAFF_AUTHOR_NAME);
+  upsertMeta("keywords", keywords);
   upsertMeta("robots", "index,follow");
 
   upsertMeta("og:title", title, true);
@@ -284,6 +325,60 @@ export function applyContributorsSeo() {
   upsertLink("canonical", canonicalUrl);
   removeStructuredDataScript();
   setHomeStructuredData();
+
+  if (canonicalContributorNames.length > 0) {
+    upsertStructuredDataScript("contributors-jsonld", {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: title,
+      url: canonicalUrl,
+      about: canonicalContributorNames.map((name) => ({
+        "@type": name === STAFF_AUTHOR_NAME ? "Organization" : "Person",
+        name,
+        url: `${SITE_URL}${getAuthorPath(name)}`,
+      })),
+      mainEntity: {
+        "@type": "ItemList",
+        itemListElement: canonicalContributorNames.map((name, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": name === STAFF_AUTHOR_NAME ? "Organization" : "Person",
+            name,
+            url: `${SITE_URL}${getAuthorPath(name)}`,
+          },
+        })),
+      },
+    });
+
+    upsertStructuredDataScript("contributors-profiles-jsonld", {
+      "@context": "https://schema.org",
+      "@graph": canonicalContributorNames.map((name) => ({
+        "@type": name === STAFF_AUTHOR_NAME ? "Organization" : "Person",
+        name,
+        url: `${SITE_URL}${getAuthorPath(name)}`,
+        mainEntityOfPage: {
+          "@type": "ProfilePage",
+          "@id": `${SITE_URL}${getAuthorPath(name)}`,
+        },
+      })),
+    });
+
+    const storyUrls = Array.from(
+      new Set(canonicalContributorNames.flatMap((name) => normalizedStoryPaths[name] || [])),
+    ).slice(0, 200);
+    if (storyUrls.length > 0) {
+      upsertStructuredDataScript("contributors-story-itemlist-jsonld", {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        itemListElement: storyUrls.map((path, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: `${SITE_URL}${path}`,
+        })),
+      });
+    }
+  }
 }
 
 export function applyCollectionSeo(title: string, description: string, path: string) {

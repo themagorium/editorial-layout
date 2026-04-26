@@ -125,7 +125,7 @@ function setStructuredData(
   });
 }
 
-function setHomeStructuredData() {
+function setHomeStructuredData(storyPaths: string[] = []) {
   upsertStructuredDataScript("organization-jsonld", {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -150,9 +150,21 @@ function setHomeStructuredData() {
       url: SITE_URL,
     },
   });
+
+  if (storyPaths.length > 0) {
+    upsertStructuredDataScript("home-itemlist-jsonld", {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      itemListElement: storyPaths.slice(0, 50).map((path, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${SITE_URL}${path}`,
+      })),
+    });
+  }
 }
 
-export function applyHomeSeo(queryHint?: string) {
+export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
   const normalizedHint = (queryHint || "").trim();
   const title = normalizedHint
     ? `${normalizedHint} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`
@@ -196,7 +208,7 @@ export function applyHomeSeo(queryHint?: string) {
 
   upsertLink("canonical", SITE_URL);
   removeStructuredDataScript();
-  setHomeStructuredData();
+  setHomeStructuredData(storyPaths);
 }
 
 export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: string })) {
@@ -380,4 +392,16 @@ export function applyMagoriumBrandSeo(path = "/magorium") {
   upsertLink("canonical", canonicalUrl);
   removeStructuredDataScript();
   setHomeStructuredData();
+  upsertStructuredDataScript("magorium-brand-jsonld", {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${BRAND_ALIAS} stories`,
+    url: canonicalUrl,
+    about: {
+      "@type": "Organization",
+      name: BRAND_NAME,
+      alternateName: BRAND_ALIASES,
+      url: SITE_URL,
+    },
+  });
 }

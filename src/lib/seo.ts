@@ -118,6 +118,12 @@ function setStructuredData(
     image: [content.imageUrl || DEFAULT_OG_IMAGE],
     description,
     articleSection: content.category,
+    about: [writerEntity],
+    isPartOf: {
+      "@type": "WebSite",
+      name: BRAND_NAME,
+      url: SITE_URL,
+    },
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": canonicalUrl,
@@ -125,7 +131,22 @@ function setStructuredData(
   });
 }
 
-function setHomeStructuredData() {
+function normalizeContributorStoryPaths(
+  contributorStoryPaths: Record<string, string[]>,
+): Record<string, string[]> {
+  const normalizedMap: Record<string, string[]> = {};
+  Object.entries(contributorStoryPaths).forEach(([authorName, storyPaths]) => {
+    const canonicalName = canonicalAuthorName(authorName);
+    const existingPaths = normalizedMap[canonicalName] || [];
+    const normalizedPaths = storyPaths
+      .filter(Boolean)
+      .map((path) => (path.startsWith("/") ? path : `/${path}`));
+    normalizedMap[canonicalName] = Array.from(new Set([...existingPaths, ...normalizedPaths]));
+  });
+  return normalizedMap;
+}
+
+function setHomeStructuredData(storyPaths: string[] = []) {
   upsertStructuredDataScript("organization-jsonld", {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -150,16 +171,27 @@ function setHomeStructuredData() {
       url: SITE_URL,
     },
   });
+
+  if (storyPaths.length > 0) {
+    upsertStructuredDataScript("home-itemlist-jsonld", {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      itemListElement: storyPaths.slice(0, 50).map((path, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${SITE_URL}${path}`,
+      })),
+    });
+  }
 }
 
-export function applyHomeSeo(queryHint?: string) {
+export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
   const normalizedHint = (queryHint || "").trim();
   const title = normalizedHint
     ? `${normalizedHint} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`
-    : `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
-  const description = normalizedHint
-    ? `${BRAND_NAME} is the official destination for searches like ${normalizedHint}, ${BRAND_ALIAS}, and Magorum. Discover luxury travel, art, fashion, culture, yachting, motorsport, and global events.`
-    : `${BRAND_NAME} (also searched as ${BRAND_ALIAS} or Magorum) is a premium curated lifestyle magazine covering luxury travel, art, fashion, culture, yachting, motorsport, and global events.`;
+    : `${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+  const description =
+    `${BRAND_NAME} — a premium curated lifestyle magazine featuring luxury travel, art, culture, fashion, motorsport, yachting, and more. Where curated becomes legend.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
@@ -196,7 +228,7 @@ export function applyHomeSeo(queryHint?: string) {
 
   upsertLink("canonical", SITE_URL);
   removeStructuredDataScript();
-  setHomeStructuredData();
+  setHomeStructuredData(storyPaths);
 }
 
 export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: string })) {
@@ -206,9 +238,9 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
   const storySummary =
     ("excerpt" in content ? content.excerpt : content.subtitle || "").trim() ||
     "Read this story on The Magorium.";
-  const description = `${storySummary} Written by ${writerName} for ${brandName}.`;
+  const description = `${content.title} by ${writerName} for ${brandName}. ${storySummary}`;
   const canonicalUrl = `${SITE_URL}${buildContentPath(content.id, content.title)}`;
-  const title = `${content.title} | ${brandName}`;
+  const title = `${writerName} — ${content.title} | ${brandName}`;
   const keywords = [
     brandName,
     "The Magorium",
@@ -247,15 +279,35 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
   setStructuredData(content, canonicalUrl, writerName, description);
 }
 
-export function applyContributorsSeo() {
+export function applyContributorsSeo(
+  contributorNames: string[] = [],
+  contributorStoryPaths: Record<string, string[]> = {},
+) {
   const canonicalUrl = `${SITE_URL}/contributors`;
   const title = `Contributors | ${BRAND_NAME}`;
+  const normalizedStoryPaths = normalizeContributorStoryPaths(contributorStoryPaths);
+  const canonicalContributorNames = Array.from(
+    new Set([
+      ...contributorNames.map((name) => canonicalAuthorName(name)),
+      ...Object.keys(normalizedStoryPaths),
+    ]),
+  );
   const description =
-    "Meet The Magorium contributors including Millie Sealana, Charlotte Thames, and editorial staff covering luxury travel, art, fashion, culture, and sport.";
+    "Meet The Magorium contributors including Millie Sealana, Charlotte Thames, and editorial staff covering luxury travel, art, fashion, culture, and sport. Discover stories by each writer and journalist.";
+  const keywords = [
+    "The Magorium contributors",
+    "Magorium journalists",
+    "Magorium writers",
+    "Magorium authors",
+    ...canonicalContributorNames,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   document.title = title;
   upsertMeta("description", description);
   upsertMeta("author", STAFF_AUTHOR_NAME);
+  upsertMeta("keywords", keywords);
   upsertMeta("robots", "index,follow");
 
   upsertMeta("og:title", title, true);
@@ -272,6 +324,60 @@ export function applyContributorsSeo() {
   upsertLink("canonical", canonicalUrl);
   removeStructuredDataScript();
   setHomeStructuredData();
+
+  if (canonicalContributorNames.length > 0) {
+    upsertStructuredDataScript("contributors-jsonld", {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: title,
+      url: canonicalUrl,
+      about: canonicalContributorNames.map((name) => ({
+        "@type": name === STAFF_AUTHOR_NAME ? "Organization" : "Person",
+        name,
+        url: `${SITE_URL}${getAuthorPath(name)}`,
+      })),
+      mainEntity: {
+        "@type": "ItemList",
+        itemListElement: canonicalContributorNames.map((name, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": name === STAFF_AUTHOR_NAME ? "Organization" : "Person",
+            name,
+            url: `${SITE_URL}${getAuthorPath(name)}`,
+          },
+        })),
+      },
+    });
+
+    upsertStructuredDataScript("contributors-profiles-jsonld", {
+      "@context": "https://schema.org",
+      "@graph": canonicalContributorNames.map((name) => ({
+        "@type": name === STAFF_AUTHOR_NAME ? "Organization" : "Person",
+        name,
+        url: `${SITE_URL}${getAuthorPath(name)}`,
+        mainEntityOfPage: {
+          "@type": "ProfilePage",
+          "@id": `${SITE_URL}${getAuthorPath(name)}`,
+        },
+      })),
+    });
+
+    const storyUrls = Array.from(
+      new Set(canonicalContributorNames.flatMap((name) => normalizedStoryPaths[name] || [])),
+    ).slice(0, 200);
+    if (storyUrls.length > 0) {
+      upsertStructuredDataScript("contributors-story-itemlist-jsonld", {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        itemListElement: storyUrls.map((path, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: `${SITE_URL}${path}`,
+        })),
+      });
+    }
+  }
 }
 
 export function applyCollectionSeo(title: string, description: string, path: string) {
@@ -298,14 +404,25 @@ export function applyCollectionSeo(title: string, description: string, path: str
   setHomeStructuredData();
 }
 
-export function applyAuthorSeo(authorName: string, storyCount: number) {
+export function applyAuthorSeo(authorName: string, storyCount: number, storyPaths: string[] = []) {
   const canonicalAuthor = canonicalAuthorName(authorName);
   const canonicalPath = getAuthorPath(canonicalAuthor);
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-  const title = `${canonicalAuthor} | ${BRAND_NAME} Journalist & Author Archive`;
+  const topStorySlug = storyPaths[0]
+    ? decodeURIComponent(storyPaths[0].split("/").pop() || "")
+        .replace(/--[a-z0-9-]+$/i, "")
+        .replace(/-/g, " ")
+        .trim()
+    : "";
+  const topStoryLabel = topStorySlug
+    ? topStorySlug.replace(/\b\w/g, (token) => token.toUpperCase())
+    : "";
+  const title = topStoryLabel
+    ? `${canonicalAuthor} | ${topStoryLabel} | ${BRAND_NAME}`
+    : `${canonicalAuthor} | ${BRAND_NAME} Journalist & Author Archive`;
   const description = `${storyCount} published ${
     storyCount === 1 ? "story" : "stories"
-  } by ${canonicalAuthor} on ${BRAND_NAME}. Read journalist and author coverage across luxury travel, art, fashion, culture, and sport.`;
+  } by ${canonicalAuthor} on ${BRAND_NAME}. Read credited stories written by ${canonicalAuthor}.`;
   const keywords = [
     canonicalAuthor,
     `${canonicalAuthor} journalist`,
@@ -329,14 +446,26 @@ export function applyAuthorSeo(authorName: string, storyCount: number) {
       "@id": canonicalUrl,
     },
   });
+
+  if (storyPaths.length > 0) {
+    upsertStructuredDataScript("author-itemlist-jsonld", {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      itemListElement: storyPaths.slice(0, 50).map((path, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${SITE_URL}${path}`,
+      })),
+    });
+  }
 }
 
 export function applyMagoriumBrandSeo(path = "/magorium") {
   const canonicalPath = path.startsWith("/") ? path : `/${path}`;
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-  const title = `${BRAND_ALIAS} | ${BRAND_NAME} Official Brand & Search Hub`;
+  const title = `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
   const description =
-    `${BRAND_NAME} is the official destination for searches including ${BRAND_ALIAS}, Magorum, and TheMagorium. Explore every issue, article, hero story, and contributor profile.`;
+    `${BRAND_NAME} — a premium curated lifestyle magazine featuring luxury travel, art, culture, fashion, motorsport, yachting, and more. Where curated becomes legend.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
@@ -368,4 +497,87 @@ export function applyMagoriumBrandSeo(path = "/magorium") {
   upsertLink("canonical", canonicalUrl);
   removeStructuredDataScript();
   setHomeStructuredData();
+  upsertStructuredDataScript("magorium-brand-jsonld", {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${BRAND_ALIAS} stories`,
+    url: canonicalUrl,
+    about: {
+      "@type": "Organization",
+      name: BRAND_NAME,
+      alternateName: BRAND_ALIASES,
+      url: SITE_URL,
+    },
+  });
+}
+
+export function applySeoHistorySeo(storyPaths: string[] = [], contributorNames: string[] = []) {
+  const canonicalUrl = `${SITE_URL}/seo-history`;
+  const title = `${BRAND_NAME} SEO History | Author & Writer Credit Archive`;
+  const description =
+    `Search-visible history for ${BRAND_NAME}: every published article with credited writer or journalist byline, plus linked author archives.`;
+  const keywords = [
+    BRAND_NAME,
+    `${BRAND_ALIAS} seo history`,
+    "writer credit archive",
+    "journalist credit archive",
+    "author byline history",
+    ...contributorNames,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  document.title = title;
+  upsertMeta("description", description);
+  upsertMeta("author", BRAND_NAME);
+  upsertMeta("keywords", keywords);
+  upsertMeta("robots", "index,follow");
+
+  upsertMeta("og:title", title, true);
+  upsertMeta("og:description", description, true);
+  upsertMeta("og:type", "website", true);
+  upsertMeta("og:url", canonicalUrl, true);
+  upsertMeta("og:image", DEFAULT_OG_IMAGE, true);
+  upsertMeta("og:site_name", BRAND_NAME, true);
+
+  upsertMeta("twitter:card", "summary_large_image");
+  upsertMeta("twitter:title", title);
+  upsertMeta("twitter:description", description);
+  upsertMeta("twitter:image", DEFAULT_OG_IMAGE);
+
+  upsertLink("canonical", canonicalUrl);
+  removeStructuredDataScript();
+
+  upsertStructuredDataScript("seo-history-jsonld", {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        name: `${BRAND_NAME} SEO history`,
+        url: canonicalUrl,
+        description,
+        mainEntity: {
+          "@type": "ItemList",
+          itemListElement: storyPaths.slice(0, 500).map((path, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            url: `${SITE_URL}${path}`,
+          })),
+        },
+      },
+      {
+        "@type": "ItemList",
+        name: `${BRAND_NAME} contributor credits`,
+        itemListElement: contributorNames.slice(0, 200).map((name, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": canonicalAuthorName(name) === STAFF_AUTHOR_NAME ? "Organization" : "Person",
+            name: canonicalAuthorName(name),
+            url: `${SITE_URL}${getAuthorPath(name)}`,
+          },
+        })),
+      },
+    ],
+  });
 }

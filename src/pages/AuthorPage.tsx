@@ -1,9 +1,9 @@
 import { Link, useParams } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
-import { buildContentPath, getArticles, getHeroes, slugifyText } from "@/lib/content-store";
+import { buildContentPath, getPublishedContentSnapshot, slugifyText } from "@/lib/content-store";
 import { applyAuthorSeo, canonicalAuthorName } from "@/lib/seo";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 type StorySummary = {
@@ -23,28 +23,51 @@ export function normalizeAuthor(author: string) {
 export default function AuthorPage() {
   useSyncPublishedContent();
   const { slug = "" } = useParams<{ slug: string }>();
-  const allStories = useMemo<StorySummary[]>(() => {
-    const articles = getArticles().map((a) => ({
-      id: a.id,
-      title: a.title,
-      excerpt: a.excerpt,
-      imageUrl: a.imageUrl,
-      date: a.date,
-      category: a.category,
-      author: normalizeAuthor(a.author),
-    }));
+  const [allStories, setAllStories] = useState<StorySummary[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
-    const heroes = getHeroes().map((h) => ({
-      id: h.id,
-      title: h.title,
-      excerpt: h.excerpt || h.subtitle,
-      imageUrl: h.imageUrl,
-      date: h.date,
-      category: h.category,
-      author: normalizeAuthor(h.author || "The Magorium Staff"),
-    }));
+  useEffect(() => {
+    let active = true;
 
-    return [...articles, ...heroes];
+    const hydrate = async () => {
+      const snapshot = await getPublishedContentSnapshot();
+      if (!active) return;
+
+      const stories: StorySummary[] = [
+        ...snapshot.articles.map((a) => ({
+          id: a.id,
+          title: a.title,
+          excerpt: a.excerpt,
+          imageUrl: a.imageUrl,
+          date: a.date,
+          category: a.category,
+          author: normalizeAuthor(a.author),
+        })),
+        ...snapshot.heroes.map((h) => ({
+          id: h.id,
+          title: h.title,
+          excerpt: h.excerpt || h.subtitle,
+          imageUrl: h.imageUrl,
+          date: h.date,
+          category: h.category,
+          author: normalizeAuthor(h.author || "The Magorium Staff"),
+        })),
+      ];
+
+      setAllStories(stories);
+      setLoaded(true);
+    };
+
+    const handleSynced = () => {
+      void hydrate();
+    };
+
+    void hydrate();
+    window.addEventListener("magorium-content-synced", handleSynced);
+    return () => {
+      active = false;
+      window.removeEventListener("magorium-content-synced", handleSynced);
+    };
   }, []);
 
   const authorName = useMemo(() => {
@@ -70,8 +93,12 @@ export default function AuthorPage() {
   }, [allStories, authorName]);
 
   useEffect(() => {
-    applyAuthorSeo(authorName, stories.length);
-  }, [authorName, stories.length]);
+    applyAuthorSeo(
+      authorName,
+      stories.length,
+      stories.map((story) => buildContentPath(story.id, story.title)),
+    );
+  }, [authorName, stories]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,7 +112,11 @@ export default function AuthorPage() {
           {stories.length} published {stories.length === 1 ? "story" : "stories"} on The Magorium
         </p>
 
-        {stories.length === 0 ? (
+        {!loaded ? (
+          <p className="text-sm text-muted-foreground font-sans mt-10">
+            Loading stories...
+          </p>
+        ) : stories.length === 0 ? (
           <p className="text-sm text-muted-foreground font-sans mt-10">
             No stories found for this contributor yet.
           </p>

@@ -189,10 +189,9 @@ export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
   const normalizedHint = (queryHint || "").trim();
   const title = normalizedHint
     ? `${normalizedHint} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`
-    : `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
-  const description = normalizedHint
-    ? `${BRAND_NAME} is the official destination for searches like ${normalizedHint}, ${BRAND_ALIAS}, and Magorum. Discover luxury travel, art, fashion, culture, yachting, motorsport, and global events.`
-    : `${BRAND_NAME} (also searched as ${BRAND_ALIAS} or Magorum) is a premium curated lifestyle magazine covering luxury travel, art, fashion, culture, yachting, motorsport, and global events.`;
+    : `${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+  const description =
+    `${BRAND_NAME} — a premium curated lifestyle magazine featuring luxury travel, art, culture, fashion, motorsport, yachting, and more. Where curated becomes legend.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
@@ -453,9 +452,9 @@ export function applyAuthorSeo(authorName: string, storyCount: number, storyPath
 export function applyMagoriumBrandSeo(path = "/magorium") {
   const canonicalPath = path.startsWith("/") ? path : `/${path}`;
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-  const title = `${BRAND_ALIAS} | ${BRAND_NAME} Official Brand & Search Hub`;
+  const title = `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
   const description =
-    `${BRAND_NAME} is the official destination for searches including ${BRAND_ALIAS}, Magorum, and TheMagorium. Explore every issue, article, hero story, and contributor profile.`;
+    `${BRAND_NAME} — a premium curated lifestyle magazine featuring luxury travel, art, culture, fashion, motorsport, yachting, and more. Where curated becomes legend.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,

@@ -33,11 +33,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const contributorNames = Array.from(new Set(topStories.map((story) => story.author)));
 
-    const title = hint
-      ? `${hint} | ${BRAND_NAME} Official Brand & Search Hub`
-      : `${BRAND_ALIAS} | ${BRAND_NAME} Official Brand & Search Hub`;
+    const title = `${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
     const description =
-      `${BRAND_NAME} is the official destination for Magorium and Magorum searches. Discover articles, hero stories, and contributor archives for every writer and journalist.`;
+      `${BRAND_NAME} is a premium curated editorial covering luxury travel, art, culture, fashion, motorsport, yachting, and global events.`;
     const keywords = [
       BRAND_NAME,
       BRAND_ALIAS,

@@ -12,6 +12,7 @@ import AuthorPage from "./pages/AuthorPage";
 import EditorsLetterPage from "./pages/EditorsLetterPage";
 import ContributorsPage from "./pages/ContributorsPage";
 import SeoHistoryPage from "./pages/SeoHistoryPage";
+import CategoryPage from "./pages/CategoryPage";
 import PartnershipsPage from "./pages/PartnershipsPage";
 import TermsPage from "./pages/TermsPage";
 import CookiesPage from "./pages/CookiesPage";
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/archive/:edition" element={<EditionPage />} />
           <Route path="/author/:slug" element={<AuthorPage />} />
           <Route path="/authors/:slug" element={<AuthorPage />} />
+          <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/editors-letter" element={<EditorsLetterPage />} />
           <Route path="/contributors" element={<ContributorsPage />} />
           <Route path="/seo-history" element={<SeoHistoryPage />} />

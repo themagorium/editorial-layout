@@ -252,6 +252,32 @@ export function getAuthorPath(author?: string) {
   return `/author/${slugifyText(canonical) || "staff"}`;
 }
 
+function normalizeCategorySlug(value: string): string {
+  return slugifyText(value);
+}
+
+export function normalizeCategoryName(rawCategory?: string): string {
+  const normalized = (rawCategory || "").trim();
+  if (!normalized) return "General";
+  const slug = normalizeCategorySlug(normalized);
+
+  if (slug === "art-design") return "Art & Design";
+  if (slug === "tech-ai") return "Tech & AI";
+  if (slug === "film-festivals") return "Film & Festivals";
+  if (slug === "motor-sport" || slug === "motor-sports") return "Motorsport";
+  if (slug === "polo") return "Equestrian";
+  return normalized;
+}
+
+export function getCategorySlug(rawCategory?: string): string {
+  const normalized = normalizeCategoryName(rawCategory);
+  return normalizeCategorySlug(normalized);
+}
+
+export function getCategoryPath(rawCategory?: string): string {
+  return `/category/${getCategorySlug(rawCategory)}`;
+}
+
 export function guessAuthorNameFromSlug(slug: string): string {
   const cleaned = slugifyText(slug || "");
   if (!cleaned || cleaned === "staff" || cleaned === "the-magorium-staff") {

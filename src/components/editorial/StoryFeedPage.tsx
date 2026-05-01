@@ -13,6 +13,7 @@ import {
   applyHomeSeo,
   applyMagoriumBrandSeo,
   canonicalAuthorName,
+  getCategoryPath,
   getAuthorPath,
 } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
@@ -162,6 +163,10 @@ export default function StoryFeedPage({
                   </div>
                 </Link>
                 <div className="px-4 pb-4 text-xs text-muted-foreground font-sans flex items-center gap-2">
+                  <Link to={getCategoryPath(story.category)} className="text-primary hover:underline">
+                    {story.category}
+                  </Link>
+                  <span className="text-primary">·</span>
                   <Link to={getAuthorPath(story.author)} className="text-primary hover:underline">
                     {story.author}
                   </Link>

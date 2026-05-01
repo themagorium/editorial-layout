@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import {
   SITE_URL,
+  getCategoryPath,
   getAuthorPath,
   getPublishedSeoStories,
 } from "./lib/seo-runtime";
@@ -17,10 +18,11 @@ function xmlEscape(input: string): string {
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   try {
     const stories = await getPublishedSeoStories();
+    const categoryPaths = Array.from(new Set(stories.map((story) => getCategoryPath(story.category))));
     const authorPaths = Array.from(new Set(stories.map((story) => getAuthorPath(story.author))));
     const storyPaths = Array.from(new Set(stories.map((story) => story.path)));
-    const staticPaths = ["/", "/magorium", "/magorum", "/the-magorium", "/archive", "/contributors", "/seo-history"];
-    const allPaths = Array.from(new Set([...staticPaths, ...authorPaths, ...storyPaths]));
+    const staticPaths = ["/", "/magorium", "/magorum", "/the-magorium", "/archive", "/contributors", "/seo-history", "/categories"];
+    const allPaths = Array.from(new Set([...staticPaths, ...categoryPaths, ...authorPaths, ...storyPaths]));
 
     const urls = allPaths
       .map((path) => `<url><loc>${xmlEscape(`${SITE_URL}${path}`)}</loc></url>`)

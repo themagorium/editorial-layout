@@ -32,6 +32,16 @@
       "destination": "/api/seo-history"
     },
     {
+      "source": "/category/(.*)",
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
+      "destination": "/api/seo-category?slug=$1"
+    },
+    {
+      "source": "/categories/(.*)",
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
+      "destination": "/api/seo-category?slug=$1"
+    },
+    {
       "source": "/magorium",
       "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
       "destination": "/api/seo-home?hint=magorium&path=/magorium"

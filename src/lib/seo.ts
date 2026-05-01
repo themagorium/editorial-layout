@@ -79,6 +79,16 @@ export function getAuthorPath(author?: string) {
   return `/author/${slug || "staff"}`;
 }
 
+export function getCategoryPath(category?: string) {
+  const slug = (category || "")
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `/category/${slug || "general"}`;
+}
+
 function setStructuredData(
   content: Article | (HeroItem & { excerpt?: string }),
   canonicalUrl: string,

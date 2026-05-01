@@ -125,6 +125,12 @@ export default function ArticlePage() {
         </Link>
 
         <span className="category-pill mb-4 block w-fit">{content.category}</span>
+        <Link
+          to={`/category/${slugifyText(content.category)}`}
+          className="text-xs font-sans text-primary hover:underline"
+        >
+          View all {content.category} stories
+        </Link>
         <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mt-3">
           {content.title}
         </h1>

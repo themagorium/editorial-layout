@@ -238,9 +238,9 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
   const storySummary =
     ("excerpt" in content ? content.excerpt : content.subtitle || "").trim() ||
     "Read this story on The Magorium.";
-  const description = `${storySummary} Written by ${writerName} for ${brandName}.`;
+  const description = `${content.title} by ${writerName} for ${brandName}. ${storySummary}`;
   const canonicalUrl = `${SITE_URL}${buildContentPath(content.id, content.title)}`;
-  const title = `${content.title} | ${brandName}`;
+  const title = `${writerName} — ${content.title} | ${brandName}`;
   const keywords = [
     brandName,
     "The Magorium",
@@ -408,10 +408,21 @@ export function applyAuthorSeo(authorName: string, storyCount: number, storyPath
   const canonicalAuthor = canonicalAuthorName(authorName);
   const canonicalPath = getAuthorPath(canonicalAuthor);
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-  const title = `${canonicalAuthor} | ${BRAND_NAME} Journalist & Author Archive`;
+  const topStorySlug = storyPaths[0]
+    ? decodeURIComponent(storyPaths[0].split("/").pop() || "")
+        .replace(/--[a-z0-9-]+$/i, "")
+        .replace(/-/g, " ")
+        .trim()
+    : "";
+  const topStoryLabel = topStorySlug
+    ? topStorySlug.replace(/\b\w/g, (token) => token.toUpperCase())
+    : "";
+  const title = topStoryLabel
+    ? `${canonicalAuthor} | ${topStoryLabel} | ${BRAND_NAME}`
+    : `${canonicalAuthor} | ${BRAND_NAME} Journalist & Author Archive`;
   const description = `${storyCount} published ${
     storyCount === 1 ? "story" : "stories"
-  } by ${canonicalAuthor} on ${BRAND_NAME}. Read journalist and author coverage across luxury travel, art, fashion, culture, and sport.`;
+  } by ${canonicalAuthor} on ${BRAND_NAME}. Read credited stories written by ${canonicalAuthor}.`;
   const keywords = [
     canonicalAuthor,
     `${canonicalAuthor} journalist`,

@@ -36,7 +36,11 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
 
     const canonicalUrl = `${SITE_URL}/contributors`;
     const title = `Contributors | ${BRAND_NAME} Journalists & Writers`;
-    const description = `${BRAND_NAME} contributors directory. Browse each writer and journalist profile with linked published stories and author archives.`;
+    const samplePairs = stories
+      .slice(0, 8)
+      .map((story) => `${story.author}: ${story.title}`)
+      .join(" | ");
+    const description = `${BRAND_NAME} contributors directory. Browse each writer and journalist profile with linked published stories and author archives.${samplePairs ? ` Featured writer-story pairs: ${samplePairs}.` : ""}`;
     const keywords = [
       BRAND_NAME,
       `${BRAND_ALIAS} contributors`,
@@ -55,7 +59,10 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
             const path = getAuthorPath(name);
             const count = storyPathsByAuthor[name]?.length || 0;
             const countLabel = `${count} ${count === 1 ? "story" : "stories"}`;
-            return `<li><a href="${path}">${escapeHtml(name)}</a> <span class="muted">(${countLabel})</span></li>`;
+            const firstStoryPath = storyPathsByAuthor[name]?.[0];
+            const firstStory = stories.find((story) => story.path === firstStoryPath);
+            const pair = firstStory ? ` — ${escapeHtml(firstStory.title)}` : "";
+            return `<li><a href="${path}">${escapeHtml(name)}</a> <span class="muted">(${countLabel})</span>${pair ? `<br/><span class="muted">Featured article: <a href="${firstStoryPath}">${pair.replace(/^ — /, "")}</a></span>` : ""}</li>`;
           })
           .join("")}
       </ul>

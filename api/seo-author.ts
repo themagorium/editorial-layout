@@ -67,9 +67,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const description = `${authorStories.length} published ${
-    authorStories.length === 1 ? "story" : "stories"
-  } by ${authorName} on ${BRAND_NAME}. Read every article and hero feature.`;
+  const topStoryTitles = authorStories.slice(0, 3).map((story) => story.title);
+  const description = `${
+    authorStories.length
+  } published ${authorStories.length === 1 ? "story" : "stories"} by ${authorName} on ${BRAND_NAME}. Featured articles by ${authorName}: ${topStoryTitles.join(
+    "; ",
+  )}.`;
   const keywords = [
     authorName,
     `${authorName} writer`,
@@ -127,7 +130,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   };
 
   const html = renderSeoDocument({
-    title: `${authorName} | ${BRAND_NAME} Journalist & Author Archive`,
+    title: `${authorName} articles on ${BRAND_NAME} | Journalist & Author Archive`,
     description,
     canonicalUrl,
     keywords,

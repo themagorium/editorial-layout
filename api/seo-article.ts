@@ -55,7 +55,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const authorPath = getAuthorPath(story.author);
   const authorUrl = `${SITE_URL}${authorPath}`;
   const summarySeed = story.excerpt || story.bodyText[0] || `${story.title} on ${BRAND_NAME}`;
-  const description = trimToSummary(`${summarySeed} Written by ${story.author} for ${BRAND_NAME}.`);
+  const description = trimToSummary(
+    `${story.author} on ${BRAND_NAME}: ${story.title}. ${summarySeed}`,
+  );
   const keywords = [
     BRAND_NAME,
     story.title,
@@ -129,7 +131,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     : `<p>${escapeHtml(story.excerpt || "Read this feature on The Magorium.")}</p>`;
 
   const html = renderSeoDocument({
-    title: `${story.title} | ${BRAND_NAME}`,
+    title: `${story.author} | ${story.title} | ${BRAND_NAME}`,
     description,
     canonicalUrl,
     keywords,

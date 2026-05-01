@@ -49,7 +49,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
         (story) =>
           `<li><a href="${story.path}">${escapeHtml(story.title)}</a> <span class="muted">(${escapeHtml(
             story.date,
-          )})</span> — <strong>Credited writer:</strong> <a href="${getAuthorPath(story.author)}">${escapeHtml(
+          )})</span> — <strong>Written by:</strong> <a href="${getAuthorPath(story.author)}">${escapeHtml(
             story.author,
           )}</a></li>`,
       )

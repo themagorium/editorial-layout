@@ -13,8 +13,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     const stories = await getPublishedSeoStories();
     const sortedStories = stories
       .slice()
-      .sort((a, b) => +new Date(b.date) - +new Date(a.date))
-      .slice(0, 500);
+      .sort((a, b) => +new Date(b.date) - +new Date(a.date));
     const contributorNames = Array.from(new Set(sortedStories.map((story) => story.author)));
 
     const canonicalUrl = `${SITE_URL}/seo-history`;

@@ -32,12 +32,11 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       "Marcus Chen",
       STAFF_AUTHOR_NAME,
     ];
-    const contributors = (authorNames.length > 0 ? authorNames : fallbackAuthorList).slice(0, 200);
+    const contributors = authorNames.length > 0 ? authorNames : fallbackAuthorList;
 
     const canonicalUrl = `${SITE_URL}/contributors`;
     const title = `Contributors | ${BRAND_NAME} Journalists & Writers`;
     const samplePairs = stories
-      .slice(0, 8)
       .map((story) => `${story.author}: ${story.title}`)
       .join(" | ");
     const description = `${BRAND_NAME} contributors directory. Browse each writer and journalist profile with linked published stories and author archives.${samplePairs ? ` Featured writer-story pairs: ${samplePairs}.` : ""}`;
@@ -87,7 +86,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
         })),
       },
       mentions: contributors.flatMap((name) =>
-        (storyPathsByAuthor[name] || []).slice(0, 50).map((path) => ({
+        (storyPathsByAuthor[name] || []).map((path) => ({
           "@type": "CreativeWork",
           url: `${SITE_URL}${path}`,
           author: {

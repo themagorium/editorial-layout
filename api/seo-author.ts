@@ -67,7 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const topStoryTitles = authorStories.slice(0, 3).map((story) => story.title);
+  const topStoryTitles = authorStories.map((story) => story.title);
   const description = `${
     authorStories.length
   } published ${authorStories.length === 1 ? "story" : "stories"} by ${authorName} on ${BRAND_NAME}. Featured articles by ${authorName}: ${topStoryTitles.join(
@@ -83,11 +83,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ...authorStories.map((story) => story.title),
   ]
     .filter(Boolean)
-    .slice(0, 30)
     .join(", ");
 
   const listMarkup = authorStories
-    .slice(0, 200)
     .map(
       (story) =>
         `<li><span class="tag">${escapeHtml(story.category)}</span> <a href="${SITE_URL}${story.path}">${escapeHtml(
@@ -110,7 +108,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       {
         "@type": "ItemList",
-        itemListElement: authorStories.slice(0, 200).map((story, index) => ({
+        itemListElement: authorStories.map((story, index) => ({
           "@type": "ListItem",
           position: index + 1,
           item: {

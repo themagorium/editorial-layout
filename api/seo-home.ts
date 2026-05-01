@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         : `/${canonicalPathRaw}`
       : "/";
     const stories = await getPublishedSeoStories();
-    const topStories = stories.slice(0, 60);
+    const topStories = stories;
     const storyItems = topStories.map((story, index) => ({
       "@type": "ListItem",
       position: index + 1,

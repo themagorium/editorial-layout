@@ -125,6 +125,11 @@ export default function ContributorsPage() {
           </div>
         ))}
       </div>
+      <div className="mt-10 border-t border-border pt-6">
+        <Link to="/seo-history" className="text-sm text-primary hover:underline">
+          View visible SEO history archive
+        </Link>
+      </div>
     </ContentPage>
   );
 }

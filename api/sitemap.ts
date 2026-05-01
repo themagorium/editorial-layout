@@ -19,7 +19,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     const stories = await getPublishedSeoStories();
     const authorPaths = Array.from(new Set(stories.map((story) => getAuthorPath(story.author))));
     const storyPaths = Array.from(new Set(stories.map((story) => story.path)));
-    const staticPaths = ["/", "/magorium", "/magorum", "/the-magorium", "/archive", "/contributors"];
+    const staticPaths = ["/", "/magorium", "/magorum", "/the-magorium", "/archive", "/contributors", "/seo-history"];
     const allPaths = Array.from(new Set([...staticPaths, ...authorPaths, ...storyPaths]));
 
     const urls = allPaths

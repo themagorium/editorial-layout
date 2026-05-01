@@ -79,6 +79,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         </ul>
       </section>
       <p class="muted"><a href="/sitemap.xml">Sitemap</a> · <a href="/contributors">Contributors</a></p>
+      <p class="muted"><a href="/seo-history">SEO History</a></p>
     `;
 
     const jsonLd = {

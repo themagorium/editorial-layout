@@ -133,6 +133,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     keywords,
     ogType: "profile",
     bodyHtml: `<h1>${escapeHtml(authorName)}</h1>
+<p><strong>Writer credit:</strong> ${escapeHtml(authorName)} · <a href="${SITE_URL}/seo-history">SEO history archive</a></p>
 <p class="muted">${escapeHtml(description)}</p>
 <ul>${listMarkup}</ul>
 <p><a href="${SITE_URL}/contributors">Browse all contributors</a></p>`,

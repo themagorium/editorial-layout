@@ -11,6 +11,7 @@ import EditionPage from "./pages/EditionPage";
 import AuthorPage from "./pages/AuthorPage";
 import EditorsLetterPage from "./pages/EditorsLetterPage";
 import ContributorsPage from "./pages/ContributorsPage";
+import SeoHistoryPage from "./pages/SeoHistoryPage";
 import PartnershipsPage from "./pages/PartnershipsPage";
 import TermsPage from "./pages/TermsPage";
 import CookiesPage from "./pages/CookiesPage";
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/authors/:slug" element={<AuthorPage />} />
           <Route path="/editors-letter" element={<EditorsLetterPage />} />
           <Route path="/contributors" element={<ContributorsPage />} />
+          <Route path="/seo-history" element={<SeoHistoryPage />} />
           <Route path="/partnerships" element={<PartnershipsPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/cookies" element={<CookiesPage />} />

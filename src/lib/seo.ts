@@ -500,3 +500,74 @@ export function applyMagoriumBrandSeo(path = "/magorium") {
     },
   });
 }
+
+export function applySeoHistorySeo(storyPaths: string[] = [], contributorNames: string[] = []) {
+  const canonicalUrl = `${SITE_URL}/seo-history`;
+  const title = `${BRAND_NAME} SEO History | Author & Writer Credit Archive`;
+  const description =
+    `Search-visible history for ${BRAND_NAME}: every published article with credited writer or journalist byline, plus linked author archives.`;
+  const keywords = [
+    BRAND_NAME,
+    `${BRAND_ALIAS} seo history`,
+    "writer credit archive",
+    "journalist credit archive",
+    "author byline history",
+    ...contributorNames,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  document.title = title;
+  upsertMeta("description", description);
+  upsertMeta("author", BRAND_NAME);
+  upsertMeta("keywords", keywords);
+  upsertMeta("robots", "index,follow");
+
+  upsertMeta("og:title", title, true);
+  upsertMeta("og:description", description, true);
+  upsertMeta("og:type", "website", true);
+  upsertMeta("og:url", canonicalUrl, true);
+  upsertMeta("og:image", DEFAULT_OG_IMAGE, true);
+  upsertMeta("og:site_name", BRAND_NAME, true);
+
+  upsertMeta("twitter:card", "summary_large_image");
+  upsertMeta("twitter:title", title);
+  upsertMeta("twitter:description", description);
+  upsertMeta("twitter:image", DEFAULT_OG_IMAGE);
+
+  upsertLink("canonical", canonicalUrl);
+  removeStructuredDataScript();
+
+  upsertStructuredDataScript("seo-history-jsonld", {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        name: `${BRAND_NAME} SEO history`,
+        url: canonicalUrl,
+        description,
+        mainEntity: {
+          "@type": "ItemList",
+          itemListElement: storyPaths.slice(0, 500).map((path, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            url: `${SITE_URL}${path}`,
+          })),
+        },
+      },
+      {
+        "@type": "ItemList",
+        name: `${BRAND_NAME} contributor credits`,
+        itemListElement: contributorNames.slice(0, 200).map((name, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": canonicalAuthorName(name) === STAFF_AUTHOR_NAME ? "Organization" : "Person",
+            name: canonicalAuthorName(name),
+            url: `${SITE_URL}${getAuthorPath(name)}`,
+          },
+        })),
+      },
+    ],
+  });
+}

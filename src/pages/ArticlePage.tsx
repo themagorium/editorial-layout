@@ -58,6 +58,14 @@ function normalizeBylineAuthor(author?: string) {
   return normalized;
 }
 
+function bylineCreditLabel(author?: string) {
+  const normalized = normalizeBylineAuthor(author);
+  if (/staff/i.test(normalized)) {
+    return "By The Magorium Editorial Staff";
+  }
+  return `By ${normalized} · Contributing Writer`;
+}
+
 export default function ArticlePage() {
   useSyncPublishedContent();
   const { id } = useParams<{ id: string }>();
@@ -126,7 +134,7 @@ export default function ArticlePage() {
             to={`/author/${slugifyText(normalizeBylineAuthor(content.author)) || "staff"}`}
             className="font-medium text-foreground hover:text-primary transition-colors"
           >
-            {normalizeBylineAuthor(content.author)}
+            {bylineCreditLabel(content.author)}
           </Link>
           <span className="text-primary">·</span>
           <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>

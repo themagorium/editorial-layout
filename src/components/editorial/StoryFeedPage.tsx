@@ -129,6 +129,11 @@ export default function StoryFeedPage({
           Latest hero features and editor picks from The Magorium
           {editionLabel ? ` · ${editionLabel} Edition` : ""}.
         </p>
+        <p className="mt-2 text-xs text-muted-foreground font-sans">
+          <Link to="/seo-history" className="text-primary hover:underline">
+            View writer SEO history
+          </Link>
+        </p>
 
         {!loaded ? (
           <p className="mt-10 text-sm text-muted-foreground font-sans">Loading stories...</p>

@@ -59,6 +59,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
           })
           .join("")}
       </ul>
+      <p><a href="/seo-history">View visible SEO history archive</a></p>
     `;
 
     const jsonLd = {

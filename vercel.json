@@ -27,6 +27,11 @@
       "destination": "/api/seo-contributors"
     },
     {
+      "source": "/seo-history",
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
+      "destination": "/api/seo-history"
+    },
+    {
       "source": "/magorium",
       "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
       "destination": "/api/seo-home?hint=magorium&path=/magorium"

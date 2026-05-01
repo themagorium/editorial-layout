@@ -137,11 +137,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     imageUrl: story.imageUrl,
     jsonLd,
     bodyHtml: `
-      <p><a href="${SITE_URL}">Home</a> / <a href="${authorUrl}">${escapeHtml(story.author)}</a></p>
+      <p><a href="${SITE_URL}">Home</a> / <a href="${authorUrl}">${escapeHtml(story.author)}</a> / <a href="${SITE_URL}/seo-history">SEO History</a></p>
       <h1>${escapeHtml(story.title)}</h1>
-      <p class="muted"><span class="tag">${escapeHtml(story.category)}</span> &nbsp; ${escapeHtml(story.date)} &nbsp; • &nbsp; by <a href="${authorUrl}">${escapeHtml(story.author)}</a></p>
+      <p class="muted"><span class="tag">${escapeHtml(story.category)}</span> &nbsp; ${escapeHtml(story.date)} &nbsp; • &nbsp; <strong>Written by:</strong> <a href="${authorUrl}">${escapeHtml(story.author)}</a></p>
       ${bodyMarkup}
-      <p><a href="${authorUrl}">Read all stories by ${escapeHtml(story.author)}</a></p>
+      <p><a href="${authorUrl}">Read all stories by ${escapeHtml(story.author)}</a> · <a href="${SITE_URL}/seo-history">View full SEO history</a></p>
     `,
   });
 

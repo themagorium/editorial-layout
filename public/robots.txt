@@ -14,3 +14,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://www.themagorium.com/sitemap.xml
+Sitemap: https://www.themagorium.com/api/sitemap

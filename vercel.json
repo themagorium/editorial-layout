@@ -3,6 +3,14 @@
     {
       "src": "/api/(.*)",
       "dest": "/api/$1"
+      {
+  "src": "/sitemap.xml",
+  "dest": "/api/sitemap"
+},
+{
+  "src": "/robots.txt",
+  "dest": "/api/robots"
+},
     },
     {
       "source": "/author/(.*)",

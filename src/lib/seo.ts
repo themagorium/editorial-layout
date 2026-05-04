@@ -365,7 +365,7 @@ export function applyContributorsSeo(
 
     const storyUrls = Array.from(
       new Set(canonicalContributorNames.flatMap((name) => normalizedStoryPaths[name] || [])),
-    ).slice(0, 200);
+    );
     if (storyUrls.length > 0) {
       upsertStructuredDataScript("contributors-story-itemlist-jsonld", {
         "@context": "https://schema.org",
@@ -451,7 +451,7 @@ export function applyAuthorSeo(authorName: string, storyCount: number, storyPath
     upsertStructuredDataScript("author-itemlist-jsonld", {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      itemListElement: storyPaths.slice(0, 50).map((path, index) => ({
+      itemListElement: storyPaths.map((path, index) => ({
         "@type": "ListItem",
         position: index + 1,
         url: `${SITE_URL}${path}`,
@@ -558,7 +558,7 @@ export function applySeoHistorySeo(storyPaths: string[] = [], contributorNames: 
         description,
         mainEntity: {
           "@type": "ItemList",
-          itemListElement: storyPaths.slice(0, 500).map((path, index) => ({
+         itemListElement: storyPaths.map((path, index) => ({
             "@type": "ListItem",
             position: index + 1,
             url: `${SITE_URL}${path}`,
@@ -568,7 +568,7 @@ export function applySeoHistorySeo(storyPaths: string[] = [], contributorNames: 
       {
         "@type": "ItemList",
         name: `${BRAND_NAME} contributor credits`,
-        itemListElement: contributorNames.slice(0, 200).map((name, index) => ({
+      itemListElement: contributorNames.map((name, index) => ({
           "@type": "ListItem",
           position: index + 1,
           item: {

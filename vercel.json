@@ -1,57 +1,63 @@
 {
-  "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+  "routes": [
     {
-      "source": "/articles/(.*)",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
-      "destination": "/api/seo-article?identifier=$1"
-    },
-    {
-      "source": "/article/(.*)",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
-      "destination": "/api/seo-article?identifier=$1"
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
     },
     {
       "source": "/author/(.*)",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
+        }
+      ],
       "destination": "/api/seo-author?slug=$1"
     },
     {
-      "source": "/authors/(.*)",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
-      "destination": "/api/seo-author?slug=$1"
+      "source": "/category/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
+        }
+      ],
+      "destination": "/api/seo-category?slug=$1"
     },
     {
-      "source": "/contributors",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
-      "destination": "/api/seo-contributors"
-    },
-    {
-      "source": "/seo-history",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
-      "destination": "/api/seo-history"
+      "source": "/categories/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
+        }
+      ],
+      "destination": "/api/seo-category?slug=$1"
     },
     {
       "source": "/magorium",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
+        }
+      ],
       "destination": "/api/seo-home?hint=magorium&path=/magorium"
     },
     {
-      "source": "/magorum",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
-      "destination": "/api/seo-home?hint=magorum&path=/magorum"
-    },
-    {
-      "source": "/the-magorium",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
-      "destination": "/api/seo-home?hint=the-magorium&path=/the-magorium"
-    },
-    {
-      "source": "/",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*" }],
-      "destination": "/api/seo-home"
-    },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
+        }
+      ],
+      "destination": "/api/seo-history"
+    }
   ]
 }

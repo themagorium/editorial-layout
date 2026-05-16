@@ -463,9 +463,9 @@ export function applyAuthorSeo(authorName: string, storyCount: number, storyPath
 export function applyMagoriumBrandSeo(path = "/magorium") {
   const canonicalPath = path.startsWith("/") ? path : `/${path}`;
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-  const title = `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+  const title = `${BRAND_NAME} — Curated Lifestyle Editorial`;
   const description =
-    `${BRAND_NAME} — a premium curated lifestyle magazine featuring luxury travel, art, culture, fashion, motorsport, yachting, and more. Where curated becomes legend.`;
+    `${BRAND_NAME} — curated lifestyle editorial covering equestrian, yachting, art, wellness, travel, fashion and motorsport.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,

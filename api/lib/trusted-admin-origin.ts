@@ -60,16 +60,20 @@ function collectHeaderHosts(value: string | string[] | undefined, asUrl = false)
   return hosts;
 }
 
-function getRequestHosts(req: VercelRequest): string[] {
+function getRequestHostCandidates(req: VercelRequest) {
   const headers = req.headers || {};
-  const hostSet = new Set<string>();
+  const sourceHosts = new Set<string>();
+  const destinationHosts = new Set<string>();
 
-  collectHeaderHosts(headers.host).forEach((host) => hostSet.add(host));
-  collectHeaderHosts(headers["x-forwarded-host"]).forEach((host) => hostSet.add(host));
-  collectHeaderHosts(headers.origin, true).forEach((host) => hostSet.add(host));
-  collectHeaderHosts(headers.referer, true).forEach((host) => hostSet.add(host));
+  collectHeaderHosts(headers.origin, true).forEach((host) => sourceHosts.add(host));
+  collectHeaderHosts(headers.referer, true).forEach((host) => sourceHosts.add(host));
+  collectHeaderHosts(headers.host).forEach((host) => destinationHosts.add(host));
+  collectHeaderHosts(headers["x-forwarded-host"]).forEach((host) => destinationHosts.add(host));
 
-  return Array.from(hostSet);
+  return {
+    sourceHosts: Array.from(sourceHosts),
+    destinationHosts: Array.from(destinationHosts),
+  };
 }
 
 function getTrustedHosts() {
@@ -90,13 +94,17 @@ function isHostTrusted(host: string, trustedHosts: Set<string>, trustedSuffixes:
 export function isTrustedAdminRequest(req: VercelRequest): boolean {
   if (process.env.ADMIN_TRUST_ALL_ORIGINS === "1") return true;
 
-  const requestHosts = getRequestHosts(req);
-  if (requestHosts.length === 0) {
+  const { sourceHosts, destinationHosts } = getRequestHostCandidates(req);
+  if (sourceHosts.length === 0 && destinationHosts.length === 0) {
     return process.env.NODE_ENV !== "production";
   }
 
   const trustedHosts = getTrustedHosts();
   const trustedSuffixes = getTrustedSuffixes();
 
-  return requestHosts.some((host) => isHostTrusted(host, trustedHosts, trustedSuffixes));
+  if (sourceHosts.length > 0) {
+    return sourceHosts.some((host) => isHostTrusted(host, trustedHosts, trustedSuffixes));
+  }
+
+  return destinationHosts.some((host) => isHostTrusted(host, trustedHosts, trustedSuffixes));
 }

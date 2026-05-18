@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { isTrustedAdminRequest } from "./lib/trusted-admin-origin";
 
 type LoginRequestBody = {
   password?: string;
@@ -7,6 +8,11 @@ type LoginRequestBody = {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed." });
+    return;
+  }
+
+  if (!isTrustedAdminRequest(req)) {
+    res.status(403).json({ error: "Untrusted admin origin." });
     return;
   }
 

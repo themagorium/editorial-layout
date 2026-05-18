@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { isTrustedAdminRequest } from "./lib/trusted-admin-origin";
 
 type BodyBlock = {
   id: string;
@@ -194,6 +195,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === "POST") {
+    if (!isTrustedAdminRequest(req)) {
+      res.status(403).json({
+        success: false,
+        configured: isKvConfigured(),
+        error: "Untrusted admin origin.",
+      });
+      return;
+    }
+
     if (!await authorized(req)) {
       res.status(401).json({
         success: false,

@@ -810,10 +810,19 @@ function ensureFreshDefaults() {
   }
 }
 
+function safeJsonParse<T>(json: string | null, defaultValue: T): T {
+  if (!json) return defaultValue;
+  try {
+    return JSON.parse(json) as T;
+  } catch {
+    return defaultValue;
+  }
+}
+
 export function getHeroes(): HeroItem[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.heroes);
-  const rawHeroes = stored ? (JSON.parse(stored) as HeroItem[]) : DEFAULT_HEROES;
+  const rawHeroes = safeJsonParse<HeroItem[]>(stored, DEFAULT_HEROES);
   const backfilledHeroes = upsertCriticalHeroFallbacks(rawHeroes, {
     forceWhenMissingAll: rawHeroes.length === 0 && Boolean(stored),
   });
@@ -823,7 +832,7 @@ export function getHeroes(): HeroItem[] {
 export function getArticles(): Article[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.articles);
-  const rawArticles = stored ? (JSON.parse(stored) as Article[]) : DEFAULT_ARTICLES;
+  const rawArticles = safeJsonParse<Article[]>(stored, DEFAULT_ARTICLES);
   const backfilledArticles = upsertCriticalArticleFallbacks(rawArticles, {
     forceWhenMissingAll: rawArticles.length === 0 && Boolean(stored),
   });
@@ -832,7 +841,7 @@ export function getArticles(): Article[] {
 
 export function getAds(): AdSlot[] {
   const stored = localStorage.getItem(STORAGE_KEYS.ads);
-  return stored ? JSON.parse(stored) : DEFAULT_ADS;
+  return safeJsonParse<AdSlot[]>(stored, DEFAULT_ADS);
 }
 
 function hasRealBodyBlockContent(block: ArticleBodyBlock): boolean {

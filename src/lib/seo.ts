@@ -1,7 +1,7 @@
 import { buildContentPath, type Article, type HeroItem } from "@/lib/content-store";
 
 const SITE_URL = "https://www.themagorium.com";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/placeholder.svg`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 const BRAND_NAME = "The Magorium";
 const BRAND_ALIAS = "Magorium";
@@ -112,7 +112,7 @@ function setStructuredData(
       name: "The Magorium",
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/favicon.png`,
+        url: `${SITE_URL}/placeholder.svg`,
       },
     },
     image: [content.imageUrl || DEFAULT_OG_IMAGE],
@@ -155,7 +155,7 @@ function setHomeStructuredData(storyPaths: string[] = []) {
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
-      url: `${SITE_URL}/favicon.png`,
+      url: `${SITE_URL}/placeholder.svg`,
     },
   });
 

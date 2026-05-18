@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "routes": [
     {
       "src": "/sitemap.xml",
@@ -7,6 +12,9 @@
     {
       "src": "/robots.txt",
       "dest": "/api/robots"
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/api/(.*)",

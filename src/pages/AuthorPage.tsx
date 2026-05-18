@@ -136,7 +136,12 @@ export default function AuthorPage() {
                   />
                 </div>
                 <div className="p-4">
-                  <span className="category-pill text-[10px]">{story.category}</span>
+                  <Link
+                    to={`/category/${slugifyText(story.category)}`}
+                    className="category-pill text-[10px] hover:opacity-90 inline-block"
+                  >
+                    {story.category}
+                  </Link>
                   <h2 className="font-editorial text-xl mt-2 group-hover:text-primary transition-colors">
                     {story.title}
                   </h2>

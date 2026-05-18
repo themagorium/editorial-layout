@@ -1,7 +1,7 @@
 import { buildContentPath, type Article, type HeroItem } from "@/lib/content-store";
 
 const SITE_URL = "https://www.themagorium.com";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/placeholder.svg`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 const BRAND_NAME = "The Magorium";
 const BRAND_ALIAS = "Magorium";
@@ -79,6 +79,16 @@ export function getAuthorPath(author?: string) {
   return `/author/${slug || "staff"}`;
 }
 
+export function getCategoryPath(category?: string) {
+  const slug = (category || "")
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `/category/${slug || "general"}`;
+}
+
 function setStructuredData(
   content: Article | (HeroItem & { excerpt?: string }),
   canonicalUrl: string,
@@ -112,7 +122,7 @@ function setStructuredData(
       name: "The Magorium",
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/favicon.png`,
+        url: `${SITE_URL}/placeholder.svg`,
       },
     },
     image: [content.imageUrl || DEFAULT_OG_IMAGE],
@@ -155,7 +165,7 @@ function setHomeStructuredData(storyPaths: string[] = []) {
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
-      url: `${SITE_URL}/favicon.png`,
+      url: `${SITE_URL}/placeholder.svg`,
     },
   });
 
@@ -176,7 +186,7 @@ function setHomeStructuredData(storyPaths: string[] = []) {
     upsertStructuredDataScript("home-itemlist-jsonld", {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      itemListElement: storyPaths.slice(0, 50).map((path, index) => ({
+      itemListElement: storyPaths.map((path, index) => ({
         "@type": "ListItem",
         position: index + 1,
         url: `${SITE_URL}${path}`,
@@ -189,9 +199,9 @@ export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
   const normalizedHint = (queryHint || "").trim();
   const title = normalizedHint
     ? `${normalizedHint} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`
-    : `${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+    : `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
   const description =
-    `${BRAND_NAME} — a premium curated lifestyle magazine featuring luxury travel, art, culture, fashion, motorsport, yachting, and more. Where curated becomes legend.`;
+    `${BRAND_NAME} (${BRAND_ALIAS}) — a premium curated lifestyle magazine featuring luxury travel, art, culture, fashion, motorsport, yachting, and more. Where curated becomes legend.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
@@ -463,9 +473,9 @@ export function applyAuthorSeo(authorName: string, storyCount: number, storyPath
 export function applyMagoriumBrandSeo(path = "/magorium") {
   const canonicalPath = path.startsWith("/") ? path : `/${path}`;
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-  const title = `${BRAND_NAME} — Curated Lifestyle Editorial`;
+  const title = `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
   const description =
-    `${BRAND_NAME} — curated lifestyle editorial covering equestrian, yachting, art, wellness, travel, fashion and motorsport.`;
+    `${BRAND_NAME} — a premium curated lifestyle magazine featuring luxury travel, art, culture, fashion, motorsport, yachting, and more. Where curated becomes legend.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
@@ -558,7 +568,7 @@ export function applySeoHistorySeo(storyPaths: string[] = [], contributorNames: 
         description,
         mainEntity: {
           "@type": "ItemList",
-         itemListElement: storyPaths.map((path, index) => ({
+          itemListElement: storyPaths.map((path, index) => ({
             "@type": "ListItem",
             position: index + 1,
             url: `${SITE_URL}${path}`,
@@ -568,7 +578,7 @@ export function applySeoHistorySeo(storyPaths: string[] = [], contributorNames: 
       {
         "@type": "ItemList",
         name: `${BRAND_NAME} contributor credits`,
-      itemListElement: contributorNames.map((name, index) => ({
+        itemListElement: contributorNames.map((name, index) => ({
           "@type": "ListItem",
           position: index + 1,
           item: {

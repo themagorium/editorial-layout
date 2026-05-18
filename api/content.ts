@@ -1,6 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { kv } from "@vercel/kv";
-import { verifyPublishToken } from "./lib/publish-token";
 
 type BodyBlock = {
   id: string;
@@ -69,6 +67,10 @@ const CONTENT_KEY = "magorium:published-content:v1";
 const ADMIN_PASSWORD_KEY = "ADMIN_PASSWORD";
 
 let memoryFallback: StoredPayload | null = null;
+let kvClientPromise: Promise<{
+  get: <T>(key: string) => Promise<T | null>;
+  set: (key: string, value: unknown) => Promise<unknown>;
+} | null> | null = null;
 
 function getConfiguredAdminPassword() {
   return process.env[ADMIN_PASSWORD_KEY];
@@ -76,6 +78,16 @@ function getConfiguredAdminPassword() {
 
 function isKvConfigured() {
   return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+}
+
+async function getKvClient() {
+  if (!isKvConfigured()) return null;
+  if (!kvClientPromise) {
+    kvClientPromise = import("@vercel/kv")
+      .then((module) => module.kv)
+      .catch(() => null);
+  }
+  return kvClientPromise;
 }
 
 function ensureArray<T>(value: unknown): T[] {
@@ -109,14 +121,24 @@ function sanitizePayload(input: unknown): PublishPayload {
   return { heroes, articles, ads };
 }
 
-function authorized(req: VercelRequest): boolean {
+async function verifyBearerPublishToken(token: string, adminPassword: string): Promise<boolean> {
+  if (!token || !adminPassword) return false;
+  try {
+    const tokenModule = await import("./lib/publish-token");
+    return tokenModule.verifyPublishToken(token, adminPassword);
+  } catch {
+    return false;
+  }
+}
+
+async function authorized(req: VercelRequest): Promise<boolean> {
   const configured = getConfiguredAdminPassword();
   if (!configured) return false;
 
   const authHeader = req.headers.authorization || req.headers.Authorization;
   const normalizedAuth = Array.isArray(authHeader) ? authHeader[0] : authHeader;
   const bearer = (normalizedAuth || "").replace(/^Bearer\s+/i, "").trim();
-  if (bearer && verifyPublishToken(bearer, configured)) return true;
+  if (bearer && await verifyBearerPublishToken(bearer, configured)) return true;
 
   const directHeader = req.headers["x-admin-password"];
   const providedDirect = Array.isArray(directHeader) ? directHeader[0] : directHeader;
@@ -125,14 +147,16 @@ function authorized(req: VercelRequest): boolean {
 }
 
 async function getStoredContent() {
-  if (isKvConfigured()) {
-    return (await kv.get<StoredPayload | null>(CONTENT_KEY)) || null;
+  const kv = await getKvClient();
+  if (kv) {
+    return (await kv.get<StoredPayload>(CONTENT_KEY)) || null;
   }
   return memoryFallback;
 }
 
 async function setStoredContent(content: StoredPayload) {
-  if (isKvConfigured()) {
+  const kv = await getKvClient();
+  if (kv) {
     await kv.set(CONTENT_KEY, content);
     return;
   }
@@ -170,7 +194,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === "POST") {
-    if (!authorized(req)) {
+    if (!await authorized(req)) {
       res.status(401).json({
         success: false,
         configured: isKvConfigured(),

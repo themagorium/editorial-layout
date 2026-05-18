@@ -13,8 +13,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     const stories = await getPublishedSeoStories();
     const sortedStories = stories
       .slice()
-      .sort((a, b) => +new Date(b.date) - +new Date(a.date))
-      .slice(0, 500);
+      .sort((a, b) => +new Date(b.date) - +new Date(a.date));
     const contributorNames = Array.from(new Set(sortedStories.map((story) => story.author)));
 
     const canonicalUrl = `${SITE_URL}/seo-history`;
@@ -103,7 +102,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       bodyHtml,
       ogType: "website",
       jsonLd,
-      imageUrl: sortedStories[0]?.imageUrl || `${SITE_URL}/og-image.jpg`,
+      imageUrl: sortedStories[0]?.imageUrl || `${SITE_URL}/placeholder.svg`,
     });
 
     res.status(200).setHeader("Content-Type", "text/html; charset=utf-8").send(html);

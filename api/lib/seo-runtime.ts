@@ -1,10 +1,12 @@
-import { kv } from "@vercel/kv";
-
 const CONTENT_KEY = "magorium:published-content:v1";
 export const SITE_URL = "https://www.themagorium.com";
 export const BRAND_NAME = "The Magorium";
 export const BRAND_ALIAS = "Magorium";
 export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
+const DEFAULT_SEO_IMAGE = `${SITE_URL}/placeholder.svg`;
+let kvClientPromise: Promise<{
+  get: <T>(key: string) => Promise<T | null>;
+} | null> | null = null;
 
 type BodyBlock = {
   type?: string;
@@ -60,7 +62,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     title: "CV Summit 2025 - Kongresshaus Zurich (September 23-24, 2025)",
     excerpt: "A Recalibration Toward Endurance.",
     category: "Tech & AI",
-    imageUrl: `${SITE_URL}/og-image.jpg`,
+    imageUrl: DEFAULT_SEO_IMAGE,
     author: "Millie Sealana",
     date: "2025-10-06",
     edition: "2025-10",
@@ -72,7 +74,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     title: "F1 returns to American soil in the tech haven of Austin.",
     excerpt: "Formula 1 returns to Austin with championship implications.",
     category: "Motorsport",
-    imageUrl: `${SITE_URL}/og-image.jpg`,
+    imageUrl: DEFAULT_SEO_IMAGE,
     author: "Charlotte Thames",
     date: "2025-10-06",
     edition: "2025-10",
@@ -84,7 +86,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     title: "132nd Hurlingham Open: La Natividad La Dolfina Establish A New Standard Under Pressure",
     excerpt: "A pivotal Hurlingham Open result with high-goal polo implications.",
     category: "Equestrian",
-    imageUrl: `${SITE_URL}/og-image.jpg`,
+    imageUrl: DEFAULT_SEO_IMAGE,
     author: "Millie Sealana",
     date: "2025-10-06",
     edition: "2025-10",
@@ -96,7 +98,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     title: "SailGP: From Geneva to Cadiz",
     excerpt: "SailGP momentum builds after Lake Geneva heading toward Cadiz.",
     category: "Yachting",
-    imageUrl: `${SITE_URL}/og-image.jpg`,
+    imageUrl: DEFAULT_SEO_IMAGE,
     author: "James Whitfield",
     date: "2025-10-06",
     edition: "2025-10",
@@ -108,7 +110,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     title: "Rio Carnival 2026: Samba Under the Stars",
     excerpt: "Rio's global cultural showcase returns with full force.",
     category: "Music",
-    imageUrl: `${SITE_URL}/og-image.jpg`,
+    imageUrl: DEFAULT_SEO_IMAGE,
     author: "Marcus Chen",
     date: "2026-02-13",
     edition: "2026-02",
@@ -120,7 +122,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     title: "Super Bowl LX: Stadium Lights & Bay Area Glamour",
     excerpt: "The Bay Area hosts an iconic Super Bowl week.",
     category: "Sports",
-    imageUrl: `${SITE_URL}/og-image.jpg`,
+    imageUrl: DEFAULT_SEO_IMAGE,
     author: "James Whitfield",
     date: "2026-02-08",
     edition: "2026-02",
@@ -132,7 +134,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     title: "Dubai International Boat Show: The Middle East's Premier Superyacht Gathering",
     excerpt: "Superyacht capital momentum in Dubai continues to rise.",
     category: "Yachting",
-    imageUrl: `${SITE_URL}/og-image.jpg`,
+    imageUrl: DEFAULT_SEO_IMAGE,
     author: "James Whitfield",
     date: "2026-02-24",
     edition: "2026-02",
@@ -144,7 +146,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     title: "AT&T Pebble Beach Pro-Am: Where Golf Meets the Pacific",
     excerpt: "A marquee golf calendar event on California's coast.",
     category: "Golf",
-    imageUrl: `${SITE_URL}/og-image.jpg`,
+    imageUrl: DEFAULT_SEO_IMAGE,
     author: "James Whitfield",
     date: "2026-02-05",
     edition: "2026-02",
@@ -155,6 +157,16 @@ const FALLBACK_STORIES: SeoStory[] = [
 
 function hasKvConfig() {
   return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+}
+
+async function getKvClient() {
+  if (!hasKvConfig()) return null;
+  if (!kvClientPromise) {
+    kvClientPromise = import("@vercel/kv")
+      .then((module) => module.kv)
+      .catch(() => null);
+  }
+  return kvClientPromise;
 }
 
 function extractBodyText(blocks: BodyBlock[] | undefined): string[] {
@@ -173,7 +185,7 @@ function sanitizeHero(hero: StoredHero): SeoStory {
     title,
     excerpt: (hero.excerpt || hero.subtitle || "").trim(),
     category: (hero.category || "News").trim(),
-    imageUrl: (hero.imageUrl || `${SITE_URL}/og-image.jpg`).trim(),
+    imageUrl: (hero.imageUrl || DEFAULT_SEO_IMAGE).trim(),
     author,
     date: (hero.date || new Date().toISOString().slice(0, 10)).trim(),
     edition: (hero.edition || "").trim(),
@@ -190,7 +202,7 @@ function sanitizeArticle(article: StoredArticle): SeoStory {
     title,
     excerpt: (article.excerpt || "").trim(),
     category: (article.category || "News").trim(),
-    imageUrl: (article.imageUrl || `${SITE_URL}/og-image.jpg`).trim(),
+    imageUrl: (article.imageUrl || DEFAULT_SEO_IMAGE).trim(),
     author,
     date: (article.date || new Date().toISOString().slice(0, 10)).trim(),
     edition: (article.edition || "").trim(),
@@ -201,8 +213,9 @@ function sanitizeArticle(article: StoredArticle): SeoStory {
 
 export async function getPublishedSeoStories(): Promise<SeoStory[]> {
   try {
-    if (!hasKvConfig()) return FALLBACK_STORIES;
-    const payload = await kv.get<StoredPayload | null>(CONTENT_KEY);
+    const kv = await getKvClient();
+    if (!kv) return FALLBACK_STORIES;
+    const payload = await kv.get<StoredPayload>(CONTENT_KEY);
     if (!payload) return FALLBACK_STORIES;
 
     const heroes = Array.isArray(payload.heroes) ? payload.heroes.map(sanitizeHero) : [];
@@ -250,6 +263,32 @@ export function getAuthorPath(author?: string) {
   const canonical = canonicalAuthorName(author);
   if (canonical === STAFF_AUTHOR_NAME) return "/author/staff";
   return `/author/${slugifyText(canonical) || "staff"}`;
+}
+
+function normalizeCategorySlug(value: string): string {
+  return slugifyText(value);
+}
+
+export function normalizeCategoryName(rawCategory?: string): string {
+  const normalized = (rawCategory || "").trim();
+  if (!normalized) return "General";
+  const slug = normalizeCategorySlug(normalized);
+
+  if (slug === "art-design") return "Art & Design";
+  if (slug === "tech-ai") return "Tech & AI";
+  if (slug === "film-festivals") return "Film & Festivals";
+  if (slug === "motor-sport" || slug === "motor-sports") return "Motorsport";
+  if (slug === "polo") return "Equestrian";
+  return normalized;
+}
+
+export function getCategorySlug(rawCategory?: string): string {
+  const normalized = normalizeCategoryName(rawCategory);
+  return normalizeCategorySlug(normalized);
+}
+
+export function getCategoryPath(rawCategory?: string): string {
+  return `/category/${getCategorySlug(rawCategory)}`;
 }
 
 export function guessAuthorNameFromSlug(slug: string): string {
@@ -321,7 +360,7 @@ export function renderSeoDocument(params: {
     keywords,
     bodyHtml,
     ogType = "website",
-    imageUrl = `${SITE_URL}/og-image.jpg`,
+    imageUrl = DEFAULT_SEO_IMAGE,
     jsonLd,
     noIndex = false,
   } = params;

@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { kv } from "@vercel/kv";
 
 type BodyBlock = {
   id: string;
@@ -68,6 +67,10 @@ const CONTENT_KEY = "magorium:published-content:v1";
 const ADMIN_PASSWORD_KEY = "ADMIN_PASSWORD";
 
 let memoryFallback: StoredPayload | null = null;
+let kvClientPromise: Promise<{
+  get: <T>(key: string) => Promise<T | null>;
+  set: (key: string, value: unknown) => Promise<unknown>;
+} | null> | null = null;
 
 function getConfiguredAdminPassword() {
   return process.env[ADMIN_PASSWORD_KEY];
@@ -75,6 +78,16 @@ function getConfiguredAdminPassword() {
 
 function isKvConfigured() {
   return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+}
+
+async function getKvClient() {
+  if (!isKvConfigured()) return null;
+  if (!kvClientPromise) {
+    kvClientPromise = import("@vercel/kv")
+      .then((module) => module.kv)
+      .catch(() => null);
+  }
+  return kvClientPromise;
 }
 
 function ensureArray<T>(value: unknown): T[] {
@@ -134,14 +147,16 @@ async function authorized(req: VercelRequest): Promise<boolean> {
 }
 
 async function getStoredContent() {
-  if (isKvConfigured()) {
-    return (await kv.get<StoredPayload | null>(CONTENT_KEY)) || null;
+  const kv = await getKvClient();
+  if (kv) {
+    return (await kv.get<StoredPayload>(CONTENT_KEY)) || null;
   }
   return memoryFallback;
 }
 
 async function setStoredContent(content: StoredPayload) {
-  if (isKvConfigured()) {
+  const kv = await getKvClient();
+  if (kv) {
     await kv.set(CONTENT_KEY, content);
     return;
   }

@@ -1,10 +1,11 @@
-import { kv } from "@vercel/kv";
-
 const CONTENT_KEY = "magorium:published-content:v1";
 export const SITE_URL = "https://www.themagorium.com";
 export const BRAND_NAME = "The Magorium";
 export const BRAND_ALIAS = "Magorium";
 export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
+let kvClientPromise: Promise<{
+  get: <T>(key: string) => Promise<T | null>;
+} | null> | null = null;
 
 type BodyBlock = {
   type?: string;
@@ -157,6 +158,16 @@ function hasKvConfig() {
   return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 }
 
+async function getKvClient() {
+  if (!hasKvConfig()) return null;
+  if (!kvClientPromise) {
+    kvClientPromise = import("@vercel/kv")
+      .then((module) => module.kv)
+      .catch(() => null);
+  }
+  return kvClientPromise;
+}
+
 function extractBodyText(blocks: BodyBlock[] | undefined): string[] {
   if (!Array.isArray(blocks)) return [];
   return blocks
@@ -201,8 +212,9 @@ function sanitizeArticle(article: StoredArticle): SeoStory {
 
 export async function getPublishedSeoStories(): Promise<SeoStory[]> {
   try {
-    if (!hasKvConfig()) return FALLBACK_STORIES;
-    const payload = await kv.get<StoredPayload | null>(CONTENT_KEY);
+    const kv = await getKvClient();
+    if (!kv) return FALLBACK_STORIES;
+    const payload = await kv.get<StoredPayload>(CONTENT_KEY);
     if (!payload) return FALLBACK_STORIES;
 
     const heroes = Array.isArray(payload.heroes) ? payload.heroes.map(sanitizeHero) : [];

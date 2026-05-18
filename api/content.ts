@@ -1,6 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { kv } from "@vercel/kv";
-import { verifyPublishToken } from "./lib/publish-token";
 
 type BodyBlock = {
   id: string;
@@ -109,14 +108,24 @@ function sanitizePayload(input: unknown): PublishPayload {
   return { heroes, articles, ads };
 }
 
-function authorized(req: VercelRequest): boolean {
+async function verifyBearerPublishToken(token: string, adminPassword: string): Promise<boolean> {
+  if (!token || !adminPassword) return false;
+  try {
+    const tokenModule = await import("./lib/publish-token");
+    return tokenModule.verifyPublishToken(token, adminPassword);
+  } catch {
+    return false;
+  }
+}
+
+async function authorized(req: VercelRequest): Promise<boolean> {
   const configured = getConfiguredAdminPassword();
   if (!configured) return false;
 
   const authHeader = req.headers.authorization || req.headers.Authorization;
   const normalizedAuth = Array.isArray(authHeader) ? authHeader[0] : authHeader;
   const bearer = (normalizedAuth || "").replace(/^Bearer\s+/i, "").trim();
-  if (bearer && verifyPublishToken(bearer, configured)) return true;
+  if (bearer && await verifyBearerPublishToken(bearer, configured)) return true;
 
   const directHeader = req.headers["x-admin-password"];
   const providedDirect = Array.isArray(directHeader) ? directHeader[0] : directHeader;
@@ -170,7 +179,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === "POST") {
-    if (!authorized(req)) {
+    if (!await authorized(req)) {
       res.status(401).json({
         success: false,
         configured: isKvConfigured(),

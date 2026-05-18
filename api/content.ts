@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { isTrustedAdminRequest } from "./lib/trusted-admin-origin";
 
 type BodyBlock = {
   id: string;
@@ -72,6 +71,17 @@ let kvClientPromise: Promise<{
   get: <T>(key: string) => Promise<T | null>;
   set: (key: string, value: unknown) => Promise<unknown>;
 } | null> | null = null;
+const TRUSTED_WRITE_HOSTS = new Set([
+  "themagorium.com",
+  "www.themagorium.com",
+  "themagorium.co",
+  "www.themagorium.co",
+  "maximillianco.com",
+  "www.maximillianco.com",
+  "localhost",
+  "127.0.0.1",
+]);
+const TRUSTED_WRITE_SUFFIXES = [".vercel.app", ".vercel.sh", ".now.sh"];
 
 function getConfiguredAdminPassword() {
   return process.env[ADMIN_PASSWORD_KEY];
@@ -79,6 +89,71 @@ function getConfiguredAdminPassword() {
 
 function isKvConfigured() {
   return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+}
+
+function splitCsv(value?: string): string[] {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((token) => token.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function getFirstHeaderValue(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] || "";
+  return value || "";
+}
+
+function normalizeHostFromHeader(raw: string): string {
+  const value = raw.trim().toLowerCase();
+  if (!value) return "";
+
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    try {
+      return new URL(value).hostname.toLowerCase();
+    } catch {
+      return "";
+    }
+  }
+
+  const hostLike = value.split("/")[0].split("?")[0];
+  const withoutPort = hostLike.includes(":") ? hostLike.split(":")[0] : hostLike;
+  return withoutPort.replace(/\.$/, "");
+}
+
+function buildTrustedWriteHosts() {
+  const trustedHosts = new Set(TRUSTED_WRITE_HOSTS);
+  splitCsv(process.env.ADMIN_TRUSTED_HOSTS).forEach((host) => trustedHosts.add(host));
+  return trustedHosts;
+}
+
+function buildTrustedWriteSuffixes() {
+  return Array.from(new Set([...TRUSTED_WRITE_SUFFIXES, ...splitCsv(process.env.ADMIN_TRUSTED_HOST_SUFFIXES)]));
+}
+
+function isTrustedAdminWriteRequest(req: VercelRequest): boolean {
+  if (process.env.ADMIN_TRUST_ALL_ORIGINS === "1") return true;
+
+  const trustedHosts = buildTrustedWriteHosts();
+  const trustedSuffixes = buildTrustedWriteSuffixes();
+
+  const sourceHeader = getFirstHeaderValue(req.headers.origin) || getFirstHeaderValue(req.headers.referer);
+  const sourceHost = normalizeHostFromHeader(sourceHeader);
+  if (sourceHost) {
+    if (trustedHosts.has(sourceHost)) return true;
+    return trustedSuffixes.some((suffix) => sourceHost.length > suffix.length && sourceHost.endsWith(suffix));
+  }
+
+  if (process.env.NODE_ENV !== "production") return true;
+
+  const destinationHost = normalizeHostFromHeader(
+    getFirstHeaderValue(req.headers["x-forwarded-host"]) || getFirstHeaderValue(req.headers.host),
+  );
+  if (!destinationHost) return false;
+  if (trustedHosts.has(destinationHost)) return true;
+  return trustedSuffixes.some(
+    (suffix) => destinationHost.length > suffix.length && destinationHost.endsWith(suffix),
+  );
 }
 
 async function getKvClient() {
@@ -195,7 +270,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === "POST") {
-    if (!isTrustedAdminRequest(req)) {
+    if (!isTrustedAdminWriteRequest(req)) {
       res.status(403).json({
         success: false,
         configured: isKvConfigured(),

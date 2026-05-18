@@ -813,7 +813,15 @@ function ensureFreshDefaults() {
 export function getHeroes(): HeroItem[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.heroes);
-  const rawHeroes = stored ? (JSON.parse(stored) as HeroItem[]) : DEFAULT_HEROES;
+  let rawHeroes: HeroItem[] = DEFAULT_HEROES;
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      rawHeroes = Array.isArray(parsed) ? (parsed as HeroItem[]) : DEFAULT_HEROES;
+    } catch {
+      localStorage.removeItem(STORAGE_KEYS.heroes);
+    }
+  }
   const backfilledHeroes = upsertCriticalHeroFallbacks(rawHeroes, {
     forceWhenMissingAll: rawHeroes.length === 0 && Boolean(stored),
   });
@@ -823,7 +831,15 @@ export function getHeroes(): HeroItem[] {
 export function getArticles(): Article[] {
   ensureFreshDefaults();
   const stored = localStorage.getItem(STORAGE_KEYS.articles);
-  const rawArticles = stored ? (JSON.parse(stored) as Article[]) : DEFAULT_ARTICLES;
+  let rawArticles: Article[] = DEFAULT_ARTICLES;
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      rawArticles = Array.isArray(parsed) ? (parsed as Article[]) : DEFAULT_ARTICLES;
+    } catch {
+      localStorage.removeItem(STORAGE_KEYS.articles);
+    }
+  }
   const backfilledArticles = upsertCriticalArticleFallbacks(rawArticles, {
     forceWhenMissingAll: rawArticles.length === 0 && Boolean(stored),
   });
@@ -832,7 +848,14 @@ export function getArticles(): Article[] {
 
 export function getAds(): AdSlot[] {
   const stored = localStorage.getItem(STORAGE_KEYS.ads);
-  return stored ? JSON.parse(stored) : DEFAULT_ADS;
+  if (!stored) return DEFAULT_ADS;
+  try {
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? (parsed as AdSlot[]) : DEFAULT_ADS;
+  } catch {
+    localStorage.removeItem(STORAGE_KEYS.ads);
+    return DEFAULT_ADS;
+  }
 }
 
 function hasRealBodyBlockContent(block: ArticleBodyBlock): boolean {

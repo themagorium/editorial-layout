@@ -33,9 +33,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const contributorNames = Array.from(new Set(topStories.map((story) => story.author)));
 
-    const title = `${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+    const title = `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
     const description =
-      `${BRAND_NAME} is a premium curated editorial covering luxury travel, art, culture, fashion, motorsport, yachting, and global events.`;
+      `${BRAND_NAME} (${BRAND_ALIAS}) is a premium curated editorial covering luxury travel, art, culture, fashion, motorsport, yachting, and global events.`;
     const keywords = [
       BRAND_NAME,
       BRAND_ALIAS,

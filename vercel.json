@@ -1,6 +1,22 @@
 {
   "routes": [
     {
+      "src": "/favicon\\.ico",
+      "dest": "/magorium-m-icon.svg"
+    },
+    {
+      "src": "/favicon\\.png",
+      "dest": "/magorium-m-icon.svg"
+    },
+    {
+      "src": "/og-image\\.jpg",
+      "dest": "/magorium-m-icon.svg"
+    },
+    {
+      "src": "/magorium-mark\\.svg",
+      "dest": "/magorium-m-icon.svg"
+    },
+    {
       "src": "/sitemap.xml",
       "dest": "/api/sitemap"
     },

@@ -102,7 +102,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       bodyHtml,
       ogType: "website",
       jsonLd,
-      imageUrl: sortedStories[0]?.imageUrl || `${SITE_URL}/magorium-m-icon.svg`,
+      imageUrl: sortedStories[0]?.imageUrl || `${SITE_URL}/og-image.jpg`,
     });
 
     res.status(200).setHeader("Content-Type", "text/html; charset=utf-8").send(html);

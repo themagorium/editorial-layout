@@ -103,7 +103,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           url: SITE_URL,
           logo: {
             "@type": "ImageObject",
-            url: `${SITE_URL}/magorium-m-icon.svg`,
+            url: `${SITE_URL}/favicon.png`,
           },
         },
         about: [jsonLdAuthor],

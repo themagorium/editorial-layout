@@ -91,11 +91,6 @@ function parseSeoTagsInput(value: string): string[] {
   return tags.slice(0, 25);
 }
 
-function formatSeoTagsInput(tags?: string[]): string {
-  if (!Array.isArray(tags) || tags.length === 0) return "";
-  return tags.join(", ");
-}
-
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(() => {
     return isAdminAuthenticated();
@@ -740,11 +735,32 @@ function EditableStoryForm({
   onNormalizeBody: () => void;
 }) {
   const isArticle = kind === "article";
-  const [seoTagsInput, setSeoTagsInput] = useState(() => formatSeoTagsInput(seoTags));
+  const [seoTagDraft, setSeoTagDraft] = useState("");
 
-  useEffect(() => {
-    setSeoTagsInput(formatSeoTagsInput(seoTags));
-  }, [seoTags]);
+  const addSeoTagsFromDraft = () => {
+    const draftTags = parseSeoTagsInput(seoTagDraft);
+    if (draftTags.length === 0) {
+      setSeoTagDraft("");
+      return;
+    }
+
+    const existing = new Set(seoTags.map((tag) => tag.toLowerCase()));
+    const merged = [...seoTags];
+    draftTags.forEach((tag) => {
+      const key = tag.toLowerCase();
+      if (existing.has(key)) return;
+      if (merged.length >= 25) return;
+      existing.add(key);
+      merged.push(tag);
+    });
+
+    onSeoTagsChange(merged);
+    setSeoTagDraft("");
+  };
+
+  const removeSeoTag = (tagToRemove: string) => {
+    onSeoTagsChange(seoTags.filter((tag) => tag.toLowerCase() !== tagToRemove.toLowerCase()));
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
@@ -778,21 +794,6 @@ function EditableStoryForm({
             placeholder="Writer / Journalist Name"
             className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
           />
-          <div className="w-full">
-            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans block mb-1">
-              SEO Tags (comma separated)
-            </label>
-            <input
-              value={seoTagsInput}
-              onChange={(e) => {
-                const nextValue = e.target.value;
-                setSeoTagsInput(nextValue);
-                onSeoTagsChange(parseSeoTagsInput(nextValue));
-              }}
-              placeholder="e.g. Formula 1, Austin Grand Prix, Motorsport News"
-              className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm"
-            />
-          </div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Published</span>
             <input
@@ -815,6 +816,60 @@ function EditableStoryForm({
               Featured
             </label>
           )}
+        </div>
+        <div className="rounded-md border border-border bg-secondary/40 p-3 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
+              SEO Tags (separate tags + bubble view)
+            </p>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
+              {seoTags.length}/25
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {seoTags.length > 0 ? (
+              seoTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => removeSeoTag(tag)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-sans"
+                  title="Remove tag"
+                >
+                  #{tag}
+                  <span className="text-[10px]">x</span>
+                </button>
+              ))
+            ) : (
+              <p className="text-xs text-muted-foreground font-sans">
+                No SEO tags yet. Add tags below to improve article discoverability.
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              value={seoTagDraft}
+              onChange={(e) => setSeoTagDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addSeoTagsFromDraft();
+                }
+              }}
+              placeholder="Add tag(s), comma-separated. Example: Formula 1, Austin Grand Prix"
+              className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm"
+            />
+            <button
+              type="button"
+              onClick={addSeoTagsFromDraft}
+              className="px-3 py-2 text-xs uppercase tracking-wider border border-primary text-primary rounded hover:bg-primary/10 transition-colors"
+            >
+              Add Tag
+            </button>
+          </div>
+          <p className="text-[10px] text-muted-foreground font-sans">
+            Tip: click a bubble to remove it. Separate multiple new tags with commas.
+          </p>
         </div>
         <div className="mt-4 pt-4 border-t border-border">
           <div className="flex items-center justify-between mb-2">

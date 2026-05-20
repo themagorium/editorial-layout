@@ -5,6 +5,8 @@ export const BRAND_ALIAS = "Magorium";
 export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 const SEO_ASSET_VERSION = "20260520-0548";
 const DEFAULT_SEO_IMAGE = `${SITE_URL}/og-image.jpg?v=${SEO_ASSET_VERSION}`;
+const DEFAULT_FAVICON = `${SITE_URL}/favicon.ico?v=${SEO_ASSET_VERSION}`;
+const DEFAULT_APPLE_ICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 let kvClientPromise: Promise<{
   get: <T>(key: string) => Promise<T | null>;
 } | null> | null = null;
@@ -381,6 +383,8 @@ export function renderSeoDocument(params: {
     <meta name="keywords" content="${escapeAttribute(keywords)}" />
     <meta name="author" content="${escapeAttribute(BRAND_NAME)}" />
     <meta name="robots" content="${robots}" />
+    <link rel="icon" href="${escapeAttribute(DEFAULT_FAVICON)}" />
+    <link rel="apple-touch-icon" href="${escapeAttribute(DEFAULT_APPLE_ICON)}" />
     <link rel="canonical" href="${escapeAttribute(canonicalUrl)}" />
     <meta property="og:title" content="${escapeAttribute(title)}" />
     <meta property="og:description" content="${escapeAttribute(description)}" />

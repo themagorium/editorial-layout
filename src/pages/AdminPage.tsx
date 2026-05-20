@@ -817,35 +817,42 @@ function EditableStoryForm({
             </label>
           )}
         </div>
-        <div className="rounded-md border border-border bg-secondary/40 p-3 space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
-              SEO Tags (separate tags + bubble view)
-            </p>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
+        <section className="rounded-lg border-2 border-primary/35 bg-primary/5 p-4 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h4 className="text-sm font-semibold text-primary font-sans">Dedicated SEO Tag Box</h4>
+              <p className="text-[11px] text-muted-foreground font-sans mt-1">
+                Add and manage search keywords for this story. Each bubble is one SEO tag.
+              </p>
+            </div>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans bg-background px-2 py-1 rounded border border-border">
               {seoTags.length}/25
             </span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {seoTags.length > 0 ? (
-              seoTags.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => removeSeoTag(tag)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-sans"
-                  title="Remove tag"
-                >
-                  #{tag}
-                  <span className="text-[10px]">x</span>
-                </button>
-              ))
-            ) : (
-              <p className="text-xs text-muted-foreground font-sans">
-                No SEO tags yet. Add tags below to improve article discoverability.
-              </p>
-            )}
+
+          <div className="rounded-md border border-border bg-background/80 p-3 min-h-[44px]">
+            <div className="flex flex-wrap gap-2">
+              {seoTags.length > 0 ? (
+                seoTags.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => removeSeoTag(tag)}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-sans hover:bg-primary/15"
+                    title="Remove tag"
+                  >
+                    #{tag}
+                    <span className="text-[10px]">x</span>
+                  </button>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground font-sans">
+                  No SEO tags added yet.
+                </p>
+              )}
+            </div>
           </div>
+
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={seoTagDraft}
@@ -868,9 +875,9 @@ function EditableStoryForm({
             </button>
           </div>
           <p className="text-[10px] text-muted-foreground font-sans">
-            Tip: click a bubble to remove it. Separate multiple new tags with commas.
+            Tip: click any bubble to remove it. You can paste multiple tags separated by commas.
           </p>
-        </div>
+        </section>
         <div className="mt-4 pt-4 border-t border-border">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">

@@ -20,6 +20,7 @@ type StoredHero = {
   id: string;
   title: string;
   excerpt?: string;
+  seoTags?: string[];
   subtitle?: string;
   category?: string;
   imageUrl?: string;
@@ -33,6 +34,7 @@ type StoredArticle = {
   id: string;
   title: string;
   excerpt?: string;
+  seoTags?: string[];
   category?: string;
   imageUrl?: string;
   author?: string;
@@ -50,6 +52,7 @@ export type SeoStory = {
   id: string;
   title: string;
   excerpt: string;
+  seoTags: string[];
   category: string;
   imageUrl: string;
   author: string;
@@ -64,6 +67,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     id: "h-cv-summit",
     title: "CV Summit 2025 - Kongresshaus Zurich (September 23-24, 2025)",
     excerpt: "A Recalibration Toward Endurance.",
+    seoTags: [],
     category: "Tech & AI",
     imageUrl: DEFAULT_SEO_IMAGE,
     author: "Millie Sealana",
@@ -76,6 +80,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     id: "h-f1-austin",
     title: "F1 returns to American soil in the tech haven of Austin.",
     excerpt: "Formula 1 returns to Austin with championship implications.",
+    seoTags: [],
     category: "Motorsport",
     imageUrl: DEFAULT_SEO_IMAGE,
     author: "Charlotte Thames",
@@ -88,6 +93,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     id: "v1-cambiaso",
     title: "132nd Hurlingham Open: La Natividad La Dolfina Establish A New Standard Under Pressure",
     excerpt: "A pivotal Hurlingham Open result with high-goal polo implications.",
+    seoTags: [],
     category: "Equestrian",
     imageUrl: DEFAULT_SEO_IMAGE,
     author: "Millie Sealana",
@@ -100,6 +106,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     id: "h-sailgp",
     title: "SailGP: From Geneva to Cadiz",
     excerpt: "SailGP momentum builds after Lake Geneva heading toward Cadiz.",
+    seoTags: [],
     category: "Yachting",
     imageUrl: DEFAULT_SEO_IMAGE,
     author: "James Whitfield",
@@ -112,6 +119,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     id: "a1",
     title: "Rio Carnival 2026: Samba Under the Stars",
     excerpt: "Rio's global cultural showcase returns with full force.",
+    seoTags: [],
     category: "Music",
     imageUrl: DEFAULT_SEO_IMAGE,
     author: "Marcus Chen",
@@ -124,6 +132,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     id: "a2",
     title: "Super Bowl LX: Stadium Lights & Bay Area Glamour",
     excerpt: "The Bay Area hosts an iconic Super Bowl week.",
+    seoTags: [],
     category: "Sports",
     imageUrl: DEFAULT_SEO_IMAGE,
     author: "James Whitfield",
@@ -136,6 +145,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     id: "a3",
     title: "Dubai International Boat Show: The Middle East's Premier Superyacht Gathering",
     excerpt: "Superyacht capital momentum in Dubai continues to rise.",
+    seoTags: [],
     category: "Yachting",
     imageUrl: DEFAULT_SEO_IMAGE,
     author: "James Whitfield",
@@ -148,6 +158,7 @@ const FALLBACK_STORIES: SeoStory[] = [
     id: "a4",
     title: "AT&T Pebble Beach Pro-Am: Where Golf Meets the Pacific",
     excerpt: "A marquee golf calendar event on California's coast.",
+    seoTags: [],
     category: "Golf",
     imageUrl: DEFAULT_SEO_IMAGE,
     author: "James Whitfield",
@@ -180,6 +191,24 @@ function extractBodyText(blocks: BodyBlock[] | undefined): string[] {
     .filter(Boolean);
 }
 
+function sanitizeSeoTags(tags: unknown): string[] {
+  if (!Array.isArray(tags)) return [];
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+  for (const rawTag of tags) {
+    const cleaned = String(rawTag || "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(cleaned);
+    if (normalized.length >= 25) break;
+  }
+  return normalized;
+}
+
 function sanitizeHero(hero: StoredHero): SeoStory {
   const author = canonicalAuthorName(hero.author);
   const title = (hero.title || "").trim() || hero.id;
@@ -187,6 +216,7 @@ function sanitizeHero(hero: StoredHero): SeoStory {
     id: hero.id,
     title,
     excerpt: (hero.excerpt || hero.subtitle || "").trim(),
+    seoTags: sanitizeSeoTags(hero.seoTags),
     category: (hero.category || "News").trim(),
     imageUrl: (hero.imageUrl || DEFAULT_SEO_IMAGE).trim(),
     author,
@@ -204,6 +234,7 @@ function sanitizeArticle(article: StoredArticle): SeoStory {
     id: article.id,
     title,
     excerpt: (article.excerpt || "").trim(),
+    seoTags: sanitizeSeoTags(article.seoTags),
     category: (article.category || "News").trim(),
     imageUrl: (article.imageUrl || DEFAULT_SEO_IMAGE).trim(),
     author,

@@ -44,6 +44,7 @@ export interface HeroItem {
   title: string;
   excerpt?: string;
   legacySlugs?: string[];
+  seoTags?: string[];
   subtitle: string;
   category: Category;
   imageUrl: string;
@@ -70,6 +71,7 @@ export interface Article {
   title: string;
   excerpt: string;
   legacySlugs?: string[];
+  seoTags?: string[];
   category: Category;
   imageUrl: string;
   videoUrl?: string;
@@ -178,6 +180,24 @@ function createMediaSeedBlock(baseId: string, imageUrl?: string, videoUrl?: stri
   };
 }
 
+function normalizeSeoTags(tags?: string[]): string[] {
+  if (!Array.isArray(tags)) return [];
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+  for (const rawTag of tags) {
+    const cleaned = String(rawTag || "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(cleaned);
+    if (normalized.length >= 25) break;
+  }
+  return normalized;
+}
+
 function normalizeBodyToOctoberPattern(
   baseId: string,
   body: ArticleBodyBlock[] | undefined,
@@ -221,6 +241,7 @@ function normalizeHero(hero: HeroItem): HeroItem {
   return {
     ...upgraded,
     excerpt: upgraded.excerpt || upgraded.subtitle,
+    seoTags: normalizeSeoTags(upgraded.seoTags),
     body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, upgraded.imageUrl, upgraded.videoUrl),
   };
 }
@@ -229,6 +250,7 @@ function normalizeArticle(article: Article): Article {
   const upgraded = upgradeLegacyArticleCopy(article);
   return {
     ...upgraded,
+    seoTags: normalizeSeoTags(upgraded.seoTags),
     body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, upgraded.imageUrl, upgraded.videoUrl),
   };
 }

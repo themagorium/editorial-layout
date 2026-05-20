@@ -75,6 +75,27 @@ function createOctoberPatternBody(seed: string): ArticleBodyBlock[] {
   ];
 }
 
+function parseSeoTagsInput(value: string): string[] {
+  const seen = new Set<string>();
+  const tags: string[] = [];
+  value
+    .split(",")
+    .map((token) => token.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .forEach((token) => {
+      const key = token.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      tags.push(token);
+    });
+  return tags.slice(0, 25);
+}
+
+function formatSeoTagsInput(tags?: string[]): string {
+  if (!Array.isArray(tags) || tags.length === 0) return "";
+  return tags.join(", ");
+}
+
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(() => {
     return isAdminAuthenticated();
@@ -333,6 +354,7 @@ function AdminDashboard() {
         id: `h-${stamp}-1`,
         title: "New Hero 1",
         subtitle: "Add your first hero story",
+        seoTags: [],
         category: "Travel",
         imageUrl: "",
         author: "Editor",
@@ -344,6 +366,7 @@ function AdminDashboard() {
         id: `h-${stamp}-2`,
         title: "New Hero 2",
         subtitle: "Add your second hero story",
+        seoTags: [],
         category: "Fashion",
         imageUrl: "",
         author: "Editor",
@@ -355,6 +378,7 @@ function AdminDashboard() {
         id: `h-${stamp}-3`,
         title: "New Hero 3",
         subtitle: "Add your third hero story",
+        seoTags: [],
         category: "Art & Design",
         imageUrl: "",
         author: "Editor",
@@ -369,6 +393,7 @@ function AdminDashboard() {
         id: `a-${stamp}-1`,
         title: "New Article 1",
         excerpt: "Add your first article",
+        seoTags: [],
         category: "Yachting",
         imageUrl: "",
         author: "Editor",
@@ -380,6 +405,7 @@ function AdminDashboard() {
         id: `a-${stamp}-2`,
         title: "New Article 2",
         excerpt: "Add your second article",
+        seoTags: [],
         category: "Sports",
         imageUrl: "",
         author: "Editor",
@@ -391,6 +417,7 @@ function AdminDashboard() {
         id: `a-${stamp}-3`,
         title: "New Article 3",
         excerpt: "Add your third article",
+        seoTags: [],
         category: "Golf",
         imageUrl: "",
         author: "Editor",
@@ -402,6 +429,7 @@ function AdminDashboard() {
         id: `a-${stamp}-4`,
         title: "New Article 4",
         excerpt: "Add your fourth article",
+        seoTags: [],
         category: "Tennis",
         imageUrl: "",
         author: "Editor",
@@ -545,6 +573,7 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
         id: `h-${Date.now()}`,
         title: "New Hero",
         subtitle: "",
+        seoTags: [],
         category: "Travel",
         imageUrl: "",
         author: "",
@@ -573,6 +602,7 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
             summary={hero.subtitle}
             category={hero.category}
             author={hero.author || ""}
+            seoTags={hero.seoTags || []}
             date={hero.date}
             featured={hero.featured}
             imageUrl={hero.imageUrl}
@@ -582,6 +612,7 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
             onSummaryChange={(value) => update(hero.id, { subtitle: value })}
             onCategoryChange={(value) => update(hero.id, { category: value })}
             onAuthorChange={(value) => update(hero.id, { author: value })}
+            onSeoTagsChange={(value) => update(hero.id, { seoTags: value })}
             onDateChange={(value) => update(hero.id, { date: value })}
             onFeaturedChange={(value) => update(hero.id, { featured: value })}
             onImageChange={(value) => update(hero.id, { imageUrl: value })}
@@ -607,7 +638,7 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
 function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string }) {
   const addArticle = () => {
     setArticles([
-      { id: `a-${Date.now()}`, title: "New Article", excerpt: "", category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) },
+      { id: `a-${Date.now()}`, title: "New Article", excerpt: "", seoTags: [], category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) },
       ...articles,
     ]);
   };
@@ -629,6 +660,7 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
             summary={article.excerpt}
             category={article.category}
             author={article.author}
+            seoTags={article.seoTags || []}
             date={article.date}
             featured={article.featured}
             imageUrl={article.imageUrl}
@@ -638,6 +670,7 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
             onSummaryChange={(value) => update(article.id, { excerpt: value })}
             onCategoryChange={(value) => update(article.id, { category: value })}
             onAuthorChange={(value) => update(article.id, { author: value })}
+            onSeoTagsChange={(value) => update(article.id, { seoTags: value })}
             onDateChange={(value) => update(article.id, { date: value })}
             onFeaturedChange={(value) => update(article.id, { featured: value })}
             onImageChange={(value) => update(article.id, { imageUrl: value })}
@@ -665,6 +698,7 @@ function EditableStoryForm({
   summary,
   category,
   author,
+  seoTags,
   date,
   featured,
   imageUrl,
@@ -674,6 +708,7 @@ function EditableStoryForm({
   onSummaryChange,
   onCategoryChange,
   onAuthorChange,
+  onSeoTagsChange,
   onDateChange,
   onFeaturedChange,
   onImageChange,
@@ -686,6 +721,7 @@ function EditableStoryForm({
   summary: string;
   category: Category;
   author: string;
+  seoTags: string[];
   date: string;
   featured?: boolean;
   imageUrl?: string;
@@ -695,6 +731,7 @@ function EditableStoryForm({
   onSummaryChange: (value: string) => void;
   onCategoryChange: (value: Category) => void;
   onAuthorChange: (value: string) => void;
+  onSeoTagsChange: (value: string[]) => void;
   onDateChange: (value: string) => void;
   onFeaturedChange: (value: boolean) => void;
   onImageChange: (value: string) => void;
@@ -703,6 +740,11 @@ function EditableStoryForm({
   onNormalizeBody: () => void;
 }) {
   const isArticle = kind === "article";
+  const [seoTagsInput, setSeoTagsInput] = useState(() => formatSeoTagsInput(seoTags));
+
+  useEffect(() => {
+    setSeoTagsInput(formatSeoTagsInput(seoTags));
+  }, [seoTags]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
@@ -736,6 +778,21 @@ function EditableStoryForm({
             placeholder="Writer / Journalist Name"
             className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
           />
+          <div className="w-full">
+            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans block mb-1">
+              SEO Tags (comma separated)
+            </label>
+            <input
+              value={seoTagsInput}
+              onChange={(e) => {
+                const nextValue = e.target.value;
+                setSeoTagsInput(nextValue);
+                onSeoTagsChange(parseSeoTagsInput(nextValue));
+              }}
+              placeholder="e.g. Formula 1, Austin Grand Prix, Motorsport News"
+              className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm"
+            />
+          </div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Published</span>
             <input

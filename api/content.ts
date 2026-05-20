@@ -15,6 +15,7 @@ type HeroPayload = {
   title: string;
   excerpt?: string;
   legacySlugs?: string[];
+  seoTags?: string[];
   subtitle: string;
   category: string;
   imageUrl: string;
@@ -31,6 +32,7 @@ type ArticlePayload = {
   title: string;
   excerpt: string;
   legacySlugs?: string[];
+  seoTags?: string[];
   category: string;
   imageUrl: string;
   videoUrl?: string;
@@ -181,15 +183,35 @@ function sanitizeBody(blocks: BodyBlock[] | undefined): BodyBlock[] {
   });
 }
 
+function sanitizeSeoTags(tags: unknown): string[] {
+  if (!Array.isArray(tags)) return [];
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+  for (const rawTag of tags) {
+    const cleaned = String(rawTag || "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(cleaned);
+    if (normalized.length >= 25) break;
+  }
+  return normalized;
+}
+
 function sanitizePayload(input: unknown): PublishPayload {
   const payload = (input || {}) as Partial<PublishPayload>;
 
   const heroes = ensureArray<HeroPayload>(payload.heroes).map((hero) => ({
     ...hero,
+    seoTags: sanitizeSeoTags(hero.seoTags),
     body: sanitizeBody(hero.body),
   }));
   const articles = ensureArray<ArticlePayload>(payload.articles).map((article) => ({
     ...article,
+    seoTags: sanitizeSeoTags(article.seoTags),
     body: sanitizeBody(article.body),
   }));
   const ads = ensureArray<AdPayload>(payload.ads);

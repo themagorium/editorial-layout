@@ -81,6 +81,7 @@ export default function ArticlePage() {
     id: heroAsArticle.id,
     title: heroAsArticle.title,
     excerpt: heroAsArticle.excerpt || heroAsArticle.subtitle,
+    seoTags: heroAsArticle.seoTags,
     category: heroAsArticle.category,
     imageUrl: heroAsArticle.imageUrl,
     videoUrl: heroAsArticle.videoUrl,
@@ -105,7 +106,7 @@ export default function ArticlePage() {
 
   useEffect(() => {
     applyArticleSeo(content);
-  }, [content.author, content.date, content.excerpt, content.id, content.imageUrl, content.title]);
+  }, [content.author, content.date, content.excerpt, content.id, content.imageUrl, content.seoTags, content.title]);
 
   return (
     <div className="min-h-screen bg-background">

@@ -58,16 +58,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const description = trimToSummary(
     `${story.author} on ${BRAND_NAME}: ${story.title}. ${summarySeed}`,
   );
-  const keywords = [
+  const keywordTerms = [
     BRAND_NAME,
     story.title,
     story.author,
     `${story.author} writer`,
     `${story.author} journalist`,
     story.category,
+    ...(story.seoTags || []),
     "Magorium",
     "The Magorium",
-  ]
+  ];
+  const keywords = keywordTerms
     .filter(Boolean)
     .join(", ");
 
@@ -94,6 +96,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         dateModified: story.date,
         image: [story.imageUrl],
         description,
+        keywords,
         articleSection: story.category,
         author: jsonLdAuthor,
         creator: jsonLdAuthor,

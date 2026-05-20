@@ -91,11 +91,29 @@ export function getCategoryPath(category?: string) {
   return `/category/${slug || "general"}`;
 }
 
+function normalizeSeoTags(tags?: string[]): string[] {
+  if (!Array.isArray(tags)) return [];
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+  for (const rawTag of tags) {
+    const cleaned = String(rawTag || "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(cleaned);
+  }
+  return normalized;
+}
+
 function setStructuredData(
   content: Article | (HeroItem & { excerpt?: string }),
   canonicalUrl: string,
   writerName: string,
   description: string,
+  keywords: string,
 ) {
   const writerUrl = `${SITE_URL}${getAuthorPath(writerName)}`;
   const writerEntity = writerName === STAFF_AUTHOR_NAME
@@ -129,6 +147,7 @@ function setStructuredData(
     },
     image: [content.imageUrl || DEFAULT_OG_IMAGE],
     description,
+    keywords,
     articleSection: content.category,
     about: [writerEntity],
     isPartOf: {
@@ -247,6 +266,7 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
   const writerName = canonicalAuthorName(content.author);
   const brandName = BRAND_NAME;
   const writerUrl = `${SITE_URL}${getAuthorPath(writerName)}`;
+  const customSeoTags = normalizeSeoTags(content.seoTags);
   const storySummary =
     ("excerpt" in content ? content.excerpt : content.subtitle || "").trim() ||
     "Read this story on The Magorium.";
@@ -259,6 +279,7 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
     writerName,
     content.category,
     content.title,
+    ...customSeoTags,
   ]
     .map((v) => v.trim())
     .filter(Boolean)
@@ -288,7 +309,7 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
 
   upsertLink("canonical", canonicalUrl);
   removeStructuredDataScript();
-  setStructuredData(content, canonicalUrl, writerName, description);
+  setStructuredData(content, canonicalUrl, writerName, description, keywords);
 }
 
 export function applyContributorsSeo(

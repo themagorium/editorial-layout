@@ -13,9 +13,10 @@ import {
 } from "./lib/seo-runtime";
 
 function getSlugFromRequest(req: VercelRequest) {
-  const direct = (req.query.slug || req.query.author || "") as string;
+  const query = req.query || {};
+  const direct = (query.slug || query.author || "") as string | string[];
   if (direct) return Array.isArray(direct) ? direct[0] : direct;
-  const pathFromQuery = (req.query.path || "") as string;
+  const pathFromQuery = (query.path || "") as string | string[];
   const fromQuery = Array.isArray(pathFromQuery) ? pathFromQuery[0] : pathFromQuery;
   const source = fromQuery || req.url || "";
   const cleaned = source.split("?")[0].replace(/^\/+|\/+$/g, "");

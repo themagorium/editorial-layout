@@ -27,7 +27,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const identifier = readQueryValue(req.query.identifier).trim();
+  const query = req.query || {};
+  const identifier = readQueryValue(query.identifier).trim();
   if (!identifier) {
     res.status(400).send("Missing article identifier.");
     return;

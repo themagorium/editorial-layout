@@ -22,7 +22,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const slug = readQueryValue(req.query.slug).trim();
+    const query = req.query || {};
+    const slug = readQueryValue(query.slug).trim();
     const requestedCategory = normalizeCategoryName(slug || "all");
     const canonicalPath = getCategoryPath(requestedCategory);
     const canonicalUrl = `${SITE_URL}${canonicalPath}`;

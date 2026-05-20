@@ -16,8 +16,9 @@ function readQueryValue(value: string | string[] | undefined): string {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const hint = readQueryValue(req.query.hint).trim();
-    const canonicalPathRaw = readQueryValue(req.query.path).trim();
+    const query = req.query || {};
+    const hint = readQueryValue(query.hint).trim();
+    const canonicalPathRaw = readQueryValue(query.path).trim();
     const canonicalPath = canonicalPathRaw
       ? canonicalPathRaw.startsWith("/")
         ? canonicalPathRaw

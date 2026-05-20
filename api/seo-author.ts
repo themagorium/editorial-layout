@@ -1,16 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import {
-  BRAND_ALIAS,
-  BRAND_NAME,
-  SITE_URL,
-  canonicalAuthorName,
-  contentIdentifierMatches,
-  escapeHtml,
-  getAuthorPath,
-  getPublishedSeoStories,
-  guessAuthorNameFromSlug,
-  renderSeoDocument,
-} from "./lib/seo-runtime";
+
+async function loadSeoRuntime() {
+  try {
+    return await import("./lib/seo-runtime.js");
+  } catch {
+    return await import("./lib/seo-runtime");
+  }
+}
 
 function getSlugFromRequest(req: VercelRequest) {
   const query = req.query || {};
@@ -30,6 +26,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  const runtime = await loadSeoRuntime();
+  const {
+    BRAND_ALIAS,
+    BRAND_NAME,
+    SITE_URL,
+    canonicalAuthorName,
+    contentIdentifierMatches,
+    escapeHtml,
+    getAuthorPath,
+    getPublishedSeoStories,
+    guessAuthorNameFromSlug,
+    renderSeoDocument,
+  } = runtime;
   const slug = getSlugFromRequest(req);
   const inferredAuthor = guessAuthorNameFromSlug(slug);
   const stories = await getPublishedSeoStories();

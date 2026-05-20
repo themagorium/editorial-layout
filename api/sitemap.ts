@@ -1,10 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import {
-  SITE_URL,
-  getCategoryPath,
-  getAuthorPath,
-  getPublishedSeoStories,
-} from "./lib/seo-runtime";
+
+async function loadSeoRuntime() {
+  try {
+    return await import("./lib/seo-runtime.js");
+  } catch {
+    return await import("./lib/seo-runtime");
+  }
+}
 
 function xmlEscape(input: string): string {
   return input
@@ -17,6 +19,8 @@ function xmlEscape(input: string): string {
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   try {
+    const runtime = await loadSeoRuntime();
+    const { SITE_URL, getCategoryPath, getAuthorPath, getPublishedSeoStories } = runtime;
     const stories = await getPublishedSeoStories();
     const categoryPaths = Array.from(new Set(stories.map((story) => getCategoryPath(story.category))));
     const authorPaths = Array.from(new Set(stories.map((story) => getAuthorPath(story.author))));

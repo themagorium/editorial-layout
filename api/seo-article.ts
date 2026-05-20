@@ -1,14 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import {
-  BRAND_NAME,
-  SITE_URL,
-  STAFF_AUTHOR_NAME,
-  contentIdentifierMatches,
-  escapeHtml,
-  getAuthorPath,
-  getPublishedSeoStories,
-  renderSeoDocument,
-} from "./lib/seo-runtime";
+
+async function loadSeoRuntime() {
+  try {
+    return await import("./lib/seo-runtime.js");
+  } catch {
+    return await import("./lib/seo-runtime");
+  }
+}
 
 function readQueryValue(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] || "";
@@ -27,6 +25,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  const runtime = await loadSeoRuntime();
+  const {
+    BRAND_NAME,
+    SITE_URL,
+    STAFF_AUTHOR_NAME,
+    contentIdentifierMatches,
+    escapeHtml,
+    getAuthorPath,
+    getPublishedSeoStories,
+    renderSeoDocument,
+  } = runtime;
   const query = req.query || {};
   const identifier = readQueryValue(query.identifier).trim();
   if (!identifier) {

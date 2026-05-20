@@ -1,15 +1,24 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import {
-  BRAND_NAME,
-  SITE_URL,
-  escapeHtml,
-  getAuthorPath,
-  getPublishedSeoStories,
-  renderSeoDocument,
-} from "./lib/seo-runtime";
+
+async function loadSeoRuntime() {
+  try {
+    return await import("./lib/seo-runtime.js");
+  } catch {
+    return await import("./lib/seo-runtime");
+  }
+}
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   try {
+    const runtime = await loadSeoRuntime();
+    const {
+      BRAND_NAME,
+      SITE_URL,
+      escapeHtml,
+      getAuthorPath,
+      getPublishedSeoStories,
+      renderSeoDocument,
+    } = runtime;
     const stories = await getPublishedSeoStories();
     const sortedStories = stories
       .slice()

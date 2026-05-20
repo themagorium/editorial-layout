@@ -1,7 +1,7 @@
 import { buildContentPath, type Article, type HeroItem } from "@/lib/content-store";
 
 const SITE_URL = "https://www.themagorium.com";
-const SEO_ASSET_VERSION = "20260520";
+const SEO_ASSET_VERSION = "20260520-0548";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg?v=${SEO_ASSET_VERSION}`;
 const DEFAULT_FAVICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
@@ -200,10 +200,10 @@ function setHomeStructuredData(storyPaths: string[] = []) {
 export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
   const normalizedHint = (queryHint || "").trim();
   const title = normalizedHint
-    ? `${normalizedHint} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`
-    : `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+    ? `${normalizedHint} | ${BRAND_NAME} - A Curated Lifestyle Magazine`
+    : `${BRAND_NAME} - A Curated Lifestyle Magazine`;
   const description =
-    `${BRAND_NAME} (${BRAND_ALIAS}) — a premium curated lifestyle magazine featuring luxury travel, art, culture, fashion, motorsport, yachting, and more. Where curated becomes legend.`;
+    `${BRAND_NAME} - A Curated Lifestyle Magazine. ${BRAND_ALIAS} covers travel, art, culture, fashion, motorsport, yachting, and global events.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
@@ -212,8 +212,8 @@ export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
     "TheMagorium",
     "Magorium magazine",
     "Magorum magazine",
-    "luxury lifestyle magazine",
-    "luxury travel",
+    "curated lifestyle magazine",
+    "travel",
     "art",
     "fashion",
     "motorsport",
@@ -475,9 +475,9 @@ export function applyAuthorSeo(authorName: string, storyCount: number, storyPath
 export function applyMagoriumBrandSeo(path = "/magorium") {
   const canonicalPath = path.startsWith("/") ? path : `/${path}`;
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-  const title = `${BRAND_ALIAS} | ${BRAND_NAME} — Curated Luxury Lifestyle Magazine`;
+  const title = `${BRAND_ALIAS} | ${BRAND_NAME} - A Curated Lifestyle Magazine`;
   const description =
-    `${BRAND_NAME} — a premium curated lifestyle magazine featuring luxury travel, art, culture, fashion, motorsport, yachting, and more. Where curated becomes legend.`;
+    `${BRAND_NAME} - A Curated Lifestyle Magazine. ${BRAND_ALIAS} covers travel, art, culture, fashion, motorsport, yachting, and global events.`;
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,

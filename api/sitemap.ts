@@ -21,7 +21,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     const categoryPaths = Array.from(new Set(stories.map((story) => getCategoryPath(story.category))));
     const authorPaths = Array.from(new Set(stories.map((story) => getAuthorPath(story.author))));
     const storyPaths = Array.from(new Set(stories.map((story) => story.path)));
-    const staticPaths = ["/", "/magorium", "/magorum", "/the-magorium", "/archive", "/contributors", "/seo-history", "/categories"];
+    const staticPaths = ["/", "/magorium", "/magorum", "/the-magorium", "/themagorium", "/archive", "/contributors", "/seo-history", "/categories"];
     const allPaths = Array.from(new Set([...staticPaths, ...categoryPaths, ...authorPaths, ...storyPaths]));
 
     const urls = allPaths

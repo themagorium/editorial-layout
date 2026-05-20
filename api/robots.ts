@@ -5,7 +5,8 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 Allow: /
 
 Sitemap: https://www.themagorium.com/sitemap.xml
-Sitemap: https://www.themagorium.com/api/sitemap`;
+Sitemap: https://www.themagorium.com/api/sitemap
+Host: www.themagorium.com`;
 
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
   res.setHeader("Cache-Control", "s-maxage=86400, stale-while-revalidate=86400");

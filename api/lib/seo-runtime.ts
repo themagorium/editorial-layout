@@ -3,7 +3,8 @@ export const SITE_URL = "https://www.themagorium.com";
 export const BRAND_NAME = "The Magorium";
 export const BRAND_ALIAS = "Magorium";
 export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
-const DEFAULT_SEO_IMAGE = `${SITE_URL}/og-image.jpg`;
+const SEO_ASSET_VERSION = "20260520";
+const DEFAULT_SEO_IMAGE = `${SITE_URL}/og-image.jpg?v=${SEO_ASSET_VERSION}`;
 let kvClientPromise: Promise<{
   get: <T>(key: string) => Promise<T | null>;
 } | null> | null = null;

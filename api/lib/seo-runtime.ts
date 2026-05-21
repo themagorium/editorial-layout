@@ -315,6 +315,9 @@ export function normalizeCategoryName(rawCategory?: string): string {
   if (slug === "film-festivals") return "Film & Festivals";
   if (slug === "motor-sport" || slug === "motor-sports") return "Motorsport";
   if (slug === "polo") return "Equestrian";
+  if (slug === "finance" || slug === "global-economy" || slug === "finance-global-economy") {
+    return "Finance/ Global Economy";
+  }
   return normalized;
 }
 

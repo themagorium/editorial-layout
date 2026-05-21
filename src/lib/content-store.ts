@@ -32,11 +32,11 @@ import articlePfw from "@/assets/article-pfw.jpg";
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 
   | "Tech & AI" | "Motorsport" | "Film & Festivals" 
-  | "Music" | "Golf" | "Tennis" | "Wellness" | "Equestrian" | "Sports";
+  | "Music" | "Golf" | "Tennis" | "Wellness" | "Equestrian" | "Sports" | "Finance/ Global Economy";
 
 export const CATEGORIES: Category[] = [
   "Travel", "Yachting", "Art & Design", "Fashion", "Tech & AI",
-  "Motorsport", "Film & Festivals", "Music", "Golf", "Tennis", "Wellness", "Equestrian", "Sports"
+  "Motorsport", "Film & Festivals", "Music", "Golf", "Tennis", "Wellness", "Equestrian", "Sports", "Finance/ Global Economy"
 ];
 
 export interface HeroItem {

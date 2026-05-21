@@ -32,6 +32,9 @@ function normalizeCategoryLabel(raw: string): string {
     "horse": "Equestrian",
     "horses": "Equestrian",
     "wellbeing": "Wellness",
+    "finance": "Finance/ Global Economy",
+    "global-economy": "Finance/ Global Economy",
+    "finance-global-economy": "Finance/ Global Economy",
   };
   if (aliases[slug]) return aliases[slug];
   return (raw || "")

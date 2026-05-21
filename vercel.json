@@ -25,9 +25,6 @@
       "dest": "/api/robots"
     },
     {
-      "handle": "filesystem"
-    },
-    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },
@@ -98,7 +95,7 @@
       "dest": "/api/seo-history"
     },
     {
-      "src": "/(magorium|magorum|magoriium|the-magorium|the-magoriium|themagorium)/?",
+      "src": "/(magorium|magorum|magoriium|the-magorium|the-magoriium|themagorium|themagoriium)/?",
       "has": [
         {
           "type": "header",
@@ -129,6 +126,9 @@
         }
       ],
       "dest": "/api/seo-home?path=/$1"
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",

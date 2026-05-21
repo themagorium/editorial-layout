@@ -32,6 +32,8 @@ const App = () => (
           <Route path="/magorium" element={<BrandAliasPage />} />
           <Route path="/magorum" element={<BrandAliasPage />} />
           <Route path="/magoriium" element={<BrandAliasPage />} />
+          <Route path="/themagorium" element={<BrandAliasPage />} />
+          <Route path="/themagoriium" element={<BrandAliasPage />} />
           <Route path="/the-magorium" element={<BrandAliasPage />} />
           <Route path="/the-magoriium" element={<BrandAliasPage />} />
           <Route path="/article/:id" element={<ArticlePage />} />

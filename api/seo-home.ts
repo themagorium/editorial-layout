@@ -61,6 +61,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       "Magoriium",
       "The Magoriium",
       "TheMagorium",
+      "Themagorium",
+      "Themagoriium",
       "Magorium writers",
       "Magorium journalists",
       "The Magorium contributors",

@@ -41,6 +41,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       "/the-magorium",
       "/the-magoriium",
       "/themagorium",
+      "/themagoriium",
       "/archive",
       "/contributors",
       "/seo-history",

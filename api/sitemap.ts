@@ -17,22 +17,33 @@ function xmlEscape(input: string): string {
     .replace(/'/g, "&apos;");
 }
 
+function toIsoDate(value: string | undefined, fallbackIso: string): string {
+  const parsed = new Date(value || "");
+  if (Number.isNaN(parsed.getTime())) return fallbackIso;
+  return parsed.toISOString();
+}
+
+function pickLatestIso(left: string, right: string): string {
+  const leftTime = +new Date(left);
+  const rightTime = +new Date(right);
+  if (Number.isNaN(leftTime)) return right;
+  if (Number.isNaN(rightTime)) return left;
+  return rightTime > leftTime ? right : left;
+}
+
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   try {
     const runtime = await loadSeoRuntime();
     const { SITE_URL, getCategoryPath, getAuthorPath, getPublishedSeoStories } = runtime;
     const stories = await getPublishedSeoStories();
-    const categoryPaths = Array.from(new Set(stories.map((story) => getCategoryPath(story.category))));
-    const authorPaths = Array.from(new Set(stories.map((story) => getAuthorPath(story.author))));
-    const storyPaths = Array.from(new Set(stories.map((story) => story.path)));
-    const editionPaths = Array.from(
-      new Set(
-        stories
-          .map((story) => (story.edition || "").trim())
-          .filter(Boolean)
-          .map((edition) => `/archive/${edition}`),
-      ),
-    );
+    const nowIso = new Date().toISOString();
+    const latestStoryIso =
+      stories.length > 0
+        ? stories
+            .map((story) => toIsoDate(story.date, nowIso))
+            .reduce((latest, current) => pickLatestIso(latest, current), nowIso)
+        : nowIso;
+
     const staticPaths = [
       "/",
       "/magorium",
@@ -47,12 +58,30 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       "/seo-history",
       "/categories",
     ];
-    const allPaths = Array.from(
-      new Set([...staticPaths, ...editionPaths, ...categoryPaths, ...authorPaths, ...storyPaths]),
-    );
 
-    const urls = allPaths
-      .map((path) => `<url><loc>${xmlEscape(`${SITE_URL}${path}`)}</loc></url>`)
+    const pathLastmod = new Map<string, string>();
+    const upsertPath = (path: string, lastmod: string) => {
+      const existing = pathLastmod.get(path);
+      pathLastmod.set(path, existing ? pickLatestIso(existing, lastmod) : lastmod);
+    };
+
+    staticPaths.forEach((path) => upsertPath(path, latestStoryIso));
+    stories.forEach((story) => {
+      const storyLastmod = toIsoDate(story.date, nowIso);
+      upsertPath(story.path, storyLastmod);
+      upsertPath(getAuthorPath(story.author), storyLastmod);
+      upsertPath(getCategoryPath(story.category), storyLastmod);
+      const edition = (story.edition || "").trim();
+      if (edition) {
+        upsertPath(`/archive/${edition}`, storyLastmod);
+      }
+    });
+
+    const urls = Array.from(pathLastmod.entries())
+      .map(
+        ([path, lastmod]) =>
+          `<url><loc>${xmlEscape(`${SITE_URL}${path}`)}</loc><lastmod>${xmlEscape(lastmod)}</lastmod></url>`,
+      )
       .join("");
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>

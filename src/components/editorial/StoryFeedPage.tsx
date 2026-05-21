@@ -4,7 +4,8 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import {
   buildContentPath,
-  getPublishedContentSnapshot,
+  getLatestPublishedEditionSnapshot,
+  formatEditionLabel,
   DEFAULT_PUBLISHED_CONTENT,
   type Article,
   type HeroItem,
@@ -79,15 +80,13 @@ export default function StoryFeedPage({
   useEffect(() => {
     let active = true;
     const hydrate = async () => {
-      const snapshot = await getPublishedContentSnapshot();
+      const snapshot = await getLatestPublishedEditionSnapshot({ heroLimit: 3, articleLimit: 8 });
       if (!active) return;
 
-      const selection = selectFrontPageEditionContent(snapshot.heroes, snapshot.articles, 8);
-
-      setHeroes(selection.heroes);
-      setArticles(selection.articles);
-      setEditionLabel(selection.editionLabel);
-      const storyPaths = [...selection.heroes, ...selection.articles].map((item) =>
+      setHeroes(snapshot.heroes);
+      setArticles(snapshot.articles);
+      setEditionLabel(snapshot.latestEdition ? formatEditionLabel(snapshot.latestEdition) : "");
+      const storyPaths = [...snapshot.heroes, ...snapshot.articles].map((item) =>
         buildContentPath(item.id, item.title),
       );
       setLoaded(true);

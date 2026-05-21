@@ -74,6 +74,15 @@ type ChunkedContentPointer = {
   updatedAt: string;
 };
 
+type LatestViewPayload = {
+  heroes: HeroPayload[];
+  articles: ArticlePayload[];
+  ads: AdPayload[];
+  publishedAt: string;
+  updatedAt?: string;
+  latestEdition: string;
+};
+
 const CONTENT_KEY = "magorium:published-content:v1";
 const CONTENT_CHUNK_PREFIX = `${CONTENT_KEY}:chunk:`;
 const CONTENT_UPLOAD_PREFIX = `${CONTENT_KEY}:upload:`;
@@ -230,6 +239,84 @@ function sanitizePayload(input: unknown): PublishPayload {
   const ads = ensureArray<AdPayload>(payload.ads);
 
   return { heroes, articles, ads };
+}
+
+const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
+const PLACEHOLDER_COPY_PATTERNS = [
+  /^add your first hero story$/i,
+  /^add your first article$/i,
+  /^add story text$/i,
+  /^add first body paragraph$/i,
+  /^add second body paragraph$/i,
+  /^add third body paragraph$/i,
+  /^upload photo or video$/i,
+];
+
+function isPlaceholderCopy(value?: string): boolean {
+  const text = (value || "").trim();
+  if (!text) return false;
+  return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function isPublishReadyHero(hero: HeroPayload): boolean {
+  const title = (hero.title || "").trim();
+  if (!title || PLACEHOLDER_TITLE_PATTERN.test(title)) return false;
+  if (isPlaceholderCopy(hero.subtitle)) return false;
+  return true;
+}
+
+function isPublishReadyArticle(article: ArticlePayload): boolean {
+  const title = (article.title || "").trim();
+  if (!title || PLACEHOLDER_TITLE_PATTERN.test(title)) return false;
+  if (isPlaceholderCopy(article.excerpt)) return false;
+  return true;
+}
+
+function pickLatestReadyEdition(heroes: HeroPayload[], articles: ArticlePayload[]): string {
+  const editions = Array.from(
+    new Set([...heroes.map((hero) => hero.edition), ...articles.map((article) => article.edition)]),
+  )
+    .filter(Boolean)
+    .sort()
+    .reverse();
+
+  for (const edition of editions) {
+    if (heroes.some((hero) => hero.edition === edition && isPublishReadyHero(hero))) return edition;
+    if (articles.some((article) => article.edition === edition && isPublishReadyArticle(article))) return edition;
+  }
+
+  return editions[0] || "";
+}
+
+function parsePositiveInt(value: string, fallback: number): number {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return parsed;
+}
+
+function toLatestViewPayload(
+  content: StoredPayload,
+  heroLimit: number,
+  articleLimit: number,
+): LatestViewPayload {
+  const readyHeroes = content.heroes.filter(isPublishReadyHero);
+  const readyArticles = content.articles.filter(isPublishReadyArticle);
+  const latestEdition = pickLatestReadyEdition(readyHeroes, readyArticles);
+  const heroes = latestEdition
+    ? readyHeroes.filter((hero) => hero.edition === latestEdition).slice(0, heroLimit)
+    : [];
+  const articles = latestEdition
+    ? readyArticles.filter((article) => article.edition === latestEdition).slice(0, articleLimit)
+    : [];
+
+  return {
+    heroes,
+    articles,
+    ads: content.ads,
+    publishedAt: content.publishedAt,
+    updatedAt: content.updatedAt,
+    latestEdition,
+  };
 }
 
 function isChunkedContentPointer(value: unknown): value is ChunkedContentPointer {
@@ -408,6 +495,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "GET") {
     try {
       const content = await getStoredContent();
+      const queryView = readFirstString(req.query?.view).trim().toLowerCase();
       const normalizedContent = content
         ? {
             ...content,
@@ -415,12 +503,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             updatedAt: content.updatedAt || content.publishedAt,
           }
         : null;
+      const responseContent = normalizedContent && queryView === "latest"
+        ? toLatestViewPayload(
+            normalizedContent,
+            parsePositiveInt(readFirstString(req.query?.heroLimit), 3),
+            parsePositiveInt(readFirstString(req.query?.articleLimit), 4),
+          )
+        : normalizedContent;
       res.status(200).json({
         ok: true,
         success: true,
         configured: isKvConfigured(),
-        content: normalizedContent,
-        payload: normalizedContent,
+        content: responseContent,
+        payload: responseContent,
       });
       return;
     } catch (error) {

@@ -5,10 +5,9 @@ import AdPlacement from "@/components/editorial/AdPlacement";
 
 import {
   getAds,
-  getArticles,
-  getHeroes,
-  getPublishedContentSnapshot,
+  getLatestPublishedEditionSnapshot,
   DEFAULT_PUBLISHED_CONTENT,
+  formatEditionLabel,
   buildContentPath,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
@@ -116,13 +115,12 @@ export default function Index() {
 
   useEffect(() => {
     let active = true;
-    getPublishedContentSnapshot().then((snapshot) => {
+    getLatestPublishedEditionSnapshot({ heroLimit: 3, articleLimit: 4 }).then((snapshot) => {
       if (!active) return;
-      const selection = selectFrontPageEditionContent(snapshot.heroes, snapshot.articles, 4);
-      setHeroes(selection.heroes);
-      setArticles(selection.articles);
+      setHeroes(snapshot.heroes);
+      setArticles(snapshot.articles);
       setAds(snapshot.ads.length > 0 ? snapshot.ads : getAds());
-      setEditionLabel(selection.editionLabel);
+      setEditionLabel(snapshot.latestEdition ? formatEditionLabel(snapshot.latestEdition) : "");
       applyHomeSeo();
       applyMagoriumBrandSeo("/magorium");
     });

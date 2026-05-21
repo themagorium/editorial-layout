@@ -1003,6 +1003,13 @@ export const DEFAULT_PUBLISHED_CONTENT: {
   ads: DEFAULT_ADS,
 };
 
+type LatestPublishedEditionSnapshot = {
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+  latestEdition: string;
+};
+
 function hasLocalEditsAvailable() {
   if (typeof window === "undefined") return false;
   ensureFreshDefaults();
@@ -1123,6 +1130,69 @@ export async function getPublishedContentSnapshot(options?: {
       };
     }
     return DEFAULT_PUBLISHED_CONTENT;
+  }
+}
+
+export async function getLatestPublishedEditionSnapshot(options?: {
+  heroLimit?: number;
+  articleLimit?: number;
+}): Promise<LatestPublishedEditionSnapshot> {
+  const heroLimit = Math.max(1, options?.heroLimit || 3);
+  const articleLimit = Math.max(1, options?.articleLimit || 4);
+
+  const fallbackEdition = Array.from(
+    new Set([
+      ...DEFAULT_PUBLISHED_CONTENT.heroes.map((hero) => hero.edition),
+      ...DEFAULT_PUBLISHED_CONTENT.articles.map((article) => article.edition),
+    ]),
+  )
+    .filter(Boolean)
+    .sort()
+    .reverse()[0] || "";
+  const buildDefaultFallback = (): LatestPublishedEditionSnapshot => ({
+    heroes: fallbackEdition
+      ? DEFAULT_PUBLISHED_CONTENT.heroes.filter((hero) => hero.edition === fallbackEdition).slice(0, heroLimit)
+      : DEFAULT_PUBLISHED_CONTENT.heroes.slice(0, heroLimit),
+    articles: fallbackEdition
+      ? DEFAULT_PUBLISHED_CONTENT.articles.filter((article) => article.edition === fallbackEdition).slice(0, articleLimit)
+      : DEFAULT_PUBLISHED_CONTENT.articles.slice(0, articleLimit),
+    ads: DEFAULT_PUBLISHED_CONTENT.ads,
+    latestEdition: fallbackEdition,
+  });
+
+  try {
+    const response = await fetch(
+      `${PUBLISHED_CONTENT_ENDPOINT}?view=latest&heroLimit=${heroLimit}&articleLimit=${articleLimit}`,
+      { cache: "no-store" },
+    );
+    if (!response.ok) return fallback;
+    const payload = await response.json().catch(() => null as unknown as {
+      payload?: {
+        heroes?: HeroItem[];
+        articles?: Article[];
+        ads?: AdSlot[];
+        latestEdition?: string;
+      };
+      content?: {
+        heroes?: HeroItem[];
+        articles?: Article[];
+        ads?: AdSlot[];
+        latestEdition?: string;
+      };
+    } | null);
+    const raw = payload?.payload || payload?.content;
+    if (!raw || !Array.isArray(raw.heroes) || !Array.isArray(raw.articles) || !Array.isArray(raw.ads)) {
+      return buildDefaultFallback();
+    }
+
+    return {
+      heroes: raw.heroes.map(normalizeHero),
+      articles: raw.articles.map(normalizeArticle),
+      ads: raw.ads,
+      latestEdition: (raw.latestEdition || "").trim(),
+    };
+  } catch {
+    return buildDefaultFallback();
   }
 }
 

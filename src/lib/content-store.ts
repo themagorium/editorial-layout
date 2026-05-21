@@ -60,6 +60,8 @@ export interface ArticleBodyBlock {
   id: string;
   type: "text" | "heading" | "image" | "video";
   content: string;
+  imageAlign?: "left" | "center" | "right";
+  imageWidth?: "small" | "medium" | "large" | "full";
   headingVariant?: "title" | "subsection";
   textStyle?: "normal" | "bold" | "italic" | "bold-italic";
   caption?: string;
@@ -176,6 +178,8 @@ function createMediaSeedBlock(baseId: string, imageUrl?: string, videoUrl?: stri
     id: `${baseId}-seed-image`,
     type: "image",
     content: imageUrl || "",
+    imageAlign: "center",
+    imageWidth: "full",
     caption: imageUrl ? "Featured image" : "Upload photo or video",
   };
 }
@@ -1224,6 +1228,8 @@ function createMediaTextPatternBody(articleId: string): ArticleBodyBlock[] {
       id: `${articleId}-m1-${now}`,
       type: "image",
       content: "",
+      imageAlign: "center",
+      imageWidth: "full",
       caption: "",
       citation: "",
     },
@@ -1236,6 +1242,8 @@ function createMediaTextPatternBody(articleId: string): ArticleBodyBlock[] {
       id: `${articleId}-m2-${now + 2}`,
       type: "image",
       content: "",
+      imageAlign: "center",
+      imageWidth: "full",
       caption: "",
       citation: "",
     },
@@ -1248,6 +1256,8 @@ function createMediaTextPatternBody(articleId: string): ArticleBodyBlock[] {
       id: `${articleId}-m3-${now + 4}`,
       type: "image",
       content: "",
+      imageAlign: "center",
+      imageWidth: "full",
       caption: "",
       citation: "",
     },
@@ -1275,6 +1285,8 @@ function normalizeBodyToMediaTextPattern(itemId: string, blocks?: ArticleBodyBlo
       id: `${itemId}-m-${now}-${i}`,
       type: "image" as const,
       content: "",
+      imageAlign: "center" as const,
+      imageWidth: "full" as const,
       caption: "",
       citation: "",
     };
@@ -1282,6 +1294,8 @@ function normalizeBodyToMediaTextPattern(itemId: string, blocks?: ArticleBodyBlo
       id: mediaBlock.id || `${itemId}-m-${now}-${i}`,
       type: mediaBlock.type === "video" ? "video" : "image",
       content: mediaBlock.content || "",
+      imageAlign: mediaBlock.type === "image" ? mediaBlock.imageAlign || "center" : undefined,
+      imageWidth: mediaBlock.type === "image" ? mediaBlock.imageWidth || "full" : undefined,
       caption: mediaBlock.caption || "",
       citation: mediaBlock.citation || "",
     });

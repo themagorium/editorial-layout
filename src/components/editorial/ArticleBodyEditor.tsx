@@ -9,6 +9,38 @@ interface Props {
   preferredPattern?: boolean;
 }
 
+const IMAGE_WIDTH_LABELS: Record<NonNullable<ArticleBodyBlock["imageWidth"]>, string> = {
+  small: "Small",
+  medium: "Medium",
+  large: "Large",
+  full: "Full Width",
+};
+
+const IMAGE_ALIGN_LABELS: Record<NonNullable<ArticleBodyBlock["imageAlign"]>, string> = {
+  left: "Left",
+  center: "Center",
+  right: "Right",
+};
+
+function getImageLayoutClasses(block: ArticleBodyBlock) {
+  const width = block.imageWidth || "full";
+  const align = block.imageAlign || "center";
+
+  const widthClassMap: Record<NonNullable<ArticleBodyBlock["imageWidth"]>, string> = {
+    small: "w-1/2",
+    medium: "w-2/3",
+    large: "w-5/6",
+    full: "w-full",
+  };
+  const alignClassMap: Record<NonNullable<ArticleBodyBlock["imageAlign"]>, string> = {
+    left: "mr-auto",
+    center: "mx-auto",
+    right: "ml-auto",
+  };
+
+  return `${widthClassMap[width]} ${alignClassMap[align]}`;
+}
+
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -41,7 +73,14 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
   const addMediaBlock = async (type: "image" | "video", file: File, atIndex?: number) => {
     const idx = atIndex ?? blocks.length;
     const url = await fileToDataUrl(file);
-    const newBlock: ArticleBodyBlock = { id: `b-${Date.now()}`, type, content: url, caption: "" };
+    const newBlock: ArticleBodyBlock = {
+      id: `b-${Date.now()}`,
+      type,
+      content: url,
+      caption: "",
+      imageAlign: type === "image" ? "center" : undefined,
+      imageWidth: type === "image" ? "full" : undefined,
+    };
     const updated = [...blocks];
     updated.splice(idx, 0, newBlock);
     onChange(updated);
@@ -246,7 +285,11 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
 
           {block.type === "image" && (
             <div className="space-y-2">
-              {block.content && <img src={block.content} alt="" className="w-full max-h-48 object-cover rounded" />}
+              {block.content && (
+                <div className={getImageLayoutClasses(block)}>
+                  <img src={block.content} alt="" className="w-full max-h-48 object-cover rounded" />
+                </div>
+              )}
               <div className="flex gap-2">
                 <label className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors cursor-pointer">
                   Replace Image
@@ -270,6 +313,38 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
                 >
                   Clear
                 </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <select
+                  value={block.imageAlign || "center"}
+                  onChange={(e) =>
+                    updateBlock(block.id, {
+                      imageAlign: e.target.value as NonNullable<ArticleBodyBlock["imageAlign"]>,
+                    })
+                  }
+                  className="bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
+                >
+                  {Object.entries(IMAGE_ALIGN_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      Align: {label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={block.imageWidth || "full"}
+                  onChange={(e) =>
+                    updateBlock(block.id, {
+                      imageWidth: e.target.value as NonNullable<ArticleBodyBlock["imageWidth"]>,
+                    })
+                  }
+                  className="bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
+                >
+                  {Object.entries(IMAGE_WIDTH_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      Size: {label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <input
                 value={block.content || ""}

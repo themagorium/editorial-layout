@@ -66,6 +66,23 @@ function bylineCreditLabel(author?: string) {
   return `By ${normalized} · Contributing Writer`;
 }
 
+function getBodyImageLayoutClasses(block: ArticleBodyBlock) {
+  const width = block.imageWidth || "full";
+  const align = block.imageAlign || "center";
+  const widthClassMap = {
+    small: "w-full md:w-1/2",
+    medium: "w-full md:w-2/3",
+    large: "w-full md:w-5/6",
+    full: "w-full",
+  } as const;
+  const alignClassMap = {
+    left: "mr-auto",
+    center: "mx-auto",
+    right: "ml-auto",
+  } as const;
+  return `${widthClassMap[width]} ${alignClassMap[align]}`;
+}
+
 export default function ArticlePage() {
   useSyncPublishedContent();
   const { id } = useParams<{ id: string }>();
@@ -197,7 +214,7 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
     const hasCaption = isMeaningfulCaption(block.caption);
     const hasCitation = Boolean(block.citation);
     return (
-      <figure className="my-8 relative">
+      <figure className={`my-8 relative ${getBodyImageLayoutClasses(block)}`}>
         <img src={block.content} alt={block.caption || ""} className="w-full rounded" loading="lazy" />
         {(hasCaption || hasCitation) && (
           <div className="flex items-start justify-between mt-2 gap-4">

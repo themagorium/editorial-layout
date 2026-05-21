@@ -4,6 +4,8 @@ type BodyBlock = {
   id: string;
   type: "text" | "heading" | "image" | "video";
   content: string;
+  imageAlign?: "left" | "center" | "right";
+  imageWidth?: "small" | "medium" | "large" | "full";
   headingVariant?: "title" | "subsection";
   textStyle?: "normal" | "bold" | "italic" | "bold-italic";
   caption?: string;

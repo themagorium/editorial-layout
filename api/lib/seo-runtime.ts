@@ -14,6 +14,8 @@ let kvClientPromise: Promise<{
 type BodyBlock = {
   type?: string;
   content?: string;
+  imageAlign?: "left" | "center" | "right";
+  imageWidth?: "small" | "medium" | "large" | "full";
 };
 
 type StoredHero = {

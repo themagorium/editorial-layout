@@ -67,11 +67,32 @@ function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[]
 function createOctoberPatternBody(seed: string): ArticleBodyBlock[] {
   return [
     { id: `${seed}-t1`, type: "text", content: "Add first body paragraph" },
-    { id: `${seed}-m1`, type: "image", content: "", caption: "Upload photo or video" },
+    {
+      id: `${seed}-m1`,
+      type: "image",
+      content: "",
+      imageAlign: "center",
+      imageWidth: "full",
+      caption: "Upload photo or video",
+    },
     { id: `${seed}-t2`, type: "text", content: "Add second body paragraph" },
-    { id: `${seed}-m2`, type: "image", content: "", caption: "Upload photo or video" },
+    {
+      id: `${seed}-m2`,
+      type: "image",
+      content: "",
+      imageAlign: "center",
+      imageWidth: "full",
+      caption: "Upload photo or video",
+    },
     { id: `${seed}-t3`, type: "text", content: "Add third body paragraph" },
-    { id: `${seed}-m3`, type: "image", content: "", caption: "Upload photo or video" },
+    {
+      id: `${seed}-m3`,
+      type: "image",
+      content: "",
+      imageAlign: "center",
+      imageWidth: "full",
+      caption: "Upload photo or video",
+    },
   ];
 }
 
@@ -1002,6 +1023,8 @@ function normalizeBodyFlow(
         id: `auto-i-${Date.now()}`,
         type: "image",
         content: imageUrl || "",
+          imageAlign: "center",
+          imageWidth: "full",
         caption: imageUrl ? "Featured image" : "Upload photo or video",
       });
     }
@@ -1028,6 +1051,8 @@ function normalizeBodyFlow(
           id: `auto-i-${Date.now()}-${i}`,
           type: "image",
           content: imageUrl || "",
+          imageAlign: "center",
+          imageWidth: "full",
           caption: imageUrl ? "Featured image" : "Upload photo or video",
         });
       }

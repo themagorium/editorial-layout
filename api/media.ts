@@ -6,7 +6,15 @@ type StoredMedia = {
   createdAt: string;
 };
 
+type ChunkedMediaPointer = {
+  __chunked: true;
+  totalChunks: number;
+  chunkPrefix: string;
+  createdAt: string;
+};
+
 const MEDIA_KEY_PREFIX = "magorium:media:v1:";
+const MEDIA_CHUNK_SIZE = 700_000;
 const ADMIN_PASSWORD_KEY = "ADMIN_PASSWORD";
 
 let memoryFallback = new Map<string, StoredMedia>();
@@ -128,8 +136,24 @@ function getMediaKey(id: string) {
   return `${MEDIA_KEY_PREFIX}${id}`;
 }
 
+function getMediaChunkPrefix(id: string) {
+  return `${getMediaKey(id)}:chunk:`;
+}
+
 function getMediaId(dataUrl: string): string {
   return crypto.createHash("sha256").update(dataUrl).digest("hex").slice(0, 40);
+}
+
+function isChunkedMediaPointer(value: unknown): value is ChunkedMediaPointer {
+  if (!value || typeof value !== "object") return false;
+  const pointer = value as Partial<ChunkedMediaPointer>;
+  return (
+    pointer.__chunked === true
+    && typeof pointer.totalChunks === "number"
+    && pointer.totalChunks > 0
+    && typeof pointer.chunkPrefix === "string"
+    && Boolean(pointer.chunkPrefix)
+  );
 }
 
 async function verifyBearerPublishToken(token: string, adminPassword: string): Promise<boolean> {
@@ -160,7 +184,22 @@ async function authorized(req: VercelRequest): Promise<boolean> {
 async function getStoredMedia(id: string): Promise<StoredMedia | null> {
   const kv = await getKvClient();
   if (kv) {
-    return (await kv.get<StoredMedia>(getMediaKey(id))) || null;
+    const stored = await kv.get<StoredMedia | ChunkedMediaPointer>(getMediaKey(id));
+    if (!stored) return null;
+    if (!isChunkedMediaPointer(stored)) return stored;
+
+    let dataUrl = "";
+    for (let index = 0; index < stored.totalChunks; index += 1) {
+      const chunk = await kv.get<string>(`${stored.chunkPrefix}${index}`);
+      if (typeof chunk !== "string") {
+        throw new Error("Stored media is missing one or more chunks.");
+      }
+      dataUrl += chunk;
+    }
+    return {
+      dataUrl,
+      createdAt: stored.createdAt,
+    };
   }
   return memoryFallback.get(id) || null;
 }
@@ -168,7 +207,25 @@ async function getStoredMedia(id: string): Promise<StoredMedia | null> {
 async function setStoredMedia(id: string, media: StoredMedia): Promise<void> {
   const kv = await getKvClient();
   if (kv) {
-    await kv.set(getMediaKey(id), media);
+    const chunkPrefix = getMediaChunkPrefix(id);
+    if (media.dataUrl.length <= MEDIA_CHUNK_SIZE) {
+      await kv.set(getMediaKey(id), media);
+      return;
+    }
+
+    const totalChunks = Math.ceil(media.dataUrl.length / MEDIA_CHUNK_SIZE);
+    for (let index = 0; index < totalChunks; index += 1) {
+      const start = index * MEDIA_CHUNK_SIZE;
+      const end = start + MEDIA_CHUNK_SIZE;
+      await kv.set(`${chunkPrefix}${index}`, media.dataUrl.slice(start, end));
+    }
+
+    await kv.set(getMediaKey(id), {
+      __chunked: true,
+      totalChunks,
+      chunkPrefix,
+      createdAt: media.createdAt,
+    } satisfies ChunkedMediaPointer);
     return;
   }
   memoryFallback.set(id, media);

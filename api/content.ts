@@ -67,7 +67,16 @@ type StoredPayload = PublishPayload & {
   updatedAt?: string;
 };
 
+type ChunkedContentPointer = {
+  __chunked: true;
+  totalChunks: number;
+  chunkPrefix: string;
+  updatedAt: string;
+};
+
 const CONTENT_KEY = "magorium:published-content:v1";
+const CONTENT_CHUNK_PREFIX = `${CONTENT_KEY}:chunk:`;
+const CONTENT_CHUNK_SIZE = 700_000;
 const ADMIN_PASSWORD_KEY = "ADMIN_PASSWORD";
 
 let memoryFallback: StoredPayload | null = null;
@@ -221,6 +230,18 @@ function sanitizePayload(input: unknown): PublishPayload {
   return { heroes, articles, ads };
 }
 
+function isChunkedContentPointer(value: unknown): value is ChunkedContentPointer {
+  if (!value || typeof value !== "object") return false;
+  const pointer = value as Partial<ChunkedContentPointer>;
+  return (
+    pointer.__chunked === true
+    && typeof pointer.totalChunks === "number"
+    && pointer.totalChunks > 0
+    && typeof pointer.chunkPrefix === "string"
+    && Boolean(pointer.chunkPrefix)
+  );
+}
+
 async function verifyBearerPublishToken(token: string, adminPassword: string): Promise<boolean> {
   if (!token || !adminPassword) return false;
   try {
@@ -249,7 +270,23 @@ async function authorized(req: VercelRequest): Promise<boolean> {
 async function getStoredContent() {
   const kv = await getKvClient();
   if (kv) {
-    return (await kv.get<StoredPayload>(CONTENT_KEY)) || null;
+    const stored = await kv.get<StoredPayload | ChunkedContentPointer>(CONTENT_KEY);
+    if (!stored) return null;
+
+    if (!isChunkedContentPointer(stored)) {
+      return stored;
+    }
+
+    let combined = "";
+    for (let index = 0; index < stored.totalChunks; index += 1) {
+      const chunk = await kv.get<string>(`${stored.chunkPrefix}${index}`);
+      if (typeof chunk !== "string") {
+        throw new Error("Published content is missing one or more stored chunks.");
+      }
+      combined += chunk;
+    }
+
+    return JSON.parse(combined) as StoredPayload;
   }
   return memoryFallback;
 }
@@ -257,7 +294,25 @@ async function getStoredContent() {
 async function setStoredContent(content: StoredPayload) {
   const kv = await getKvClient();
   if (kv) {
-    await kv.set(CONTENT_KEY, content);
+    const serialized = JSON.stringify(content);
+    if (serialized.length <= CONTENT_CHUNK_SIZE) {
+      await kv.set(CONTENT_KEY, content);
+      return;
+    }
+
+    const totalChunks = Math.ceil(serialized.length / CONTENT_CHUNK_SIZE);
+    for (let index = 0; index < totalChunks; index += 1) {
+      const start = index * CONTENT_CHUNK_SIZE;
+      const end = start + CONTENT_CHUNK_SIZE;
+      await kv.set(`${CONTENT_CHUNK_PREFIX}${index}`, serialized.slice(start, end));
+    }
+
+    await kv.set(CONTENT_KEY, {
+      __chunked: true,
+      totalChunks,
+      chunkPrefix: CONTENT_CHUNK_PREFIX,
+      updatedAt: content.updatedAt || content.publishedAt,
+    } satisfies ChunkedContentPointer);
     return;
   }
   memoryFallback = content;

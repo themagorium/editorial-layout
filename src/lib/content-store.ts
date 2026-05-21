@@ -1010,6 +1010,28 @@ type LatestPublishedEditionSnapshot = {
   latestEdition: string;
 };
 
+function editionSortWeight(edition: string): number {
+  const normalized = (edition || "").trim();
+  const direct = normalized.match(/^(\d{4})-(\d{1,2})$/);
+  if (direct) {
+    const year = Number.parseInt(direct[1], 10);
+    const month = Number.parseInt(direct[2], 10);
+    if (month >= 1 && month <= 12) return year * 100 + month;
+  }
+  const parsed = new Date(normalized);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.getUTCFullYear() * 100 + (parsed.getUTCMonth() + 1);
+  }
+  return Number.MIN_SAFE_INTEGER;
+}
+
+function compareEditionDesc(left: string, right: string): number {
+  const leftWeight = editionSortWeight(left);
+  const rightWeight = editionSortWeight(right);
+  if (leftWeight === rightWeight) return right.localeCompare(left);
+  return rightWeight - leftWeight;
+}
+
 function hasLocalEditsAvailable() {
   if (typeof window === "undefined") return false;
   ensureFreshDefaults();
@@ -1147,8 +1169,7 @@ export async function getLatestPublishedEditionSnapshot(options?: {
     ]),
   )
     .filter(Boolean)
-    .sort()
-    .reverse()[0] || "";
+    .sort(compareEditionDesc)[0] || "";
   const buildDefaultFallback = (): LatestPublishedEditionSnapshot => ({
     heroes: fallbackEdition
       ? DEFAULT_PUBLISHED_CONTENT.heroes.filter((hero) => hero.edition === fallbackEdition).slice(0, heroLimit)
@@ -1165,7 +1186,7 @@ export async function getLatestPublishedEditionSnapshot(options?: {
       `${PUBLISHED_CONTENT_ENDPOINT}?view=latest&heroLimit=${heroLimit}&articleLimit=${articleLimit}`,
       { cache: "no-store" },
     );
-    if (!response.ok) return fallback;
+    if (!response.ok) return buildDefaultFallback();
     const payload = await response.json().catch(() => null as unknown as {
       payload?: {
         heroes?: HeroItem[];

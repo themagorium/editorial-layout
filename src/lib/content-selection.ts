@@ -32,13 +32,34 @@ export function isPublishReadyArticle(article: Article): boolean {
   return true;
 }
 
+function editionSortWeight(edition: string): number {
+  const normalized = (edition || "").trim();
+  const direct = normalized.match(/^(\d{4})-(\d{1,2})$/);
+  if (direct) {
+    const year = Number.parseInt(direct[1], 10);
+    const month = Number.parseInt(direct[2], 10);
+    if (month >= 1 && month <= 12) return year * 100 + month;
+  }
+  const parsed = new Date(normalized);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.getUTCFullYear() * 100 + (parsed.getUTCMonth() + 1);
+  }
+  return Number.MIN_SAFE_INTEGER;
+}
+
+function compareEditionDesc(left: string, right: string): number {
+  const leftWeight = editionSortWeight(left);
+  const rightWeight = editionSortWeight(right);
+  if (leftWeight === rightWeight) return right.localeCompare(left);
+  return rightWeight - leftWeight;
+}
+
 export function pickLatestReadyEdition(heroes: HeroItem[], articles: Article[]): string {
   const editions = Array.from(
     new Set([...heroes.map((hero) => hero.edition), ...articles.map((article) => article.edition)]),
   )
     .filter(Boolean)
-    .sort()
-    .reverse();
+    .sort(compareEditionDesc);
 
   for (const edition of editions) {
     const hasHero = heroes.some((hero) => hero.edition === edition && isPublishReadyHero(hero));

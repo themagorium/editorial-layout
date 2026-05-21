@@ -58,6 +58,70 @@ function isPublishReadyCategoryStory(story: CategoryStory): boolean {
   return true;
 }
 
+function editionSortWeight(edition: string): number {
+  const normalized = (edition || "").trim();
+  const direct = normalized.match(/^(\d{4})-(\d{1,2})$/);
+  if (direct) {
+    const year = Number.parseInt(direct[1], 10);
+    const month = Number.parseInt(direct[2], 10);
+    if (month >= 1 && month <= 12) return year * 100 + month;
+  }
+  const parsed = new Date(normalized);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.getUTCFullYear() * 100 + (parsed.getUTCMonth() + 1);
+  }
+  return Number.MIN_SAFE_INTEGER;
+}
+
+function compareStoryRecency(left: CategoryStory, right: CategoryStory): number {
+  const leftEditionWeight = editionSortWeight(left.edition);
+  const rightEditionWeight = editionSortWeight(right.edition);
+  if (leftEditionWeight !== rightEditionWeight) return rightEditionWeight - leftEditionWeight;
+
+  const leftDate = +new Date(left.date);
+  const rightDate = +new Date(right.date);
+  if (leftDate !== rightDate) return rightDate - leftDate;
+
+  if (left.storyType !== right.storyType) {
+    // Prefer article when both story variants exist.
+    return left.storyType === "article" ? -1 : 1;
+  }
+  return left.id.localeCompare(right.id);
+}
+
+function normalizeVersionTokens(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/artificial intelligence/g, "ai")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean)
+    .filter((token) => !["the", "a", "an", "and", "of", "to", "for", "in"].includes(token))
+    .join(" ");
+}
+
+function versionKeyForStory(story: CategoryStory): string {
+  const titleKey = normalizeVersionTokens(story.title);
+  const excerptKey = normalizeVersionTokens(story.excerpt).split(" ").slice(0, 10).join(" ");
+  return `${titleKey}|${excerptKey}`;
+}
+
+function dedupeStoryVersions(stories: CategoryStory[]): CategoryStory[] {
+  const byNewest = stories.slice().sort(compareStoryRecency);
+  const seen = new Set<string>();
+  const deduped: CategoryStory[] = [];
+
+  byNewest.forEach((story) => {
+    const key = versionKeyForStory(story);
+    if (seen.has(key)) return;
+    seen.add(key);
+    deduped.push(story);
+  });
+
+  return deduped.sort(compareStoryRecency);
+}
+
 function normalizeCategoryLabel(raw: string): string {
   const slug = slugifyText(raw || "");
   const aliases: Record<string, string> = {
@@ -143,11 +207,12 @@ export default function CategoryPage() {
       const filtered = allStories
         .filter((story) => slugifyText(story.category) === normalizedSlug)
         .filter(isPublishReadyCategoryStory)
-        .sort((a, b) => +new Date(b.date) - +new Date(a.date));
+        .sort(compareStoryRecency);
+      const deduped = dedupeStoryVersions(filtered);
 
-      setStories(filtered);
+      setStories(deduped);
       setLoaded(true);
-      const editionCount = new Set(filtered.map((story) => story.edition).filter(Boolean)).size;
+      const editionCount = new Set(deduped.map((story) => story.edition).filter(Boolean)).size;
       applyCollectionSeo(
         `${normalizedLabel} Editions & Stories | The Magorium`,
         `Browse ${normalizedLabel} stories across ${editionCount || 0} editions on The Magorium.`,

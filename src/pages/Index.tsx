@@ -132,7 +132,7 @@ export default function Index() {
   const hasAdMedia = (ad: AdSlot) => Boolean(ad.imageUrl || ad.videoUrl);
   const authorPages = Array.from(
     new Set(
-      [...getHeroes().map((h) => h.author || ""), ...getArticles().map((a) => a.author || "")]
+      [...heroes.map((hero) => hero.author || ""), ...articles.map((article) => article.author || "")]
         .map((name) => (name || "").trim())
         .filter(Boolean),
     ),

@@ -32,13 +32,33 @@ export default class AppErrorBoundary extends Component<AppErrorBoundaryProps, A
     console.error("App crash prevented by boundary:", error, errorInfo);
   }
 
-  handleReload = () => {
-    window.location.reload();
+  forceReload = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("_recover", Date.now().toString());
+    window.location.replace(url.toString());
   };
 
-  handleResetLocalCache = () => {
-    STORAGE_KEYS_TO_RESET.forEach((key) => localStorage.removeItem(key));
-    window.location.reload();
+  handleReload = () => {
+    this.forceReload();
+  };
+
+  handleResetLocalCache = async () => {
+    try {
+      STORAGE_KEYS_TO_RESET.forEach((key) => localStorage.removeItem(key));
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith("editorial_") || key.startsWith("magorium"))
+        .forEach((key) => localStorage.removeItem(key));
+      Object.keys(sessionStorage)
+        .filter((key) => key.startsWith("editorial_") || key.startsWith("magorium"))
+        .forEach((key) => sessionStorage.removeItem(key));
+
+      if (typeof caches !== "undefined") {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      }
+    } finally {
+      this.forceReload();
+    }
   };
 
   render() {

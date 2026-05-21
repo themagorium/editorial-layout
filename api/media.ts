@@ -1,4 +1,4 @@
-import crypto from "node:crypto";
+import { createHash } from "crypto";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 type StoredMedia = {
@@ -141,7 +141,7 @@ function getMediaChunkPrefix(id: string) {
 }
 
 function getMediaId(dataUrl: string): string {
-  return crypto.createHash("sha256").update(dataUrl).digest("hex").slice(0, 40);
+  return createHash("sha256").update(dataUrl).digest("hex").slice(0, 40);
 }
 
 function isChunkedMediaPointer(value: unknown): value is ChunkedMediaPointer {
@@ -220,12 +220,13 @@ async function setStoredMedia(id: string, media: StoredMedia): Promise<void> {
       await kv.set(`${chunkPrefix}${index}`, media.dataUrl.slice(start, end));
     }
 
-    await kv.set(getMediaKey(id), {
+    const pointer: ChunkedMediaPointer = {
       __chunked: true,
       totalChunks,
       chunkPrefix,
       createdAt: media.createdAt,
-    } satisfies ChunkedMediaPointer);
+    };
+    await kv.set(getMediaKey(id), pointer);
     return;
   }
   memoryFallback.set(id, media);

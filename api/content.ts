@@ -392,12 +392,13 @@ async function setStoredContent(content: StoredPayload) {
       await kv.set(`${CONTENT_CHUNK_PREFIX}${index}`, serialized.slice(start, end));
     }
 
-    await kv.set(CONTENT_KEY, {
+    const pointer: ChunkedContentPointer = {
       __chunked: true,
       totalChunks,
       chunkPrefix: CONTENT_CHUNK_PREFIX,
       updatedAt: content.updatedAt || content.publishedAt,
-    } satisfies ChunkedContentPointer);
+    };
+    await kv.set(CONTENT_KEY, pointer);
     return;
   }
   memoryFallback = content;

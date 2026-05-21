@@ -4,8 +4,8 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import {
   buildContentPath,
-  formatEditionLabel,
   getPublishedContentSnapshot,
+  DEFAULT_PUBLISHED_CONTENT,
   type Article,
   type HeroItem,
 } from "@/lib/content-store";
@@ -17,6 +17,7 @@ import {
   getAuthorPath,
 } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
+import { selectFrontPageEditionContent } from "@/lib/content-selection";
 
 type StoryFeedPageProps = {
   seoHint?: string;
@@ -65,10 +66,15 @@ export default function StoryFeedPage({
   canonicalAliasPath = "/magorium",
 }: StoryFeedPageProps) {
   useSyncPublishedContent();
-  const [heroes, setHeroes] = useState<HeroItem[]>([]);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [editionLabel, setEditionLabel] = useState("");
-  const [loaded, setLoaded] = useState(false);
+  const initial = selectFrontPageEditionContent(
+    DEFAULT_PUBLISHED_CONTENT.heroes,
+    DEFAULT_PUBLISHED_CONTENT.articles,
+    8,
+  );
+  const [heroes, setHeroes] = useState<HeroItem[]>(initial.heroes);
+  const [articles, setArticles] = useState<Article[]>(initial.articles);
+  const [editionLabel, setEditionLabel] = useState(initial.editionLabel);
+  const [loaded, setLoaded] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -76,22 +82,12 @@ export default function StoryFeedPage({
       const snapshot = await getPublishedContentSnapshot();
       if (!active) return;
 
-      const editions = new Set<string>();
-      snapshot.heroes.forEach((h) => editions.add(h.edition));
-      snapshot.articles.forEach((a) => editions.add(a.edition));
-      const latestEdition = Array.from(editions).sort().reverse()[0];
+      const selection = selectFrontPageEditionContent(snapshot.heroes, snapshot.articles, 8);
 
-      const latestHeroes = latestEdition
-        ? snapshot.heroes.filter((h) => h.edition === latestEdition).slice(0, 3)
-        : snapshot.heroes.slice(0, 3);
-      const latestArticles = latestEdition
-        ? snapshot.articles.filter((a) => a.edition === latestEdition).slice(0, 8)
-        : snapshot.articles.slice(0, 8);
-
-      setHeroes(latestHeroes);
-      setArticles(latestArticles);
-      setEditionLabel(latestEdition ? formatEditionLabel(latestEdition) : "");
-      const storyPaths = [...latestHeroes, ...latestArticles].map((item) =>
+      setHeroes(selection.heroes);
+      setArticles(selection.articles);
+      setEditionLabel(selection.editionLabel);
+      const storyPaths = [...selection.heroes, ...selection.articles].map((item) =>
         buildContentPath(item.id, item.title),
       );
       setLoaded(true);

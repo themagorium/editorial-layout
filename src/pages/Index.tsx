@@ -7,11 +7,8 @@ import {
   getAds,
   getArticles,
   getHeroes,
-  getLatestEdition,
-  getHeroesByEdition,
-  getArticlesByEdition,
   getPublishedContentSnapshot,
-  formatEditionLabel,
+  DEFAULT_PUBLISHED_CONTENT,
   buildContentPath,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
@@ -19,6 +16,7 @@ import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { applyHomeSeo, applyMagoriumBrandSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
+import { selectFrontPageEditionContent } from "@/lib/content-selection";
 
 function HeroCard({ hero }: { hero: HeroItem }) {
   const authorName = canonicalAuthorName(hero.author);
@@ -106,24 +104,25 @@ function ArticleCard({ article }: { article: Article }) {
 
 export default function Index() {
   useSyncPublishedContent();
-  const [heroes, setHeroes] = useState<HeroItem[]>([]);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [ads, setAds] = useState<AdSlot[]>([]);
-  const [editionLabel, setEditionLabel] = useState("");
+  const initial = selectFrontPageEditionContent(
+    DEFAULT_PUBLISHED_CONTENT.heroes,
+    DEFAULT_PUBLISHED_CONTENT.articles,
+    4,
+  );
+  const [heroes, setHeroes] = useState<HeroItem[]>(initial.heroes);
+  const [articles, setArticles] = useState<Article[]>(initial.articles);
+  const [ads, setAds] = useState<AdSlot[]>(DEFAULT_PUBLISHED_CONTENT.ads);
+  const [editionLabel, setEditionLabel] = useState(initial.editionLabel);
 
   useEffect(() => {
     let active = true;
     getPublishedContentSnapshot().then((snapshot) => {
       if (!active) return;
-      const editions = new Set<string>();
-      snapshot.heroes.forEach((h) => editions.add(h.edition));
-      snapshot.articles.forEach((a) => editions.add(a.edition));
-      const latestEdition = Array.from(editions).sort().reverse()[0] || getLatestEdition();
-
-      setHeroes(snapshot.heroes.filter((h) => h.edition === latestEdition).slice(0, 3));
-      setArticles(snapshot.articles.filter((a) => a.edition === latestEdition).slice(0, 4));
+      const selection = selectFrontPageEditionContent(snapshot.heroes, snapshot.articles, 4);
+      setHeroes(selection.heroes);
+      setArticles(selection.articles);
       setAds(snapshot.ads.length > 0 ? snapshot.ads : getAds());
-      setEditionLabel(formatEditionLabel(latestEdition));
+      setEditionLabel(selection.editionLabel);
       applyHomeSeo();
       applyMagoriumBrandSeo("/magorium");
     });

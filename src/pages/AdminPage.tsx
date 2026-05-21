@@ -120,99 +120,6 @@ type EditableContentPayload = {
   ads: AdSlot[];
 };
 
-function isDataUrl(value?: string): value is string {
-  if (!value) return false;
-  return /^data:[^;]+;base64,/.test(value.trim());
-}
-
-async function uploadMediaDataUrl(dataUrl: string, publishToken: string): Promise<string> {
-  const response = await fetch("/api/media", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${publishToken}`,
-      "x-admin-password": publishToken,
-    },
-    body: JSON.stringify({ dataUrl }),
-  });
-  const payload = await response.json().catch(() => ({} as { success?: boolean; error?: string; url?: string }));
-  if (!response.ok || !payload.success || !payload.url) {
-    throw new Error(payload.error || "Failed to upload media asset.");
-  }
-  return payload.url;
-}
-
-async function prepareContentForPublish(
-  content: EditableContentPayload,
-  publishToken: string,
-): Promise<{ content: EditableContentPayload; uploadedCount: number }> {
-  const uploadCache = new Map<string, Promise<string>>();
-  let uploadedCount = 0;
-
-  const resolveMediaUrl = async (value?: string): Promise<string | undefined> => {
-    const trimmed = (value || "").trim();
-    if (!trimmed) return value;
-    if (!isDataUrl(trimmed)) return value;
-    if (!uploadCache.has(trimmed)) {
-      uploadCache.set(
-        trimmed,
-        uploadMediaDataUrl(trimmed, publishToken).then((url) => {
-          uploadedCount += 1;
-          return url;
-        }),
-      );
-    }
-    return uploadCache.get(trimmed);
-  };
-
-  const heroes = await Promise.all(
-    content.heroes.map(async (hero) => ({
-      ...hero,
-      imageUrl: (await resolveMediaUrl(hero.imageUrl)) || "",
-      videoUrl: await resolveMediaUrl(hero.videoUrl),
-      body: await Promise.all(
-        (hero.body || []).map(async (block) => {
-          if (block.type !== "image" && block.type !== "video") return block;
-          return {
-            ...block,
-            content: (await resolveMediaUrl(block.content)) || "",
-          };
-        }),
-      ),
-    })),
-  );
-
-  const articles = await Promise.all(
-    content.articles.map(async (article) => ({
-      ...article,
-      imageUrl: (await resolveMediaUrl(article.imageUrl)) || "",
-      videoUrl: await resolveMediaUrl(article.videoUrl),
-      body: await Promise.all(
-        (article.body || []).map(async (block) => {
-          if (block.type !== "image" && block.type !== "video") return block;
-          return {
-            ...block,
-            content: (await resolveMediaUrl(block.content)) || "",
-          };
-        }),
-      ),
-    })),
-  );
-
-  const ads = await Promise.all(
-    content.ads.map(async (ad) => ({
-      ...ad,
-      imageUrl: await resolveMediaUrl(ad.imageUrl),
-      videoUrl: await resolveMediaUrl(ad.videoUrl),
-    })),
-  );
-
-  return {
-    content: { heroes, articles, ads },
-    uploadedCount,
-  };
-}
-
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(() => {
     return isAdminAuthenticated();
@@ -366,20 +273,15 @@ function AdminDashboard() {
         toast.error("Admin session expired. Please sign in again to publish live.");
         return;
       }
-      const prepared = await prepareContentForPublish({ heroes, articles, ads }, publishToken);
-      if (prepared.uploadedCount > 0) {
-        setHeroes(prepared.content.heroes);
-        setArticles(prepared.content.articles);
-        setAds(prepared.content.ads);
-      }
-      const published = await publishEditorialContent(prepared.content, publishToken);
+      const contentToPublish: EditableContentPayload = { heroes, articles, ads };
+      const published = await publishEditorialContent(contentToPublish, publishToken);
       if (!published.success) {
         const fallbackMessage = published.error || "Could not publish content to live";
         let draftStored = true;
         try {
-          saveHeroes(prepared.content.heroes);
-          saveArticles(prepared.content.articles);
-          saveAds(prepared.content.ads);
+          saveHeroes(contentToPublish.heroes);
+          saveArticles(contentToPublish.articles);
+          saveAds(contentToPublish.ads);
         } catch (error) {
           if (!isStorageQuotaExceededError(error)) {
             throw error;
@@ -396,11 +298,7 @@ function AdminDashboard() {
       }
 
       clearLocalDraftStorage();
-      toast.success(
-        prepared.uploadedCount > 0
-          ? `Content published to live. Uploaded ${prepared.uploadedCount} media assets to cloud storage.`
-          : "Content published to live.",
-      );
+      toast.success("Content published to live.");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not save content";
       toast.error(message);

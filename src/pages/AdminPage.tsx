@@ -5,12 +5,12 @@ import {
   getHeroes,
   getArticles,
   getAds,
-  restoreDefaultContentBackup,
   saveHeroes,
   saveArticles,
   saveAds,
   publishEditorialContent,
   getPublishedContentSnapshot,
+  DEFAULT_PUBLISHED_CONTENT,
   resetToDefaults,
   clearLocalDraftStorage,
   isStorageQuotaExceededError,
@@ -112,6 +112,105 @@ function parseSeoTagsInput(value: string): string[] {
       tags.push(token);
     });
   return tags.slice(0, 25);
+}
+
+type EditableContentPayload = {
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+};
+
+function isDataUrl(value?: string): value is string {
+  if (!value) return false;
+  return /^data:[^;]+;base64,/.test(value.trim());
+}
+
+async function uploadMediaDataUrl(dataUrl: string, publishToken: string): Promise<string> {
+  const response = await fetch("/api/media", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${publishToken}`,
+      "x-admin-password": publishToken,
+    },
+    body: JSON.stringify({ dataUrl }),
+  });
+  const payload = await response.json().catch(() => ({} as { success?: boolean; error?: string; url?: string }));
+  if (!response.ok || !payload.success || !payload.url) {
+    throw new Error(payload.error || "Failed to upload media asset.");
+  }
+  return payload.url;
+}
+
+async function prepareContentForPublish(
+  content: EditableContentPayload,
+  publishToken: string,
+): Promise<{ content: EditableContentPayload; uploadedCount: number }> {
+  const uploadCache = new Map<string, Promise<string>>();
+  let uploadedCount = 0;
+
+  const resolveMediaUrl = async (value?: string): Promise<string | undefined> => {
+    const trimmed = (value || "").trim();
+    if (!trimmed) return value;
+    if (!isDataUrl(trimmed)) return value;
+    if (!uploadCache.has(trimmed)) {
+      uploadCache.set(
+        trimmed,
+        uploadMediaDataUrl(trimmed, publishToken).then((url) => {
+          uploadedCount += 1;
+          return url;
+        }),
+      );
+    }
+    return uploadCache.get(trimmed);
+  };
+
+  const heroes = await Promise.all(
+    content.heroes.map(async (hero) => ({
+      ...hero,
+      imageUrl: (await resolveMediaUrl(hero.imageUrl)) || "",
+      videoUrl: await resolveMediaUrl(hero.videoUrl),
+      body: await Promise.all(
+        (hero.body || []).map(async (block) => {
+          if (block.type !== "image" && block.type !== "video") return block;
+          return {
+            ...block,
+            content: (await resolveMediaUrl(block.content)) || "",
+          };
+        }),
+      ),
+    })),
+  );
+
+  const articles = await Promise.all(
+    content.articles.map(async (article) => ({
+      ...article,
+      imageUrl: (await resolveMediaUrl(article.imageUrl)) || "",
+      videoUrl: await resolveMediaUrl(article.videoUrl),
+      body: await Promise.all(
+        (article.body || []).map(async (block) => {
+          if (block.type !== "image" && block.type !== "video") return block;
+          return {
+            ...block,
+            content: (await resolveMediaUrl(block.content)) || "",
+          };
+        }),
+      ),
+    })),
+  );
+
+  const ads = await Promise.all(
+    content.ads.map(async (ad) => ({
+      ...ad,
+      imageUrl: await resolveMediaUrl(ad.imageUrl),
+      videoUrl: await resolveMediaUrl(ad.videoUrl),
+    })),
+  );
+
+  return {
+    content: { heroes, articles, ads },
+    uploadedCount,
+  };
 }
 
 export default function AdminPage() {
@@ -267,14 +366,20 @@ function AdminDashboard() {
         toast.error("Admin session expired. Please sign in again to publish live.");
         return;
       }
-      const published = await publishEditorialContent({ heroes, articles, ads }, publishToken);
+      const prepared = await prepareContentForPublish({ heroes, articles, ads }, publishToken);
+      if (prepared.uploadedCount > 0) {
+        setHeroes(prepared.content.heroes);
+        setArticles(prepared.content.articles);
+        setAds(prepared.content.ads);
+      }
+      const published = await publishEditorialContent(prepared.content, publishToken);
       if (!published.success) {
         const fallbackMessage = published.error || "Could not publish content to live";
         let draftStored = true;
         try {
-          saveHeroes(heroes);
-          saveArticles(articles);
-          saveAds(ads);
+          saveHeroes(prepared.content.heroes);
+          saveArticles(prepared.content.articles);
+          saveAds(prepared.content.ads);
         } catch (error) {
           if (!isStorageQuotaExceededError(error)) {
             throw error;
@@ -291,7 +396,11 @@ function AdminDashboard() {
       }
 
       clearLocalDraftStorage();
-      toast.success("Content published to live.");
+      toast.success(
+        prepared.uploadedCount > 0
+          ? `Content published to live. Uploaded ${prepared.uploadedCount} media assets to cloud storage.`
+          : "Content published to live.",
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not save content";
       toast.error(message);
@@ -312,10 +421,17 @@ function AdminDashboard() {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      restoreDefaultContentBackup();
-      const restoredHeroes = getHeroes();
-      const restoredArticles = getArticles();
-      const restoredAds = getAds();
+      const restoredHeroes = DEFAULT_PUBLISHED_CONTENT.heroes.map((hero) => ({
+        ...hero,
+        body: (hero.body || []).map((block) => ({ ...block })),
+        seoTags: [...(hero.seoTags || [])],
+      }));
+      const restoredArticles = DEFAULT_PUBLISHED_CONTENT.articles.map((article) => ({
+        ...article,
+        body: (article.body || []).map((block) => ({ ...block })),
+        seoTags: [...(article.seoTags || [])],
+      }));
+      const restoredAds = DEFAULT_PUBLISHED_CONTENT.ads.map((ad) => ({ ...ad }));
 
       setHeroes(restoredHeroes);
       setArticles(restoredArticles);
@@ -338,10 +454,11 @@ function AdminDashboard() {
       }, publishToken);
       if (!published.success) {
         const fallbackMessage = published.error || "Could not publish restored backup to live";
-        toast.warning(`${fallbackMessage}. Backup was restored locally in this browser.`);
+        toast.warning(`${fallbackMessage}. Backup is loaded in the editor, but publish did not complete.`);
         return;
       }
 
+      clearLocalDraftStorage();
       toast.success("Baseline backup restored and published.");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not restore backup";

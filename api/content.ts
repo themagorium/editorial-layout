@@ -76,10 +76,12 @@ type ChunkedContentPointer = {
 
 const CONTENT_KEY = "magorium:published-content:v1";
 const CONTENT_CHUNK_PREFIX = `${CONTENT_KEY}:chunk:`;
+const CONTENT_UPLOAD_PREFIX = `${CONTENT_KEY}:upload:`;
 const CONTENT_CHUNK_SIZE = 700_000;
 const ADMIN_PASSWORD_KEY = "ADMIN_PASSWORD";
 
 let memoryFallback: StoredPayload | null = null;
+let memoryChunkUploads = new Map<string, { totalChunks: number; chunks: Map<number, string> }>();
 let kvClientPromise: Promise<{
   get: <T>(key: string) => Promise<T | null>;
   set: (key: string, value: unknown) => Promise<unknown>;
@@ -242,6 +244,89 @@ function isChunkedContentPointer(value: unknown): value is ChunkedContentPointer
   );
 }
 
+function readFirstString(value: unknown): string {
+  if (Array.isArray(value)) return String(value[0] || "");
+  return String(value || "");
+}
+
+function readNumber(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return NaN;
+}
+
+function normalizeUploadId(value: unknown): string {
+  const normalized = readFirstString(value).trim();
+  return normalized.replace(/[^a-z0-9_-]/gi, "").slice(0, 80);
+}
+
+function getUploadMetaKey(uploadId: string): string {
+  return `${CONTENT_UPLOAD_PREFIX}${uploadId}:meta`;
+}
+
+function getUploadChunkKey(uploadId: string, index: number): string {
+  return `${CONTENT_UPLOAD_PREFIX}${uploadId}:chunk:${index}`;
+}
+
+async function storeUploadChunk(uploadId: string, index: number, totalChunks: number, chunk: string) {
+  const kv = await getKvClient();
+  if (kv) {
+    await kv.set(getUploadMetaKey(uploadId), {
+      totalChunks,
+      updatedAt: new Date().toISOString(),
+    });
+    await kv.set(getUploadChunkKey(uploadId, index), chunk);
+    return;
+  }
+
+  const existing = memoryChunkUploads.get(uploadId) || {
+    totalChunks,
+    chunks: new Map<number, string>(),
+  };
+  existing.totalChunks = totalChunks;
+  existing.chunks.set(index, chunk);
+  memoryChunkUploads.set(uploadId, existing);
+}
+
+async function readUploadedContent(uploadId: string): Promise<string> {
+  const kv = await getKvClient();
+  if (kv) {
+    const meta = await kv.get<{ totalChunks?: number }>(getUploadMetaKey(uploadId));
+    const totalChunks = Number(meta?.totalChunks || 0);
+    if (!Number.isInteger(totalChunks) || totalChunks <= 0 || totalChunks > 5000) {
+      throw new Error("Upload is incomplete or invalid.");
+    }
+
+    let combined = "";
+    for (let index = 0; index < totalChunks; index += 1) {
+      const chunk = await kv.get<string>(getUploadChunkKey(uploadId, index));
+      if (typeof chunk !== "string") {
+        throw new Error("One or more upload chunks are missing.");
+      }
+      combined += chunk;
+    }
+    return combined;
+  }
+
+  const upload = memoryChunkUploads.get(uploadId);
+  if (!upload || !upload.totalChunks) {
+    throw new Error("Upload is incomplete or invalid.");
+  }
+  let combined = "";
+  for (let index = 0; index < upload.totalChunks; index += 1) {
+    const chunk = upload.chunks.get(index);
+    if (typeof chunk !== "string") {
+      throw new Error("One or more upload chunks are missing.");
+    }
+    combined += chunk;
+  }
+  memoryChunkUploads.delete(uploadId);
+  return combined;
+}
+
 async function verifyBearerPublishToken(token: string, adminPassword: string): Promise<boolean> {
   if (!token || !adminPassword) return false;
   try {
@@ -368,6 +453,62 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
+      const phase = readFirstString((req.body as { phase?: string } | undefined)?.phase).trim().toLowerCase();
+      if (phase === "chunk") {
+        const uploadId = normalizeUploadId((req.body as { uploadId?: unknown })?.uploadId);
+        const index = readNumber((req.body as { index?: unknown })?.index);
+        const totalChunks = readNumber((req.body as { totalChunks?: unknown })?.totalChunks);
+        const chunk = readFirstString((req.body as { chunk?: unknown })?.chunk);
+
+        if (!uploadId) {
+          res.status(400).json({ ok: false, success: false, configured: isKvConfigured(), error: "Missing upload id." });
+          return;
+        }
+        if (!Number.isInteger(index) || index < 0 || index > 5000) {
+          res.status(400).json({ ok: false, success: false, configured: isKvConfigured(), error: "Invalid chunk index." });
+          return;
+        }
+        if (!Number.isInteger(totalChunks) || totalChunks <= 0 || totalChunks > 5000) {
+          res.status(400).json({ ok: false, success: false, configured: isKvConfigured(), error: "Invalid chunk count." });
+          return;
+        }
+        if (chunk.length === 0 || chunk.length > CONTENT_CHUNK_SIZE + 10_000) {
+          res.status(400).json({ ok: false, success: false, configured: isKvConfigured(), error: "Chunk payload is invalid." });
+          return;
+        }
+
+        await storeUploadChunk(uploadId, index, totalChunks, chunk);
+        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), uploadId, index, totalChunks });
+        return;
+      }
+
+      if (phase === "finalize") {
+        const uploadId = normalizeUploadId((req.body as { uploadId?: unknown })?.uploadId);
+        if (!uploadId) {
+          res.status(400).json({ ok: false, success: false, configured: isKvConfigured(), error: "Missing upload id." });
+          return;
+        }
+
+        const serialized = await readUploadedContent(uploadId);
+        const parsed = JSON.parse(serialized) as unknown;
+        const content = sanitizePayload(parsed);
+        const publishedAt = new Date().toISOString();
+        await setStoredContent({
+          ...content,
+          publishedAt,
+          updatedAt: publishedAt,
+        });
+
+        res.status(200).json({
+          ok: true,
+          success: true,
+          configured: isKvConfigured(),
+          publishedAt,
+          updatedAt: publishedAt,
+        });
+        return;
+      }
+
       const content = sanitizePayload(req.body);
       const publishedAt = new Date().toISOString();
       await setStoredContent({

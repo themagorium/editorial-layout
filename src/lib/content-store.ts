@@ -1165,6 +1165,73 @@ export async function publishEditorialContent(
   content: Omit<PublishedEditorialContent, "publishedAt">,
   adminPasswordOrToken?: string,
 ) {
+  const publishByChunks = async (authValue: string) => {
+    const chunkSize = 450_000;
+    const serialized = JSON.stringify(content);
+    const totalChunks = Math.max(1, Math.ceil(serialized.length / chunkSize));
+    const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authValue}`,
+      "x-admin-password": authValue,
+    };
+
+    for (let index = 0; index < totalChunks; index += 1) {
+      const chunk = serialized.slice(index * chunkSize, (index + 1) * chunkSize);
+      const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          phase: "chunk",
+          uploadId,
+          index,
+          totalChunks,
+          chunk,
+        }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; success?: boolean; error?: string };
+      const ok = payload.ok ?? payload.success ?? false;
+      if (!response.ok || !ok) {
+        return {
+          success: false as const,
+          configured: true,
+          error: payload.error || "Failed while uploading content chunks.",
+        };
+      }
+    }
+
+    const finalizeResponse = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        phase: "finalize",
+        uploadId,
+      }),
+    });
+
+    const finalizePayload = (await finalizeResponse.json().catch(() => ({}))) as {
+      ok?: boolean;
+      success?: boolean;
+      error?: string;
+      publishedAt?: string;
+      updatedAt?: string;
+    };
+    const finalizeOk = finalizePayload.ok ?? finalizePayload.success ?? false;
+    if (!finalizeResponse.ok || !finalizeOk) {
+      return {
+        success: false as const,
+        configured: true,
+        error: finalizePayload.error || "Failed while finalizing content publish.",
+      };
+    }
+
+    return {
+      success: true as const,
+      configured: true,
+      publishedAt: finalizePayload.publishedAt || finalizePayload.updatedAt,
+    };
+  };
+
   try {
     const authValue = (adminPasswordOrToken || getAdminPublishCredentialFromBrowserStorage() || "").trim();
     if (!authValue) {
@@ -1195,6 +1262,10 @@ export async function publishEditorialContent(
 
     const ok = payload.ok ?? payload.success ?? false;
     if (!response.ok || !ok) {
+      if (response.status === 413 || !response.ok) {
+        const fallback = await publishByChunks(authValue);
+        if (fallback.success) return fallback;
+      }
       return {
         success: false,
         configured: true,

@@ -12,6 +12,8 @@ import {
   publishEditorialContent,
   syncPublishedContentToLocalStorage,
   resetToDefaults,
+  clearLocalDraftStorage,
+  isStorageQuotaExceededError,
   CATEGORIES,
   formatEditionLabel,
 } from "@/lib/content-store";
@@ -259,10 +261,19 @@ function AdminDashboard() {
   const save = async () => {
     if (isSaving) return;
     setIsSaving(true);
+    let localDraftStored = true;
     try {
-      saveHeroes(heroes);
-      saveArticles(articles);
-      saveAds(ads);
+      try {
+        saveHeroes(heroes);
+        saveArticles(articles);
+        saveAds(ads);
+      } catch (error) {
+        if (!isStorageQuotaExceededError(error)) {
+          throw error;
+        }
+        localDraftStored = false;
+        clearLocalDraftStorage();
+      }
       const publishToken = getAdminPublishToken();
       if (!publishToken) {
         toast.error("Admin session expired. Please sign in again to publish live.");
@@ -271,11 +282,20 @@ function AdminDashboard() {
       const published = await publishEditorialContent({ heroes, articles, ads }, publishToken);
       if (!published.success) {
         const fallbackMessage = published.error || "Could not publish content to live";
-        toast.warning(`${fallbackMessage}. Local draft was still saved in this browser.`);
+        if (localDraftStored) {
+          toast.warning(`${fallbackMessage}. Local draft was still saved in this browser.`);
+        } else {
+          toast.error(`${fallbackMessage}. Browser storage is full, so local draft backup could not be saved.`);
+        }
         return;
       }
 
-      toast.success("Content saved and published to live.");
+      if (localDraftStored) {
+        toast.success("Content saved and published to live.");
+      } else {
+        toast.success("Content published to live.");
+        toast.warning("Browser storage quota is full. Draft backup is skipped, but live publish succeeded.");
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not save content";
       toast.error(message);

@@ -794,12 +794,35 @@ const STORAGE_KEYS = {
   localDraft: "editorial_has_local_draft",
 };
 
+export function isStorageQuotaExceededError(error: unknown): boolean {
+  if (!error) return false;
+  if (typeof DOMException !== "undefined" && error instanceof DOMException) {
+    return error.name === "QuotaExceededError" || error.name === "NS_ERROR_DOM_QUOTA_REACHED";
+  }
+  if (error instanceof Error) {
+    const lowerName = (error.name || "").toLowerCase();
+    const lowerMessage = (error.message || "").toLowerCase();
+    return (
+      lowerName.includes("quota") ||
+      (lowerMessage.includes("quota") && (lowerMessage.includes("exceeded") || lowerMessage.includes("full")))
+    );
+  }
+  return false;
+}
+
 function markLocalDraftAvailable() {
   localStorage.setItem(STORAGE_KEYS.localDraft, "1");
 }
 
 function clearLocalDraftFlag() {
   localStorage.removeItem(STORAGE_KEYS.localDraft);
+}
+
+export function clearLocalDraftStorage() {
+  localStorage.removeItem(STORAGE_KEYS.heroes);
+  localStorage.removeItem(STORAGE_KEYS.articles);
+  localStorage.removeItem(STORAGE_KEYS.ads);
+  clearLocalDraftFlag();
 }
 
 function isPublishedContentPayload(value: unknown): value is PublishedEditorialContent {

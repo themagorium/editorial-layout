@@ -10,7 +10,7 @@ import {
   saveArticles,
   saveAds,
   publishEditorialContent,
-  syncPublishedContentToLocalStorage,
+  getPublishedContentSnapshot,
   resetToDefaults,
   clearLocalDraftStorage,
   isStorageQuotaExceededError,
@@ -234,11 +234,11 @@ function AdminDashboard() {
   useEffect(() => {
     let active = true;
     const initialize = async () => {
-      await syncPublishedContentToLocalStorage();
+      const snapshot = await getPublishedContentSnapshot();
       if (!active) return;
-      const initialHeroes = getHeroes();
-      const initialArticles = getArticles();
-      const initialAds = getAds();
+      const initialHeroes = snapshot.heroes;
+      const initialArticles = snapshot.articles;
+      const initialAds = snapshot.ads;
 
       setHeroes(initialHeroes);
       setArticles(initialArticles);
@@ -261,19 +261,7 @@ function AdminDashboard() {
   const save = async () => {
     if (isSaving) return;
     setIsSaving(true);
-    let localDraftStored = true;
     try {
-      try {
-        saveHeroes(heroes);
-        saveArticles(articles);
-        saveAds(ads);
-      } catch (error) {
-        if (!isStorageQuotaExceededError(error)) {
-          throw error;
-        }
-        localDraftStored = false;
-        clearLocalDraftStorage();
-      }
       const publishToken = getAdminPublishToken();
       if (!publishToken) {
         toast.error("Admin session expired. Please sign in again to publish live.");
@@ -282,20 +270,28 @@ function AdminDashboard() {
       const published = await publishEditorialContent({ heroes, articles, ads }, publishToken);
       if (!published.success) {
         const fallbackMessage = published.error || "Could not publish content to live";
-        if (localDraftStored) {
-          toast.warning(`${fallbackMessage}. Local draft was still saved in this browser.`);
-        } else {
-          toast.error(`${fallbackMessage}. Browser storage is full, so local draft backup could not be saved.`);
+        let draftStored = true;
+        try {
+          saveHeroes(heroes);
+          saveArticles(articles);
+          saveAds(ads);
+        } catch (error) {
+          if (!isStorageQuotaExceededError(error)) {
+            throw error;
+          }
+          draftStored = false;
+          clearLocalDraftStorage();
         }
+        if (draftStored) {
+          toast.warning(`${fallbackMessage}. Local draft was still saved in this browser.`);
+          return;
+        }
+        toast.error(`${fallbackMessage}. Browser storage is full, so local draft backup could not be saved.`);
         return;
       }
 
-      if (localDraftStored) {
-        toast.success("Content saved and published to live.");
-      } else {
-        toast.success("Content published to live.");
-        toast.warning("Browser storage quota is full. Draft backup is skipped, but live publish succeeded.");
-      }
+      clearLocalDraftStorage();
+      toast.success("Content published to live.");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not save content";
       toast.error(message);

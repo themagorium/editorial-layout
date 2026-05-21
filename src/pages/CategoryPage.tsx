@@ -33,6 +33,31 @@ type EditionBucket = {
   stories: CategoryStory[];
 };
 
+const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
+const PLACEHOLDER_COPY_PATTERNS = [
+  /^add your first hero story$/i,
+  /^add your first article$/i,
+  /^add story text$/i,
+  /^add first body paragraph$/i,
+  /^add second body paragraph$/i,
+  /^add third body paragraph$/i,
+  /^upload photo or video$/i,
+];
+
+function isPlaceholderCopy(value?: string): boolean {
+  const text = (value || "").trim();
+  if (!text) return false;
+  return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function isPublishReadyCategoryStory(story: CategoryStory): boolean {
+  const title = (story.title || "").trim();
+  if (!title) return false;
+  if (PLACEHOLDER_TITLE_PATTERN.test(title)) return false;
+  if (isPlaceholderCopy(story.excerpt)) return false;
+  return true;
+}
+
 function normalizeCategoryLabel(raw: string): string {
   const slug = slugifyText(raw || "");
   const aliases: Record<string, string> = {
@@ -117,6 +142,7 @@ export default function CategoryPage() {
       const normalizedSlug = slugifyText(normalizedLabel);
       const filtered = allStories
         .filter((story) => slugifyText(story.category) === normalizedSlug)
+        .filter(isPublishReadyCategoryStory)
         .sort((a, b) => +new Date(b.date) - +new Date(a.date));
 
       setStories(filtered);

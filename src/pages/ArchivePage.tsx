@@ -8,6 +8,29 @@ import { Input } from "@/components/ui/input";
 import { applyCollectionSeo, applyHomeSeo } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
+const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
+const PLACEHOLDER_COPY_PATTERNS = [
+  /^add your first hero story$/i,
+  /^add your first article$/i,
+  /^add story text$/i,
+  /^add first body paragraph$/i,
+  /^add second body paragraph$/i,
+  /^add third body paragraph$/i,
+  /^upload photo or video$/i,
+];
+
+function isPlaceholderCopy(value?: string): boolean {
+  const text = (value || "").trim();
+  if (!text) return false;
+  return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function isPublishReadyTitle(title?: string): boolean {
+  const normalized = (title || "").trim();
+  if (!normalized) return false;
+  return !PLACEHOLDER_TITLE_PATTERN.test(normalized);
+}
+
 export default function ArchivePage() {
   useSyncPublishedContent();
   const [searchParams] = useSearchParams();
@@ -34,8 +57,15 @@ export default function ArchivePage() {
         .sort()
         .reverse()
         .map((ed) => {
-          const heroes = snapshot.heroes.filter((h) => h.edition === ed);
-          const articles = snapshot.articles.filter((a) => a.edition === ed);
+          const heroes = snapshot.heroes.filter(
+            (h) => h.edition === ed && isPublishReadyTitle(h.title) && !isPlaceholderCopy(h.subtitle),
+          );
+          const articles = snapshot.articles.filter(
+            (a) => a.edition === ed && isPublishReadyTitle(a.title) && !isPlaceholderCopy(a.excerpt),
+          );
+          if (heroes.length === 0 && articles.length === 0) {
+            return null;
+          }
           const searchableText = [
             ed,
             formatEditionLabel(ed),
@@ -53,7 +83,8 @@ export default function ArchivePage() {
             coverImage: heroes[0]?.imageUrl,
             searchableText,
           };
-        });
+        })
+        .filter((edition): edition is NonNullable<typeof edition> => Boolean(edition));
 
       setEditions(nextEditions);
     });

@@ -249,6 +249,31 @@ function sanitizeSeoTags(tags: unknown): string[] {
   return normalized;
 }
 
+const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
+const PLACEHOLDER_COPY_PATTERNS = [
+  /^add your first hero story$/i,
+  /^add your first article$/i,
+  /^add story text$/i,
+  /^add first body paragraph$/i,
+  /^add second body paragraph$/i,
+  /^add third body paragraph$/i,
+  /^upload photo or video$/i,
+];
+
+function isPlaceholderCopy(value?: string): boolean {
+  const text = (value || "").trim();
+  if (!text) return false;
+  return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function isPublishReadyStory(story: SeoStory): boolean {
+  const title = (story.title || "").trim();
+  if (!title) return false;
+  if (PLACEHOLDER_TITLE_PATTERN.test(title)) return false;
+  if (isPlaceholderCopy(story.excerpt)) return false;
+  return true;
+}
+
 function sanitizeHero(hero: StoredHero): SeoStory {
   const author = canonicalAuthorName(hero.author);
   const title = (hero.title || "").trim() || hero.id;
@@ -298,7 +323,9 @@ export async function getPublishedSeoStories(): Promise<SeoStory[]> {
 
     const heroes = Array.isArray(payload.heroes) ? payload.heroes.map(sanitizeHero) : [];
     const articles = Array.isArray(payload.articles) ? payload.articles.map(sanitizeArticle) : [];
-    const stories = [...heroes, ...articles].filter((story) => Boolean(story.id && story.title));
+    const stories = [...heroes, ...articles]
+      .filter((story) => Boolean(story.id && story.title))
+      .filter(isPublishReadyStory);
     if (stories.length === 0) return FALLBACK_STORIES;
     return stories.sort((a, b) => +new Date(b.date) - +new Date(a.date));
   } catch {

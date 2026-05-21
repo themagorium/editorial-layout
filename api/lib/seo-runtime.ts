@@ -50,6 +50,12 @@ type StoredPayload = {
   articles?: StoredArticle[];
 };
 
+type ChunkedContentPointer = {
+  __chunked: true;
+  totalChunks: number;
+  chunkPrefix: string;
+};
+
 export type SeoStory = {
   id: string;
   title: string;
@@ -171,6 +177,38 @@ const FALLBACK_STORIES: SeoStory[] = [
   },
 ];
 
+function isChunkedContentPointer(value: unknown): value is ChunkedContentPointer {
+  if (!value || typeof value !== "object") return false;
+  const pointer = value as Partial<ChunkedContentPointer>;
+  return (
+    pointer.__chunked === true
+    && typeof pointer.totalChunks === "number"
+    && pointer.totalChunks > 0
+    && pointer.totalChunks <= 5000
+    && typeof pointer.chunkPrefix === "string"
+    && Boolean(pointer.chunkPrefix)
+  );
+}
+
+async function readChunkedPayload(
+  kv: { get: <T>(key: string) => Promise<T | null> },
+  pointer: ChunkedContentPointer,
+): Promise<StoredPayload | null> {
+  let combined = "";
+  for (let index = 0; index < pointer.totalChunks; index += 1) {
+    const chunk = await kv.get<string>(`${pointer.chunkPrefix}${index}`);
+    if (typeof chunk !== "string") {
+      return null;
+    }
+    combined += chunk;
+  }
+  try {
+    return JSON.parse(combined) as StoredPayload;
+  } catch {
+    return null;
+  }
+}
+
 function hasKvConfig() {
   return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 }
@@ -251,7 +289,11 @@ export async function getPublishedSeoStories(): Promise<SeoStory[]> {
   try {
     const kv = await getKvClient();
     if (!kv) return FALLBACK_STORIES;
-    const payload = await kv.get<StoredPayload>(CONTENT_KEY);
+    const rawPayload = await kv.get<StoredPayload | ChunkedContentPointer>(CONTENT_KEY);
+    if (!rawPayload) return FALLBACK_STORIES;
+    const payload = isChunkedContentPointer(rawPayload)
+      ? await readChunkedPayload(kv, rawPayload)
+      : rawPayload;
     if (!payload) return FALLBACK_STORIES;
 
     const heroes = Array.isArray(payload.heroes) ? payload.heroes.map(sanitizeHero) : [];

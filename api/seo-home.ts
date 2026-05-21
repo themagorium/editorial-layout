@@ -40,6 +40,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       position: index + 1,
       url: `${SITE_URL}${story.path}`,
     }));
+    const editionPaths = Array.from(
+      new Set(
+        topStories
+          .map((story) => (story.edition || "").trim())
+          .filter(Boolean)
+          .map((edition) => `/archive/${edition}`),
+      ),
+    );
 
     const contributorNames = Array.from(new Set(topStories.map((story) => story.author)));
 
@@ -50,6 +58,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       BRAND_NAME,
       BRAND_ALIAS,
       "Magorum",
+      "Magoriium",
+      "The Magoriium",
       "TheMagorium",
       "Magorium writers",
       "Magorium journalists",
@@ -86,6 +96,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .join("\n")}
         </ul>
       </section>
+      ${
+        editionPaths.length > 0
+          ? `<section><h2>Edition Archive</h2><ul>${editionPaths
+              .map((path) => `<li><a href="${path}">${escapeHtml(path.replace("/archive/", ""))}</a></li>`)
+              .join("")}</ul></section>`
+          : ""
+      }
       <p class="muted"><a href="/sitemap.xml">Sitemap</a> · <a href="/contributors">Contributors</a></p>
       <p class="muted"><a href="/seo-history">SEO History</a></p>
     `;

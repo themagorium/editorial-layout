@@ -1028,12 +1028,28 @@ export async function getPublishedContentSnapshot(): Promise<{
   heroes: HeroItem[];
   articles: Article[];
   ads: AdSlot[];
+}>;
+export async function getPublishedContentSnapshot(options: {
+  allowLocalDraft?: boolean;
+}): Promise<{
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+}>;
+export async function getPublishedContentSnapshot(options?: {
+  allowLocalDraft?: boolean;
+}): Promise<{
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
 }> {
   if (typeof window === "undefined") {
     return DEFAULT_PUBLISHED_CONTENT;
   }
+  const allowLocalDraft = options?.allowLocalDraft === true;
   ensureFreshDefaults();
-  if (hasLocalEditsAvailable()) {
+  const hasLocalDraft = hasLocalEditsAvailable();
+  if (allowLocalDraft && hasLocalDraft) {
     return {
       heroes: getHeroes(),
       articles: getArticles(),
@@ -1043,7 +1059,7 @@ export async function getPublishedContentSnapshot(): Promise<{
   try {
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, { cache: "no-store" });
     if (!response.ok) {
-      if (hasCachedSnapshotAvailable()) {
+      if (!hasLocalDraft && hasCachedSnapshotAvailable()) {
         return {
           heroes: getHeroes(),
           articles: getArticles(),
@@ -1069,7 +1085,7 @@ export async function getPublishedContentSnapshot(): Promise<{
     } | null);
     const raw = payload?.payload || payload?.content || payload;
     if (!raw || !Array.isArray(raw.heroes) || !Array.isArray(raw.articles) || !Array.isArray(raw.ads)) {
-      if (hasCachedSnapshotAvailable()) {
+      if (!hasLocalDraft && hasCachedSnapshotAvailable()) {
         return {
           heroes: getHeroes(),
           articles: getArticles(),
@@ -1088,7 +1104,7 @@ export async function getPublishedContentSnapshot(): Promise<{
       ads: raw.ads,
     };
     if (!hasPublishedStoryContent(normalized)) {
-      if (hasCachedSnapshotAvailable()) {
+      if (!hasLocalDraft && hasCachedSnapshotAvailable()) {
         return {
           heroes: getHeroes(),
           articles: getArticles(),
@@ -1099,7 +1115,7 @@ export async function getPublishedContentSnapshot(): Promise<{
     }
     return normalized;
   } catch {
-    if (hasCachedSnapshotAvailable()) {
+    if (!hasLocalDraft && hasCachedSnapshotAvailable()) {
       return {
         heroes: getHeroes(),
         articles: getArticles(),
@@ -1122,7 +1138,8 @@ export async function syncPublishedContentToLocalStorage() {
     return { synced: false, configured: false };
   }
   ensureFreshDefaults();
-  if (hasLocalEditsAvailable()) {
+  const isAdminPage = window.location.pathname.startsWith("/admin");
+  if (isAdminPage && hasLocalEditsAvailable()) {
     return { synced: false, configured: false };
   }
 

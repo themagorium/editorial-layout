@@ -1,6 +1,7 @@
 import { CATEGORIES } from "@/lib/content-store";
 import { Link, useLocation } from "react-router-dom";
 import { Settings, Archive } from "lucide-react";
+import { getCategoryPath } from "@/lib/seo";
 
 export default function EditorialHeader() {
   const location = useLocation();
@@ -38,7 +39,7 @@ export default function EditorialHeader() {
           {CATEGORIES.map((cat) => (
             <Link
               key={cat}
-              to={`/archive?category=${encodeURIComponent(cat)}`}
+              to={getCategoryPath(cat)}
               className="whitespace-nowrap px-3 py-1.5 text-xs font-sans font-medium uppercase tracking-widest text-muted-foreground hover:text-primary cursor-pointer transition-colors"
             >
               {cat}

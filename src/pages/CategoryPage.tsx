@@ -4,6 +4,7 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import {
   buildContentPath,
+  formatEditionLabel,
   getPublishedContentSnapshot,
   slugifyText,
   type Article,
@@ -18,9 +19,18 @@ type CategoryStory = {
   excerpt: string;
   imageUrl: string;
   date: string;
+  edition: string;
+  storyType: "hero" | "article";
   category: string;
   author: string;
   path: string;
+};
+
+type EditionBucket = {
+  edition: string;
+  label: string;
+  storyCount: number;
+  stories: CategoryStory[];
 };
 
 function normalizeCategoryLabel(raw: string): string {
@@ -50,6 +60,8 @@ function mapHero(hero: HeroItem): CategoryStory {
     excerpt: hero.excerpt || hero.subtitle,
     imageUrl: hero.imageUrl,
     date: hero.date,
+    edition: hero.edition,
+    storyType: "hero",
     category: hero.category,
     author: canonicalAuthorName(hero.author),
     path: buildContentPath(hero.id, hero.title),
@@ -63,6 +75,8 @@ function mapArticle(article: Article): CategoryStory {
     excerpt: article.excerpt,
     imageUrl: article.imageUrl,
     date: article.date,
+    edition: article.edition,
+    storyType: "article",
     category: article.category,
     author: canonicalAuthorName(article.author),
     path: buildContentPath(article.id, article.title),
@@ -75,6 +89,24 @@ export default function CategoryPage() {
   const normalizedLabel = normalizeCategoryLabel(slug);
   const [stories, setStories] = useState<CategoryStory[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const editionBuckets = useMemo<EditionBucket[]>(() => {
+    const byEdition = new Map<string, CategoryStory[]>();
+    stories.forEach((story) => {
+      const key = story.edition || "unknown";
+      const bucket = byEdition.get(key) || [];
+      bucket.push(story);
+      byEdition.set(key, bucket);
+    });
+
+    return Array.from(byEdition.entries())
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([edition, editionStories]) => ({
+        edition,
+        label: edition === "unknown" ? "Undated Edition" : formatEditionLabel(edition),
+        storyCount: editionStories.length,
+        stories: editionStories.sort((a, b) => +new Date(b.date) - +new Date(a.date)),
+      }));
+  }, [stories]);
 
   useEffect(() => {
     let active = true;
@@ -89,9 +121,10 @@ export default function CategoryPage() {
 
       setStories(filtered);
       setLoaded(true);
+      const editionCount = new Set(filtered.map((story) => story.edition).filter(Boolean)).size;
       applyCollectionSeo(
-        `${normalizedLabel} | ${filtered.length > 0 ? filtered[0].author : "Category"} | The Magorium`,
-        `Browse ${normalizedLabel} stories on The Magorium with credited writers and journalists.`,
+        `${normalizedLabel} Editions & Stories | The Magorium`,
+        `Browse ${normalizedLabel} stories across ${editionCount || 0} editions on The Magorium.`,
         `/category/${slugifyText(normalizedLabel)}`,
       );
     };
@@ -119,6 +152,19 @@ export default function CategoryPage() {
         <p className="text-sm text-muted-foreground font-sans mt-3">
           {stories.length} published {stories.length === 1 ? "story" : "stories"} in {normalizedLabel}
         </p>
+        {loaded && editionBuckets.length > 0 && (
+          <div className="mt-5 flex flex-wrap gap-2">
+            {editionBuckets.map((bucket) => (
+              <Link
+                key={bucket.edition}
+                to={bucket.edition === "unknown" ? "/archive" : `/archive/${bucket.edition}`}
+                className="text-[11px] font-sans px-3 py-1 rounded border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+              >
+                {bucket.label} ({bucket.storyCount})
+              </Link>
+            ))}
+          </div>
+        )}
 
         {!loaded ? (
           <p className="text-sm text-muted-foreground font-sans mt-10">Loading stories...</p>
@@ -127,40 +173,64 @@ export default function CategoryPage() {
             No stories found in this category yet.
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-            {stories.map((story) => (
-              <article key={story.id} className="group border border-border rounded overflow-hidden hover:border-primary transition-colors">
-                <Link to={story.path}>
-                  <div className="aspect-[16/9] overflow-hidden">
-                    <img
-                      src={story.imageUrl}
-                      alt={story.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                </Link>
-                <div className="p-4">
-                  <span className="category-pill text-[10px]">{story.category}</span>
-                  <Link to={story.path} className="block">
-                    <h2 className="font-editorial text-xl mt-2 group-hover:text-primary transition-colors">
-                      {story.title}
-                    </h2>
-                  </Link>
-                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{story.excerpt}</p>
-                  <p className="text-xs mt-3 text-muted-foreground">
-                    Written by{" "}
-                    <Link to={getAuthorPath(story.author)} className="text-primary hover:underline">
-                      {story.author}
+          <div className="space-y-12 mt-10">
+            {editionBuckets.map((bucket) => (
+              <section key={bucket.edition} className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="font-editorial text-2xl md:text-3xl text-foreground">
+                    {bucket.label}
+                  </h2>
+                  {bucket.edition !== "unknown" && (
+                    <Link
+                      to={`/archive/${bucket.edition}`}
+                      className="text-xs font-sans text-primary hover:underline"
+                    >
+                      Open this edition →
                     </Link>
-                    {" · "}
-                    {new Date(story.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
+                  )}
                 </div>
-              </article>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {bucket.stories.map((story) => (
+                    <article key={`${bucket.edition}:${story.storyType}:${story.id}`} className="group border border-border rounded overflow-hidden hover:border-primary transition-colors">
+                      <Link to={story.path}>
+                        <div className="aspect-[16/9] overflow-hidden">
+                          <img
+                            src={story.imageUrl}
+                            alt={story.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                      </Link>
+                      <div className="p-4">
+                        <div className="flex items-center gap-2">
+                          <span className="category-pill text-[10px]">{story.category}</span>
+                          <span className="text-[10px] font-sans uppercase tracking-wide text-muted-foreground">
+                            {story.storyType === "hero" ? "Hero" : "Article"}
+                          </span>
+                        </div>
+                        <Link to={story.path} className="block">
+                          <h3 className="font-editorial text-xl mt-2 group-hover:text-primary transition-colors">
+                            {story.title}
+                          </h3>
+                        </Link>
+                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{story.excerpt}</p>
+                        <p className="text-xs mt-3 text-muted-foreground">
+                          Written by{" "}
+                          <Link to={getAuthorPath(story.author)} className="text-primary hover:underline">
+                            {story.author}
+                          </Link>
+                          {" · "}
+                          {new Date(story.date).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         )}

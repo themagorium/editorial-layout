@@ -98,7 +98,7 @@
       "dest": "/api/seo-history"
     },
     {
-      "src": "/(magorium|magorum|the-magorium|themagorium)/?",
+      "src": "/(magorium|magorum|magoriium|the-magorium|the-magoriium|themagorium)/?",
       "has": [
         {
           "type": "header",

@@ -7,7 +7,7 @@ const DEFAULT_FAVICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 const BRAND_NAME = "The Magorium";
 const BRAND_ALIAS = "Magorium";
-const BRAND_ALIASES = [BRAND_ALIAS, "Magorum", "The Magorium"];
+const BRAND_ALIASES = [BRAND_ALIAS, "Magorum", "Magoriium", "The Magorium", "The Magoriium", "TheMagorium"];
 
 function upsertMeta(name: string, content: string, property = false) {
   const attr = property ? "property" : "name";
@@ -227,6 +227,8 @@ export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
     BRAND_NAME,
     BRAND_ALIAS,
     "Magorum",
+    "Magoriium",
+    "The Magoriium",
     normalizedHint,
     "TheMagorium",
     "Magorium magazine",
@@ -503,6 +505,8 @@ export function applyMagoriumBrandSeo(path = "/magorium") {
     BRAND_NAME,
     BRAND_ALIAS,
     "Magorum",
+    "Magoriium",
+    "The Magoriium",
     "TheMagorium",
     "Magorium journalists",
     "Magorium authors",

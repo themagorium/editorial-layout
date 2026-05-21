@@ -17,6 +17,20 @@ function xmlEscape(input: string): string {
     .replace(/'/g, "&apos;");
 }
 
+function buildSitemapXml(
+  siteUrl: string,
+  pathLastmodPairs: Array<[string, string]>,
+): string {
+  const urls = pathLastmodPairs
+    .map(
+      ([path, lastmod]) =>
+        `<url><loc>${xmlEscape(`${siteUrl}${path}`)}</loc><lastmod>${xmlEscape(lastmod)}</lastmod></url>`,
+    )
+    .join("");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`;
+}
+
 function toIsoDate(value: string | undefined, fallbackIso: string): string {
   const parsed = new Date(value || "");
   if (Number.isNaN(parsed.getTime())) return fallbackIso;
@@ -32,11 +46,17 @@ function pickLatestIso(left: string, right: string): string {
 }
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
+  const fallbackSiteUrl = "https://www.themagorium.com";
+  const nowIso = new Date().toISOString();
+  const fallbackPaths = ["/", "/archive", "/contributors", "/seo-history", "/sitemap.xml"];
+
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+
   try {
     const runtime = await loadSeoRuntime();
     const { SITE_URL, getCategoryPath, getAuthorPath, getPublishedSeoStories } = runtime;
     const stories = await getPublishedSeoStories();
-    const nowIso = new Date().toISOString();
     const latestStoryIso =
       stories.length > 0
         ? stories
@@ -77,19 +97,13 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       }
     });
 
-    const urls = Array.from(pathLastmod.entries())
-      .map(
-        ([path, lastmod]) =>
-          `<url><loc>${xmlEscape(`${SITE_URL}${path}`)}</loc><lastmod>${xmlEscape(lastmod)}</lastmod></url>`,
-      )
-      .join("");
-
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`;
-
-    res.setHeader("Content-Type", "application/xml; charset=utf-8");
+    const xml = buildSitemapXml(SITE_URL, Array.from(pathLastmod.entries()).sort(([a], [b]) => a.localeCompare(b)));
     res.status(200).send(xml);
   } catch {
-    res.status(500).send('<?xml version="1.0" encoding="UTF-8"?><error>failed</error>');
+    const fallbackXml = buildSitemapXml(
+      fallbackSiteUrl,
+      fallbackPaths.map((path) => [path, nowIso]),
+    );
+    res.status(200).send(fallbackXml);
   }
 }

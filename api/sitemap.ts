@@ -26,9 +26,11 @@ function buildSitemapXml(
       ([path, lastmod]) =>
         `<url><loc>${xmlEscape(`${siteUrl}${path}`)}</loc><lastmod>${xmlEscape(lastmod)}</lastmod></url>`,
     )
-    .join("");
+    .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>`;
 }
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
@@ -43,10 +45,10 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: 
   }
 }
 
-function toIsoDate(value: string | undefined, fallbackIso: string): string {
+function toSitemapDate(value: string | undefined, fallbackDate: string): string {
   const parsed = new Date(value || "");
-  if (Number.isNaN(parsed.getTime())) return fallbackIso;
-  return parsed.toISOString();
+  if (Number.isNaN(parsed.getTime())) return fallbackDate;
+  return parsed.toISOString().slice(0, 10);
 }
 
 function pickLatestIso(left: string, right: string): string {
@@ -59,8 +61,8 @@ function pickLatestIso(left: string, right: string): string {
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   const fallbackSiteUrl = "https://www.themagorium.com";
-  const nowIso = new Date().toISOString();
-  const fallbackPaths = ["/", "/archive", "/contributors", "/seo-history", "/sitemap.xml"];
+  const nowDate = new Date().toISOString().slice(0, 10);
+  const fallbackPaths = ["/", "/archive", "/contributors", "/seo-history"];
 
   res.setHeader("Content-Type", "application/xml; charset=utf-8");
   res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
@@ -74,7 +76,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     if (!runtime) {
       const fallbackXml = buildSitemapXml(
         fallbackSiteUrl,
-        fallbackPaths.map((path) => [path, nowIso]),
+        fallbackPaths.map((path) => [path, nowDate]),
       );
       res.status(200).send(fallbackXml);
       return;
@@ -90,9 +92,9 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     const latestStoryIso =
       stories.length > 0
         ? stories
-            .map((story) => toIsoDate(story.date, nowIso))
-            .reduce((latest, current) => pickLatestIso(latest, current), nowIso)
-        : nowIso;
+            .map((story) => toSitemapDate(story.date, nowDate))
+            .reduce((latest, current) => pickLatestIso(latest, current), nowDate)
+        : nowDate;
 
     const staticPaths = [
       "/",
@@ -106,7 +108,6 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       "/archive",
       "/contributors",
       "/seo-history",
-      "/categories",
     ];
 
     const pathLastmod = new Map<string, string>();
@@ -117,7 +118,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
 
     staticPaths.forEach((path) => upsertPath(path, latestStoryIso));
     stories.forEach((story) => {
-      const storyLastmod = toIsoDate(story.date, nowIso);
+      const storyLastmod = toSitemapDate(story.date, nowDate);
       upsertPath(story.path, storyLastmod);
       upsertPath(getAuthorPath(story.author), storyLastmod);
       upsertPath(getCategoryPath(story.category), storyLastmod);
@@ -132,7 +133,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
   } catch {
     const fallbackXml = buildSitemapXml(
       fallbackSiteUrl,
-      fallbackPaths.map((path) => [path, nowIso]),
+      fallbackPaths.map((path) => [path, nowDate]),
     );
     res.status(200).send(fallbackXml);
   }

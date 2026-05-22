@@ -34,9 +34,16 @@ export default function AdPlacement({ ad, className = "" }: Props) {
       onClick={handleClick}
     >
       {ad.videoUrl ? (
-        <video src={ad.videoUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+        <video
+          src={ad.videoUrl}
+          muted
+          loop
+          playsInline
+          preload="none"
+          className="w-full h-full object-cover"
+        />
       ) : (
-        <img src={ad.imageUrl} alt={ad.label} className="w-full h-full object-cover" />
+        <img src={ad.imageUrl} alt={ad.label} className="w-full h-full object-cover" loading="lazy" decoding="async" />
       )}
     </a>
   );

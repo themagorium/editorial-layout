@@ -145,7 +145,7 @@ export default function StoryFeedPage({
           </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
-            {stories.map((story) => (
+            {stories.map((story, index) => (
               <article key={`${story.contentType}:${story.id}`} className="border border-border rounded overflow-hidden">
                 <Link to={buildContentPath(story.id, story.title)} className="group block">
                   <div className="aspect-[16/10] overflow-hidden">
@@ -153,6 +153,9 @@ export default function StoryFeedPage({
                       src={story.imageUrl}
                       alt={story.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      fetchPriority={index === 0 ? "high" : "low"}
+                      decoding="async"
                     />
                   </div>
                   <div className="p-4">

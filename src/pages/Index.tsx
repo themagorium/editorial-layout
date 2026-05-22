@@ -16,7 +16,7 @@ import { trackEvent } from "@/lib/analytics";
 import { applyHomeSeo, applyMagoriumBrandSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
-function HeroCard({ hero }: { hero: HeroItem }) {
+function HeroCard({ hero, prioritizeMedia }: { hero: HeroItem; prioritizeMedia: boolean }) {
   const authorName = canonicalAuthorName(hero.author);
   return (
     <article>
@@ -30,14 +30,10 @@ function HeroCard({ hero }: { hero: HeroItem }) {
             src={hero.imageUrl}
             alt={hero.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading={prioritizeMedia ? "eager" : "lazy"}
+            fetchPriority={prioritizeMedia ? "high" : "low"}
+            decoding="async"
           />
-          {hero.videoUrl && (
-            <video
-              src={hero.videoUrl}
-              autoPlay muted loop playsInline
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          )}
           <div className="article-overlay absolute inset-0" />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8 z-10">
@@ -170,8 +166,8 @@ export default function Index() {
                 Loading latest edition...
               </div>
             )}
-            {loaded && heroes.map((hero) => (
-              <HeroCard key={hero.id} hero={hero} />
+            {loaded && heroes.map((hero, index) => (
+              <HeroCard key={hero.id} hero={hero} prioritizeMedia={index === 0} />
             ))}
           </div>
           <aside className="hidden xl:flex flex-col gap-6 sticky top-24">

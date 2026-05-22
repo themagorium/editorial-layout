@@ -1,6 +1,10 @@
 {
   "routes": [
     {
+      "src": "/BingSiteAuth\\.xml",
+      "dest": "/BingSiteAuth.xml"
+    },
+    {
       "src": "/favicon\\.png",
       "dest": "/favicon.png"
     },

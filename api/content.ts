@@ -521,6 +521,15 @@ async function getLatestStoredContent() {
   return memoryLatestFallback;
 }
 
+async function setLatestStoredContent(content: LatestViewPayload) {
+  const kv = await getKvClient();
+  if (kv) {
+    await kv.set(LATEST_CONTENT_KEY, content);
+    return;
+  }
+  memoryLatestFallback = content;
+}
+
 async function setStoredContent(content: StoredPayload) {
   const latestPayload = buildLatestEditionPayload(content);
   const kv = await getKvClient();
@@ -589,6 +598,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             parsePositiveInt(readFirstString(req.query?.articleLimit), 4),
           )
         : normalizedContent;
+      if (queryView === "latest" && responseContent) {
+        await setLatestStoredContent(responseContent as LatestViewPayload);
+      }
       res.status(200).json({
         ok: true,
         success: true,

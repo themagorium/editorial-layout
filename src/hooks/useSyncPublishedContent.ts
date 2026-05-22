@@ -8,7 +8,7 @@ type SyncOptions = {
 
 export function useSyncPublishedContent(options?: SyncOptions) {
   useEffect(() => {
-    const shouldSync = options?.enabled ?? window.location.pathname.startsWith("/admin");
+    const shouldSync = options?.enabled ?? true;
     if (!shouldSync) return;
 
     let cancelled = false;

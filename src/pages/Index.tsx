@@ -101,7 +101,7 @@ function ArticleCard({ article }: { article: Article }) {
 }
 
 export default function Index() {
-  useSyncPublishedContent();
+  useSyncPublishedContent({ enabled: false });
   const [initialSnapshot] = useState(() =>
     getCachedLatestPublishedEditionSnapshot({ heroLimit: 3, articleLimit: 4 }),
   );

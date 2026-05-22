@@ -65,7 +65,7 @@ export default function StoryFeedPage({
   seoHint,
   canonicalAliasPath = "/magorium",
 }: StoryFeedPageProps) {
-  useSyncPublishedContent();
+  useSyncPublishedContent({ enabled: false });
   const [initialSnapshot] = useState(() =>
     getCachedLatestPublishedEditionSnapshot({ heroLimit: 3, articleLimit: 8 }),
   );

@@ -3,7 +3,7 @@ export const SITE_URL = "https://www.themagorium.com";
 export const BRAND_NAME = "The Magorium";
 export const BRAND_ALIAS = "Magorium";
 export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
-export const SEO_ASSET_VERSION = "20260522-2000";
+export const SEO_ASSET_VERSION = "20260522-0630";
 export const DEFAULT_SEO_IMAGE = `${SITE_URL}/og-image.jpg?v=${SEO_ASSET_VERSION}`;
 export const DEFAULT_FAVICON = `${SITE_URL}/favicon.ico?v=${SEO_ASSET_VERSION}`;
 const DEFAULT_APPLE_ICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;

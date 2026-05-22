@@ -117,7 +117,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       bodyHtml,
       ogType: "website",
       jsonLd,
-      imageUrl: categoryStories[0]?.imageUrl || `${SITE_URL}/og-image.jpg?v=20260522-2000`,
+      imageUrl: categoryStories[0]?.imageUrl || `${SITE_URL}/og-image.jpg?v=20260522-0630`,
       noIndex: !hasStories,
     });
 

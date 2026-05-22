@@ -7,6 +7,7 @@ export const SEO_ASSET_VERSION = "20260522-2000";
 export const DEFAULT_SEO_IMAGE = `${SITE_URL}/og-image.jpg?v=${SEO_ASSET_VERSION}`;
 export const DEFAULT_FAVICON = `${SITE_URL}/favicon.ico?v=${SEO_ASSET_VERSION}`;
 const DEFAULT_APPLE_ICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
+const BING_SITE_VERIFICATION_TOKEN = "A28C29B769451A568A699A7479DF03F8";
 let kvClientPromise: Promise<{
   get: <T>(key: string) => Promise<T | null>;
 } | null> | null = null;
@@ -485,6 +486,7 @@ export function renderSeoDocument(params: {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeAttribute(description)}" />
+    <meta name="msvalidate.01" content="${BING_SITE_VERIFICATION_TOKEN}" />
     <meta name="keywords" content="${escapeAttribute(keywords)}" />
     <meta name="author" content="${escapeAttribute(BRAND_NAME)}" />
     <meta name="robots" content="${robots}" />

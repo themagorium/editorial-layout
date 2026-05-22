@@ -1081,13 +1081,12 @@ export function getCachedLatestPublishedEditionSnapshot(options?: {
       articles: cached.articles.slice(0, articleLimit),
     };
   }
-  return selectLatestEditionSnapshotFromLists(
-    DEFAULT_PUBLISHED_CONTENT.heroes,
-    DEFAULT_PUBLISHED_CONTENT.articles,
-    DEFAULT_PUBLISHED_CONTENT.ads,
-    heroLimit,
-    articleLimit,
-  );
+  return {
+    heroes: [],
+    articles: [],
+    ads: DEFAULT_PUBLISHED_CONTENT.ads,
+    latestEdition: "",
+  };
 }
 
 function editionSortWeight(edition: string): number {
@@ -1251,10 +1250,12 @@ export async function getLatestPublishedEditionSnapshot(options?: {
   });
 
   try {
-    const response = await fetch(
-      `${PUBLISHED_CONTENT_ENDPOINT}?view=latest&heroLimit=${heroLimit}&articleLimit=${articleLimit}`,
-      { cache: "no-store" },
-    );
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timeoutId = setTimeout(() => controller?.abort(), 4000);
+    const response = await fetch(`${PUBLISHED_CONTENT_ENDPOINT}?view=latest&heroLimit=${heroLimit}&articleLimit=${articleLimit}`, {
+      cache: "no-store",
+      signal: controller?.signal,
+    }).finally(() => clearTimeout(timeoutId));
     if (!response.ok) return buildDefaultFallback();
     const payload = await response.json().catch(() => null as unknown as {
       payload?: {

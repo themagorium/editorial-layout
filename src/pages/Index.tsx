@@ -5,6 +5,7 @@ import AdPlacement from "@/components/editorial/AdPlacement";
 
 import {
   getAds,
+  getCachedLatestPublishedEditionSnapshot,
   getLatestPublishedEditionSnapshot,
   formatEditionLabel,
   buildContentPath,
@@ -101,11 +102,18 @@ function ArticleCard({ article }: { article: Article }) {
 
 export default function Index() {
   useSyncPublishedContent();
-  const [heroes, setHeroes] = useState<HeroItem[]>([]);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [ads, setAds] = useState<AdSlot[]>([]);
-  const [editionLabel, setEditionLabel] = useState("");
-  const [loaded, setLoaded] = useState(false);
+  const [initialSnapshot] = useState(() =>
+    getCachedLatestPublishedEditionSnapshot({ heroLimit: 3, articleLimit: 4 }),
+  );
+  const [heroes, setHeroes] = useState<HeroItem[]>(initialSnapshot.heroes);
+  const [articles, setArticles] = useState<Article[]>(initialSnapshot.articles);
+  const [ads, setAds] = useState<AdSlot[]>(initialSnapshot.ads.length > 0 ? initialSnapshot.ads : getAds());
+  const [editionLabel, setEditionLabel] = useState(
+    initialSnapshot.latestEdition ? formatEditionLabel(initialSnapshot.latestEdition) : "",
+  );
+  const [loaded, setLoaded] = useState(
+    initialSnapshot.heroes.length > 0 || initialSnapshot.articles.length > 0,
+  );
 
   useEffect(() => {
     let active = true;

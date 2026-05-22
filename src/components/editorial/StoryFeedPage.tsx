@@ -4,6 +4,7 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import {
   buildContentPath,
+  getCachedLatestPublishedEditionSnapshot,
   getLatestPublishedEditionSnapshot,
   formatEditionLabel,
   type Article,
@@ -65,10 +66,17 @@ export default function StoryFeedPage({
   canonicalAliasPath = "/magorium",
 }: StoryFeedPageProps) {
   useSyncPublishedContent();
-  const [heroes, setHeroes] = useState<HeroItem[]>([]);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [editionLabel, setEditionLabel] = useState("");
-  const [loaded, setLoaded] = useState(false);
+  const [initialSnapshot] = useState(() =>
+    getCachedLatestPublishedEditionSnapshot({ heroLimit: 3, articleLimit: 8 }),
+  );
+  const [heroes, setHeroes] = useState<HeroItem[]>(initialSnapshot.heroes);
+  const [articles, setArticles] = useState<Article[]>(initialSnapshot.articles);
+  const [editionLabel, setEditionLabel] = useState(
+    initialSnapshot.latestEdition ? formatEditionLabel(initialSnapshot.latestEdition) : "",
+  );
+  const [loaded, setLoaded] = useState(
+    initialSnapshot.heroes.length > 0 || initialSnapshot.articles.length > 0,
+  );
 
   useEffect(() => {
     let active = true;

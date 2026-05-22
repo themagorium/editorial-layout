@@ -792,6 +792,7 @@ const STORAGE_KEYS = {
   ads: "editorial_ads",
   version: "editorial_content_version",
   localDraft: "editorial_has_local_draft",
+  latestSnapshot: "editorial_latest_snapshot_v1",
 };
 
 export function isStorageQuotaExceededError(error: unknown): boolean {
@@ -1010,6 +1011,85 @@ type LatestPublishedEditionSnapshot = {
   latestEdition: string;
 };
 
+function selectLatestEditionSnapshotFromLists(
+  heroes: HeroItem[],
+  articles: Article[],
+  ads: AdSlot[],
+  heroLimit: number,
+  articleLimit: number,
+): LatestPublishedEditionSnapshot {
+  const editions = Array.from(new Set([...heroes.map((hero) => hero.edition), ...articles.map((article) => article.edition)]))
+    .filter(Boolean)
+    .sort(compareEditionDesc);
+  const latestEdition = editions[0] || "";
+  return {
+    heroes: latestEdition ? heroes.filter((hero) => hero.edition === latestEdition).slice(0, heroLimit) : [],
+    articles: latestEdition ? articles.filter((article) => article.edition === latestEdition).slice(0, articleLimit) : [],
+    ads,
+    latestEdition,
+  };
+}
+
+function isLatestPublishedEditionSnapshot(value: unknown): value is LatestPublishedEditionSnapshot {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<LatestPublishedEditionSnapshot>;
+  return (
+    Array.isArray(candidate.heroes) &&
+    Array.isArray(candidate.articles) &&
+    Array.isArray(candidate.ads) &&
+    typeof candidate.latestEdition === "string"
+  );
+}
+
+function readCachedLatestSnapshot(): LatestPublishedEditionSnapshot | null {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(STORAGE_KEYS.latestSnapshot);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!isLatestPublishedEditionSnapshot(parsed)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedLatestSnapshot(snapshot: LatestPublishedEditionSnapshot) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.latestSnapshot, JSON.stringify(snapshot));
+  } catch {
+    // Best-effort cache only.
+  }
+}
+
+function hasLatestSnapshotStories(snapshot: LatestPublishedEditionSnapshot) {
+  return snapshot.heroes.length > 0 || snapshot.articles.length > 0;
+}
+
+export function getCachedLatestPublishedEditionSnapshot(options?: {
+  heroLimit?: number;
+  articleLimit?: number;
+}): LatestPublishedEditionSnapshot {
+  const heroLimit = Math.max(1, options?.heroLimit || 3);
+  const articleLimit = Math.max(1, options?.articleLimit || 4);
+  const cached = readCachedLatestSnapshot();
+  if (cached && hasLatestSnapshotStories(cached)) {
+    return {
+      ...cached,
+      heroes: cached.heroes.slice(0, heroLimit),
+      articles: cached.articles.slice(0, articleLimit),
+    };
+  }
+  return selectLatestEditionSnapshotFromLists(
+    DEFAULT_PUBLISHED_CONTENT.heroes,
+    DEFAULT_PUBLISHED_CONTENT.articles,
+    DEFAULT_PUBLISHED_CONTENT.ads,
+    heroLimit,
+    articleLimit,
+  );
+}
+
 function editionSortWeight(edition: string): number {
   const normalized = (edition || "").trim();
   const direct = normalized.match(/^(\d{4})-(\d{1,2})$/);
@@ -1161,12 +1241,13 @@ export async function getLatestPublishedEditionSnapshot(options?: {
 }): Promise<LatestPublishedEditionSnapshot> {
   const heroLimit = Math.max(1, options?.heroLimit || 3);
   const articleLimit = Math.max(1, options?.articleLimit || 4);
+  const cachedFallback = getCachedLatestPublishedEditionSnapshot({ heroLimit, articleLimit });
 
   const buildDefaultFallback = (): LatestPublishedEditionSnapshot => ({
-    heroes: [],
-    articles: [],
-    ads: DEFAULT_PUBLISHED_CONTENT.ads,
-    latestEdition: "",
+    heroes: cachedFallback.heroes,
+    articles: cachedFallback.articles,
+    ads: cachedFallback.ads,
+    latestEdition: cachedFallback.latestEdition,
   });
 
   try {
@@ -1194,12 +1275,16 @@ export async function getLatestPublishedEditionSnapshot(options?: {
       return buildDefaultFallback();
     }
 
-    return {
+    const latestSnapshot = {
       heroes: raw.heroes.map(normalizeHero),
       articles: raw.articles.map(normalizeArticle),
       ads: raw.ads,
       latestEdition: (raw.latestEdition || "").trim(),
     };
+    if (hasLatestSnapshotStories(latestSnapshot)) {
+      writeCachedLatestSnapshot(latestSnapshot);
+    }
+    return latestSnapshot;
   } catch {
     return buildDefaultFallback();
   }

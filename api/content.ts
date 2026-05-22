@@ -93,7 +93,7 @@ const SITE_URL = "https://www.themagorium.com";
 const INDEXNOW_KEY = "8f3d2a6b9c1e4f7ab5d8c2e1f0a9b6d3";
 const INDEXNOW_KEY_LOCATION = `${SITE_URL}/${INDEXNOW_KEY}.txt`;
 const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
-const LATEST_VIEW_FALLBACK_IMAGE = `${SITE_URL}/og-image.jpg?v=20260522-0630`;
+const LATEST_VIEW_FALLBACK_IMAGE = `${SITE_URL}/og-image.jpg?v=20260522-0700`;
 
 let memoryFallback: StoredPayload | null = null;
 let memoryLatestFallback: LatestViewPayload | null = null;

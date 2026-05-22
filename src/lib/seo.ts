@@ -1,7 +1,7 @@
 import { buildContentPath, type Article, type HeroItem } from "@/lib/content-store";
 
 const SITE_URL = "https://www.themagorium.com";
-const SEO_ASSET_VERSION = "20260522-0630";
+const SEO_ASSET_VERSION = "20260522-0700";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg?v=${SEO_ASSET_VERSION}`;
 const DEFAULT_FAVICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";

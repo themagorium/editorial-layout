@@ -5,6 +5,10 @@
       "dest": "/api/bing-site-auth"
     },
     {
+      "src": "/favicon\\.ico",
+      "dest": "/favicon.png"
+    },
+    {
       "src": "/favicon\\.png",
       "dest": "/favicon.png"
     },

@@ -89,6 +89,10 @@ const CONTENT_CHUNK_PREFIX = `${CONTENT_KEY}:chunk:`;
 const CONTENT_UPLOAD_PREFIX = `${CONTENT_KEY}:upload:`;
 const CONTENT_CHUNK_SIZE = 700_000;
 const ADMIN_PASSWORD_KEY = "ADMIN_PASSWORD";
+const SITE_URL = "https://www.themagorium.com";
+const INDEXNOW_KEY = "8f3d2a6b9c1e4f7ab5d8c2e1f0a9b6d3";
+const INDEXNOW_KEY_LOCATION = `${SITE_URL}/${INDEXNOW_KEY}.txt`;
+const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
 
 let memoryFallback: StoredPayload | null = null;
 let memoryLatestFallback: LatestViewPayload | null = null;
@@ -241,6 +245,72 @@ function sanitizePayload(input: unknown): PublishPayload {
   const ads = ensureArray<AdPayload>(payload.ads);
 
   return { heroes, articles, ads };
+}
+
+function slugifyText(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function buildContentPath(id: string, title: string): string {
+  return `/articles/${slugifyText(title || id)}--${id}`;
+}
+
+function canonicalAuthorSlug(author?: string): string {
+  const normalized = slugifyText(author || "");
+  if (!normalized || normalized === "staff") return "staff";
+  return normalized;
+}
+
+function collectIndexNowUrls(content: PublishPayload): string[] {
+  const paths = new Set<string>(["/", "/archive", "/themagorium", "/magorium"]);
+  const editionKeys = new Set<string>();
+
+  content.heroes.forEach((hero) => {
+    paths.add(buildContentPath(hero.id, hero.title));
+    if (hero.edition) editionKeys.add(hero.edition);
+    if (hero.category) paths.add(`/category/${slugifyText(hero.category)}`);
+    paths.add(`/author/${canonicalAuthorSlug(hero.author)}`);
+  });
+
+  content.articles.forEach((article) => {
+    paths.add(buildContentPath(article.id, article.title));
+    if (article.edition) editionKeys.add(article.edition);
+    if (article.category) paths.add(`/category/${slugifyText(article.category)}`);
+    paths.add(`/author/${canonicalAuthorSlug(article.author)}`);
+  });
+
+  editionKeys.forEach((edition) => paths.add(`/archive/${edition}`));
+  return Array.from(paths).map((path) => `${SITE_URL}${path}`);
+}
+
+async function submitIndexNow(urls: string[]) {
+  if (urls.length === 0) return;
+  const payload = {
+    host: "www.themagorium.com",
+    key: INDEXNOW_KEY,
+    keyLocation: INDEXNOW_KEY_LOCATION,
+    urlList: urls.slice(0, 1000),
+  };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 2500);
+  try {
+    await fetch(INDEXNOW_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+  } catch {
+    // Non-blocking best-effort indexing hint.
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
@@ -685,6 +755,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           publishedAt,
           updatedAt: publishedAt,
         });
+        void submitIndexNow(collectIndexNowUrls(content));
 
         res.status(200).json({
           ok: true,
@@ -703,6 +774,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         publishedAt,
         updatedAt: publishedAt,
       });
+      void submitIndexNow(collectIndexNowUrls(content));
       res.status(200).json({
         ok: true,
         success: true,

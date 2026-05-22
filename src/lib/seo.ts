@@ -1,4 +1,4 @@
-import { buildContentPath, type Article, type HeroItem } from "@/lib/content-store";
+import { buildContentPath, type Article, type HeroItem } from "@/lib/content-public";
 
 const SITE_URL = "https://www.themagorium.com";
 const SEO_ASSET_VERSION = "20260522-0700";

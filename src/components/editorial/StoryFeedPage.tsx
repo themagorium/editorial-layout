@@ -9,7 +9,7 @@ import {
   formatEditionLabel,
   type Article,
   type HeroItem,
-} from "@/lib/content-store";
+} from "@/lib/content-public";
 import {
   applyHomeSeo,
   applyMagoriumBrandSeo,

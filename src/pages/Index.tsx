@@ -4,13 +4,12 @@ import EditorialFooter from "@/components/editorial/EditorialFooter";
 import AdPlacement from "@/components/editorial/AdPlacement";
 
 import {
-  getAds,
   getCachedLatestPublishedEditionSnapshot,
   getLatestPublishedEditionSnapshot,
   formatEditionLabel,
   buildContentPath,
-} from "@/lib/content-store";
-import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
+} from "@/lib/content-public";
+import type { HeroItem, Article, AdSlot } from "@/lib/content-public";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { applyHomeSeo, applyMagoriumBrandSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
@@ -103,7 +102,7 @@ export default function Index() {
   );
   const [heroes, setHeroes] = useState<HeroItem[]>(initialSnapshot.heroes);
   const [articles, setArticles] = useState<Article[]>(initialSnapshot.articles);
-  const [ads, setAds] = useState<AdSlot[]>(initialSnapshot.ads.length > 0 ? initialSnapshot.ads : getAds());
+  const [ads, setAds] = useState<AdSlot[]>(initialSnapshot.ads);
   const [editionLabel, setEditionLabel] = useState(
     initialSnapshot.latestEdition ? formatEditionLabel(initialSnapshot.latestEdition) : "",
   );
@@ -118,7 +117,7 @@ export default function Index() {
         if (!active) return;
         setHeroes(snapshot.heroes);
         setArticles(snapshot.articles);
-        setAds(snapshot.ads.length > 0 ? snapshot.ads : getAds());
+        setAds(snapshot.ads);
         setEditionLabel(snapshot.latestEdition ? formatEditionLabel(snapshot.latestEdition) : "");
         setLoaded(true);
         applyHomeSeo();

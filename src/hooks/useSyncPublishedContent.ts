@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { syncPublishedContentToLocalStorage } from "@/lib/content-store";
 
 type SyncOptions = {
   enabled?: boolean;
@@ -14,6 +13,7 @@ export function useSyncPublishedContent(options?: SyncOptions) {
     let cancelled = false;
     const deferMs = Math.max(0, options?.deferMs ?? 1500);
     const run = async () => {
+      const { syncPublishedContentToLocalStorage } = await import("@/lib/content-store");
       const result = await syncPublishedContentToLocalStorage();
       if (cancelled) return;
       if (result.synced) {

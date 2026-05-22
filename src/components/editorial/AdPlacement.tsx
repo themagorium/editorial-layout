@@ -1,4 +1,4 @@
-import type { AdSlot } from "@/lib/content-store";
+import type { AdSlot } from "@/lib/content-public";
 import { Megaphone } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { useEffect, useRef } from "react";

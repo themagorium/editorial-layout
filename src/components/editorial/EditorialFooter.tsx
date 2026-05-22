@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CATEGORIES, getEditions, formatEditionLabel } from "@/lib/content-store";
+import { CATEGORIES, PUBLIC_ARCHIVE_EDITIONS, formatEditionLabel } from "@/lib/content-public";
 import { Link } from "react-router-dom";
 import PrivacyPopupButton from "@/components/editorial/PrivacyPopupButton";
 import { toast } from "sonner";
@@ -65,7 +65,7 @@ export default function EditorialFooter() {
             <div className="mt-5">
               <h4 className="text-xs font-sans uppercase tracking-widest text-primary mb-3">Archive</h4>
               <div className="space-y-2">
-                {getEditions().map((ed) => (
+                {PUBLIC_ARCHIVE_EDITIONS.map((ed) => (
                   <Link key={ed} to={`/archive/${ed}`} className="block text-sm font-sans text-muted-foreground hover:text-foreground transition-colors">
                     {formatEditionLabel(ed)}
                   </Link>

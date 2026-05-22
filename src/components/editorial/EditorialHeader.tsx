@@ -1,4 +1,4 @@
-import { CATEGORIES } from "@/lib/content-store";
+import { CATEGORIES } from "@/lib/content-public";
 import { Link, useLocation } from "react-router-dom";
 import { Settings, Archive } from "lucide-react";
 import { getCategoryPath } from "@/lib/seo";

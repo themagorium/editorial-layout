@@ -93,6 +93,7 @@ const SITE_URL = "https://www.themagorium.com";
 const INDEXNOW_KEY = "8f3d2a6b9c1e4f7ab5d8c2e1f0a9b6d3";
 const INDEXNOW_KEY_LOCATION = `${SITE_URL}/${INDEXNOW_KEY}.txt`;
 const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
+const LATEST_VIEW_FALLBACK_IMAGE = `${SITE_URL}/og-image.jpg?v=20260522-0630`;
 
 let memoryFallback: StoredPayload | null = null;
 let memoryLatestFallback: LatestViewPayload | null = null;
@@ -389,6 +390,94 @@ function parsePositiveInt(value: string, fallback: number): number {
   return parsed;
 }
 
+function isLargeInlineDataUrl(value?: string): boolean {
+  const normalized = (value || "").trim();
+  return normalized.startsWith("data:") && normalized.length > 2048;
+}
+
+function normalizeLatestImageUrl(imageUrl?: string): string {
+  const normalized = (imageUrl || "").trim();
+  if (!normalized) return LATEST_VIEW_FALLBACK_IMAGE;
+  if (isLargeInlineDataUrl(normalized)) return LATEST_VIEW_FALLBACK_IMAGE;
+  return normalized;
+}
+
+function normalizeLatestVideoUrl(videoUrl?: string): string | undefined {
+  const normalized = (videoUrl || "").trim();
+  if (!normalized) return undefined;
+  if (isLargeInlineDataUrl(normalized)) return undefined;
+  return normalized;
+}
+
+function toLatestHeroSummary(hero: HeroPayload): HeroPayload {
+  return {
+    id: hero.id,
+    title: hero.title,
+    excerpt: hero.excerpt,
+    legacySlugs: hero.legacySlugs,
+    seoTags: hero.seoTags,
+    subtitle: hero.subtitle,
+    category: hero.category,
+    imageUrl: normalizeLatestImageUrl(hero.imageUrl),
+    videoUrl: normalizeLatestVideoUrl(hero.videoUrl),
+    author: hero.author,
+    date: hero.date,
+    featured: hero.featured,
+    edition: hero.edition,
+    body: [],
+  };
+}
+
+function toLatestArticleSummary(article: ArticlePayload): ArticlePayload {
+  return {
+    id: article.id,
+    title: article.title,
+    excerpt: article.excerpt,
+    legacySlugs: article.legacySlugs,
+    seoTags: article.seoTags,
+    category: article.category,
+    imageUrl: normalizeLatestImageUrl(article.imageUrl),
+    videoUrl: normalizeLatestVideoUrl(article.videoUrl),
+    author: article.author,
+    date: article.date,
+    featured: article.featured,
+    edition: article.edition,
+    body: [],
+  };
+}
+
+function toLatestAdSummary(ad: AdPayload): AdPayload {
+  return {
+    id: ad.id,
+    label: ad.label,
+    position: ad.position,
+    imageUrl: isLargeInlineDataUrl(ad.imageUrl) ? undefined : ad.imageUrl,
+    videoUrl: isLargeInlineDataUrl(ad.videoUrl) ? undefined : ad.videoUrl,
+    linkUrl: ad.linkUrl,
+    width: ad.width,
+    height: ad.height,
+  };
+}
+
+function sanitizeLatestViewPayload(content: LatestViewPayload): LatestViewPayload {
+  return {
+    ...content,
+    heroes: content.heroes.map(toLatestHeroSummary),
+    articles: content.articles.map(toLatestArticleSummary),
+    ads: content.ads.map(toLatestAdSummary),
+  };
+}
+
+function latestPayloadNeedsCompaction(content: LatestViewPayload): boolean {
+  return (
+    content.heroes.some((hero) => (hero.body || []).length > 0 || isLargeInlineDataUrl(hero.imageUrl) || isLargeInlineDataUrl(hero.videoUrl)) ||
+    content.articles.some(
+      (article) => (article.body || []).length > 0 || isLargeInlineDataUrl(article.imageUrl) || isLargeInlineDataUrl(article.videoUrl),
+    ) ||
+    content.ads.some((ad) => isLargeInlineDataUrl(ad.imageUrl) || isLargeInlineDataUrl(ad.videoUrl))
+  );
+}
+
 function toLatestViewPayload(
   content: StoredPayload,
   heroLimit: number,
@@ -398,16 +487,22 @@ function toLatestViewPayload(
   const readyArticles = content.articles.filter(isPublishReadyArticle);
   const latestEdition = pickLatestReadyEdition(readyHeroes, readyArticles);
   const heroes = latestEdition
-    ? readyHeroes.filter((hero) => hero.edition === latestEdition).slice(0, heroLimit)
+    ? readyHeroes
+        .filter((hero) => hero.edition === latestEdition)
+        .slice(0, heroLimit)
+        .map(toLatestHeroSummary)
     : [];
   const articles = latestEdition
-    ? readyArticles.filter((article) => article.edition === latestEdition).slice(0, articleLimit)
+    ? readyArticles
+        .filter((article) => article.edition === latestEdition)
+        .slice(0, articleLimit)
+        .map(toLatestArticleSummary)
     : [];
 
   return {
     heroes,
     articles,
-    ads: content.ads,
+    ads: content.ads.map(toLatestAdSummary),
     publishedAt: content.publishedAt,
     updatedAt: content.updatedAt,
     latestEdition,
@@ -418,13 +513,17 @@ function buildLatestEditionPayload(content: StoredPayload): LatestViewPayload {
   const readyHeroes = content.heroes.filter(isPublishReadyHero);
   const readyArticles = content.articles.filter(isPublishReadyArticle);
   const latestEdition = pickLatestReadyEdition(readyHeroes, readyArticles);
-  const heroes = latestEdition ? readyHeroes.filter((hero) => hero.edition === latestEdition) : [];
-  const articles = latestEdition ? readyArticles.filter((article) => article.edition === latestEdition) : [];
+  const heroes = latestEdition
+    ? readyHeroes.filter((hero) => hero.edition === latestEdition).map(toLatestHeroSummary)
+    : [];
+  const articles = latestEdition
+    ? readyArticles.filter((article) => article.edition === latestEdition).map(toLatestArticleSummary)
+    : [];
 
   return {
     heroes,
     articles,
-    ads: content.ads,
+    ads: content.ads.map(toLatestAdSummary),
     publishedAt: content.publishedAt,
     updatedAt: content.updatedAt,
     latestEdition,
@@ -637,11 +736,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const queryView = readFirstString(req.query?.view).trim().toLowerCase();
       if (queryView === "latest") {
+        res.setHeader("Cache-Control", "public, s-maxage=5, stale-while-revalidate=30");
         const heroLimit = parsePositiveInt(readFirstString(req.query?.heroLimit), 3);
         const articleLimit = parsePositiveInt(readFirstString(req.query?.articleLimit), 4);
         const latestStored = await getLatestStoredContent();
         if (latestStored) {
-          const limited = applyLatestLimits(latestStored, heroLimit, articleLimit);
+          const sanitizedLatest = sanitizeLatestViewPayload(latestStored);
+          const limited = applyLatestLimits(sanitizedLatest, heroLimit, articleLimit);
+          if (latestPayloadNeedsCompaction(latestStored)) {
+            await setLatestStoredContent(sanitizedLatest);
+          }
           res.status(200).json({
             ok: true,
             success: true,

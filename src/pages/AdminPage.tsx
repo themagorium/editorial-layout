@@ -50,14 +50,7 @@ import {
   setAdminAuthenticated,
   resetAdminPasswordAccess,
 } from "@/lib/admin-auth";
-
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.readAsDataURL(file);
-  });
-}
+import { fileToOptimizedDataUrl } from "@/lib/media-optimizer";
 
 function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[] {
   const editions = new Set<string>();
@@ -1102,13 +1095,13 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
 
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onImage(await fileToDataUrl(file));
+    if (file) onImage(await fileToOptimizedDataUrl(file));
     e.target.value = "";
   };
 
   const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onVideo(await fileToDataUrl(file));
+    if (file) onVideo(await fileToOptimizedDataUrl(file));
     e.target.value = "";
   };
 

@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import type { ArticleBodyBlock } from "@/lib/content-store";
 import { Trash2, Image, Video, Type, GripVertical, Heading, Bold, Italic } from "lucide-react";
+import { fileToOptimizedDataUrl } from "@/lib/media-optimizer";
 
 interface Props {
   blocks: ArticleBodyBlock[];
@@ -41,14 +42,6 @@ function getImageLayoutClasses(block: ArticleBodyBlock) {
   return `${widthClassMap[width]} ${alignClassMap[align]}`;
 }
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function ArticleBodyEditor({ blocks, onChange, heading = "Article Body", preferredPattern = false }: Props) {
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
@@ -72,7 +65,7 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
 
   const addMediaBlock = async (type: "image" | "video", file: File, atIndex?: number) => {
     const idx = atIndex ?? blocks.length;
-    const url = await fileToDataUrl(file);
+    const url = await fileToOptimizedDataUrl(file);
     const newBlock: ArticleBodyBlock = {
       id: `b-${Date.now()}`,
       type,
@@ -87,7 +80,7 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
   };
 
   const replaceMediaBlock = async (id: string, file: File) => {
-    const url = await fileToDataUrl(file);
+    const url = await fileToOptimizedDataUrl(file);
     updateBlock(id, { content: url });
   };
 

@@ -6,7 +6,6 @@ import {
   buildContentPath,
   getLatestPublishedEditionSnapshot,
   formatEditionLabel,
-  DEFAULT_PUBLISHED_CONTENT,
   type Article,
   type HeroItem,
 } from "@/lib/content-store";
@@ -18,7 +17,6 @@ import {
   getAuthorPath,
 } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
-import { selectFrontPageEditionContent } from "@/lib/content-selection";
 
 type StoryFeedPageProps = {
   seoHint?: string;
@@ -67,31 +65,31 @@ export default function StoryFeedPage({
   canonicalAliasPath = "/magorium",
 }: StoryFeedPageProps) {
   useSyncPublishedContent();
-  const initial = selectFrontPageEditionContent(
-    DEFAULT_PUBLISHED_CONTENT.heroes,
-    DEFAULT_PUBLISHED_CONTENT.articles,
-    8,
-  );
-  const [heroes, setHeroes] = useState<HeroItem[]>(initial.heroes);
-  const [articles, setArticles] = useState<Article[]>(initial.articles);
-  const [editionLabel, setEditionLabel] = useState(initial.editionLabel);
-  const [loaded, setLoaded] = useState(true);
+  const [heroes, setHeroes] = useState<HeroItem[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [editionLabel, setEditionLabel] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let active = true;
     const hydrate = async () => {
-      const snapshot = await getLatestPublishedEditionSnapshot({ heroLimit: 3, articleLimit: 8 });
-      if (!active) return;
+      try {
+        const snapshot = await getLatestPublishedEditionSnapshot({ heroLimit: 3, articleLimit: 8 });
+        if (!active) return;
 
-      setHeroes(snapshot.heroes);
-      setArticles(snapshot.articles);
-      setEditionLabel(snapshot.latestEdition ? formatEditionLabel(snapshot.latestEdition) : "");
-      const storyPaths = [...snapshot.heroes, ...snapshot.articles].map((item) =>
-        buildContentPath(item.id, item.title),
-      );
-      setLoaded(true);
-      applyHomeSeo(seoHint, storyPaths);
-      applyMagoriumBrandSeo(canonicalAliasPath);
+        setHeroes(snapshot.heroes);
+        setArticles(snapshot.articles);
+        setEditionLabel(snapshot.latestEdition ? formatEditionLabel(snapshot.latestEdition) : "");
+        const storyPaths = [...snapshot.heroes, ...snapshot.articles].map((item) =>
+          buildContentPath(item.id, item.title),
+        );
+        setLoaded(true);
+        applyHomeSeo(seoHint, storyPaths);
+        applyMagoriumBrandSeo(canonicalAliasPath);
+      } catch {
+        if (!active) return;
+        setLoaded(true);
+      }
     };
 
     const handleSynced = () => {

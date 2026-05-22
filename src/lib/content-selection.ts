@@ -3,8 +3,10 @@ import { formatEditionLabel } from "@/lib/content-store";
 
 const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
 const PLACEHOLDER_COPY_PATTERNS = [
-  /^add your first hero story$/i,
-  /^add your first article$/i,
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
   /^add story text$/i,
   /^add first body paragraph$/i,
   /^add second body paragraph$/i,

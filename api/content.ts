@@ -84,12 +84,14 @@ type LatestViewPayload = {
 };
 
 const CONTENT_KEY = "magorium:published-content:v1";
+const LATEST_CONTENT_KEY = `${CONTENT_KEY}:latest`;
 const CONTENT_CHUNK_PREFIX = `${CONTENT_KEY}:chunk:`;
 const CONTENT_UPLOAD_PREFIX = `${CONTENT_KEY}:upload:`;
 const CONTENT_CHUNK_SIZE = 700_000;
 const ADMIN_PASSWORD_KEY = "ADMIN_PASSWORD";
 
 let memoryFallback: StoredPayload | null = null;
+let memoryLatestFallback: LatestViewPayload | null = null;
 let memoryChunkUploads = new Map<string, { totalChunks: number; chunks: Map<number, string> }>();
 let kvClientPromise: Promise<{
   get: <T>(key: string) => Promise<T | null>;
@@ -243,8 +245,10 @@ function sanitizePayload(input: unknown): PublishPayload {
 
 const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
 const PLACEHOLDER_COPY_PATTERNS = [
-  /^add your first hero story$/i,
-  /^add your first article$/i,
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
   /^add story text$/i,
   /^add first body paragraph$/i,
   /^add second body paragraph$/i,
@@ -337,6 +341,31 @@ function toLatestViewPayload(
     publishedAt: content.publishedAt,
     updatedAt: content.updatedAt,
     latestEdition,
+  };
+}
+
+function buildLatestEditionPayload(content: StoredPayload): LatestViewPayload {
+  const readyHeroes = content.heroes.filter(isPublishReadyHero);
+  const readyArticles = content.articles.filter(isPublishReadyArticle);
+  const latestEdition = pickLatestReadyEdition(readyHeroes, readyArticles);
+  const heroes = latestEdition ? readyHeroes.filter((hero) => hero.edition === latestEdition) : [];
+  const articles = latestEdition ? readyArticles.filter((article) => article.edition === latestEdition) : [];
+
+  return {
+    heroes,
+    articles,
+    ads: content.ads,
+    publishedAt: content.publishedAt,
+    updatedAt: content.updatedAt,
+    latestEdition,
+  };
+}
+
+function applyLatestLimits(content: LatestViewPayload, heroLimit: number, articleLimit: number): LatestViewPayload {
+  return {
+    ...content,
+    heroes: content.heroes.slice(0, heroLimit),
+    articles: content.articles.slice(0, articleLimit),
   };
 }
 
@@ -484,12 +513,22 @@ async function getStoredContent() {
   return memoryFallback;
 }
 
+async function getLatestStoredContent() {
+  const kv = await getKvClient();
+  if (kv) {
+    return (await kv.get<LatestViewPayload>(LATEST_CONTENT_KEY)) || null;
+  }
+  return memoryLatestFallback;
+}
+
 async function setStoredContent(content: StoredPayload) {
+  const latestPayload = buildLatestEditionPayload(content);
   const kv = await getKvClient();
   if (kv) {
     const serialized = JSON.stringify(content);
     if (serialized.length <= CONTENT_CHUNK_SIZE) {
       await kv.set(CONTENT_KEY, content);
+      await kv.set(LATEST_CONTENT_KEY, latestPayload);
       return;
     }
 
@@ -507,16 +546,35 @@ async function setStoredContent(content: StoredPayload) {
       updatedAt: content.updatedAt || content.publishedAt,
     };
     await kv.set(CONTENT_KEY, pointer);
+    await kv.set(LATEST_CONTENT_KEY, latestPayload);
     return;
   }
   memoryFallback = content;
+  memoryLatestFallback = latestPayload;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "GET") {
     try {
-      const content = await getStoredContent();
       const queryView = readFirstString(req.query?.view).trim().toLowerCase();
+      if (queryView === "latest") {
+        const heroLimit = parsePositiveInt(readFirstString(req.query?.heroLimit), 3);
+        const articleLimit = parsePositiveInt(readFirstString(req.query?.articleLimit), 4);
+        const latestStored = await getLatestStoredContent();
+        if (latestStored) {
+          const limited = applyLatestLimits(latestStored, heroLimit, articleLimit);
+          res.status(200).json({
+            ok: true,
+            success: true,
+            configured: isKvConfigured(),
+            content: limited,
+            payload: limited,
+          });
+          return;
+        }
+      }
+
+      const content = await getStoredContent();
       const normalizedContent = content
         ? {
             ...content,

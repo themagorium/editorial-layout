@@ -1162,23 +1162,11 @@ export async function getLatestPublishedEditionSnapshot(options?: {
   const heroLimit = Math.max(1, options?.heroLimit || 3);
   const articleLimit = Math.max(1, options?.articleLimit || 4);
 
-  const fallbackEdition = Array.from(
-    new Set([
-      ...DEFAULT_PUBLISHED_CONTENT.heroes.map((hero) => hero.edition),
-      ...DEFAULT_PUBLISHED_CONTENT.articles.map((article) => article.edition),
-    ]),
-  )
-    .filter(Boolean)
-    .sort(compareEditionDesc)[0] || "";
   const buildDefaultFallback = (): LatestPublishedEditionSnapshot => ({
-    heroes: fallbackEdition
-      ? DEFAULT_PUBLISHED_CONTENT.heroes.filter((hero) => hero.edition === fallbackEdition).slice(0, heroLimit)
-      : DEFAULT_PUBLISHED_CONTENT.heroes.slice(0, heroLimit),
-    articles: fallbackEdition
-      ? DEFAULT_PUBLISHED_CONTENT.articles.filter((article) => article.edition === fallbackEdition).slice(0, articleLimit)
-      : DEFAULT_PUBLISHED_CONTENT.articles.slice(0, articleLimit),
+    heroes: [],
+    articles: [],
     ads: DEFAULT_PUBLISHED_CONTENT.ads,
-    latestEdition: fallbackEdition,
+    latestEdition: "",
   });
 
   try {

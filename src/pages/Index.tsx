@@ -6,7 +6,6 @@ import AdPlacement from "@/components/editorial/AdPlacement";
 import {
   getAds,
   getLatestPublishedEditionSnapshot,
-  DEFAULT_PUBLISHED_CONTENT,
   formatEditionLabel,
   buildContentPath,
 } from "@/lib/content-store";
@@ -15,7 +14,6 @@ import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { applyHomeSeo, applyMagoriumBrandSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
-import { selectFrontPageEditionContent } from "@/lib/content-selection";
 
 function HeroCard({ hero }: { hero: HeroItem }) {
   const authorName = canonicalAuthorName(hero.author);
@@ -103,27 +101,29 @@ function ArticleCard({ article }: { article: Article }) {
 
 export default function Index() {
   useSyncPublishedContent();
-  const initial = selectFrontPageEditionContent(
-    DEFAULT_PUBLISHED_CONTENT.heroes,
-    DEFAULT_PUBLISHED_CONTENT.articles,
-    4,
-  );
-  const [heroes, setHeroes] = useState<HeroItem[]>(initial.heroes);
-  const [articles, setArticles] = useState<Article[]>(initial.articles);
-  const [ads, setAds] = useState<AdSlot[]>(DEFAULT_PUBLISHED_CONTENT.ads);
-  const [editionLabel, setEditionLabel] = useState(initial.editionLabel);
+  const [heroes, setHeroes] = useState<HeroItem[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [ads, setAds] = useState<AdSlot[]>([]);
+  const [editionLabel, setEditionLabel] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let active = true;
-    getLatestPublishedEditionSnapshot({ heroLimit: 3, articleLimit: 4 }).then((snapshot) => {
-      if (!active) return;
-      setHeroes(snapshot.heroes);
-      setArticles(snapshot.articles);
-      setAds(snapshot.ads.length > 0 ? snapshot.ads : getAds());
-      setEditionLabel(snapshot.latestEdition ? formatEditionLabel(snapshot.latestEdition) : "");
-      applyHomeSeo();
-      applyMagoriumBrandSeo("/magorium");
-    });
+    getLatestPublishedEditionSnapshot({ heroLimit: 3, articleLimit: 4 })
+      .then((snapshot) => {
+        if (!active) return;
+        setHeroes(snapshot.heroes);
+        setArticles(snapshot.articles);
+        setAds(snapshot.ads.length > 0 ? snapshot.ads : getAds());
+        setEditionLabel(snapshot.latestEdition ? formatEditionLabel(snapshot.latestEdition) : "");
+        setLoaded(true);
+        applyHomeSeo();
+        applyMagoriumBrandSeo("/magorium");
+      })
+      .catch(() => {
+        if (!active) return;
+        setLoaded(true);
+      });
     return () => {
       active = false;
     };
@@ -157,7 +157,12 @@ export default function Index() {
       <section className="container mx-auto px-4 mt-4 md:mt-6">
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-6 items-start">
           <div className="flex flex-col gap-6">
-            {heroes.map((hero) => (
+            {!loaded && (
+              <div className="rounded border border-border p-6 text-sm text-muted-foreground font-sans">
+                Loading latest edition...
+              </div>
+            )}
+            {loaded && heroes.map((hero) => (
               <HeroCard key={hero.id} hero={hero} />
             ))}
           </div>

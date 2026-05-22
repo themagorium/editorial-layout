@@ -35,8 +35,10 @@ type EditionBucket = {
 
 const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
 const PLACEHOLDER_COPY_PATTERNS = [
-  /^add your first hero story$/i,
-  /^add your first article$/i,
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
   /^add story text$/i,
   /^add first body paragraph$/i,
   /^add second body paragraph$/i,
@@ -103,8 +105,9 @@ function normalizeVersionTokens(value: string): string {
 
 function versionKeyForStory(story: CategoryStory): string {
   const titleKey = normalizeVersionTokens(story.title);
+  if (titleKey) return `${slugifyText(story.category)}|${titleKey}`;
   const excerptKey = normalizeVersionTokens(story.excerpt).split(" ").slice(0, 10).join(" ");
-  return `${titleKey}|${excerptKey}`;
+  return `${slugifyText(story.category)}|${excerptKey}`;
 }
 
 function dedupeStoryVersions(stories: CategoryStory[]): CategoryStory[] {

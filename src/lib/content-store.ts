@@ -1,32 +1,32 @@
 // ===== Image Imports =====
-import heroOlympics from "@/assets/hero-olympics.jpg";
-import heroMilanFashion from "@/assets/hero-milan-fashion.jpg";
-import heroSothebys from "@/assets/hero-sothebys.jpg";
-import articleRioCarnival from "@/assets/article-rio-carnival.jpg";
-import articleSuperbowl from "@/assets/article-superbowl.jpg";
-import articleDubaiBoatShow from "@/assets/article-dubai-boat-show.jpg";
-import articlePebbleBeach from "@/assets/article-pebble-beach.jpg";
-import articleAbuDhabiArt from "@/assets/article-abu-dhabi-art.jpg";
+import heroOlympics from "@/assets/hero-olympics.webp";
+import heroMilanFashion from "@/assets/hero-milan-fashion.webp";
+import heroSothebys from "@/assets/hero-sothebys.webp";
+import articleRioCarnival from "@/assets/article-rio-carnival.webp";
+import articleSuperbowl from "@/assets/article-superbowl.webp";
+import articleDubaiBoatShow from "@/assets/article-dubai-boat-show.webp";
+import articlePebbleBeach from "@/assets/article-pebble-beach.webp";
+import articleAbuDhabiArt from "@/assets/article-abu-dhabi-art.webp";
 // January 2026
-import heroDavosWef from "@/assets/hero-davos-wef.jpg";
-import heroSnowPolo from "@/assets/hero-snow-polo.jpg";
-import heroHauteCouture from "@/assets/hero-haute-couture.jpg";
-import articleOscars from "@/assets/article-oscars.jpg";
-import articleArtSg from "@/assets/article-art-sg.jpg";
+import heroDavosWef from "@/assets/hero-davos-wef.webp";
+import heroSnowPolo from "@/assets/hero-snow-polo.webp";
+import heroHauteCouture from "@/assets/hero-haute-couture.webp";
+import articleOscars from "@/assets/article-oscars.webp";
+import articleArtSg from "@/assets/article-art-sg.webp";
 // (Pitti Uomo import removed — replaced by Abu Dhabi Art)
-import articleAustralianOpen from "@/assets/article-australian-open.jpg";
+import articleAustralianOpen from "@/assets/article-australian-open.webp";
 // October 2025
-import articleCambiaso from "@/assets/article-cambiaso.jpg";
-import articleF1Americas from "@/assets/article-f1-americas.jpg";
-import heroCapeTown from "@/assets/hero-cape-town.jpg";
-import articleSailgp from "@/assets/article-sailgp.jpg";
-import articleCvSummit from "@/assets/article-cv-summit.jpg";
-import articleKusama from "@/assets/article-kusama.jpg";
-import articleMarrakech from "@/assets/article-marrakech.jpg";
-import articleEngadin from "@/assets/article-engadin.jpg";
-import articleCambiasoPhoto1 from "@/assets/article-cambiaso-photo1.jpg";
-import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.jpg";
-import articlePfw from "@/assets/article-pfw.jpg";
+import articleCambiaso from "@/assets/article-cambiaso.webp";
+import articleF1Americas from "@/assets/article-f1-americas.webp";
+import heroCapeTown from "@/assets/hero-cape-town.webp";
+import articleSailgp from "@/assets/article-sailgp.webp";
+import articleCvSummit from "@/assets/article-cv-summit.webp";
+import articleKusama from "@/assets/article-kusama.webp";
+import articleMarrakech from "@/assets/article-marrakech.webp";
+import articleEngadin from "@/assets/article-engadin.webp";
+import articleCambiasoPhoto1 from "@/assets/article-cambiaso-photo1.webp";
+import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.webp";
+import articlePfw from "@/assets/article-pfw.webp";
 
 // ===== Types =====
 export type Category = 

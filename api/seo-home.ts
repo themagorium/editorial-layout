@@ -53,7 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const title = BRAND_NAME;
     const description =
-      "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
+      "A Curated Lifestyle Magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
     const keywords = [
       BRAND_NAME,
       BRAND_ALIAS,

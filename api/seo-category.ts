@@ -117,7 +117,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       bodyHtml,
       ogType: "website",
       jsonLd,
-      imageUrl: categoryStories[0]?.imageUrl || `${SITE_URL}/favicon.png?v=20260523-0545`,
+      imageUrl: categoryStories[0]?.imageUrl || `${SITE_URL}/favicon.png?v=20260523-1845`,
       noIndex: !hasStories,
     });
 

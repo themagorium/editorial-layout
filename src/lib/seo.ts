@@ -1,7 +1,7 @@
 import { buildContentPath, type Article, type HeroItem } from "@/lib/content-public";
 
 const SITE_URL = "https://www.themagorium.com";
-const SEO_ASSET_VERSION = "20260523-0545";
+const SEO_ASSET_VERSION = "20260523-1845";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 const DEFAULT_FAVICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
@@ -229,7 +229,7 @@ export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
   const normalizedHint = (queryHint || "").trim();
   const title = BRAND_NAME;
   const description =
-    "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
+    "A Curated Lifestyle Magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
@@ -509,7 +509,7 @@ export function applyMagoriumBrandSeo(path = "/magorium") {
   const canonicalUrl = `${SITE_URL}/`;
   const title = BRAND_NAME;
   const description =
-    "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
+    "A Curated Lifestyle Magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,

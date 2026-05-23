@@ -15,8 +15,7 @@ import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 export default function EditionPage() {
   useSyncPublishedContent();
-  const { edition } = useParams<{ edition: string }>();
-  if (!edition) return null;
+  const { edition = "" } = useParams<{ edition: string }>();
 
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -24,6 +23,7 @@ export default function EditionPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    if (!edition) return;
     let active = true;
     getPublishedContentSnapshot()
       .then((snapshot) => {
@@ -47,6 +47,8 @@ export default function EditionPage() {
   const sidebarAd = ads.find((a) => a.position === "sidebar" && hasAdMedia(a));
   const midAd = ads.find((a) => a.position === "mid-feed" && hasAdMedia(a));
   const bottomAd = ads.find((a) => a.position === "bottom-banner" && hasAdMedia(a));
+
+  if (!edition) return null;
   const label = formatEditionLabel(edition);
 
   if (!loaded) {

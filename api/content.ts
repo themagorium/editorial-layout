@@ -96,7 +96,7 @@ const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
 
 let memoryFallback: StoredPayload | null = null;
 let memoryLatestFallback: LatestViewPayload | null = null;
-let memoryChunkUploads = new Map<string, { totalChunks: number; chunks: Map<number, string> }>();
+const memoryChunkUploads = new Map<string, { totalChunks: number; chunks: Map<number, string> }>();
 let kvClientPromise: Promise<{
   get: <T>(key: string) => Promise<T | null>;
   set: (key: string, value: unknown) => Promise<unknown>;
@@ -403,7 +403,7 @@ function isInvalidMediaValue(value?: string): boolean {
 }
 
 function isLogoFallbackAsset(value: string): boolean {
-  return value.includes("/favicon.png") || value.includes("/og-image.jpg") || value.includes("/og-image.png");
+  return value.includes("/favicon.png") || value.includes("/og-image.jpg");
 }
 
 function extractFirstBodyImageUrl(body?: BodyBlock[]): string {
@@ -518,7 +518,6 @@ function latestPayloadLooksLikePlaceholderFallback(content: LatestViewPayload): 
   const onlyImage = uniqueImages[0];
   return (
     onlyImage.includes("/og-image.jpg")
-    || onlyImage.includes("/og-image.png")
     || onlyImage.includes("/favicon.png")
   );
 }

@@ -21,4 +21,10 @@ describe("story media helpers", () => {
     ])).toBe("/assets/body-photo.webp");
   });
 
+
+  it("does not use the brand icon as a story-card fallback", () => {
+    expect(getStoryCardImageUrl("", [])).toBe("");
+    expect(getStoryCardImageUrl("/favicon.png?v=1", [])).toBe("");
+  });
+
 });

@@ -12,7 +12,7 @@ import {
 } from "@/lib/content-store";
 import { applyCollectionSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
-import { getStoryCardImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
+import { getStoryCardImageUrl } from "@/lib/story-media";
 
 type CategoryStory = {
   id: string;
@@ -287,23 +287,23 @@ export default function CategoryPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {bucket.stories.map((story) => (
                     <article key={`${bucket.edition}:${story.storyType}:${story.id}`} className="group border border-border rounded overflow-hidden hover:border-primary transition-colors">
-                      <Link to={story.path}>
-                        <div className="aspect-[16/9] overflow-hidden">
-                          <img
-                            src={story.imageUrl}
-                            alt={story.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
-                            decoding="async"
-                            sizes="(min-width: 768px) 50vw, 100vw"
-                            onError={(event) => {
-                              if (!event.currentTarget.src.endsWith(STORY_IMAGE_FALLBACK)) {
-                                event.currentTarget.src = STORY_IMAGE_FALLBACK;
-                              }
-                            }}
-                          />
-                        </div>
-                      </Link>
+                      {story.imageUrl && (
+                        <Link to={story.path}>
+                          <div data-story-media className="aspect-[16/9] overflow-hidden">
+                            <img
+                              src={story.imageUrl}
+                              alt={story.title}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              loading="lazy"
+                              decoding="async"
+                              sizes="(min-width: 768px) 50vw, 100vw"
+                              onError={(event) => {
+                                event.currentTarget.closest("[data-story-media]")?.classList.add("hidden");
+                              }}
+                            />
+                          </div>
+                        </Link>
+                      )}
                       <div className="p-4">
                         <div className="flex items-center gap-2">
                           <span className="category-pill text-[10px]">{story.category}</span>

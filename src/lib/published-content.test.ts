@@ -371,4 +371,24 @@ describe("published content snapshot", () => {
     expect(snapshot.articles[0]?.excerpt).toBe("");
   });
 
+
+  it("replaces stale bundled asset URLs with canonical story images", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        content: {
+          heroes: [{ ...createHero("h-wef", "2026-01"), imageUrl: "/assets/hero-davos-wef-stale.jpg" }],
+          articles: [],
+          ads: [],
+        },
+      }),
+    }) as unknown as typeof fetch;
+
+    const snapshot = await getPublishedContentSnapshot();
+
+    expect(snapshot.heroes[0]?.imageUrl).toBeTruthy();
+    expect(snapshot.heroes[0]?.imageUrl).not.toBe("/assets/hero-davos-wef-stale.jpg");
+  });
+
 });

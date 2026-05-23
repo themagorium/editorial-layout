@@ -184,6 +184,23 @@ function createMediaSeedBlock(baseId: string, imageUrl?: string, videoUrl?: stri
   };
 }
 
+
+const ADMIN_PLACEHOLDER_COPY_PATTERNS = [
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
+  /^add story text$/i,
+  /^add (first|second|third|fourth) body paragraph$/i,
+  /^upload photo or video$/i,
+];
+
+function stripAdminPlaceholderCopy(value?: string): string {
+  const trimmed = (value || "").trim();
+  if (!trimmed) return "";
+  return ADMIN_PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(trimmed)) ? "" : trimmed;
+}
+
 function normalizeSeoTags(tags?: string[]): string[] {
   if (!Array.isArray(tags)) return [];
   const seen = new Set<string>();
@@ -277,9 +294,12 @@ function normalizeHero(hero: HeroItem): HeroItem {
   const upgraded = upgradeLegacyHeroCopy(hero);
   const canonical = HERO_DEFAULT_BY_ID.get(upgraded.id);
   const imageUrl = resolveStoryImageUrl(upgraded.imageUrl, upgraded.body, canonical?.imageUrl);
+  const subtitle = stripAdminPlaceholderCopy(upgraded.subtitle);
+  const excerpt = stripAdminPlaceholderCopy(upgraded.excerpt) || subtitle;
   return {
     ...upgraded,
-    excerpt: upgraded.excerpt || upgraded.subtitle,
+    subtitle,
+    excerpt,
     imageUrl,
     seoTags: normalizeSeoTags(upgraded.seoTags),
     body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
@@ -290,8 +310,10 @@ function normalizeArticle(article: Article): Article {
   const upgraded = upgradeLegacyArticleCopy(article);
   const canonical = ARTICLE_DEFAULT_BY_ID.get(upgraded.id);
   const imageUrl = resolveStoryImageUrl(upgraded.imageUrl, upgraded.body, canonical?.imageUrl);
+  const excerpt = stripAdminPlaceholderCopy(upgraded.excerpt);
   return {
     ...upgraded,
+    excerpt,
     imageUrl,
     seoTags: normalizeSeoTags(upgraded.seoTags),
     body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),

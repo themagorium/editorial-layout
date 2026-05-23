@@ -332,6 +332,11 @@ function isPlaceholderCopy(value?: string): boolean {
   return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+function stripPlaceholderCopy(value?: string): string {
+  const text = (value || "").trim();
+  return isPlaceholderCopy(text) ? "" : text;
+}
+
 function isPublishReadyHero(hero: HeroPayload): boolean {
   const title = (hero.title || "").trim();
   if (!title || PLACEHOLDER_TITLE_PATTERN.test(title)) return false;
@@ -403,7 +408,7 @@ function isInvalidMediaValue(value?: string): boolean {
 }
 
 function isLogoFallbackAsset(value: string): boolean {
-  return value.includes("/favicon.png") || value.includes("/og-image.jpg");
+  return value.includes("/favicon.png") || value.includes("/og-image.jpg") || value.includes("/og-image.png");
 }
 
 function extractFirstBodyImageUrl(body?: BodyBlock[]): string {
@@ -442,10 +447,10 @@ function toLatestHeroSummary(hero: HeroPayload): HeroPayload {
   return {
     id: hero.id,
     title: hero.title,
-    excerpt: hero.excerpt,
+    excerpt: stripPlaceholderCopy(hero.excerpt) || stripPlaceholderCopy(hero.subtitle),
     legacySlugs: hero.legacySlugs,
     seoTags: hero.seoTags,
-    subtitle: hero.subtitle,
+    subtitle: stripPlaceholderCopy(hero.subtitle),
     category: hero.category,
     imageUrl,
     videoUrl: normalizeLatestVideoUrl(hero.videoUrl),
@@ -462,7 +467,7 @@ function toLatestArticleSummary(article: ArticlePayload): ArticlePayload {
   return {
     id: article.id,
     title: article.title,
-    excerpt: article.excerpt,
+    excerpt: stripPlaceholderCopy(article.excerpt),
     legacySlugs: article.legacySlugs,
     seoTags: article.seoTags,
     category: article.category,
@@ -518,6 +523,7 @@ function latestPayloadLooksLikePlaceholderFallback(content: LatestViewPayload): 
   const onlyImage = uniqueImages[0];
   return (
     onlyImage.includes("/og-image.jpg")
+    || onlyImage.includes("/og-image.png")
     || onlyImage.includes("/favicon.png")
   );
 }

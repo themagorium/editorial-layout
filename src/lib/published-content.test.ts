@@ -339,4 +339,36 @@ describe("published content snapshot", () => {
     );
     expect(snapshot.articles.some((article) => article.id === "v1-engadin")).toBe(true);
   });
+
+  it("strips admin placeholder summaries from published snapshots", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        content: {
+          heroes: [
+            {
+              ...createHero("placeholder-hero", "2026-04"),
+              subtitle: "Add your second hero story",
+              excerpt: "Add your second hero story",
+            },
+          ],
+          articles: [
+            {
+              ...createArticle("placeholder-article", "2026-04"),
+              excerpt: "Add your third article",
+            },
+          ],
+          ads: [],
+        },
+      }),
+    }) as unknown as typeof fetch;
+
+    const snapshot = await getPublishedContentSnapshot();
+
+    expect(snapshot.heroes[0]?.subtitle).toBe("");
+    expect(snapshot.heroes[0]?.excerpt).toBe("");
+    expect(snapshot.articles[0]?.excerpt).toBe("");
+  });
+
 });

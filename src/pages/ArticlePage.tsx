@@ -12,14 +12,18 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { ArrowLeft } from "lucide-react";
 import { applyArticleSeo } from "@/lib/seo";
+import { getFirstBodyImageUrl, getStoryCardImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
-const TEXT_PLACEHOLDERS = new Set([
-  "Add story text",
-  "Add first body paragraph",
-  "Add second body paragraph",
-  "Add third body paragraph",
-]);
+const TEXT_PLACEHOLDER_PATTERNS = [
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
+  /^add story text$/i,
+  /^add (first|second|third|fourth) body paragraph$/i,
+  /^upload photo or video$/i,
+];
 
 const CAPTION_PLACEHOLDERS = new Set([
   "Upload photo or video",
@@ -30,7 +34,7 @@ const CAPTION_PLACEHOLDERS = new Set([
 function isMeaningfulText(value?: string) {
   const trimmed = (value || "").trim();
   if (!trimmed) return false;
-  return !TEXT_PLACEHOLDERS.has(trimmed);
+  return !TEXT_PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(trimmed));
 }
 
 function isMeaningfulCaption(value?: string) {
@@ -69,7 +73,7 @@ function bylineCreditLabel(author?: string) {
   if (/staff/i.test(normalized)) {
     return "By The Magorium Editorial Staff";
   }
-  return `By ${normalized} · Contributing Writer`;
+  return `By ${normalized}`;
 }
 
 function getBodyImageLayoutClasses(block: ArticleBodyBlock) {
@@ -138,7 +142,10 @@ export default function ArticlePage() {
 
   useEffect(() => {
     if (!content) return;
-    applyArticleSeo(content);
+    applyArticleSeo({
+      ...content,
+      excerpt: isMeaningfulText(content.excerpt) ? content.excerpt : "",
+    });
   }, [content]);
 
   if (!content) {
@@ -161,12 +168,24 @@ export default function ArticlePage() {
       <EditorialHeader />
 
       {/* Hero image */}
-      {(content.imageUrl || "").trim() && (
-        <div className="relative w-full aspect-[21/9] max-h-[500px] overflow-hidden">
-          <img src={content.imageUrl} alt={content.title} className="w-full h-full object-cover" />
-          <div className="article-overlay absolute inset-0" />
-        </div>
-      )}
+      <div className="relative w-full aspect-[21/9] max-h-[500px] overflow-hidden">
+        <img
+          src={getStoryCardImageUrl(content.imageUrl, content.body)}
+          alt={content.title}
+          className="w-full h-full object-cover"
+          onError={(event) => {
+            const bodyImage = getFirstBodyImageUrl(content.body);
+            if (bodyImage && event.currentTarget.src !== bodyImage) {
+              event.currentTarget.src = bodyImage;
+              return;
+            }
+            if (!event.currentTarget.src.endsWith(STORY_IMAGE_FALLBACK)) {
+              event.currentTarget.src = STORY_IMAGE_FALLBACK;
+            }
+          }}
+        />
+        <div className="article-overlay absolute inset-0" />
+      </div>
 
       <article className="container mx-auto px-4 max-w-3xl py-10">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-sans mb-8">
@@ -183,7 +202,9 @@ export default function ArticlePage() {
         <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mt-3">
           {content.title}
         </h1>
-        <p className="font-sans text-lg text-muted-foreground mt-4">{content.excerpt}</p>
+        {isMeaningfulText(content.excerpt) && (
+          <p className="font-sans text-lg text-muted-foreground mt-4">{content.excerpt}</p>
+        )}
         <div className="flex items-center gap-3 mt-6 text-sm font-sans text-muted-foreground border-b border-border pb-6">
           <Link
             to={`/author/${slugifyText(normalizeBylineAuthor(content.author)) || "staff"}`}

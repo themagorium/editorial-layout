@@ -12,12 +12,14 @@ import { Search, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { applyCollectionSeo, applyHomeSeo } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
-import { getStoryImageUrl, hasUsableStoryImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
+import { getStoryCardImageUrl, getStoryImageUrl, hasUsableStoryImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
 
 const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
 const PLACEHOLDER_COPY_PATTERNS = [
-  /^add your first hero story$/i,
-  /^add your first article$/i,
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
   /^add story text$/i,
   /^add first body paragraph$/i,
   /^add second body paragraph$/i,
@@ -71,7 +73,7 @@ function heroToArchiveStory(hero: HeroItem): ArchiveStory {
     title: hero.title,
     category: hero.category,
     author: hero.author,
-    imageUrl: hero.imageUrl,
+    imageUrl: getStoryCardImageUrl(hero.imageUrl, hero.body),
     searchableText: "",
   };
   return {
@@ -85,7 +87,7 @@ function articleToArchiveStory(article: Article): ArchiveStory {
     title: article.title,
     category: article.category,
     author: article.author,
-    imageUrl: article.imageUrl,
+    imageUrl: getStoryCardImageUrl(article.imageUrl, article.body),
     searchableText: "",
   };
   return {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getStoryImageUrl, hasUsableStoryImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
+import { getStoryCardImageUrl, getStoryImageUrl, hasUsableStoryImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
 
 describe("story media helpers", () => {
   it("rejects logo and generated fallback assets as story images", () => {
@@ -13,4 +13,12 @@ describe("story media helpers", () => {
     expect(getStoryImageUrl("")).toBe(STORY_IMAGE_FALLBACK);
     expect(getStoryImageUrl("/assets/article.webp")).toBe("/assets/article.webp");
   });
+
+  it("can use the first body image for archive and category cards", () => {
+    expect(getStoryCardImageUrl("", [
+      { type: "text", content: "copy" },
+      { type: "image", content: "/assets/body-photo.webp" },
+    ])).toBe("/assets/body-photo.webp");
+  });
+
 });

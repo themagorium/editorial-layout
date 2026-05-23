@@ -12,7 +12,7 @@ import {
 } from "@/lib/content-store";
 import { applyCollectionSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
-import { getStoryImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
+import { getStoryCardImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
 
 type CategoryStory = {
   id: string;
@@ -151,7 +151,7 @@ function mapHero(hero: HeroItem): CategoryStory {
     id: hero.id,
     title: hero.title,
     excerpt: hero.excerpt || hero.subtitle,
-    imageUrl: getStoryImageUrl(hero.imageUrl),
+    imageUrl: getStoryCardImageUrl(hero.imageUrl, hero.body),
     date: hero.date,
     edition: hero.edition,
     storyType: "hero",
@@ -166,7 +166,7 @@ function mapArticle(article: Article): CategoryStory {
     id: article.id,
     title: article.title,
     excerpt: article.excerpt,
-    imageUrl: getStoryImageUrl(article.imageUrl),
+    imageUrl: getStoryCardImageUrl(article.imageUrl, article.body),
     date: article.date,
     edition: article.edition,
     storyType: "article",

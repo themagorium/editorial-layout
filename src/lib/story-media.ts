@@ -16,3 +16,23 @@ export function getStoryImageUrl(value?: string): string {
   const normalized = (value || "").trim();
   return hasUsableStoryImageUrl(normalized) ? normalized : STORY_IMAGE_FALLBACK;
 }
+
+
+export type StoryMediaBlock = {
+  type?: string;
+  content?: string;
+};
+
+export function getFirstBodyImageUrl(body?: StoryMediaBlock[]): string {
+  if (!Array.isArray(body)) return "";
+  for (const block of body) {
+    if (!block || block.type !== "image") continue;
+    const candidate = (block.content || "").trim();
+    if (hasUsableStoryImageUrl(candidate)) return candidate;
+  }
+  return "";
+}
+
+export function getStoryCardImageUrl(imageUrl?: string, body?: StoryMediaBlock[]): string {
+  return getStoryImageUrl(getFirstBodyImageUrl(body) || imageUrl);
+}

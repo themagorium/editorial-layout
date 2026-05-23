@@ -240,22 +240,60 @@ function normalizeBodyToOctoberPattern(
   return normalized;
 }
 
+function isInvalidStoryMediaUrl(value?: string): boolean {
+  const normalized = (value || "").trim();
+  if (!normalized) return true;
+  if (normalized === "undefined" || normalized === "null") return true;
+  if (normalized.startsWith("blob:")) return true;
+  if (normalized.includes("/favicon.png")) return true;
+  if (normalized.includes("/og-image.jpg")) return true;
+  return false;
+}
+
+function pickFirstBodyImageUrl(body?: ArticleBodyBlock[]): string {
+  if (!Array.isArray(body)) return "";
+  for (const block of body) {
+    if (!block || block.type !== "image") continue;
+    const candidate = (block.content || "").trim();
+    if (!isInvalidStoryMediaUrl(candidate)) return candidate;
+  }
+  return "";
+}
+
+function resolveStoryImageUrl(imageUrl?: string, body?: ArticleBodyBlock[], canonicalImageUrl?: string): string {
+  const directImage = (imageUrl || "").trim();
+  if (!isInvalidStoryMediaUrl(directImage)) return directImage;
+
+  const bodyImage = pickFirstBodyImageUrl(body);
+  if (bodyImage) return bodyImage;
+
+  const canonicalImage = (canonicalImageUrl || "").trim();
+  if (!isInvalidStoryMediaUrl(canonicalImage)) return canonicalImage;
+  return "";
+}
+
 function normalizeHero(hero: HeroItem): HeroItem {
   const upgraded = upgradeLegacyHeroCopy(hero);
+  const canonical = HERO_DEFAULT_BY_ID.get(upgraded.id);
+  const imageUrl = resolveStoryImageUrl(upgraded.imageUrl, upgraded.body, canonical?.imageUrl);
   return {
     ...upgraded,
     excerpt: upgraded.excerpt || upgraded.subtitle,
+    imageUrl,
     seoTags: normalizeSeoTags(upgraded.seoTags),
-    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, upgraded.imageUrl, upgraded.videoUrl),
+    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
   };
 }
 
 function normalizeArticle(article: Article): Article {
   const upgraded = upgradeLegacyArticleCopy(article);
+  const canonical = ARTICLE_DEFAULT_BY_ID.get(upgraded.id);
+  const imageUrl = resolveStoryImageUrl(upgraded.imageUrl, upgraded.body, canonical?.imageUrl);
   return {
     ...upgraded,
+    imageUrl,
     seoTags: normalizeSeoTags(upgraded.seoTags),
-    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, upgraded.imageUrl, upgraded.videoUrl),
+    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
   };
 }
 

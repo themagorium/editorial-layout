@@ -114,6 +114,40 @@ function hasStories(snapshot: LatestPublishedEditionSnapshot) {
   return snapshot.heroes.length > 0 || snapshot.articles.length > 0;
 }
 
+function normalizeStoryMediaUrl(value?: string): string {
+  const normalized = (value || "").trim();
+  if (!normalized) return "";
+  if (normalized === "undefined" || normalized === "null") return "";
+  if (normalized.startsWith("blob:")) return "";
+  if (normalized.includes("/favicon.png")) return "";
+  if (normalized.includes("/og-image.jpg")) return "";
+  return normalized;
+}
+
+function sanitizeLatestSnapshot(snapshot: LatestPublishedEditionSnapshot): LatestPublishedEditionSnapshot {
+  const heroes = snapshot.heroes
+    .map((hero) => ({
+      ...hero,
+      imageUrl: normalizeStoryMediaUrl(hero.imageUrl),
+      videoUrl: normalizeStoryMediaUrl(hero.videoUrl) || undefined,
+    }))
+    .filter((hero) => Boolean(hero.imageUrl || hero.videoUrl));
+
+  const articles = snapshot.articles
+    .map((article) => ({
+      ...article,
+      imageUrl: normalizeStoryMediaUrl(article.imageUrl),
+      videoUrl: normalizeStoryMediaUrl(article.videoUrl) || undefined,
+    }))
+    .filter((article) => Boolean(article.imageUrl || article.videoUrl));
+
+  return {
+    ...snapshot,
+    heroes,
+    articles,
+  };
+}
+
 function readCachedLatestSnapshot(): LatestPublishedEditionSnapshot | null {
   if (typeof window === "undefined") return null;
   const raw = localStorage.getItem(LATEST_SNAPSHOT_CACHE_KEY);
@@ -121,7 +155,7 @@ function readCachedLatestSnapshot(): LatestPublishedEditionSnapshot | null {
   try {
     const parsed = JSON.parse(raw) as unknown;
     if (!isLatestPublishedEditionSnapshot(parsed)) return null;
-    return parsed;
+    return sanitizeLatestSnapshot(parsed);
   } catch {
     return null;
   }
@@ -214,12 +248,12 @@ export async function getLatestPublishedEditionSnapshot(options?: {
       return fallback;
     }
 
-    const latestSnapshot: LatestPublishedEditionSnapshot = {
+    const latestSnapshot = sanitizeLatestSnapshot({
       heroes: raw.heroes,
       articles: raw.articles,
       ads: raw.ads,
       latestEdition: (raw.latestEdition || "").trim(),
-    };
+    });
     if (hasStories(latestSnapshot)) writeCachedLatestSnapshot(latestSnapshot);
     return latestSnapshot;
   } catch {

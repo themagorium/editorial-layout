@@ -93,7 +93,6 @@ const SITE_URL = "https://www.themagorium.com";
 const INDEXNOW_KEY = "8f3d2a6b9c1e4f7ab5d8c2e1f0a9b6d3";
 const INDEXNOW_KEY_LOCATION = `${SITE_URL}/${INDEXNOW_KEY}.txt`;
 const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
-const LATEST_VIEW_FALLBACK_IMAGE = `${SITE_URL}/favicon.png?v=20260523-0545`;
 
 let memoryFallback: StoredPayload | null = null;
 let memoryLatestFallback: LatestViewPayload | null = null;
@@ -395,21 +394,51 @@ function isLargeInlineDataUrl(value?: string): boolean {
   return normalized.startsWith("data:") && normalized.length > 2_400_000;
 }
 
+function isInvalidMediaValue(value?: string): boolean {
+  const normalized = (value || "").trim();
+  if (!normalized) return true;
+  if (normalized === "undefined" || normalized === "null") return true;
+  if (normalized.startsWith("blob:")) return true;
+  return false;
+}
+
+function isLogoFallbackAsset(value: string): boolean {
+  return value.includes("/favicon.png") || value.includes("/og-image.jpg");
+}
+
+function extractFirstBodyImageUrl(body?: BodyBlock[]): string {
+  if (!Array.isArray(body)) return "";
+  for (const block of body) {
+    if (!block || block.type !== "image") continue;
+    const candidate = normalizeLatestImageUrl(block.content);
+    if (candidate) return candidate;
+  }
+  return "";
+}
+
 function normalizeLatestImageUrl(imageUrl?: string): string {
   const normalized = (imageUrl || "").trim();
-  if (!normalized) return LATEST_VIEW_FALLBACK_IMAGE;
-  if (isLargeInlineDataUrl(normalized)) return LATEST_VIEW_FALLBACK_IMAGE;
+  if (isInvalidMediaValue(normalized)) return "";
+  if (isLargeInlineDataUrl(normalized)) return "";
+  if (isLogoFallbackAsset(normalized)) return "";
   return normalized;
 }
 
 function normalizeLatestVideoUrl(videoUrl?: string): string | undefined {
   const normalized = (videoUrl || "").trim();
-  if (!normalized) return undefined;
+  if (isInvalidMediaValue(normalized)) return undefined;
   if (isLargeInlineDataUrl(normalized)) return undefined;
   return normalized;
 }
 
+function hasLatestDisplayMedia(entry: { imageUrl?: string; videoUrl?: string; body?: BodyBlock[] }): boolean {
+  const normalizedImage = normalizeLatestImageUrl(entry.imageUrl) || extractFirstBodyImageUrl(entry.body);
+  const normalizedVideo = normalizeLatestVideoUrl(entry.videoUrl);
+  return Boolean(normalizedImage || normalizedVideo);
+}
+
 function toLatestHeroSummary(hero: HeroPayload): HeroPayload {
+  const imageUrl = normalizeLatestImageUrl(hero.imageUrl) || extractFirstBodyImageUrl(hero.body);
   return {
     id: hero.id,
     title: hero.title,
@@ -418,7 +447,7 @@ function toLatestHeroSummary(hero: HeroPayload): HeroPayload {
     seoTags: hero.seoTags,
     subtitle: hero.subtitle,
     category: hero.category,
-    imageUrl: normalizeLatestImageUrl(hero.imageUrl),
+    imageUrl,
     videoUrl: normalizeLatestVideoUrl(hero.videoUrl),
     author: hero.author,
     date: hero.date,
@@ -429,6 +458,7 @@ function toLatestHeroSummary(hero: HeroPayload): HeroPayload {
 }
 
 function toLatestArticleSummary(article: ArticlePayload): ArticlePayload {
+  const imageUrl = normalizeLatestImageUrl(article.imageUrl) || extractFirstBodyImageUrl(article.body);
   return {
     id: article.id,
     title: article.title,
@@ -436,7 +466,7 @@ function toLatestArticleSummary(article: ArticlePayload): ArticlePayload {
     legacySlugs: article.legacySlugs,
     seoTags: article.seoTags,
     category: article.category,
-    imageUrl: normalizeLatestImageUrl(article.imageUrl),
+    imageUrl,
     videoUrl: normalizeLatestVideoUrl(article.videoUrl),
     author: article.author,
     date: article.date,
@@ -462,8 +492,8 @@ function toLatestAdSummary(ad: AdPayload): AdPayload {
 function sanitizeLatestViewPayload(content: LatestViewPayload): LatestViewPayload {
   return {
     ...content,
-    heroes: content.heroes.map(toLatestHeroSummary),
-    articles: content.articles.map(toLatestArticleSummary),
+    heroes: content.heroes.map(toLatestHeroSummary).filter((hero) => hasLatestDisplayMedia(hero)),
+    articles: content.articles.map(toLatestArticleSummary).filter((article) => hasLatestDisplayMedia(article)),
     ads: content.ads.map(toLatestAdSummary),
   };
 }
@@ -487,8 +517,7 @@ function latestPayloadLooksLikePlaceholderFallback(content: LatestViewPayload): 
   if (uniqueImages.length !== 1) return false;
   const onlyImage = uniqueImages[0];
   return (
-    onlyImage === LATEST_VIEW_FALLBACK_IMAGE
-    || onlyImage.includes("/og-image.jpg")
+    onlyImage.includes("/og-image.jpg")
     || onlyImage.includes("/favicon.png")
   );
 }
@@ -504,14 +533,14 @@ function toLatestViewPayload(
   const heroes = latestEdition
     ? readyHeroes
         .filter((hero) => hero.edition === latestEdition)
-        .filter((hero) => Boolean((hero.imageUrl || "").trim() || (hero.videoUrl || "").trim()))
+        .filter((hero) => hasLatestDisplayMedia(hero))
         .slice(0, heroLimit)
         .map(toLatestHeroSummary)
     : [];
   const articles = latestEdition
     ? readyArticles
         .filter((article) => article.edition === latestEdition)
-        .filter((article) => Boolean((article.imageUrl || "").trim() || (article.videoUrl || "").trim()))
+        .filter((article) => hasLatestDisplayMedia(article))
         .slice(0, articleLimit)
         .map(toLatestArticleSummary)
     : [];
@@ -533,13 +562,13 @@ function buildLatestEditionPayload(content: StoredPayload): LatestViewPayload {
   const heroes = latestEdition
     ? readyHeroes
         .filter((hero) => hero.edition === latestEdition)
-        .filter((hero) => Boolean((hero.imageUrl || "").trim() || (hero.videoUrl || "").trim()))
+        .filter((hero) => hasLatestDisplayMedia(hero))
         .map(toLatestHeroSummary)
     : [];
   const articles = latestEdition
     ? readyArticles
         .filter((article) => article.edition === latestEdition)
-        .filter((article) => Boolean((article.imageUrl || "").trim() || (article.videoUrl || "").trim()))
+        .filter((article) => hasLatestDisplayMedia(article))
         .map(toLatestArticleSummary)
     : [];
 

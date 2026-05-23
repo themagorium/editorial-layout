@@ -1,11 +1,17 @@
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { contentIdentifierMatches, getArticles, getHeroes, slugifyText } from "@/lib/content-store";
+import {
+  contentIdentifierMatches,
+  getArticles,
+  getHeroes,
+  getPublishedContentSnapshot,
+  slugifyText,
+} from "@/lib/content-store";
 import type { ArticleBodyBlock } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import { ArrowLeft } from "lucide-react";
 import { applyArticleSeo } from "@/lib/seo";
-import { useEffect } from "react";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 const TEXT_PLACEHOLDERS = new Set([
@@ -86,44 +92,69 @@ function getBodyImageLayoutClasses(block: ArticleBodyBlock) {
 export default function ArticlePage() {
   useSyncPublishedContent();
   const { id } = useParams<{ id: string }>();
-  let articles = getArticles();
-  let heroes = getHeroes();
-  let article = articles.find((a) => contentIdentifierMatches(a, id || ""));
+  const [contentLoaded, setContentLoaded] = useState(false);
+  const [publishedArticles, setPublishedArticles] = useState(() => getArticles());
+  const [publishedHeroes, setPublishedHeroes] = useState(() => getHeroes());
 
-  // Also search heroes — they share the same article detail page
-  let heroAsArticle = !article ? heroes.find((h) => contentIdentifierMatches(h, id || "")) : undefined;
+  useEffect(() => {
+    let active = true;
+    const hydratePublishedContent = async () => {
+      try {
+        const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: false });
+        if (!active) return;
+        setPublishedArticles(snapshot.articles);
+        setPublishedHeroes(snapshot.heroes);
+      } finally {
+        if (active) setContentLoaded(true);
+      }
+    };
+    void hydratePublishedContent();
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
-  // Normalize hero into article-like shape for rendering
-  const content = article || (heroAsArticle ? {
-    id: heroAsArticle.id,
-    title: heroAsArticle.title,
-    excerpt: heroAsArticle.excerpt || heroAsArticle.subtitle,
-    seoTags: heroAsArticle.seoTags,
-    category: heroAsArticle.category,
-    imageUrl: heroAsArticle.imageUrl,
-    videoUrl: heroAsArticle.videoUrl,
-    author: heroAsArticle.author || "The Magorium Staff",
-    date: heroAsArticle.date,
-    body: (heroAsArticle.body || []) as ArticleBodyBlock[],
-    edition: heroAsArticle.edition,
-  } : undefined);
+  const content = useMemo(() => {
+    const article = publishedArticles.find((a) => contentIdentifierMatches(a, id || ""));
+    const heroAsArticle = !article
+      ? publishedHeroes.find((h) => contentIdentifierMatches(h, id || ""))
+      : undefined;
+    if (article) return article;
+    if (!heroAsArticle) return undefined;
+    return {
+      id: heroAsArticle.id,
+      title: heroAsArticle.title,
+      excerpt: heroAsArticle.excerpt || heroAsArticle.subtitle,
+      seoTags: heroAsArticle.seoTags,
+      category: heroAsArticle.category,
+      imageUrl: heroAsArticle.imageUrl,
+      videoUrl: heroAsArticle.videoUrl,
+      author: heroAsArticle.author || "The Magorium Staff",
+      date: heroAsArticle.date,
+      body: (heroAsArticle.body || []) as ArticleBodyBlock[],
+      edition: heroAsArticle.edition,
+    };
+  }, [publishedArticles, publishedHeroes, id]);
+
+  useEffect(() => {
+    if (!content) return;
+    applyArticleSeo(content);
+  }, [content]);
 
   if (!content) {
     return (
       <div className="min-h-screen bg-background">
         <EditorialHeader />
         <div className="container mx-auto px-4 py-20 text-center">
-          <h2 className="font-serif text-3xl text-foreground mb-4">Article Not Found</h2>
+          <h2 className="font-serif text-3xl text-foreground mb-4">
+            {contentLoaded ? "Article Not Found" : "Loading story..."}
+          </h2>
           <Link to="/" className="text-primary hover:underline font-sans text-sm">← Back to home</Link>
         </div>
         <EditorialFooter />
       </div>
     );
   }
-
-  useEffect(() => {
-    applyArticleSeo(content);
-  }, [content.author, content.date, content.excerpt, content.id, content.imageUrl, content.seoTags, content.title]);
 
   return (
     <div className="min-h-screen bg-background">

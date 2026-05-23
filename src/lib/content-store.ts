@@ -1193,10 +1193,10 @@ export async function getPublishedContentSnapshot(options?: {
   if (typeof window === "undefined") {
     return DEFAULT_PUBLISHED_CONTENT;
   }
-  const allowLocalDraft = options?.allowLocalDraft === true;
+  void options;
   ensureFreshDefaults();
   const hasLocalDraft = hasLocalEditsAvailable();
-  if (allowLocalDraft && hasLocalDraft) {
+  if (hasLocalDraft) {
     return {
       heroes: getHeroes(),
       articles: getArticles(),

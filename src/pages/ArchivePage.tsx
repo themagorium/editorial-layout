@@ -31,6 +31,29 @@ function isPublishReadyTitle(title?: string): boolean {
   return !PLACEHOLDER_TITLE_PATTERN.test(normalized);
 }
 
+function normalizeCardImageUrl(value?: string): string {
+  const normalized = (value || "").trim();
+  if (!normalized) return "";
+  if (normalized === "undefined" || normalized === "null") return "";
+  if (normalized.startsWith("blob:")) return "";
+  if (normalized.includes("/favicon.png") || normalized.includes("/og-image.jpg")) return "";
+  return normalized;
+}
+
+function firstBodyImageUrl(body?: Array<{ type?: string; content?: string }>): string {
+  if (!Array.isArray(body)) return "";
+  for (const block of body) {
+    if (!block || block.type !== "image") continue;
+    const normalized = normalizeCardImageUrl(block.content);
+    if (normalized) return normalized;
+  }
+  return "";
+}
+
+function resolveStoryCardImage(story: { imageUrl?: string; body?: Array<{ type?: string; content?: string }> }): string {
+  return normalizeCardImageUrl(story.imageUrl) || firstBodyImageUrl(story.body);
+}
+
 export default function ArchivePage() {
   useSyncPublishedContent();
   const [searchParams] = useSearchParams();
@@ -75,12 +98,16 @@ export default function ArchivePage() {
             .join(" ")
             .toLowerCase();
 
+          const coverImage = [...heroes, ...articles]
+            .map((story) => resolveStoryCardImage(story))
+            .find(Boolean);
+
           return {
             key: ed,
             label: formatEditionLabel(ed),
             heroCount: heroes.slice(0, 3).length,
             articleCount: articles.slice(0, 4).length,
-            coverImage: heroes[0]?.imageUrl,
+            coverImage,
             searchableText,
           };
         })

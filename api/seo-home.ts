@@ -27,14 +27,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       renderSeoDocument,
     } = runtime;
     const query = req.query || {};
-    const hint = readQueryValue(query.hint).trim();
     const canonicalPathRaw = readQueryValue(query.path).trim();
     const canonicalPath = canonicalPathRaw
       ? canonicalPathRaw.startsWith("/")
         ? canonicalPathRaw
         : `/${canonicalPathRaw}`
       : "/";
-    const normalizedHint = hint.toLowerCase();
     const stories = await getPublishedSeoStories();
     const topStories = stories;
     const storyItems = topStories.map((story, index) => ({
@@ -53,9 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const contributorNames = Array.from(new Set(topStories.map((story) => story.author)));
 
-    const title = normalizedHint.includes("magorium")
-      ? `${BRAND_ALIAS} | ${BRAND_NAME} | TheMagorium - A Curated Lifestyle Magazine`
-      : `${BRAND_NAME} | TheMagorium | Magorium - A Curated Lifestyle Magazine`;
+    const title = BRAND_NAME;
     const description =
       "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
     const keywords = [

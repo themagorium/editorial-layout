@@ -227,9 +227,7 @@ function setHomeStructuredData(storyPaths: string[] = []) {
 
 export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
   const normalizedHint = (queryHint || "").trim();
-  const title = normalizedHint
-    ? `${normalizedHint} | ${BRAND_NAME} | TheMagorium | Magorium`
-    : `${BRAND_NAME} | TheMagorium | Magorium - A Curated Lifestyle Magazine`;
+  const title = BRAND_NAME;
   const description =
     "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
   const keywords = [
@@ -509,7 +507,7 @@ export function applyAuthorSeo(authorName: string, storyCount: number, storyPath
 export function applyMagoriumBrandSeo(path = "/magorium") {
   void path;
   const canonicalUrl = `${SITE_URL}/`;
-  const title = `${BRAND_NAME} | TheMagorium | Magorium - A Curated Lifestyle Magazine`;
+  const title = BRAND_NAME;
   const description =
     "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
   const keywords = [

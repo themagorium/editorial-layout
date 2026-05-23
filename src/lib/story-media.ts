@@ -34,5 +34,8 @@ export function getFirstBodyImageUrl(body?: StoryMediaBlock[]): string {
 }
 
 export function getStoryCardImageUrl(imageUrl?: string, body?: StoryMediaBlock[]): string {
-  return getStoryImageUrl(getFirstBodyImageUrl(body) || imageUrl);
+  const bodyImage = getFirstBodyImageUrl(body);
+  if (bodyImage) return bodyImage;
+  const normalized = (imageUrl || "").trim();
+  return hasUsableStoryImageUrl(normalized) ? normalized : "";
 }

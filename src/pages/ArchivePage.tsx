@@ -12,7 +12,7 @@ import { Search, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { applyCollectionSeo, applyHomeSeo } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
-import { getStoryCardImageUrl, getStoryImageUrl, hasUsableStoryImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
+import { getStoryCardImageUrl, hasUsableStoryImageUrl } from "@/lib/story-media";
 
 const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
 const PLACEHOLDER_COPY_PATTERNS = [
@@ -105,11 +105,10 @@ function pickArchiveCoverImage(edition: ArchiveEdition, searchQuery: string): st
   const matchingStories = normalizedQuery
     ? edition.stories.filter((story) => story.searchableText.includes(normalizedQuery))
     : edition.stories;
-  return getStoryImageUrl(
-    firstUsableStoryImage(matchingStories)
-      || firstUsableStoryImage(edition.stories)
-      || edition.coverImage,
-  );
+  return firstUsableStoryImage(matchingStories)
+    || firstUsableStoryImage(edition.stories)
+    || edition.coverImage
+    || "";
 }
 
 export default function ArchivePage() {
@@ -149,7 +148,7 @@ export default function ArchivePage() {
           const searchableText = [
             ed,
             formatEditionLabel(ed),
-            ...heroes.map((h) => `${h.title} ${h.category}`),
+            ...heroes.map((h) => `${h.title} ${h.category} ${h.author || ""}`),
             ...articles.map((a) => `${a.title} ${a.category} ${a.author}`),
           ]
             .join(" ")
@@ -240,21 +239,21 @@ export default function ArchivePage() {
                   to={`/archive/${ed.key}`}
                   className="group block border border-border rounded overflow-hidden hover:border-primary transition-colors"
                 >
-                  <div className="aspect-[16/9] overflow-hidden">
-                    <img
-                      src={coverImage}
-                      alt={ed.label}
-                      className="w-full h-full object-cover bg-card transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                      decoding="async"
-                      sizes="(min-width: 1024px) 282px, (min-width: 768px) 50vw, 100vw"
-                      onError={(event) => {
-                        if (!event.currentTarget.src.endsWith(STORY_IMAGE_FALLBACK)) {
-                          event.currentTarget.src = STORY_IMAGE_FALLBACK;
-                        }
-                      }}
-                    />
-                  </div>
+                  {coverImage && (
+                    <div data-archive-media className="aspect-[16/9] overflow-hidden">
+                      <img
+                        src={coverImage}
+                        alt={ed.label}
+                        className="w-full h-full object-cover bg-card transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
+                        sizes="(min-width: 1024px) 282px, (min-width: 768px) 50vw, 100vw"
+                        onError={(event) => {
+                          event.currentTarget.closest("[data-archive-media]")?.classList.add("hidden");
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className="p-5 bg-card">
                     <div className="flex items-center gap-3 mb-2">
                       <BookOpen className="w-4 h-4 text-primary" />

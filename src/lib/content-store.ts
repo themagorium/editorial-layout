@@ -268,6 +268,13 @@ function isInvalidStoryMediaUrl(value?: string): boolean {
   return false;
 }
 
+function isStaleBundledStoryAssetUrl(value: string, canonicalImageUrl?: string): boolean {
+  const normalized = value.trim();
+  if (!canonicalImageUrl) return false;
+  if (!normalized.startsWith("/assets/")) return false;
+  return normalized !== canonicalImageUrl;
+}
+
 function pickFirstBodyImageUrl(body?: ArticleBodyBlock[]): string {
   if (!Array.isArray(body)) return "";
   for (const block of body) {
@@ -280,13 +287,17 @@ function pickFirstBodyImageUrl(body?: ArticleBodyBlock[]): string {
 
 function resolveStoryImageUrl(imageUrl?: string, body?: ArticleBodyBlock[], canonicalImageUrl?: string): string {
   const directImage = (imageUrl || "").trim();
-  if (!isInvalidStoryMediaUrl(directImage)) return directImage;
+  const canonicalImage = (canonicalImageUrl || "").trim();
+
+  if (directImage && !isInvalidStoryMediaUrl(directImage) && !isStaleBundledStoryAssetUrl(directImage, canonicalImage)) {
+    return directImage;
+  }
+
+  if (!isInvalidStoryMediaUrl(canonicalImage)) return canonicalImage;
 
   const bodyImage = pickFirstBodyImageUrl(body);
-  if (bodyImage) return bodyImage;
+  if (bodyImage && !isStaleBundledStoryAssetUrl(bodyImage, canonicalImage)) return bodyImage;
 
-  const canonicalImage = (canonicalImageUrl || "").trim();
-  if (!isInvalidStoryMediaUrl(canonicalImage)) return canonicalImage;
   return "";
 }
 

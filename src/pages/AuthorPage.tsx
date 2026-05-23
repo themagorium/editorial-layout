@@ -6,6 +6,7 @@ import { applyAuthorSeo, canonicalAuthorName } from "@/lib/seo";
 import { useEffect, useMemo, useState } from "react";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 import { getStoryCardImageUrl } from "@/lib/story-media";
+import { isPublishReadyArticle, isPublishReadyHero } from "@/lib/content-selection";
 
 type StorySummary = {
   id: string;
@@ -35,24 +36,28 @@ export default function AuthorPage() {
       if (!active) return;
 
       const stories: StorySummary[] = [
-        ...snapshot.articles.map((a) => ({
-          id: a.id,
-          title: a.title,
-          excerpt: a.excerpt,
-          imageUrl: getStoryCardImageUrl(a.imageUrl, a.body),
-          date: a.date,
-          category: a.category,
-          author: normalizeAuthor(a.author),
-        })),
-        ...snapshot.heroes.map((h) => ({
-          id: h.id,
-          title: h.title,
-          excerpt: h.excerpt || h.subtitle,
-          imageUrl: getStoryCardImageUrl(h.imageUrl, h.body),
-          date: h.date,
-          category: h.category,
-          author: normalizeAuthor(h.author || "The Magorium Staff"),
-        })),
+        ...snapshot.articles
+          .filter(isPublishReadyArticle)
+          .map((a) => ({
+            id: a.id,
+            title: a.title,
+            excerpt: a.excerpt,
+            imageUrl: getStoryCardImageUrl(a.imageUrl, a.body),
+            date: a.date,
+            category: a.category,
+            author: normalizeAuthor(a.author),
+          })),
+        ...snapshot.heroes
+          .filter(isPublishReadyHero)
+          .map((h) => ({
+            id: h.id,
+            title: h.title,
+            excerpt: h.excerpt || h.subtitle,
+            imageUrl: getStoryCardImageUrl(h.imageUrl, h.body),
+            date: h.date,
+            category: h.category,
+            author: normalizeAuthor(h.author || "The Magorium Staff"),
+          })),
       ];
 
       setAllStories(stories);

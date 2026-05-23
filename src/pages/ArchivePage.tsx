@@ -21,9 +21,7 @@ const PLACEHOLDER_COPY_PATTERNS = [
   /^add your .* story$/i,
   /^add your .* article$/i,
   /^add story text$/i,
-  /^add first body paragraph$/i,
-  /^add second body paragraph$/i,
-  /^add third body paragraph$/i,
+  /^add (first|second|third|fourth) body paragraph$/i,
   /^upload photo or video$/i,
 ];
 

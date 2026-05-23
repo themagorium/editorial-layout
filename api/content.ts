@@ -481,10 +481,16 @@ function latestPayloadNeedsCompaction(content: LatestViewPayload): boolean {
 function latestPayloadLooksLikePlaceholderFallback(content: LatestViewPayload): boolean {
   const stories = [...content.heroes, ...content.articles];
   if (stories.length === 0) return false;
-  return stories.every((story) => {
-    const image = (story.imageUrl || "").trim();
-    return !image || image === LATEST_VIEW_FALLBACK_IMAGE;
-  });
+  const normalizedImages = stories.map((story) => (story.imageUrl || "").trim()).filter(Boolean);
+  if (normalizedImages.length === 0) return true;
+  const uniqueImages = Array.from(new Set(normalizedImages));
+  if (uniqueImages.length !== 1) return false;
+  const onlyImage = uniqueImages[0];
+  return (
+    onlyImage === LATEST_VIEW_FALLBACK_IMAGE
+    || onlyImage.includes("/og-image.jpg")
+    || onlyImage.includes("/favicon.png")
+  );
 }
 
 function toLatestViewPayload(

@@ -121,6 +121,7 @@ function normalizeStoryMediaUrl(value?: string): string {
   if (normalized.startsWith("blob:")) return "";
   if (normalized.includes("/favicon.png")) return "";
   if (normalized.includes("/og-image.jpg")) return "";
+  if (normalized.includes("/og-image.png")) return "";
   return normalized;
 }
 

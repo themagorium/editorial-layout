@@ -403,7 +403,7 @@ function isInvalidMediaValue(value?: string): boolean {
 }
 
 function isLogoFallbackAsset(value: string): boolean {
-  return value.includes("/favicon.png") || value.includes("/og-image.jpg");
+  return value.includes("/favicon.png") || value.includes("/og-image.jpg") || value.includes("/og-image.png");
 }
 
 function extractFirstBodyImageUrl(body?: BodyBlock[]): string {
@@ -518,6 +518,7 @@ function latestPayloadLooksLikePlaceholderFallback(content: LatestViewPayload): 
   const onlyImage = uniqueImages[0];
   return (
     onlyImage.includes("/og-image.jpg")
+    || onlyImage.includes("/og-image.png")
     || onlyImage.includes("/favicon.png")
   );
 }

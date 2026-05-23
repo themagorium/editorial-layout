@@ -17,10 +17,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const runtime = await loadSeoRuntime();
     const {
-      BRAND_ALIAS,
       BRAND_NAME,
       SITE_URL,
       DEFAULT_FAVICON,
+      HOME_SEO_DESCRIPTION,
       escapeHtml,
       getAuthorPath,
       getPublishedSeoStories,
@@ -33,6 +33,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ? canonicalPathRaw
         : `/${canonicalPathRaw}`
       : "/";
+    const isHiddenAliasPath = /^\/(magorium|magorum|magoriium|the-magorium|the-magoriium|themagorium|themagoriium)\/?$/i
+      .test(canonicalPath);
     const stories = await getPublishedSeoStories();
     const topStories = stories;
     const storyItems = topStories.map((story, index) => ({
@@ -52,21 +54,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const contributorNames = Array.from(new Set(topStories.map((story) => story.author)));
 
     const title = BRAND_NAME;
-    const description =
-      "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
+    const description = HOME_SEO_DESCRIPTION;
     const keywords = [
       BRAND_NAME,
-      BRAND_ALIAS,
-      "TheMagorium",
-      "Themagorium",
-      "Magorum",
-      "Magoriium",
-      "The Magoriium",
-      "Themagorium",
-      "Themagoriium",
-      "Magorium writers",
-      "Magorium journalists",
-      "The Magorium contributors",
+      "curated lifestyle magazine",
+      "travel",
+      "art",
+      "culture",
+      "fashion",
+      "motorsport",
+      "yachting",
+      "global events",
       ...contributorNames,
     ].join(", ");
 
@@ -117,13 +115,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           "@type": "Organization",
           name: BRAND_NAME,
           logo: DEFAULT_FAVICON,
-          alternateName: [
-            BRAND_ALIAS,
-            "TheMagorium",
-            "Themagorium",
-            "Magorium",
-            "The Magorium",
-          ],
           url: SITE_URL,
         },
         {
@@ -154,11 +145,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const html = renderSeoDocument({
       title,
       description,
-      canonicalUrl: `${SITE_URL}${canonicalPath}`,
+      canonicalUrl: isHiddenAliasPath ? SITE_URL : `${SITE_URL}${canonicalPath}`,
       keywords,
       bodyHtml,
       ogType: "website",
       jsonLd,
+      noIndex: isHiddenAliasPath,
     });
 
     res.status(200).setHeader("Content-Type", "text/html; charset=utf-8").send(html);

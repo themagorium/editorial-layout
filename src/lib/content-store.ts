@@ -247,6 +247,7 @@ function isInvalidStoryMediaUrl(value?: string): boolean {
   if (normalized.startsWith("blob:")) return true;
   if (normalized.includes("/favicon.png")) return true;
   if (normalized.includes("/og-image.jpg")) return true;
+  if (normalized.includes("/og-image.png")) return true;
   return false;
 }
 

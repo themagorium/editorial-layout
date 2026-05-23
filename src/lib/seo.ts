@@ -2,20 +2,23 @@ import { buildContentPath, type Article, type HeroItem } from "@/lib/content-pub
 
 const SITE_URL = "https://www.themagorium.com";
 const SEO_ASSET_VERSION = "20260523-0545";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png?v=${SEO_ASSET_VERSION}`;
 const DEFAULT_FAVICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 const BRAND_NAME = "The Magorium";
 const BRAND_ALIAS = "Magorium";
-const BRAND_ALIASES = [
-  BRAND_ALIAS,
-  "Magorum",
-  "Magoriium",
-  "The Magorium",
-  "The Magoriium",
-  "TheMagorium",
-  "Themagorium",
-  "Themagoriium",
+export const HOME_SEO_DESCRIPTION =
+  "- A Curated Lifestyle Magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
+const HOME_SEO_KEYWORDS = [
+  BRAND_NAME,
+  "curated lifestyle magazine",
+  "travel",
+  "art",
+  "culture",
+  "fashion",
+  "motorsport",
+  "yachting",
+  "global events",
 ];
 
 function upsertMeta(name: string, content: string, property = false) {
@@ -191,7 +194,6 @@ function setHomeStructuredData(storyPaths: string[] = []) {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: BRAND_NAME,
-    alternateName: BRAND_ALIASES,
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
@@ -203,7 +205,6 @@ function setHomeStructuredData(storyPaths: string[] = []) {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: BRAND_NAME,
-    alternateName: BRAND_ALIASES,
     url: SITE_URL,
     publisher: {
       "@type": "Organization",
@@ -226,29 +227,10 @@ function setHomeStructuredData(storyPaths: string[] = []) {
 }
 
 export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
-  const normalizedHint = (queryHint || "").trim();
+  void queryHint;
   const title = BRAND_NAME;
-  const description =
-    "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
-  const keywords = [
-    BRAND_NAME,
-    BRAND_ALIAS,
-    "Magorum",
-    "Magoriium",
-    "The Magoriium",
-    normalizedHint,
-    "TheMagorium",
-    "Themagorium",
-    "Themagoriium",
-    "Magorium magazine",
-    "Magorum magazine",
-    "curated lifestyle magazine",
-    "travel",
-    "art",
-    "fashion",
-    "motorsport",
-    "yachting",
-  ].join(", ");
+  const description = HOME_SEO_DESCRIPTION;
+  const keywords = HOME_SEO_KEYWORDS.join(", ");
 
   document.title = title;
   upsertMeta("description", description);
@@ -505,30 +487,17 @@ export function applyAuthorSeo(authorName: string, storyCount: number, storyPath
 }
 
 export function applyMagoriumBrandSeo(path = "/magorium") {
-  void path;
+  const isAliasPage = path.trim() !== "" && path.trim() !== "/";
   const canonicalUrl = `${SITE_URL}/`;
   const title = BRAND_NAME;
-  const description =
-    "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
-  const keywords = [
-    BRAND_NAME,
-    BRAND_ALIAS,
-    "Magorum",
-    "Magoriium",
-    "The Magoriium",
-    "TheMagorium",
-    "Themagorium",
-    "Themagoriium",
-    "Magorium journalists",
-    "Magorium authors",
-    "Magorium archive",
-  ].join(", ");
+  const description = HOME_SEO_DESCRIPTION;
+  const keywords = HOME_SEO_KEYWORDS.join(", ");
 
   document.title = title;
   upsertMeta("description", description);
   upsertMeta("author", BRAND_NAME);
   upsertMeta("keywords", keywords);
-  upsertMeta("robots", "index,follow");
+  upsertMeta("robots", isAliasPage ? "noindex,follow" : "index,follow");
 
   upsertMeta("og:title", title, true);
   upsertMeta("og:description", description, true);
@@ -547,13 +516,12 @@ export function applyMagoriumBrandSeo(path = "/magorium") {
   setHomeStructuredData();
   upsertStructuredDataScript("magorium-brand-jsonld", {
     "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: `${BRAND_ALIAS} stories`,
+    "@type": "WebSite",
+    name: BRAND_NAME,
     url: canonicalUrl,
-    about: {
+    publisher: {
       "@type": "Organization",
       name: BRAND_NAME,
-      alternateName: BRAND_ALIASES,
       url: SITE_URL,
     },
   });

@@ -4,7 +4,9 @@ export const BRAND_NAME = "The Magorium";
 export const BRAND_ALIAS = "Magorium";
 export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 export const SEO_ASSET_VERSION = "20260523-0545";
-export const DEFAULT_SEO_IMAGE = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
+export const HOME_SEO_DESCRIPTION =
+  "- A Curated Lifestyle Magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
+export const DEFAULT_SEO_IMAGE = `${SITE_URL}/og-image.png?v=${SEO_ASSET_VERSION}`;
 export const DEFAULT_FAVICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 const DEFAULT_APPLE_ICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 const BING_SITE_VERIFICATION_TOKEN = "A28C29B769451A568A699A7479DF03F8";

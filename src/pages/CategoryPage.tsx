@@ -12,6 +12,7 @@ import {
 } from "@/lib/content-store";
 import { applyCollectionSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
+import { getStoryImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
 
 type CategoryStory = {
   id: string;
@@ -150,7 +151,7 @@ function mapHero(hero: HeroItem): CategoryStory {
     id: hero.id,
     title: hero.title,
     excerpt: hero.excerpt || hero.subtitle,
-    imageUrl: hero.imageUrl,
+    imageUrl: getStoryImageUrl(hero.imageUrl),
     date: hero.date,
     edition: hero.edition,
     storyType: "hero",
@@ -165,7 +166,7 @@ function mapArticle(article: Article): CategoryStory {
     id: article.id,
     title: article.title,
     excerpt: article.excerpt,
-    imageUrl: article.imageUrl,
+    imageUrl: getStoryImageUrl(article.imageUrl),
     date: article.date,
     edition: article.edition,
     storyType: "article",
@@ -292,6 +293,14 @@ export default function CategoryPage() {
                             src={story.imageUrl}
                             alt={story.title}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                            decoding="async"
+                            sizes="(min-width: 768px) 50vw, 100vw"
+                            onError={(event) => {
+                              if (!event.currentTarget.src.endsWith(STORY_IMAGE_FALLBACK)) {
+                                event.currentTarget.src = STORY_IMAGE_FALLBACK;
+                              }
+                            }}
                           />
                         </div>
                       </Link>

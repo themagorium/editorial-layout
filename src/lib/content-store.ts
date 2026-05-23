@@ -242,20 +242,38 @@ function normalizeBodyToOctoberPattern(
 
 function normalizeHero(hero: HeroItem): HeroItem {
   const upgraded = upgradeLegacyHeroCopy(hero);
+  const canonical = HERO_DEFAULT_BY_ID.get(upgraded.id);
+  const normalizedImageUrl = (upgraded.imageUrl || "").trim();
+  const useCanonicalImage =
+    !normalizedImageUrl
+    || normalizedImageUrl === "undefined"
+    || normalizedImageUrl === "null"
+    || normalizedImageUrl.startsWith("blob:");
+  const imageUrl = useCanonicalImage ? canonical?.imageUrl || upgraded.imageUrl : upgraded.imageUrl;
   return {
     ...upgraded,
     excerpt: upgraded.excerpt || upgraded.subtitle,
+    imageUrl,
     seoTags: normalizeSeoTags(upgraded.seoTags),
-    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, upgraded.imageUrl, upgraded.videoUrl),
+    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
   };
 }
 
 function normalizeArticle(article: Article): Article {
   const upgraded = upgradeLegacyArticleCopy(article);
+  const canonical = ARTICLE_DEFAULT_BY_ID.get(upgraded.id);
+  const normalizedImageUrl = (upgraded.imageUrl || "").trim();
+  const useCanonicalImage =
+    !normalizedImageUrl
+    || normalizedImageUrl === "undefined"
+    || normalizedImageUrl === "null"
+    || normalizedImageUrl.startsWith("blob:");
+  const imageUrl = useCanonicalImage ? canonical?.imageUrl || upgraded.imageUrl : upgraded.imageUrl;
   return {
     ...upgraded,
+    imageUrl,
     seoTags: normalizeSeoTags(upgraded.seoTags),
-    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, upgraded.imageUrl, upgraded.videoUrl),
+    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
   };
 }
 

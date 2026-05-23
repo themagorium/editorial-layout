@@ -231,7 +231,7 @@ export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
     ? `${normalizedHint} | ${BRAND_NAME} | TheMagorium | Magorium`
     : `${BRAND_NAME} | TheMagorium | Magorium - A Curated Lifestyle Magazine`;
   const description =
-    `${BRAND_NAME} (also searched as TheMagorium and Magorium) - A Curated Lifestyle Magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.`;
+    "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,
@@ -511,7 +511,7 @@ export function applyMagoriumBrandSeo(path = "/magorium") {
   const canonicalUrl = `${SITE_URL}/`;
   const title = `${BRAND_NAME} | TheMagorium | Magorium - A Curated Lifestyle Magazine`;
   const description =
-    `${BRAND_NAME} (also searched as TheMagorium and Magorium) - A Curated Lifestyle Magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.`;
+    "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
   const keywords = [
     BRAND_NAME,
     BRAND_ALIAS,

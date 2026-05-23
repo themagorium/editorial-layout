@@ -57,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? `${BRAND_ALIAS} | ${BRAND_NAME} | TheMagorium - A Curated Lifestyle Magazine`
       : `${BRAND_NAME} | TheMagorium | Magorium - A Curated Lifestyle Magazine`;
     const description =
-      `${BRAND_NAME} (also searched as TheMagorium and Magorium) - A Curated Lifestyle Magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.`;
+      "A curated lifestyle magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
     const keywords = [
       BRAND_NAME,
       BRAND_ALIAS,

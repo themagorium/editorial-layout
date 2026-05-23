@@ -3,6 +3,7 @@ import { applyContributorsSeo, canonicalAuthorName } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { buildContentPath, getPublishedContentSnapshot, slugifyText } from "@/lib/content-store";
+import { isPublishReadyArticle, isPublishReadyHero } from "@/lib/content-selection";
 
 type ContributorProfile = {
   name: string;
@@ -48,12 +49,12 @@ export default function ContributorsPage() {
       if (!active) return;
 
       const storyPathsByContributor: Record<string, string[]> = {};
-      snapshot.articles.forEach((article) => {
+      snapshot.articles.filter(isPublishReadyArticle).forEach((article) => {
         const key = canonicalAuthorName(article.author);
         const path = buildContentPath(article.id, article.title);
         storyPathsByContributor[key] = [...(storyPathsByContributor[key] || []), path];
       });
-      snapshot.heroes.forEach((hero) => {
+      snapshot.heroes.filter(isPublishReadyHero).forEach((hero) => {
         const key = canonicalAuthorName(hero.author);
         const path = buildContentPath(hero.id, hero.title);
         storyPathsByContributor[key] = [...(storyPathsByContributor[key] || []), path];

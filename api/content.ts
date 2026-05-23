@@ -93,7 +93,7 @@ const SITE_URL = "https://www.themagorium.com";
 const INDEXNOW_KEY = "8f3d2a6b9c1e4f7ab5d8c2e1f0a9b6d3";
 const INDEXNOW_KEY_LOCATION = `${SITE_URL}/${INDEXNOW_KEY}.txt`;
 const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
-const LATEST_VIEW_FALLBACK_IMAGE = `${SITE_URL}/og-image.jpg?v=20260522-0700`;
+const LATEST_VIEW_FALLBACK_IMAGE = `${SITE_URL}/favicon.png?v=20260523-0545`;
 
 let memoryFallback: StoredPayload | null = null;
 let memoryLatestFallback: LatestViewPayload | null = null;
@@ -392,7 +392,7 @@ function parsePositiveInt(value: string, fallback: number): number {
 
 function isLargeInlineDataUrl(value?: string): boolean {
   const normalized = (value || "").trim();
-  return normalized.startsWith("data:") && normalized.length > 2048;
+  return normalized.startsWith("data:") && normalized.length > 2_400_000;
 }
 
 function normalizeLatestImageUrl(imageUrl?: string): string {
@@ -478,6 +478,15 @@ function latestPayloadNeedsCompaction(content: LatestViewPayload): boolean {
   );
 }
 
+function latestPayloadLooksLikePlaceholderFallback(content: LatestViewPayload): boolean {
+  const stories = [...content.heroes, ...content.articles];
+  if (stories.length === 0) return false;
+  return stories.every((story) => {
+    const image = (story.imageUrl || "").trim();
+    return !image || image === LATEST_VIEW_FALLBACK_IMAGE;
+  });
+}
+
 function toLatestViewPayload(
   content: StoredPayload,
   heroLimit: number,
@@ -489,12 +498,14 @@ function toLatestViewPayload(
   const heroes = latestEdition
     ? readyHeroes
         .filter((hero) => hero.edition === latestEdition)
+        .filter((hero) => Boolean((hero.imageUrl || "").trim() || (hero.videoUrl || "").trim()))
         .slice(0, heroLimit)
         .map(toLatestHeroSummary)
     : [];
   const articles = latestEdition
     ? readyArticles
         .filter((article) => article.edition === latestEdition)
+        .filter((article) => Boolean((article.imageUrl || "").trim() || (article.videoUrl || "").trim()))
         .slice(0, articleLimit)
         .map(toLatestArticleSummary)
     : [];
@@ -514,10 +525,16 @@ function buildLatestEditionPayload(content: StoredPayload): LatestViewPayload {
   const readyArticles = content.articles.filter(isPublishReadyArticle);
   const latestEdition = pickLatestReadyEdition(readyHeroes, readyArticles);
   const heroes = latestEdition
-    ? readyHeroes.filter((hero) => hero.edition === latestEdition).map(toLatestHeroSummary)
+    ? readyHeroes
+        .filter((hero) => hero.edition === latestEdition)
+        .filter((hero) => Boolean((hero.imageUrl || "").trim() || (hero.videoUrl || "").trim()))
+        .map(toLatestHeroSummary)
     : [];
   const articles = latestEdition
-    ? readyArticles.filter((article) => article.edition === latestEdition).map(toLatestArticleSummary)
+    ? readyArticles
+        .filter((article) => article.edition === latestEdition)
+        .filter((article) => Boolean((article.imageUrl || "").trim() || (article.videoUrl || "").trim()))
+        .map(toLatestArticleSummary)
     : [];
 
   return {
@@ -741,9 +758,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const articleLimit = parsePositiveInt(readFirstString(req.query?.articleLimit), 4);
         const latestStored = await getLatestStoredContent();
         if (latestStored) {
-          const sanitizedLatest = sanitizeLatestViewPayload(latestStored);
+          const shouldRefreshFromSource = latestPayloadLooksLikePlaceholderFallback(latestStored);
+          const sourceContent = shouldRefreshFromSource ? await getStoredContent() : null;
+          const rebuiltLatest = sourceContent ? buildLatestEditionPayload(sourceContent) : null;
+          const sanitizedLatest = sanitizeLatestViewPayload(rebuiltLatest || latestStored);
           const limited = applyLatestLimits(sanitizedLatest, heroLimit, articleLimit);
-          if (latestPayloadNeedsCompaction(latestStored)) {
+          if (latestPayloadNeedsCompaction(latestStored) || shouldRefreshFromSource) {
             await setLatestStoredContent(sanitizedLatest);
           }
           res.status(200).json({

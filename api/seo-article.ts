@@ -116,7 +116,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           url: SITE_URL,
           logo: {
             "@type": "ImageObject",
-            url: `${SITE_URL}/favicon.png?v=20260522-0700`,
+            url: `${SITE_URL}/favicon.png?v=20260523-0545`,
           },
         },
         about: [jsonLdAuthor],

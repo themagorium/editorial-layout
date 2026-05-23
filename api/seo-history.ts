@@ -111,7 +111,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       bodyHtml,
       ogType: "website",
       jsonLd,
-      imageUrl: sortedStories[0]?.imageUrl || `${SITE_URL}/og-image.jpg?v=20260522-0700`,
+      imageUrl: sortedStories[0]?.imageUrl || `${SITE_URL}/favicon.png?v=20260523-0545`,
     });
 
     res.status(200).setHeader("Content-Type", "text/html; charset=utf-8").send(html);

@@ -3,8 +3,10 @@ export const SITE_URL = "https://www.themagorium.com";
 export const BRAND_NAME = "The Magorium";
 export const BRAND_ALIAS = "Magorium";
 export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
-export const SEO_ASSET_VERSION = "20260523-0545";
-export const DEFAULT_SEO_IMAGE = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
+export const SEO_ASSET_VERSION = "20260523-2022";
+export const HOME_SEO_DESCRIPTION =
+  "- A Curated Lifestyle Magazine covering travel, art, culture, fashion, motorsport, yachting, and global events.";
+export const DEFAULT_SEO_IMAGE = `${SITE_URL}/og-image.png?v=${SEO_ASSET_VERSION}`;
 export const DEFAULT_FAVICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 const DEFAULT_APPLE_ICON = `${SITE_URL}/favicon.png?v=${SEO_ASSET_VERSION}`;
 const BING_SITE_VERIFICATION_TOKEN = "A28C29B769451A568A699A7479DF03F8";
@@ -228,7 +230,7 @@ function extractBodyText(blocks: BodyBlock[] | undefined): string[] {
   if (!Array.isArray(blocks)) return [];
   return blocks
     .filter((block) => block && (block.type === "text" || block.type === "heading"))
-    .map((block) => (block.content || "").trim())
+    .map((block) => stripPlaceholderCopy(block.content))
     .filter(Boolean);
 }
 
@@ -252,8 +254,10 @@ function sanitizeSeoTags(tags: unknown): string[] {
 
 const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
 const PLACEHOLDER_COPY_PATTERNS = [
-  /^add your first hero story$/i,
-  /^add your first article$/i,
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
   /^add story text$/i,
   /^add first body paragraph$/i,
   /^add second body paragraph$/i,
@@ -265,6 +269,11 @@ function isPlaceholderCopy(value?: string): boolean {
   const text = (value || "").trim();
   if (!text) return false;
   return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function stripPlaceholderCopy(value?: string): string {
+  const text = (value || "").trim();
+  return isPlaceholderCopy(text) ? "" : text;
 }
 
 function isPublishReadyStory(story: SeoStory): boolean {
@@ -281,7 +290,7 @@ function sanitizeHero(hero: StoredHero): SeoStory {
   return {
     id: hero.id,
     title,
-    excerpt: (hero.excerpt || hero.subtitle || "").trim(),
+    excerpt: stripPlaceholderCopy(hero.excerpt) || stripPlaceholderCopy(hero.subtitle),
     seoTags: sanitizeSeoTags(hero.seoTags),
     category: (hero.category || "News").trim(),
     imageUrl: (hero.imageUrl || DEFAULT_SEO_IMAGE).trim(),
@@ -299,7 +308,7 @@ function sanitizeArticle(article: StoredArticle): SeoStory {
   return {
     id: article.id,
     title,
-    excerpt: (article.excerpt || "").trim(),
+    excerpt: stripPlaceholderCopy(article.excerpt),
     seoTags: sanitizeSeoTags(article.seoTags),
     category: (article.category || "News").trim(),
     imageUrl: (article.imageUrl || DEFAULT_SEO_IMAGE).trim(),

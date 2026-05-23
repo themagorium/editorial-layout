@@ -2,22 +2,48 @@ import { useMemo, useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
-import { getPublishedContentSnapshot, formatEditionLabel } from "@/lib/content-store";
+import {
+  getPublishedContentSnapshot,
+  formatEditionLabel,
+  type Article,
+  type HeroItem,
+} from "@/lib/content-store";
 import { Search, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { applyCollectionSeo, applyHomeSeo } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
+import { getStoryCardImageUrl, getStoryImageUrl, hasUsableStoryImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
 
 const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
 const PLACEHOLDER_COPY_PATTERNS = [
-  /^add your first hero story$/i,
-  /^add your first article$/i,
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
   /^add story text$/i,
   /^add first body paragraph$/i,
   /^add second body paragraph$/i,
   /^add third body paragraph$/i,
   /^upload photo or video$/i,
 ];
+
+type ArchiveStory = {
+  title: string;
+  category: string;
+  author?: string;
+  imageUrl?: string;
+  searchableText: string;
+};
+
+type ArchiveEdition = {
+  key: string;
+  label: string;
+  heroCount: number;
+  articleCount: number;
+  coverImage?: string;
+  searchableText: string;
+  stories: ArchiveStory[];
+};
 
 function isPlaceholderCopy(value?: string): boolean {
   const text = (value || "").trim();
@@ -31,19 +57,67 @@ function isPublishReadyTitle(title?: string): boolean {
   return !PLACEHOLDER_TITLE_PATTERN.test(normalized);
 }
 
+function buildArchiveStorySearchText(story: ArchiveStory): string {
+  return [
+    story.title,
+    story.category,
+    story.author,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function heroToArchiveStory(hero: HeroItem): ArchiveStory {
+  const story = {
+    title: hero.title,
+    category: hero.category,
+    author: hero.author,
+    imageUrl: getStoryCardImageUrl(hero.imageUrl, hero.body),
+    searchableText: "",
+  };
+  return {
+    ...story,
+    searchableText: buildArchiveStorySearchText(story),
+  };
+}
+
+function articleToArchiveStory(article: Article): ArchiveStory {
+  const story = {
+    title: article.title,
+    category: article.category,
+    author: article.author,
+    imageUrl: getStoryCardImageUrl(article.imageUrl, article.body),
+    searchableText: "",
+  };
+  return {
+    ...story,
+    searchableText: buildArchiveStorySearchText(story),
+  };
+}
+
+function firstUsableStoryImage(stories: ArchiveStory[]): string {
+  return stories.find((story) => hasUsableStoryImageUrl(story.imageUrl))?.imageUrl || "";
+}
+
+function pickArchiveCoverImage(edition: ArchiveEdition, searchQuery: string): string {
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const matchingStories = normalizedQuery
+    ? edition.stories.filter((story) => story.searchableText.includes(normalizedQuery))
+    : edition.stories;
+  return getStoryImageUrl(
+    firstUsableStoryImage(matchingStories)
+      || firstUsableStoryImage(edition.stories)
+      || edition.coverImage,
+  );
+}
+
 export default function ArchivePage() {
   useSyncPublishedContent();
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get("category") || "";
   const [search, setSearch] = useState(categoryFilter);
-  const [editions, setEditions] = useState<Array<{
-    key: string;
-    label: string;
-    heroCount: number;
-    articleCount: number;
-    coverImage?: string;
-    searchableText: string;
-  }>>([]);
+  const [editions, setEditions] = useState<ArchiveEdition[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -66,6 +140,12 @@ export default function ArchivePage() {
           if (heroes.length === 0 && articles.length === 0) {
             return null;
           }
+          const stories = [
+            ...heroes.map(heroToArchiveStory),
+            ...articles.map(articleToArchiveStory),
+          ];
+          const coverImage = firstUsableStoryImage(heroes.map(heroToArchiveStory))
+            || firstUsableStoryImage(stories);
           const searchableText = [
             ed,
             formatEditionLabel(ed),
@@ -80,8 +160,9 @@ export default function ArchivePage() {
             label: formatEditionLabel(ed),
             heroCount: heroes.slice(0, 3).length,
             articleCount: articles.slice(0, 4).length,
-            coverImage: heroes[0]?.imageUrl,
+            coverImage,
             searchableText,
+            stories,
           };
         })
         .filter((edition): edition is NonNullable<typeof edition> => Boolean(edition));
@@ -151,32 +232,40 @@ export default function ArchivePage() {
           <p className="text-center text-muted-foreground font-sans">No volumes match your search.</p>
         ) : (
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((ed) => (
-              <Link
-                key={ed.key}
-                to={`/archive/${ed.key}`}
-                className="group block border border-border rounded overflow-hidden hover:border-primary transition-colors"
-              >
-                {ed.coverImage && (
+            {filtered.map((ed) => {
+              const coverImage = pickArchiveCoverImage(ed, search);
+              return (
+                <Link
+                  key={ed.key}
+                  to={`/archive/${ed.key}`}
+                  className="group block border border-border rounded overflow-hidden hover:border-primary transition-colors"
+                >
                   <div className="aspect-[16/9] overflow-hidden">
                     <img
-                      src={ed.coverImage}
+                      src={coverImage}
                       alt={ed.label}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover bg-card transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
+                      decoding="async"
+                      sizes="(min-width: 1024px) 282px, (min-width: 768px) 50vw, 100vw"
+                      onError={(event) => {
+                        if (!event.currentTarget.src.endsWith(STORY_IMAGE_FALLBACK)) {
+                          event.currentTarget.src = STORY_IMAGE_FALLBACK;
+                        }
+                      }}
                     />
                   </div>
-                )}
-                <div className="p-5 bg-card">
-                  <div className="flex items-center gap-3 mb-2">
-                    <BookOpen className="w-4 h-4 text-primary" />
-                    <h3 className="font-editorial text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
-                      {ed.label}
-                    </h3>
+                  <div className="p-5 bg-card">
+                    <div className="flex items-center gap-3 mb-2">
+                      <BookOpen className="w-4 h-4 text-primary" />
+                      <h3 className="font-editorial text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {ed.label}
+                      </h3>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         )}
       </section>

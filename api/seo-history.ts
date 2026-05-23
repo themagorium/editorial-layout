@@ -13,6 +13,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     const runtime = await loadSeoRuntime();
     const {
       BRAND_NAME,
+      DEFAULT_SEO_IMAGE,
       SITE_URL,
       escapeHtml,
       getAuthorPath,
@@ -111,7 +112,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       bodyHtml,
       ogType: "website",
       jsonLd,
-      imageUrl: sortedStories[0]?.imageUrl || `${SITE_URL}/favicon.png?v=20260523-0545`,
+      imageUrl: sortedStories[0]?.imageUrl || DEFAULT_SEO_IMAGE,
     });
 
     res.status(200).setHeader("Content-Type", "text/html; charset=utf-8").send(html);

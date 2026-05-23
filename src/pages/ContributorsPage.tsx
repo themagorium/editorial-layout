@@ -69,7 +69,7 @@ export default function ContributorsPage() {
           const profile = CONTRIBUTOR_PROFILE_BY_NAME[name];
           return {
             name,
-            role: profile?.role || "Contributing Writer",
+            role: profile?.role || "Writer",
             bio:
               profile?.bio ||
               "Contributor to The Magorium covering luxury lifestyle, culture, travel, and global events.",

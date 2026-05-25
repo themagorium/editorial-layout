@@ -77,7 +77,7 @@ describe("published content snapshot", () => {
     expect(snapshot.articles[0]?.id).toBe("remote-article");
   });
 
-  it("keeps local snapshot when an admin draft marker exists", async () => {
+  it("keeps local snapshot for admin when an admin draft marker exists", async () => {
     localStorage.setItem("editorial_heroes", JSON.stringify([createHero("draft-hero")]));
     localStorage.setItem("editorial_articles", JSON.stringify([createArticle("draft-article")]));
     localStorage.setItem("editorial_ads", JSON.stringify([]));
@@ -96,7 +96,7 @@ describe("published content snapshot", () => {
       }),
     }) as unknown as typeof fetch;
 
-    const snapshot = await getPublishedContentSnapshot();
+    const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: true });
     expect(snapshot.heroes[0]?.id).toBe("draft-hero");
     expect(snapshot.articles[0]?.id).toBe("draft-article");
   });

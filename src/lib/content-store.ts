@@ -301,6 +301,52 @@ function resolveStoryImageUrl(imageUrl?: string, body?: ArticleBodyBlock[], cano
   return "";
 }
 
+function normalizeStoryVersionTokens(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/artificial intelligence/g, "ai")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean)
+    .filter((token) => !["the", "a", "an", "and", "of", "to", "for", "in", "from"].includes(token))
+    .join(" ");
+}
+
+function storyMediaFallbackKey(story: { title: string; category: string }): string {
+  const titleKey = normalizeStoryVersionTokens(story.title || "");
+  return `${slugifyText(story.category || "")}|${titleKey}`;
+}
+
+function hasUsableLeadMedia(story: { imageUrl?: string; videoUrl?: string }): boolean {
+  return !isInvalidStoryMediaUrl(story.imageUrl) || !isInvalidStoryMediaUrl(story.videoUrl);
+}
+
+function backfillMissingStoryMedia<T extends HeroItem | Article>(stories: T[]): T[] {
+  const mediaByKey = new Map<string, Pick<HeroItem, "imageUrl" | "videoUrl">>();
+  stories.forEach((story) => {
+    if (!hasUsableLeadMedia(story)) return;
+    const key = storyMediaFallbackKey(story);
+    if (!key.endsWith("|")) {
+      mediaByKey.set(key, { imageUrl: story.imageUrl, videoUrl: story.videoUrl });
+    }
+  });
+
+  return stories.map((story) => {
+    if (hasUsableLeadMedia(story)) return story;
+    const media = mediaByKey.get(storyMediaFallbackKey(story));
+    if (!media) return story;
+    const imageUrl = media.imageUrl || story.imageUrl;
+    const videoUrl = media.videoUrl || story.videoUrl;
+    return {
+      ...story,
+      imageUrl,
+      videoUrl,
+      body: normalizeBodyToOctoberPattern(story.id, story.body, imageUrl, videoUrl),
+    };
+  });
+}
+
 function normalizeHero(hero: HeroItem): HeroItem {
   const upgraded = upgradeLegacyHeroCopy(hero);
   const canonical = HERO_DEFAULT_BY_ID.get(upgraded.id);
@@ -1278,9 +1324,14 @@ export async function getPublishedContentSnapshot(options?: {
       heroes: raw.heroes,
       articles: raw.articles,
     });
+    const normalizedHeroes = backfilled.heroes.map(normalizeHero);
+    const normalizedArticles = backfilled.articles.map(normalizeArticle);
+    const mediaBackfilled = backfillMissingStoryMedia([...normalizedHeroes, ...normalizedArticles]);
+    const heroIds = new Set(normalizedHeroes.map((hero) => hero.id));
+    const articleIds = new Set(normalizedArticles.map((article) => article.id));
     const normalized = {
-      heroes: backfilled.heroes.map(normalizeHero),
-      articles: backfilled.articles.map(normalizeArticle),
+      heroes: mediaBackfilled.filter((story): story is HeroItem => heroIds.has(story.id)),
+      articles: mediaBackfilled.filter((story): story is Article => articleIds.has(story.id)),
       ads: raw.ads,
     };
     if (!hasPublishedStoryContent(normalized)) {

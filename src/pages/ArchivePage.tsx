@@ -152,10 +152,6 @@ export default function ArchivePage() {
             .join(" ")
             .toLowerCase();
 
-          const coverImage = [...heroes, ...articles]
-            .map((story) => resolveStoryCardImage(story))
-            .find(Boolean);
-
           return {
             key: ed,
             label: formatEditionLabel(ed),

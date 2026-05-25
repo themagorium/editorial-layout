@@ -233,7 +233,7 @@ function AdminDashboard() {
   useEffect(() => {
     let active = true;
     const initialize = async () => {
-      const snapshot = await getPublishedContentSnapshot();
+      const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: true });
       if (!active) return;
       const initialHeroes = snapshot.heroes;
       const initialArticles = snapshot.articles;

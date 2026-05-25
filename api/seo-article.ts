@@ -28,6 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const runtime = await loadSeoRuntime();
   const {
     BRAND_NAME,
+    DEFAULT_FAVICON,
     SITE_URL,
     STAFF_AUTHOR_NAME,
     contentIdentifierMatches,
@@ -116,7 +117,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           url: SITE_URL,
           logo: {
             "@type": "ImageObject",
-            url: `${SITE_URL}/favicon.png?v=20260523-1845`,
+            url: DEFAULT_FAVICON,
           },
         },
         about: [jsonLdAuthor],

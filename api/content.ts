@@ -96,7 +96,7 @@ const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
 
 let memoryFallback: StoredPayload | null = null;
 let memoryLatestFallback: LatestViewPayload | null = null;
-let memoryChunkUploads = new Map<string, { totalChunks: number; chunks: Map<number, string> }>();
+const memoryChunkUploads = new Map<string, { totalChunks: number; chunks: Map<number, string> }>();
 let kvClientPromise: Promise<{
   get: <T>(key: string) => Promise<T | null>;
   set: (key: string, value: unknown) => Promise<unknown>;
@@ -320,9 +320,7 @@ const PLACEHOLDER_COPY_PATTERNS = [
   /^add your .* story$/i,
   /^add your .* article$/i,
   /^add story text$/i,
-  /^add first body paragraph$/i,
-  /^add second body paragraph$/i,
-  /^add third body paragraph$/i,
+  /^add (first|second|third|fourth) body paragraph$/i,
   /^upload photo or video$/i,
 ];
 
@@ -330,6 +328,11 @@ function isPlaceholderCopy(value?: string): boolean {
   const text = (value || "").trim();
   if (!text) return false;
   return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function stripPlaceholderCopy(value?: string): string {
+  const text = (value || "").trim();
+  return isPlaceholderCopy(text) ? "" : text;
 }
 
 function isPublishReadyHero(hero: HeroPayload): boolean {
@@ -403,7 +406,7 @@ function isInvalidMediaValue(value?: string): boolean {
 }
 
 function isLogoFallbackAsset(value: string): boolean {
-  return value.includes("/favicon.png") || value.includes("/og-image.jpg");
+  return value.includes("/favicon.png") || value.includes("/og-image.jpg") || value.includes("/og-image.png");
 }
 
 function extractFirstBodyImageUrl(body?: BodyBlock[]): string {
@@ -442,10 +445,10 @@ function toLatestHeroSummary(hero: HeroPayload): HeroPayload {
   return {
     id: hero.id,
     title: hero.title,
-    excerpt: hero.excerpt,
+    excerpt: stripPlaceholderCopy(hero.excerpt) || stripPlaceholderCopy(hero.subtitle),
     legacySlugs: hero.legacySlugs,
     seoTags: hero.seoTags,
-    subtitle: hero.subtitle,
+    subtitle: stripPlaceholderCopy(hero.subtitle),
     category: hero.category,
     imageUrl,
     videoUrl: normalizeLatestVideoUrl(hero.videoUrl),
@@ -462,7 +465,7 @@ function toLatestArticleSummary(article: ArticlePayload): ArticlePayload {
   return {
     id: article.id,
     title: article.title,
-    excerpt: article.excerpt,
+    excerpt: stripPlaceholderCopy(article.excerpt),
     legacySlugs: article.legacySlugs,
     seoTags: article.seoTags,
     category: article.category,
@@ -518,6 +521,7 @@ function latestPayloadLooksLikePlaceholderFallback(content: LatestViewPayload): 
   const onlyImage = uniqueImages[0];
   return (
     onlyImage.includes("/og-image.jpg")
+    || onlyImage.includes("/og-image.png")
     || onlyImage.includes("/favicon.png")
   );
 }

@@ -5,6 +5,8 @@ import { buildContentPath, getPublishedContentSnapshot, slugifyText } from "@/li
 import { applyAuthorSeo, canonicalAuthorName } from "@/lib/seo";
 import { useEffect, useMemo, useState } from "react";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
+import { getStoryCardImageUrl } from "@/lib/story-media";
+import { isPublishReadyArticle, isPublishReadyHero } from "@/lib/content-selection";
 
 type StorySummary = {
   id: string;
@@ -34,24 +36,28 @@ export default function AuthorPage() {
       if (!active) return;
 
       const stories: StorySummary[] = [
-        ...snapshot.articles.map((a) => ({
-          id: a.id,
-          title: a.title,
-          excerpt: a.excerpt,
-          imageUrl: a.imageUrl,
-          date: a.date,
-          category: a.category,
-          author: normalizeAuthor(a.author),
-        })),
-        ...snapshot.heroes.map((h) => ({
-          id: h.id,
-          title: h.title,
-          excerpt: h.excerpt || h.subtitle,
-          imageUrl: h.imageUrl,
-          date: h.date,
-          category: h.category,
-          author: normalizeAuthor(h.author || "The Magorium Staff"),
-        })),
+        ...snapshot.articles
+          .filter(isPublishReadyArticle)
+          .map((a) => ({
+            id: a.id,
+            title: a.title,
+            excerpt: a.excerpt,
+            imageUrl: getStoryCardImageUrl(a.imageUrl, a.body),
+            date: a.date,
+            category: a.category,
+            author: normalizeAuthor(a.author),
+          })),
+        ...snapshot.heroes
+          .filter(isPublishReadyHero)
+          .map((h) => ({
+            id: h.id,
+            title: h.title,
+            excerpt: h.excerpt || h.subtitle,
+            imageUrl: getStoryCardImageUrl(h.imageUrl, h.body),
+            date: h.date,
+            category: h.category,
+            author: normalizeAuthor(h.author || "The Magorium Staff"),
+          })),
       ];
 
       setAllStories(stories);
@@ -128,13 +134,20 @@ export default function AuthorPage() {
                 to={buildContentPath(story.id, story.title)}
                 className="group border border-border rounded overflow-hidden hover:border-primary transition-colors"
               >
-                <div className="aspect-[16/9] overflow-hidden">
-                  <img
-                    src={story.imageUrl}
-                    alt={story.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
+                {story.imageUrl && (
+                  <div data-story-media className="aspect-[16/9] overflow-hidden">
+                    <img
+                      src={story.imageUrl}
+                      alt={story.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(event) => {
+                        event.currentTarget.closest("[data-story-media]")?.classList.add("hidden");
+                      }}
+                    />
+                  </div>
+                )}
                 <div className="p-4">
                   <Link
                     to={`/category/${slugifyText(story.category)}`}

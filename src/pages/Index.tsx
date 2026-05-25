@@ -12,7 +12,7 @@ import {
 import type { HeroItem, Article, AdSlot } from "@/lib/content-public";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
-import { applyHomeSeo, applyMagoriumBrandSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
+import { applyHomeSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 function HeroCard({ hero, prioritizeMedia }: { hero: HeroItem; prioritizeMedia: boolean }) {
@@ -120,8 +120,10 @@ export default function Index() {
         setAds(snapshot.ads);
         setEditionLabel(snapshot.latestEdition ? formatEditionLabel(snapshot.latestEdition) : "");
         setLoaded(true);
-        applyHomeSeo();
-        applyMagoriumBrandSeo("/magorium");
+        applyHomeSeo(
+          undefined,
+          [...snapshot.heroes, ...snapshot.articles].map((item) => buildContentPath(item.id, item.title)),
+        );
       })
       .catch(() => {
         if (!active) return;

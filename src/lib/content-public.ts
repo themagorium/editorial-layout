@@ -114,6 +114,23 @@ function hasStories(snapshot: LatestPublishedEditionSnapshot) {
   return snapshot.heroes.length > 0 || snapshot.articles.length > 0;
 }
 
+
+const ADMIN_PLACEHOLDER_COPY_PATTERNS = [
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
+  /^add story text$/i,
+  /^add (first|second|third|fourth) body paragraph$/i,
+  /^upload photo or video$/i,
+];
+
+function stripAdminPlaceholderCopy(value?: string): string {
+  const trimmed = (value || "").trim();
+  if (!trimmed) return "";
+  return ADMIN_PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(trimmed)) ? "" : trimmed;
+}
+
 function normalizeStoryMediaUrl(value?: string): string {
   const normalized = (value || "").trim();
   if (!normalized) return "";
@@ -121,21 +138,29 @@ function normalizeStoryMediaUrl(value?: string): string {
   if (normalized.startsWith("blob:")) return "";
   if (normalized.includes("/favicon.png")) return "";
   if (normalized.includes("/og-image.jpg")) return "";
+  if (normalized.includes("/og-image.png")) return "";
   return normalized;
 }
 
 function sanitizeLatestSnapshot(snapshot: LatestPublishedEditionSnapshot): LatestPublishedEditionSnapshot {
   const heroes = snapshot.heroes
-    .map((hero) => ({
-      ...hero,
-      imageUrl: normalizeStoryMediaUrl(hero.imageUrl),
-      videoUrl: normalizeStoryMediaUrl(hero.videoUrl) || undefined,
-    }))
+    .map((hero) => {
+      const subtitle = stripAdminPlaceholderCopy(hero.subtitle);
+      const excerpt = stripAdminPlaceholderCopy(hero.excerpt) || subtitle;
+      return {
+        ...hero,
+        subtitle,
+        excerpt,
+        imageUrl: normalizeStoryMediaUrl(hero.imageUrl),
+        videoUrl: normalizeStoryMediaUrl(hero.videoUrl) || undefined,
+      };
+    })
     .filter((hero) => Boolean(hero.imageUrl || hero.videoUrl));
 
   const articles = snapshot.articles
     .map((article) => ({
       ...article,
+      excerpt: stripAdminPlaceholderCopy(article.excerpt),
       imageUrl: normalizeStoryMediaUrl(article.imageUrl),
       videoUrl: normalizeStoryMediaUrl(article.videoUrl) || undefined,
     }))

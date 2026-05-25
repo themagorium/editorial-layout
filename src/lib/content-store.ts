@@ -184,6 +184,23 @@ function createMediaSeedBlock(baseId: string, imageUrl?: string, videoUrl?: stri
   };
 }
 
+
+const ADMIN_PLACEHOLDER_COPY_PATTERNS = [
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
+  /^add story text$/i,
+  /^add (first|second|third|fourth) body paragraph$/i,
+  /^upload photo or video$/i,
+];
+
+function stripAdminPlaceholderCopy(value?: string): string {
+  const trimmed = (value || "").trim();
+  if (!trimmed) return "";
+  return ADMIN_PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(trimmed)) ? "" : trimmed;
+}
+
 function normalizeSeoTags(tags?: string[]): string[] {
   if (!Array.isArray(tags)) return [];
   const seen = new Set<string>();
@@ -247,7 +264,15 @@ function isInvalidStoryMediaUrl(value?: string): boolean {
   if (normalized.startsWith("blob:")) return true;
   if (normalized.includes("/favicon.png")) return true;
   if (normalized.includes("/og-image.jpg")) return true;
+  if (normalized.includes("/og-image.png")) return true;
   return false;
+}
+
+function isStaleBundledStoryAssetUrl(value: string, canonicalImageUrl?: string): boolean {
+  const normalized = value.trim();
+  if (!canonicalImageUrl) return false;
+  if (!normalized.startsWith("/assets/")) return false;
+  return normalized !== canonicalImageUrl;
 }
 
 function pickFirstBodyImageUrl(body?: ArticleBodyBlock[]): string {
@@ -262,23 +287,76 @@ function pickFirstBodyImageUrl(body?: ArticleBodyBlock[]): string {
 
 function resolveStoryImageUrl(imageUrl?: string, body?: ArticleBodyBlock[], canonicalImageUrl?: string): string {
   const directImage = (imageUrl || "").trim();
-  if (!isInvalidStoryMediaUrl(directImage)) return directImage;
+  const canonicalImage = (canonicalImageUrl || "").trim();
+
+  if (directImage && !isInvalidStoryMediaUrl(directImage) && !isStaleBundledStoryAssetUrl(directImage, canonicalImage)) {
+    return directImage;
+  }
+
+  if (!isInvalidStoryMediaUrl(canonicalImage)) return canonicalImage;
 
   const bodyImage = pickFirstBodyImageUrl(body);
-  if (bodyImage) return bodyImage;
+  if (bodyImage && !isStaleBundledStoryAssetUrl(bodyImage, canonicalImage)) return bodyImage;
 
-  const canonicalImage = (canonicalImageUrl || "").trim();
-  if (!isInvalidStoryMediaUrl(canonicalImage)) return canonicalImage;
   return "";
+}
+
+function normalizeStoryVersionTokens(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/artificial intelligence/g, "ai")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean)
+    .filter((token) => !["the", "a", "an", "and", "of", "to", "for", "in", "from"].includes(token))
+    .join(" ");
+}
+
+function storyMediaFallbackKey(story: { title: string; category: string }): string {
+  const titleKey = normalizeStoryVersionTokens(story.title || "");
+  return `${slugifyText(story.category || "")}|${titleKey}`;
+}
+
+function hasUsableLeadMedia(story: { imageUrl?: string; videoUrl?: string }): boolean {
+  return !isInvalidStoryMediaUrl(story.imageUrl) || !isInvalidStoryMediaUrl(story.videoUrl);
+}
+
+function backfillMissingStoryMedia<T extends HeroItem | Article>(stories: T[]): T[] {
+  const mediaByKey = new Map<string, Pick<HeroItem, "imageUrl" | "videoUrl">>();
+  stories.forEach((story) => {
+    if (!hasUsableLeadMedia(story)) return;
+    const key = storyMediaFallbackKey(story);
+    if (!key.endsWith("|")) {
+      mediaByKey.set(key, { imageUrl: story.imageUrl, videoUrl: story.videoUrl });
+    }
+  });
+
+  return stories.map((story) => {
+    if (hasUsableLeadMedia(story)) return story;
+    const media = mediaByKey.get(storyMediaFallbackKey(story));
+    if (!media) return story;
+    const imageUrl = media.imageUrl || story.imageUrl;
+    const videoUrl = media.videoUrl || story.videoUrl;
+    return {
+      ...story,
+      imageUrl,
+      videoUrl,
+      body: normalizeBodyToOctoberPattern(story.id, story.body, imageUrl, videoUrl),
+    };
+  });
 }
 
 function normalizeHero(hero: HeroItem): HeroItem {
   const upgraded = upgradeLegacyHeroCopy(hero);
   const canonical = HERO_DEFAULT_BY_ID.get(upgraded.id);
   const imageUrl = resolveStoryImageUrl(upgraded.imageUrl, upgraded.body, canonical?.imageUrl);
+  const subtitle = stripAdminPlaceholderCopy(upgraded.subtitle);
+  const excerpt = stripAdminPlaceholderCopy(upgraded.excerpt) || subtitle;
   return {
     ...upgraded,
-    excerpt: upgraded.excerpt || upgraded.subtitle,
+    subtitle,
+    excerpt,
     imageUrl,
     seoTags: normalizeSeoTags(upgraded.seoTags),
     body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
@@ -289,8 +367,10 @@ function normalizeArticle(article: Article): Article {
   const upgraded = upgradeLegacyArticleCopy(article);
   const canonical = ARTICLE_DEFAULT_BY_ID.get(upgraded.id);
   const imageUrl = resolveStoryImageUrl(upgraded.imageUrl, upgraded.body, canonical?.imageUrl);
+  const excerpt = stripAdminPlaceholderCopy(upgraded.excerpt);
   return {
     ...upgraded,
+    excerpt,
     imageUrl,
     seoTags: normalizeSeoTags(upgraded.seoTags),
     body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
@@ -1192,10 +1272,10 @@ export async function getPublishedContentSnapshot(options?: {
   if (typeof window === "undefined") {
     return DEFAULT_PUBLISHED_CONTENT;
   }
-  const allowLocalDraft = options?.allowLocalDraft === true;
+  void options;
   ensureFreshDefaults();
   const hasLocalDraft = hasLocalEditsAvailable();
-  if (allowLocalDraft && hasLocalDraft) {
+  if (hasLocalDraft) {
     return {
       heroes: getHeroes(),
       articles: getArticles(),
@@ -1244,9 +1324,14 @@ export async function getPublishedContentSnapshot(options?: {
       heroes: raw.heroes,
       articles: raw.articles,
     });
+    const normalizedHeroes = backfilled.heroes.map(normalizeHero);
+    const normalizedArticles = backfilled.articles.map(normalizeArticle);
+    const mediaBackfilled = backfillMissingStoryMedia([...normalizedHeroes, ...normalizedArticles]);
+    const heroIds = new Set(normalizedHeroes.map((hero) => hero.id));
+    const articleIds = new Set(normalizedArticles.map((article) => article.id));
     const normalized = {
-      heroes: backfilled.heroes.map(normalizeHero),
-      articles: backfilled.articles.map(normalizeArticle),
+      heroes: mediaBackfilled.filter((story): story is HeroItem => heroIds.has(story.id)),
+      articles: mediaBackfilled.filter((story): story is Article => articleIds.has(story.id)),
       ads: raw.ads,
     };
     if (!hasPublishedStoryContent(normalized)) {

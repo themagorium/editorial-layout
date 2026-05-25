@@ -12,6 +12,7 @@ import {
 } from "@/lib/content-store";
 import { applyCollectionSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
+import { getStoryCardImageUrl } from "@/lib/story-media";
 
 type CategoryStory = {
   id: string;
@@ -40,9 +41,7 @@ const PLACEHOLDER_COPY_PATTERNS = [
   /^add your .* story$/i,
   /^add your .* article$/i,
   /^add story text$/i,
-  /^add first body paragraph$/i,
-  /^add second body paragraph$/i,
-  /^add third body paragraph$/i,
+  /^add (first|second|third|fourth) body paragraph$/i,
   /^upload photo or video$/i,
 ];
 
@@ -174,7 +173,7 @@ function mapHero(hero: HeroItem): CategoryStory {
     id: hero.id,
     title: hero.title,
     excerpt: hero.excerpt || hero.subtitle,
-    imageUrl: resolveStoryCardImage(hero),
+    imageUrl: getStoryCardImageUrl(hero.imageUrl, hero.body),
     date: hero.date,
     edition: hero.edition,
     storyType: "hero",
@@ -189,7 +188,7 @@ function mapArticle(article: Article): CategoryStory {
     id: article.id,
     title: article.title,
     excerpt: article.excerpt,
-    imageUrl: resolveStoryCardImage(article),
+    imageUrl: getStoryCardImageUrl(article.imageUrl, article.body),
     date: article.date,
     edition: article.edition,
     storyType: "article",
@@ -310,15 +309,23 @@ export default function CategoryPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {bucket.stories.map((story) => (
                     <article key={`${bucket.edition}:${story.storyType}:${story.id}`} className="group border border-border rounded overflow-hidden hover:border-primary transition-colors">
-                      <Link to={story.path}>
-                        <div className="aspect-[16/9] overflow-hidden">
-                          <img
-                            src={story.imageUrl}
-                            alt={story.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        </div>
-                      </Link>
+                      {story.imageUrl && (
+                        <Link to={story.path}>
+                          <div data-story-media className="aspect-[16/9] overflow-hidden">
+                            <img
+                              src={story.imageUrl}
+                              alt={story.title}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              loading="lazy"
+                              decoding="async"
+                              sizes="(min-width: 768px) 50vw, 100vw"
+                              onError={(event) => {
+                                event.currentTarget.closest("[data-story-media]")?.classList.add("hidden");
+                              }}
+                            />
+                          </div>
+                        </Link>
+                      )}
                       <div className="p-4">
                         <div className="flex items-center gap-2">
                           <span className="category-pill text-[10px]">{story.category}</span>

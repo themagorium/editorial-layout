@@ -51,11 +51,35 @@ function isPlaceholderCopy(value?: string): boolean {
   return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+function normalizeCardImageUrl(value?: string): string {
+  const normalized = (value || "").trim();
+  if (!normalized) return "";
+  if (normalized === "undefined" || normalized === "null") return "";
+  if (normalized.startsWith("blob:")) return "";
+  if (normalized.includes("/favicon.png") || normalized.includes("/og-image.jpg")) return "";
+  return normalized;
+}
+
+function firstBodyImageUrl(body?: Array<{ type?: string; content?: string }>): string {
+  if (!Array.isArray(body)) return "";
+  for (const block of body) {
+    if (!block || block.type !== "image") continue;
+    const normalized = normalizeCardImageUrl(block.content);
+    if (normalized) return normalized;
+  }
+  return "";
+}
+
+function resolveStoryCardImage(story: { imageUrl?: string; body?: Array<{ type?: string; content?: string }> }): string {
+  return normalizeCardImageUrl(story.imageUrl) || firstBodyImageUrl(story.body);
+}
+
 function isPublishReadyCategoryStory(story: CategoryStory): boolean {
   const title = (story.title || "").trim();
   if (!title) return false;
   if (PLACEHOLDER_TITLE_PATTERN.test(title)) return false;
   if (isPlaceholderCopy(story.excerpt)) return false;
+  if (!(story.imageUrl || "").trim()) return false;
   return true;
 }
 

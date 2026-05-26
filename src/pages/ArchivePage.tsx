@@ -55,12 +55,13 @@ function isPublishReadyTitle(title?: string): boolean {
   return !PLACEHOLDER_TITLE_PATTERN.test(normalized);
 }
 
+// ── ACCEPTED: incoming (main) ──────────────────────────────────────────────
+// Uses getStoryCardImageUrl + hasUsableStoryImageUrl from story-media lib.
+// Removes local normalizeCardImageUrl / firstBodyImageUrl / resolveStoryCardImage
+// which duplicated logic already in story-media and caused favicon.png leakage.
+
 function buildArchiveStorySearchText(story: ArchiveStory): string {
-  return [
-    story.title,
-    story.category,
-    story.author,
-  ]
+  return [story.title, story.category, story.author]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -95,19 +96,30 @@ function articleToArchiveStory(article: Article): ArchiveStory {
 }
 
 function firstUsableStoryImage(stories: ArchiveStory[]): string {
-  return stories.find((story) => hasUsableStoryImageUrl(story.imageUrl))?.imageUrl || "";
+  return (
+    stories.find((story) => hasUsableStoryImageUrl(story.imageUrl))?.imageUrl ||
+    ""
+  );
 }
 
-function pickArchiveCoverImage(edition: ArchiveEdition, searchQuery: string): string {
+function pickArchiveCoverImage(
+  edition: ArchiveEdition,
+  searchQuery: string
+): string {
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const matchingStories = normalizedQuery
-    ? edition.stories.filter((story) => story.searchableText.includes(normalizedQuery))
+    ? edition.stories.filter((story) =>
+        story.searchableText.includes(normalizedQuery)
+      )
     : edition.stories;
-  return firstUsableStoryImage(matchingStories)
-    || firstUsableStoryImage(edition.stories)
-    || edition.coverImage
-    || "";
+  return (
+    firstUsableStoryImage(matchingStories) ||
+    firstUsableStoryImage(edition.stories) ||
+    edition.coverImage ||
+    ""
+  );
 }
+// ── END CONFLICT RESOLUTION ────────────────────────────────────────────────
 
 export default function ArchivePage() {
   useSyncPublishedContent();
@@ -129,32 +141,42 @@ export default function ArchivePage() {
         .reverse()
         .map((ed) => {
           const heroes = snapshot.heroes.filter(
-            (h) => h.edition === ed && isPublishReadyTitle(h.title) && !isPlaceholderCopy(h.subtitle),
+            (h) =>
+              h.edition === ed &&
+              isPublishReadyTitle(h.title) &&
+              !isPlaceholderCopy(h.subtitle)
           );
           const articles = snapshot.articles.filter(
-            (a) => a.edition === ed && isPublishReadyTitle(a.title) && !isPlaceholderCopy(a.excerpt),
+            (a) =>
+              a.edition === ed &&
+              isPublishReadyTitle(a.title) &&
+              !isPlaceholderCopy(a.excerpt)
           );
           if (heroes.length === 0 && articles.length === 0) {
             return null;
           }
-          const stories = [
-            ...heroes.map(heroToArchiveStory),
-            ...articles.map(articleToArchiveStory),
-          ];
-          const coverImage = firstUsableStoryImage(heroes.map(heroToArchiveStory))
-            || firstUsableStoryImage(stories);
+
+          const heroStories = heroes.map(heroToArchiveStory);
+          const articleStories = articles.map(articleToArchiveStory);
+          const stories = [...heroStories, ...articleStories];
+
+          // Single coverImage declaration — no duplicate
+          const coverImage =
+            firstUsableStoryImage(heroStories) ||
+            firstUsableStoryImage(stories);
+
           const searchableText = [
             ed,
             formatEditionLabel(ed),
-            ...heroes.map((h) => `${h.title} ${h.category} ${h.author || ""}`),
-            ...articles.map((a) => `${a.title} ${a.category} ${a.author}`),
+            ...heroes.map(
+              (h) => `${h.title} ${h.category} ${h.author || ""}`
+            ),
+            ...articles.map(
+              (a) => `${a.title} ${a.category} ${a.author}`
+            ),
           ]
             .join(" ")
             .toLowerCase();
-
-          const coverImage = [...heroes, ...articles]
-            .map((story) => resolveStoryCardImage(story))
-            .find(Boolean);
 
           return {
             key: ed,
@@ -166,7 +188,10 @@ export default function ArchivePage() {
             stories,
           };
         })
-        .filter((edition): edition is NonNullable<typeof edition> => Boolean(edition));
+        .filter(
+          (edition): edition is NonNullable<typeof edition> =>
+            Boolean(edition)
+        );
 
       setEditions(nextEditions);
     });
@@ -188,20 +213,23 @@ export default function ArchivePage() {
       applyHomeSeo();
       return;
     }
-
-    if (q === "millie sealana" || q === "charlotte thames" || q === "staff" || q === "the magorium") {
+    if (
+      q === "millie sealana" ||
+      q === "charlotte thames" ||
+      q === "staff" ||
+      q === "the magorium"
+    ) {
       applyCollectionSeo(
         `Stories by ${search.trim()} | The Magorium`,
         `Explore The Magorium stories by ${search.trim()}.`,
-        `/archive?category=${encodeURIComponent(search.trim())}`,
+        `/archive?category=${encodeURIComponent(search.trim())}`
       );
       return;
     }
-
     applyCollectionSeo(
       "Archive | The Magorium",
       "Browse The Magorium archive by edition, author, and category.",
-      "/archive",
+      "/archive"
     );
   }, [search]);
 
@@ -230,7 +258,9 @@ export default function ArchivePage() {
         </div>
 
         {filtered.length === 0 ? (
-          <p className="text-center text-muted-foreground font-sans">No volumes match your search.</p>
+          <p className="text-center text-muted-foreground font-sans">
+            No volumes match your search.
+          </p>
         ) : (
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((ed) => {
@@ -242,7 +272,10 @@ export default function ArchivePage() {
                   className="group block border border-border rounded overflow-hidden hover:border-primary transition-colors"
                 >
                   {coverImage && (
-                    <div data-archive-media className="aspect-[16/9] overflow-hidden">
+                    <div
+                      data-archive-media
+                      className="aspect-[16/9] overflow-hidden"
+                    >
                       <img
                         src={coverImage}
                         alt={ed.label}
@@ -251,7 +284,9 @@ export default function ArchivePage() {
                         decoding="async"
                         sizes="(min-width: 1024px) 282px, (min-width: 768px) 50vw, 100vw"
                         onError={(event) => {
-                          event.currentTarget.closest("[data-archive-media]")?.classList.add("hidden");
+                          event.currentTarget
+                            .closest("[data-archive-media]")
+                            ?.classList.add("hidden");
                         }}
                       />
                     </div>

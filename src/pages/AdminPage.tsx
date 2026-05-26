@@ -1,1313 +1,273 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
-import ArticleBodyEditor from "@/components/editorial/ArticleBodyEditor";
+import EditorialFooter from "@/components/editorial/EditorialFooter";
 import {
-  getHeroes,
-  getArticles,
-  getAds,
-  saveHeroes,
-  saveArticles,
-  saveAds,
-  publishEditorialContent,
   getPublishedContentSnapshot,
-  DEFAULT_PUBLISHED_CONTENT,
-  resetToDefaults,
-  clearLocalDraftStorage,
-  isStorageQuotaExceededError,
-  CATEGORIES,
   formatEditionLabel,
+  type Article,
+  type HeroItem,
 } from "@/lib/content-store";
-import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
-import {
-  Trash2,
-  Plus,
-  Upload,
-  RotateCcw,
-  Image,
-  Video,
-  BarChart3,
-  Eye,
-  MousePointer,
-  TrendingUp,
-  MapPin,
-  Globe,
-  Calendar,
-  ChevronDown,
-} from "lucide-react";
-import { toast } from "sonner";
-import {
-  getAnalyticsSummary,
-  getTotalStats,
-  getRecentEvents,
-  getLocationStats,
-  clearAnalytics,
-  type ContentStats,
-} from "@/lib/analytics";
-import {
-  getAdminPublishToken,
-  isAdminAuthenticated,
-  setAdminPublishToken,
-  setAdminAuthenticated,
-  resetAdminPasswordAccess,
-} from "@/lib/admin-auth";
-import { fileToOptimizedDataUrl } from "@/lib/media-optimizer";
+import { Search, BookOpen } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { applyCollectionSeo, applyHomeSeo } from "@/lib/seo";
+import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
+import { getStoryCardImageUrl, hasUsableStoryImageUrl } from "@/lib/story-media";
 
-function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[] {
-  const editions = new Set<string>();
-  heroes.forEach((h) => editions.add(h.edition));
-  articles.forEach((a) => editions.add(a.edition));
-  return Array.from(editions).sort().reverse();
-}
+const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
+const PLACEHOLDER_COPY_PATTERNS = [
+  /^add your (first|second|third|fourth)\s+hero story$/i,
+  /^add your (first|second|third|fourth)\s+article$/i,
+  /^add your .* story$/i,
+  /^add your .* article$/i,
+  /^add story text$/i,
+  /^add (first|second|third|fourth) body paragraph$/i,
+  /^upload photo or video$/i,
+];
 
-function createOctoberPatternBody(seed: string): ArticleBodyBlock[] {
-  return [
-    { id: `${seed}-t1`, type: "text", content: "Add first body paragraph" },
-    {
-      id: `${seed}-m1`,
-      type: "image",
-      content: "",
-      imageAlign: "center",
-      imageWidth: "full",
-      caption: "Upload photo or video",
-    },
-    { id: `${seed}-t2`, type: "text", content: "Add second body paragraph" },
-    {
-      id: `${seed}-m2`,
-      type: "image",
-      content: "",
-      imageAlign: "center",
-      imageWidth: "full",
-      caption: "Upload photo or video",
-    },
-    { id: `${seed}-t3`, type: "text", content: "Add third body paragraph" },
-    {
-      id: `${seed}-m3`,
-      type: "image",
-      content: "",
-      imageAlign: "center",
-      imageWidth: "full",
-      caption: "Upload photo or video",
-    },
-  ];
-}
-
-function parseSeoTagsInput(value: string): string[] {
-  const seen = new Set<string>();
-  const tags: string[] = [];
-  value
-    .split(",")
-    .map((token) => token.replace(/\s+/g, " ").trim())
-    .filter(Boolean)
-    .forEach((token) => {
-      const key = token.toLowerCase();
-      if (seen.has(key)) return;
-      seen.add(key);
-      tags.push(token);
-    });
-  return tags.slice(0, 25);
-}
-
-type EditableContentPayload = {
-  heroes: HeroItem[];
-  articles: Article[];
-  ads: AdSlot[];
+type ArchiveStory = {
+  title: string;
+  category: string;
+  author?: string;
+  imageUrl?: string;
+  searchableText: string;
 };
 
-export default function AdminPage() {
-  const [authenticated, setAuthenticated] = useState(() => {
-    return isAdminAuthenticated();
-  });
-  const [passwordInput, setPasswordInput] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+type ArchiveEdition = {
+  key: string;
+  label: string;
+  heroCount: number;
+  articleCount: number;
+  coverImage?: string;
+  searchableText: string;
+  stories: ArchiveStory[];
+};
 
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    const resetToken = url.searchParams.get("resetToken");
-    if (!resetToken) return;
-
-    resetAdminPasswordAccess();
-    setAuthenticated(false);
-    setPasswordInput("");
-    setPasswordError(false);
-
-    url.searchParams.delete("resetToken");
-    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
-    toast.success("Reset link used.");
-  }, []);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoggingIn(true);
-    try {
-      const response = await fetch("/api/admin-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: passwordInput }),
-      });
-      const payload = await response.json().catch(() => ({} as { success?: boolean; token?: string }));
-      const normalizedPassword = passwordInput.trim();
-      if (response.ok && payload.success) {
-        setAuthenticated(true);
-        setAdminAuthenticated(true);
-        setAdminPublishToken(typeof payload.token === "string" ? payload.token : normalizedPassword);
-        setPasswordInput("");
-        setPasswordError(false);
-        return;
-      }
-      setPasswordError(true);
-    } catch {
-      setPasswordError(true);
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
-  const handleResetAccess = () => {
-    const confirmReset = window.confirm(
-      "Reset admin password access? This will sign out any current admin session.",
-    );
-    if (!confirmReset) return;
-
-    resetAdminPasswordAccess();
-    setAuthenticated(false);
-    setPasswordInput("");
-    setPasswordError(false);
-    toast.success("Admin password access reset.");
-  };
-
-  if (!authenticated) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <form onSubmit={handleLogin} className="w-full max-w-sm mx-auto p-8 space-y-6 text-center">
-          <h1 className="text-3xl font-bold tracking-tight masthead-font">
-            <span className="text-foreground">THE </span>
-            <span className="text-primary">MAGORIUM</span>
-          </h1>
-          <p className="text-sm text-muted-foreground uppercase tracking-widest">Content Manager</p>
-          <div className="space-y-3">
-            <input
-              type="password"
-              value={passwordInput}
-              onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }}
-              placeholder="Enter password"
-              className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              autoFocus
-            />
-            {passwordError && (
-              <p className="text-sm text-destructive">Incorrect password</p>
-            )}
-            <button
-              type="submit"
-              disabled={isLoggingIn}
-              className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-70"
-            >
-              {isLoggingIn ? "Signing In..." : "Sign In"}
-            </button>
-            <button
-              type="button"
-              onClick={handleResetAccess}
-              className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Reset Admin Password Access
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
-  return <AdminDashboard />;
+function isPlaceholderCopy(value?: string): boolean {
+  const text = (value || "").trim();
+  if (!text) return false;
+  return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
 }
 
-function AdminDashboard() {
-  const [heroes, setHeroes] = useState<HeroItem[]>([]);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [ads, setAds] = useState<AdSlot[]>([]);
-  const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics">("heroes");
-  const [currentEdition, setCurrentEdition] = useState<string>("");
-  const [showNewEdition, setShowNewEdition] = useState(false);
-  const [newEditionMonth, setNewEditionMonth] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
+function isPublishReadyTitle(title?: string): boolean {
+  const normalized = (title || "").trim();
+  if (!normalized) return false;
+  return !PLACEHOLDER_TITLE_PATTERN.test(normalized);
+}
+
+function buildArchiveStorySearchText(story: ArchiveStory): string {
+  return [
+    story.title,
+    story.category,
+    story.author,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function heroToArchiveStory(hero: HeroItem): ArchiveStory {
+  const story = {
+    title: hero.title,
+    category: hero.category,
+    author: hero.author,
+    imageUrl: getStoryCardImageUrl(hero.imageUrl, hero.body),
+    searchableText: "",
+  };
+  return {
+    ...story,
+    searchableText: buildArchiveStorySearchText(story),
+  };
+}
+
+function articleToArchiveStory(article: Article): ArchiveStory {
+  const story = {
+    title: article.title,
+    category: article.category,
+    author: article.author,
+    imageUrl: getStoryCardImageUrl(article.imageUrl, article.body),
+    searchableText: "",
+  };
+  return {
+    ...story,
+    searchableText: buildArchiveStorySearchText(story),
+  };
+}
+
+function firstUsableStoryImage(stories: ArchiveStory[]): string {
+  return stories.find((story) => hasUsableStoryImageUrl(story.imageUrl))?.imageUrl || "";
+}
+
+function pickArchiveCoverImage(edition: ArchiveEdition, searchQuery: string): string {
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const matchingStories = normalizedQuery
+    ? edition.stories.filter((story) => story.searchableText.includes(normalizedQuery))
+    : edition.stories;
+  return firstUsableStoryImage(matchingStories)
+    || firstUsableStoryImage(edition.stories)
+    || edition.coverImage
+    || "";
+}
+
+export default function ArchivePage() {
+  useSyncPublishedContent();
+  const [searchParams] = useSearchParams();
+  const categoryFilter = searchParams.get("category") || "";
+  const [search, setSearch] = useState(categoryFilter);
+  const [editions, setEditions] = useState<ArchiveEdition[]>([]);
 
   useEffect(() => {
     let active = true;
-    const initialize = async () => {
-      const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: true });
+    getPublishedContentSnapshot().then((snapshot) => {
       if (!active) return;
-      const initialHeroes = snapshot.heroes;
-      const initialArticles = snapshot.articles;
-      const initialAds = snapshot.ads;
+      const editionKeys = new Set<string>();
+      snapshot.heroes.forEach((h) => editionKeys.add(h.edition));
+      snapshot.articles.forEach((a) => editionKeys.add(a.edition));
 
-      setHeroes(initialHeroes);
-      setArticles(initialArticles);
-      setAds(initialAds);
+      const nextEditions = Array.from(editionKeys)
+        .sort()
+        .reverse()
+        .map((ed) => {
+          const heroes = snapshot.heroes.filter(
+            (h) => h.edition === ed && isPublishReadyTitle(h.title) && !isPlaceholderCopy(h.subtitle),
+          );
+          const articles = snapshot.articles.filter(
+            (a) => a.edition === ed && isPublishReadyTitle(a.title) && !isPlaceholderCopy(a.excerpt),
+          );
+          if (heroes.length === 0 && articles.length === 0) {
+            return null;
+          }
+          const stories = [
+            ...heroes.map(heroToArchiveStory),
+            ...articles.map(articleToArchiveStory),
+          ];
+          const coverImage = firstUsableStoryImage(heroes.map(heroToArchiveStory))
+            || firstUsableStoryImage(stories);
+          const searchableText = [
+            ed,
+            formatEditionLabel(ed),
+            ...heroes.map((h) => `${h.title} ${h.category} ${h.author || ""}`),
+            ...articles.map((a) => `${a.title} ${a.category} ${a.author}`),
+          ]
+            .join(" ")
+            .toLowerCase();
 
-      const initialEditions = getEditionsFromState(initialHeroes, initialArticles);
-      if (initialEditions.length > 0) setCurrentEdition(initialEditions[0]);
-    };
+          return {
+            key: ed,
+            label: formatEditionLabel(ed),
+            heroCount: heroes.slice(0, 3).length,
+            articleCount: articles.slice(0, 4).length,
+            coverImage,
+            searchableText,
+            stories,
+          };
+        })
+        .filter((edition): edition is NonNullable<typeof edition> => Boolean(edition));
 
-    void initialize();
+      setEditions(nextEditions);
+    });
+
     return () => {
       active = false;
     };
   }, []);
 
-  const editions = useMemo(() => getEditionsFromState(heroes, articles), [heroes, articles]);
-  const filteredHeroes = currentEdition ? heroes.filter((h) => h.edition === currentEdition) : heroes;
-  const filteredArticles = currentEdition ? articles.filter((a) => a.edition === currentEdition) : articles;
+  const filtered = useMemo(() => {
+    if (!search.trim()) return editions;
+    const q = search.toLowerCase();
+    return editions.filter((e) => e.searchableText.includes(q));
+  }, [search, editions]);
 
-  const save = async () => {
-    if (isSaving) return;
-    setIsSaving(true);
-    try {
-      const publishToken = getAdminPublishToken();
-      if (!publishToken) {
-        toast.error("Admin session expired. Please sign in again to publish live.");
-        return;
-      }
-      const contentToPublish: EditableContentPayload = { heroes, articles, ads };
-      const published = await publishEditorialContent(contentToPublish, publishToken);
-      if (!published.success) {
-        const fallbackMessage = published.error || "Could not publish content to live";
-        let draftStored = true;
-        try {
-          saveHeroes(contentToPublish.heroes);
-          saveArticles(contentToPublish.articles);
-          saveAds(contentToPublish.ads);
-        } catch (error) {
-          if (!isStorageQuotaExceededError(error)) {
-            throw error;
-          }
-          draftStored = false;
-          clearLocalDraftStorage();
-        }
-        if (draftStored) {
-          toast.warning(`${fallbackMessage}. Local draft was still saved in this browser.`);
-          return;
-        }
-        toast.error(`${fallbackMessage}. Browser storage is full, so local draft backup could not be saved.`);
-        return;
-      }
-
-      clearLocalDraftStorage();
-      toast.success("Content published to live.");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not save content";
-      toast.error(message);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleReset = () => {
-    resetToDefaults();
-    setHeroes(getHeroes());
-    setArticles(getArticles());
-    setAds(getAds());
-    toast.success("Reset to defaults.");
-  };
-
-  const handleRestoreBackup = async () => {
-    if (isSaving) return;
-    setIsSaving(true);
-    try {
-      const restoredHeroes = DEFAULT_PUBLISHED_CONTENT.heroes.map((hero) => ({
-        ...hero,
-        body: (hero.body || []).map((block) => ({ ...block })),
-        seoTags: [...(hero.seoTags || [])],
-      }));
-      const restoredArticles = DEFAULT_PUBLISHED_CONTENT.articles.map((article) => ({
-        ...article,
-        body: (article.body || []).map((block) => ({ ...block })),
-        seoTags: [...(article.seoTags || [])],
-      }));
-      const restoredAds = DEFAULT_PUBLISHED_CONTENT.ads.map((ad) => ({ ...ad }));
-
-      setHeroes(restoredHeroes);
-      setArticles(restoredArticles);
-      setAds(restoredAds);
-
-      const restoredEditions = getEditionsFromState(restoredHeroes, restoredArticles);
-      if (restoredEditions.length > 0) {
-        setCurrentEdition(restoredEditions[0]);
-      }
-
-      const publishToken = getAdminPublishToken();
-      if (!publishToken) {
-        toast.error("Admin session expired. Please sign in again to publish live.");
-        return;
-      }
-      const published = await publishEditorialContent({
-        heroes: restoredHeroes,
-        articles: restoredArticles,
-        ads: restoredAds,
-      }, publishToken);
-      if (!published.success) {
-        const fallbackMessage = published.error || "Could not publish restored backup to live";
-        toast.warning(`${fallbackMessage}. Backup is loaded in the editor, but publish did not complete.`);
-        return;
-      }
-
-      clearLocalDraftStorage();
-      toast.success("Baseline backup restored and published.");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not restore backup";
-      toast.error(message);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const deleteCurrentEdition = () => {
-    if (!currentEdition) return;
-
-    const label = formatEditionLabel(currentEdition);
-    const ok = window.confirm(
-      `Delete the entire ${label} edition? This will remove all heroes and articles for that edition.\n\nClick “Save Changes” after deleting to make it permanent.`,
-    );
-    if (!ok) return;
-
-    const nextHeroes = heroes.filter((h) => h.edition !== currentEdition);
-    const nextArticles = articles.filter((a) => a.edition !== currentEdition);
-
-    setHeroes(nextHeroes);
-    setArticles(nextArticles);
-
-    const remainingEditions = getEditionsFromState(nextHeroes, nextArticles);
-    setCurrentEdition(remainingEditions[0] ?? "");
-
-    toast.success(`Deleted edition: ${label}.`);
-  };
-
-  const createNewEdition = () => {
-    if (!newEditionMonth) {
-      toast.error("Please select a month for the new edition");
+  useEffect(() => {
+    const q = search.trim().toLowerCase();
+    if (q === "magorium" || q === "the magorium" || q === "magorum") {
+      applyHomeSeo();
       return;
     }
 
-    const stamp = Date.now();
+    if (q === "millie sealana" || q === "charlotte thames" || q === "staff" || q === "the magorium") {
+      applyCollectionSeo(
+        `Stories by ${search.trim()} | The Magorium`,
+        `Explore The Magorium stories by ${search.trim()}.`,
+        `/archive?category=${encodeURIComponent(search.trim())}`,
+      );
+      return;
+    }
 
-    // Create starter template content for new edition
-    const starterHeroes: HeroItem[] = [
-      {
-        id: `h-${stamp}-1`,
-        title: "New Hero 1",
-        subtitle: "Add your first hero story",
-        seoTags: [],
-        category: "Travel",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`h-${stamp}-1`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `h-${stamp}-2`,
-        title: "New Hero 2",
-        subtitle: "Add your second hero story",
-        seoTags: [],
-        category: "Fashion",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`h-${stamp}-2`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `h-${stamp}-3`,
-        title: "New Hero 3",
-        subtitle: "Add your third hero story",
-        seoTags: [],
-        category: "Art & Design",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`h-${stamp}-3`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-    ];
-
-    const starterArticles: Article[] = [
-      {
-        id: `a-${stamp}-1`,
-        title: "New Article 1",
-        excerpt: "Add your first article",
-        seoTags: [],
-        category: "Yachting",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-1`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `a-${stamp}-2`,
-        title: "New Article 2",
-        excerpt: "Add your second article",
-        seoTags: [],
-        category: "Sports",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-2`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `a-${stamp}-3`,
-        title: "New Article 3",
-        excerpt: "Add your third article",
-        seoTags: [],
-        category: "Golf",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-3`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `a-${stamp}-4`,
-        title: "New Article 4",
-        excerpt: "Add your fourth article",
-        seoTags: [],
-        category: "Tennis",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-4`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-    ];
-
-    setHeroes([...heroes, ...starterHeroes]);
-    setArticles([...articles, ...starterArticles]);
-    setCurrentEdition(newEditionMonth);
-    setShowNewEdition(false);
-    setNewEditionMonth("");
-    toast.success(`Created new edition: ${formatEditionLabel(newEditionMonth)} with starter content!`);
-  };
+    applyCollectionSeo(
+      "Archive | The Magorium",
+      "Browse The Magorium archive by edition, author, and category.",
+      "/archive",
+    );
+  }, [search]);
 
   return (
     <div className="min-h-screen bg-background">
       <EditorialHeader />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h2 className="font-serif text-3xl font-bold">Content Manager</h2>
-            <p className="text-sm text-muted-foreground font-sans mt-1">Upload and manage articles, heroes, and advertising</p>
-          </div>
-          <div className="flex gap-3">
-            <button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 text-sm border border-border rounded text-muted-foreground hover:text-foreground transition-colors">
-              <RotateCcw className="w-4 h-4" /> Reset
-            </button>
-            <button
-              onClick={handleRestoreBackup}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-4 py-2 text-sm border border-primary rounded text-primary hover:bg-primary/10 transition-colors disabled:opacity-70"
-            >
-              <RotateCcw className="w-4 h-4" /> Restore Backup
-            </button>
-            <button
-              onClick={save}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-70"
-            >
-              {isSaving ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
-        </div>
 
-        {/* Edition Selector */}
-        <div className="bg-card border border-border rounded-lg p-4 mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-primary" />
-              <span className="text-sm font-sans uppercase tracking-wider text-muted-foreground">Current Edition:</span>
-              <select
-                value={currentEdition}
-                onChange={(e) => setCurrentEdition(e.target.value)}
-                className="bg-secondary text-foreground px-4 py-2 rounded font-serif text-lg border-0"
-              >
-                {editions.map((ed) => (
-                  <option key={ed} value={ed}>{formatEditionLabel(ed)}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={deleteCurrentEdition}
-                disabled={!currentEdition}
-                className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive text-destructive rounded hover:bg-destructive/10 transition-colors disabled:pointer-events-none disabled:opacity-50"
-              >
-                <Trash2 className="w-4 h-4" /> Delete Edition
-              </button>
-
-              {showNewEdition ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="month"
-                    value={newEditionMonth}
-                    onChange={(e) => setNewEditionMonth(e.target.value)}
-                    className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
-                  />
-                  <button onClick={createNewEdition} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded">
-                    Create
-                  </button>
-                  <button onClick={() => setShowNewEdition(false)} className="px-3 py-2 text-sm text-muted-foreground">
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowNewEdition(true)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"
-                >
-                  <Plus className="w-4 h-4" /> New Edition
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="mt-3 text-xs text-muted-foreground font-sans">
-            {filteredHeroes.length} heroes · {filteredArticles.length} articles in this edition
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-1 border-b border-border mb-8">
-          {(["heroes", "articles", "ads", "analytics"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${
-                tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t === "analytics" && <BarChart3 className="w-4 h-4" />}
-              {t === "ads" ? "Advertising" : t === "analytics" ? "Analytics" : t}
-            </button>
-          ))}
-        </div>
-
-        {tab === "heroes" && (
-          <HeroesManager heroes={heroes} setHeroes={setHeroes} filteredHeroes={filteredHeroes} currentEdition={currentEdition} />
-        )}
-        {tab === "articles" && (
-          <ArticlesManager articles={articles} setArticles={setArticles} filteredArticles={filteredArticles} currentEdition={currentEdition} />
-        )}
-        {tab === "ads" && (
-          <AdsManager ads={ads} setAds={setAds} />
-        )}
-        {tab === "analytics" && (
-          <AnalyticsDashboard articles={articles} heroes={heroes} ads={ads} />
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ---- Heroes Manager ---- */
-function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { heroes: HeroItem[]; setHeroes: (h: HeroItem[]) => void; filteredHeroes: HeroItem[]; currentEdition: string }) {
-  const addHero = () => {
-    setHeroes([
-      {
-        id: `h-${Date.now()}`,
-        title: "New Hero",
-        subtitle: "",
-        seoTags: [],
-        category: "Travel",
-        imageUrl: "",
-        author: "",
-        body: [],
-        date: new Date().toISOString().split("T")[0],
-        edition: currentEdition || new Date().toISOString().slice(0, 7),
-      },
-      ...heroes,
-    ]);
-  };
-
-  const update = (id: string, patch: Partial<HeroItem>) => {
-    setHeroes(heroes.map((h) => (h.id === id ? { ...h, ...patch } : h)));
-  };
-
-  const remove = (id: string) => setHeroes(heroes.filter((h) => h.id !== id));
-
-  return (
-    <div className="space-y-6">
-      <AddButton onClick={addHero} label={`Add Hero to ${currentEdition ? formatEditionLabel(currentEdition) : 'Edition'}`} />
-      {filteredHeroes.map((hero) => (
-        <ContentCard key={hero.id} onRemove={() => remove(hero.id)}>
-          <EditableStoryForm
-            kind="hero"
-            title={hero.title}
-            summary={hero.subtitle}
-            category={hero.category}
-            author={hero.author || ""}
-            seoTags={hero.seoTags || []}
-            date={hero.date}
-            featured={hero.featured}
-            imageUrl={hero.imageUrl}
-            videoUrl={hero.videoUrl}
-            body={hero.body || []}
-            onTitleChange={(value) => update(hero.id, { title: value })}
-            onSummaryChange={(value) => update(hero.id, { subtitle: value })}
-            onCategoryChange={(value) => update(hero.id, { category: value })}
-            onAuthorChange={(value) => update(hero.id, { author: value })}
-            onSeoTagsChange={(value) => update(hero.id, { seoTags: value })}
-            onDateChange={(value) => update(hero.id, { date: value })}
-            onFeaturedChange={(value) => update(hero.id, { featured: value })}
-            onImageChange={(value) => update(hero.id, { imageUrl: value })}
-            onVideoChange={(value) => update(hero.id, { videoUrl: value })}
-            onBodyChange={(value) =>
-              update(hero.id, {
-                body: value,
-              })
-            }
-            onNormalizeBody={() =>
-              update(hero.id, {
-                body: normalizeBodyFlow(hero.body || [], hero.imageUrl, hero.videoUrl),
-              })
-            }
-          />
-        </ContentCard>
-      ))}
-    </div>
-  );
-}
-
-/* ---- Articles Manager ---- */
-function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string }) {
-  const addArticle = () => {
-    setArticles([
-      { id: `a-${Date.now()}`, title: "New Article", excerpt: "", seoTags: [], category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) },
-      ...articles,
-    ]);
-  };
-
-  const update = (id: string, patch: Partial<Article>) => {
-    setArticles(articles.map((a) => (a.id === id ? { ...a, ...patch } : a)));
-  };
-
-  const remove = (id: string) => setArticles(articles.filter((a) => a.id !== id));
-
-  return (
-    <div className="space-y-6">
-      <AddButton onClick={addArticle} label={`Add Article to ${currentEdition ? formatEditionLabel(currentEdition) : 'Edition'}`} />
-      {filteredArticles.map((article) => (
-        <ContentCard key={article.id} onRemove={() => remove(article.id)}>
-          <EditableStoryForm
-            kind="article"
-            title={article.title}
-            summary={article.excerpt}
-            category={article.category}
-            author={article.author}
-            seoTags={article.seoTags || []}
-            date={article.date}
-            featured={article.featured}
-            imageUrl={article.imageUrl}
-            videoUrl={article.videoUrl}
-            body={article.body || []}
-            onTitleChange={(value) => update(article.id, { title: value })}
-            onSummaryChange={(value) => update(article.id, { excerpt: value })}
-            onCategoryChange={(value) => update(article.id, { category: value })}
-            onAuthorChange={(value) => update(article.id, { author: value })}
-            onSeoTagsChange={(value) => update(article.id, { seoTags: value })}
-            onDateChange={(value) => update(article.id, { date: value })}
-            onFeaturedChange={(value) => update(article.id, { featured: value })}
-            onImageChange={(value) => update(article.id, { imageUrl: value })}
-            onVideoChange={(value) => update(article.id, { videoUrl: value })}
-            onBodyChange={(value) =>
-              update(article.id, {
-                body: value,
-              })
-            }
-            onNormalizeBody={() =>
-              update(article.id, {
-                body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl),
-              })
-            }
-          />
-        </ContentCard>
-      ))}
-    </div>
-  );
-}
-
-function EditableStoryForm({
-  kind,
-  title,
-  summary,
-  category,
-  author,
-  seoTags,
-  date,
-  featured,
-  imageUrl,
-  videoUrl,
-  body,
-  onTitleChange,
-  onSummaryChange,
-  onCategoryChange,
-  onAuthorChange,
-  onSeoTagsChange,
-  onDateChange,
-  onFeaturedChange,
-  onImageChange,
-  onVideoChange,
-  onBodyChange,
-  onNormalizeBody,
-}: {
-  kind: "hero" | "article";
-  title: string;
-  summary: string;
-  category: Category;
-  author: string;
-  seoTags: string[];
-  date: string;
-  featured?: boolean;
-  imageUrl?: string;
-  videoUrl?: string;
-  body: ArticleBodyBlock[];
-  onTitleChange: (value: string) => void;
-  onSummaryChange: (value: string) => void;
-  onCategoryChange: (value: Category) => void;
-  onAuthorChange: (value: string) => void;
-  onSeoTagsChange: (value: string[]) => void;
-  onDateChange: (value: string) => void;
-  onFeaturedChange: (value: boolean) => void;
-  onImageChange: (value: string) => void;
-  onVideoChange: (value: string) => void;
-  onBodyChange: (value: ArticleBodyBlock[]) => void;
-  onNormalizeBody: () => void;
-}) {
-  const isArticle = kind === "article";
-  const [seoTagDraft, setSeoTagDraft] = useState("");
-
-  const addSeoTagsFromDraft = () => {
-    const draftTags = parseSeoTagsInput(seoTagDraft);
-    if (draftTags.length === 0) {
-      setSeoTagDraft("");
-      return;
-    }
-
-    const existing = new Set(seoTags.map((tag) => tag.toLowerCase()));
-    const merged = [...seoTags];
-    draftTags.forEach((tag) => {
-      const key = tag.toLowerCase();
-      if (existing.has(key)) return;
-      if (merged.length >= 25) return;
-      existing.add(key);
-      merged.push(tag);
-    });
-
-    onSeoTagsChange(merged);
-    setSeoTagDraft("");
-  };
-
-  const removeSeoTag = (tagToRemove: string) => {
-    onSeoTagsChange(seoTags.filter((tag) => tag.toLowerCase() !== tagToRemove.toLowerCase()));
-  };
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
-      <MediaUpload
-        imageUrl={imageUrl}
-        videoUrl={videoUrl}
-        onImage={onImageChange}
-        onVideo={onVideoChange}
-      />
-      <div className="space-y-3">
-        <input
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          placeholder={isArticle ? "Article title" : "Hero title"}
-          className="w-full bg-secondary text-foreground px-3 py-2 rounded font-serif text-lg"
-        />
-        <textarea
-          value={summary}
-          onChange={(e) => onSummaryChange(e.target.value)}
-          placeholder={isArticle ? "Excerpt" : "Subtitle / deck"}
-          rows={2}
-          className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none"
-        />
-        <div className="flex flex-wrap gap-3">
-          <select value={category} onChange={(e) => onCategoryChange(e.target.value as Category)} className="bg-secondary text-foreground px-3 py-2 rounded text-sm">
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <input
-            value={author}
-            onChange={(e) => onAuthorChange(e.target.value)}
-            placeholder="Writer / Journalist Name"
-            className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
-          />
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Published</span>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => onDateChange(e.target.value)}
-              className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
-            />
-            <button
-              type="button"
-              onClick={() => onDateChange(new Date().toISOString().split("T")[0])}
-              className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-            >
-              Today
-            </button>
-          </div>
-          {isArticle && (
-            <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-              <input type="checkbox" checked={featured || false} onChange={(e) => onFeaturedChange(e.target.checked)} className="accent-primary" />
-              Featured
-            </label>
-          )}
-        </div>
-        <section className="rounded-lg border-2 border-primary/35 bg-primary/5 p-4 space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h4 className="text-sm font-semibold text-primary font-sans">Dedicated SEO Tag Box</h4>
-              <p className="text-[11px] text-muted-foreground font-sans mt-1">
-                Add and manage search keywords for this story. Each bubble is one SEO tag.
-              </p>
-            </div>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans bg-background px-2 py-1 rounded border border-border">
-              {seoTags.length}/25
-            </span>
-          </div>
-
-          <div className="rounded-md border border-border bg-background/80 p-3 min-h-[44px]">
-            <div className="flex flex-wrap gap-2">
-              {seoTags.length > 0 ? (
-                seoTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => removeSeoTag(tag)}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-sans hover:bg-primary/15"
-                    title="Remove tag"
-                  >
-                    #{tag}
-                    <span className="text-[10px]">x</span>
-                  </button>
-                ))
-              ) : (
-                <p className="text-xs text-muted-foreground font-sans">
-                  No SEO tags added yet.
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              value={seoTagDraft}
-              onChange={(e) => setSeoTagDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addSeoTagsFromDraft();
-                }
-              }}
-              placeholder="Add tag(s), comma-separated. Example: Formula 1, Austin Grand Prix"
-              className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm"
-            />
-            <button
-              type="button"
-              onClick={addSeoTagsFromDraft}
-              className="px-3 py-2 text-xs uppercase tracking-wider border border-primary text-primary rounded hover:bg-primary/10 transition-colors"
-            >
-              Add Tag
-            </button>
-          </div>
-          <p className="text-[10px] text-muted-foreground font-sans">
-            Tip: click any bubble to remove it. You can paste multiple tags separated by commas.
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-3xl mx-auto text-center mb-10">
+          <h2 className="font-editorial text-4xl md:text-5xl font-bold text-foreground mb-3">
+            <span className="text-primary">Archive</span>
+          </h2>
+          <p className="text-muted-foreground font-sans text-sm tracking-wide">
+            Search by volume or category.
           </p>
-        </section>
-        <div className="mt-4 pt-4 border-t border-border">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
-              Preferred flow: {formatEditionLabel(date.slice(0, 7))} · photo/video → text → photo/video → text
-            </p>
-            <button
-              type="button"
-              onClick={onNormalizeBody}
-              className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-            >
-              Auto Arrange
-            </button>
-          </div>
-          <ArticleBodyEditor
-            blocks={body}
-            heading={isArticle ? "Article Body" : "Hero Body"}
-            onChange={onBodyChange}
+        </div>
+
+        <div className="max-w-lg mx-auto mb-12 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search volumes — e.g. February 2026, Travel, Fashion…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground"
           />
         </div>
-      </div>
-    </div>
-  );
-}
 
-/* ---- Ads Manager ---- */
-function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => void }) {
-  const addAd = () => {
-    setAds([
-      ...ads,
-      { id: `ad-${Date.now()}`, label: "New Ad Slot", position: "mid-feed", width: 728, height: 90 },
-    ]);
-  };
-
-  const update = (id: string, patch: Partial<AdSlot>) => {
-    setAds(ads.map((a) => (a.id === id ? { ...a, ...patch } : a)));
-  };
-
-  const remove = (id: string) => setAds(ads.filter((a) => a.id !== id));
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground font-sans">Upload images or videos for each ad placement. These slots appear throughout the editorial layout.</p>
-        <button onClick={addAd} className="px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Slot
-        </button>
-      </div>
-      {ads.map((ad) => (
-        <ContentCard key={ad.id} onRemove={() => remove(ad.id)}>
-          <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
-            <MediaUpload
-              imageUrl={ad.imageUrl}
-              videoUrl={ad.videoUrl}
-              onImage={(url) => update(ad.id, { imageUrl: url })}
-              onVideo={(url) => update(ad.id, { videoUrl: url })}
-            />
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <select 
-                  value={ad.position} 
-                  onChange={(e) => update(ad.id, { position: e.target.value as AdSlot["position"] })} 
-                  className="category-pill bg-secondary text-foreground border-none"
+        {filtered.length === 0 ? (
+          <p className="text-center text-muted-foreground font-sans">No volumes match your search.</p>
+        ) : (
+          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((ed) => {
+              const coverImage = pickArchiveCoverImage(ed, search);
+              return (
+                <Link
+                  key={ed.key}
+                  to={`/archive/${ed.key}`}
+                  className="group block border border-border rounded overflow-hidden hover:border-primary transition-colors"
                 >
-                  <option value="hero-sidebar">Hero Sidebar</option>
-                  <option value="mid-feed">Mid Feed</option>
-                  <option value="bottom-banner">Bottom Banner</option>
-                  <option value="sidebar">Sidebar</option>
-                </select>
-                <span className="text-xs text-muted-foreground">
-                  W: <input type="number" value={ad.width} onChange={(e) => update(ad.id, { width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
-                  × H: <input type="number" value={ad.height} onChange={(e) => update(ad.id, { height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
-                </span>
-              </div>
-              <input value={ad.label} onChange={(e) => update(ad.id, { label: e.target.value })} placeholder="Ad label (internal use)" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm" />
-              <input value={ad.linkUrl || ""} onChange={(e) => update(ad.id, { linkUrl: e.target.value })} placeholder="Click-through URL" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
-            </div>
+                  {coverImage && (
+                    <div data-archive-media className="aspect-[16/9] overflow-hidden">
+                      <img
+                        src={coverImage}
+                        alt={ed.label}
+                        className="w-full h-full object-cover bg-card transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
+                        sizes="(min-width: 1024px) 282px, (min-width: 768px) 50vw, 100vw"
+                        onError={(event) => {
+                          event.currentTarget.closest("[data-archive-media]")?.classList.add("hidden");
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="p-5 bg-card">
+                    <div className="flex items-center gap-3 mb-2">
+                      <BookOpen className="w-4 h-4 text-primary" />
+                      <h3 className="font-editorial text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {ed.label}
+                      </h3>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
-        </ContentCard>
-      ))}
-    </div>
-  );
-}
-
-/* ---- Shared Components ---- */
-function ContentCard({ children, onRemove }: { children: React.ReactNode; onRemove?: () => void }) {
-  return (
-    <div className="bg-card border border-border rounded p-5 relative group">
-      {children}
-      {onRemove && (
-        <button onClick={onRemove} className="absolute top-3 right-3 p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100">
-          <Trash2 className="w-4 h-4" />
-        </button>
-      )}
-    </div>
-  );
-}
-
-function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
-  return (
-    <button onClick={onClick} className="w-full border border-dashed border-border rounded p-4 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-      <Plus className="w-4 h-4" /> {label}
-    </button>
-  );
-}
-
-function normalizeBodyFlow(
-  blocks: ArticleBodyBlock[],
-  imageUrl?: string,
-  videoUrl?: string,
-): ArticleBodyBlock[] {
-  const source = blocks.filter(Boolean);
-  const textBlocks = source.filter((b) => b.type === "text" || b.type === "heading");
-  const mediaBlocks = source.filter((b) => b.type === "image" || b.type === "video");
-  const ordered: ArticleBodyBlock[] = [];
-
-  if (textBlocks.length === 0) {
-    ordered.push({ id: `auto-t-${Date.now()}`, type: "text", content: "Add body text" });
-    if (videoUrl) {
-      ordered.push({ id: `auto-v-${Date.now()}`, type: "video", content: videoUrl, caption: "Featured video" });
-    } else {
-      ordered.push({
-        id: `auto-i-${Date.now()}`,
-        type: "image",
-        content: imageUrl || "",
-          imageAlign: "center",
-          imageWidth: "full",
-        caption: imageUrl ? "Featured image" : "Upload photo or video",
-      });
-    }
-    return ordered;
-  }
-
-  const max = Math.max(textBlocks.length, mediaBlocks.length || 1);
-  for (let i = 0; i < max; i += 1) {
-    if (textBlocks[i]) {
-      ordered.push(textBlocks[i]);
-    }
-    if (mediaBlocks[i]) {
-      ordered.push(mediaBlocks[i]);
-    } else if (i < textBlocks.length) {
-      if (videoUrl) {
-        ordered.push({
-          id: `auto-v-${Date.now()}-${i}`,
-          type: "video",
-          content: videoUrl,
-          caption: "Featured video",
-        });
-      } else {
-        ordered.push({
-          id: `auto-i-${Date.now()}-${i}`,
-          type: "image",
-          content: imageUrl || "",
-          imageAlign: "center",
-          imageWidth: "full",
-          caption: imageUrl ? "Featured image" : "Upload photo or video",
-        });
-      }
-    }
-  }
-
-  return ordered;
-}
-
-function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
-  imageUrl?: string; videoUrl?: string;
-  onImage: (url: string) => void; onVideo: (url: string) => void;
-}) {
-  const imgRef = useRef<HTMLInputElement>(null);
-  const vidRef = useRef<HTMLInputElement>(null);
-
-  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) onImage(await fileToOptimizedDataUrl(file));
-    e.target.value = "";
-  };
-
-  const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) onVideo(await fileToOptimizedDataUrl(file));
-    e.target.value = "";
-  };
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
-        <span>Featured Media</span>
-        <span>Click Photo or Video to Upload</span>
-      </div>
-      <div className="aspect-video bg-secondary rounded overflow-hidden flex items-center justify-center">
-        {imageUrl ? (
-          <img src={imageUrl} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <Image className="w-8 h-8 text-muted-foreground" />
         )}
-      </div>
-      <div className="flex gap-2">
-        <button type="button" onClick={() => imgRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-          <Upload className="w-3 h-3" /> Photo
-        </button>
-        <button type="button" onClick={() => vidRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-          <Video className="w-3 h-3" /> Video
-        </button>
-      </div>
-      <p className="text-[10px] text-muted-foreground font-sans">
-        Supported uploads: image/* and video/* files from your device.
-      </p>
-      {videoUrl && <p className="text-[10px] text-primary truncate">Video attached ✓</p>}
-      <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
-      <input ref={vidRef} type="file" accept="video/*" className="hidden" onChange={handleVideo} />
-    </div>
-  );
-}
+      </section>
 
-/* ---- Analytics Dashboard ---- */
-function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; heroes: HeroItem[]; ads: AdSlot[] }) {
-  const [filter, setFilter] = useState<"all" | "article" | "hero" | "ad">("all");
-  const totals = getTotalStats();
-  const summary = getAnalyticsSummary(articles, heroes, ads);
-  const recent = getRecentEvents(30);
-  const locations = getLocationStats();
-
-  const filtered = filter === "all" ? summary : summary.filter((s) => s.contentType === filter);
-  const sorted = [...filtered].sort((a, b) => b.views - a.views);
-
-  const handleClear = () => {
-    clearAnalytics();
-    toast.success("Analytics data cleared.");
-    window.location.reload();
-  };
-
-  return (
-    <div className="space-y-8">
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<Eye className="w-5 h-5" />} label="Total Views" value={totals.totalViews} />
-        <StatCard icon={<MousePointer className="w-5 h-5" />} label="Total Clicks" value={totals.totalClicks} />
-        <StatCard
-          icon={<TrendingUp className="w-5 h-5" />}
-          label="Click-Through Rate"
-          value={totals.totalViews > 0 ? `${((totals.totalClicks / totals.totalViews) * 100).toFixed(1)}%` : "—"}
-        />
-        <StatCard icon={<Globe className="w-5 h-5" />} label="Unique Locations" value={totals.uniqueLocations} />
-      </div>
-
-      {/* Filter + clear */}
-      <div className="flex flex-wrap items-center gap-3">
-        {(["all", "article", "hero", "ad"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-2 text-xs uppercase tracking-widest font-sans border rounded transition-colors ${
-              filter === f
-                ? "border-primary text-primary bg-primary/10"
-                : "border-border text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {f === "all" ? "All Content" : f === "ad" ? "Ads" : `${f}s`}
-          </button>
-        ))}
-        <button
-          onClick={handleClear}
-          className="ml-auto px-4 py-2 text-xs uppercase tracking-widest font-sans border border-destructive/30 text-destructive rounded hover:bg-destructive/10 transition-colors"
-        >
-          Clear Data
-        </button>
-      </div>
-
-      {/* Content table */}
-      <div className="bg-card border border-border rounded overflow-hidden">
-        <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
-          <span>Content</span>
-          <span className="text-center">Type</span>
-          <span className="text-center">Views</span>
-          <span className="text-center">Clicks</span>
-          <span className="text-center">CTR</span>
-        </div>
-        {sorted.length === 0 ? (
-          <div className="px-5 py-8 text-center text-muted-foreground text-sm font-sans">No data yet. Views and clicks are tracked as visitors interact with content.</div>
-        ) : (
-          sorted.map((item) => {
-            const ctr = item.views > 0 ? ((item.clicks / item.views) * 100).toFixed(1) : "0.0";
-            return (
-              <div
-                key={`${item.contentType}:${item.contentId}`}
-                className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors"
-              >
-                <span className="truncate text-foreground">{item.label || item.contentId}</span>
-                <span className="text-center">
-                  <span className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider rounded ${
-                    item.contentType === "article" ? "bg-primary/10 text-primary" :
-                    item.contentType === "hero" ? "bg-accent/10 text-accent" :
-                    "bg-muted text-muted-foreground"
-                  }`}>{item.contentType}</span>
-                </span>
-                <span className="text-center text-foreground font-medium">{item.views}</span>
-                <span className="text-center text-foreground font-medium">{item.clicks}</span>
-                <span className="text-center text-primary font-medium">{ctr}%</span>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* Viewer Locations */}
-      <div>
-        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-primary" /> Viewer Locations
-        </h3>
-        <div className="bg-card border border-border rounded overflow-hidden">
-          <div className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
-            <span>City</span>
-            <span>Country</span>
-            <span className="text-center">Views</span>
-            <span className="text-center">Clicks</span>
-          </div>
-          {locations.length === 0 ? (
-            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">
-              No location data yet. Locations are captured automatically from viewer IP addresses.
-            </div>
-          ) : (
-            locations.map((loc) => (
-              <div
-                key={`${loc.city}|${loc.country}`}
-                className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors"
-              >
-                <span className="text-foreground flex items-center gap-2">
-                  <MapPin className="w-3 h-3 text-primary shrink-0" />
-                  {loc.city}
-                </span>
-                <span className="text-muted-foreground flex items-center gap-1.5">
-                  <span className="text-xs">{loc.countryCode}</span>
-                  {loc.country}
-                </span>
-                <span className="text-center text-foreground font-medium">{loc.views}</span>
-                <span className="text-center text-foreground font-medium">{loc.clicks}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Recent events log */}
-      <div>
-        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground">Recent Events</h3>
-        <div className="bg-card border border-border rounded max-h-72 overflow-y-auto">
-          {recent.length === 0 ? (
-            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No events recorded yet.</div>
-          ) : (
-            recent.map((ev) => (
-              <div key={ev.id} className="flex items-center gap-3 px-4 py-2.5 text-xs font-sans border-b border-border/30">
-                <span className={`w-2 h-2 rounded-full shrink-0 ${ev.eventType === "view" ? "bg-primary/50" : "bg-primary"}`} />
-                <span className="text-muted-foreground w-36 shrink-0">
-                  {new Date(ev.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                </span>
-                <span className="text-foreground">{ev.eventType}</span>
-                <span className="text-muted-foreground">·</span>
-                <span className="text-muted-foreground truncate">{ev.contentType} — {ev.contentId}</span>
-                {ev.location && (
-                  <>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-primary/70 shrink-0 flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {ev.location.city}, {ev.location.countryCode}
-                    </span>
-                  </>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
-  return (
-    <div className="bg-card border border-border rounded p-5 flex items-center gap-4">
-      <div className="w-10 h-10 rounded flex items-center justify-center bg-primary/10 text-primary">
-        {icon}
-      </div>
-      <div>
-        <p className="text-2xl font-serif font-bold text-foreground">{value}</p>
-        <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{label}</p>
-      </div>
+      <EditorialFooter />
     </div>
   );
 }

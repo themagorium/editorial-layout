@@ -1,312 +1,334 @@
-import { useMemo, useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
-import EditorialHeader from "@/components/editorial/EditorialHeader";
-import EditorialFooter from "@/components/editorial/EditorialFooter";
-import {
-  getPublishedContentSnapshot,
-  formatEditionLabel,
-  type Article,
-  type HeroItem,
-} from "@/lib/content-store";
-import { Search, BookOpen } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { applyCollectionSeo, applyHomeSeo } from "@/lib/seo";
-import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
-import { getStoryCardImageUrl, hasUsableStoryImageUrl } from "@/lib/story-media";
-
+import fetch from "node-fetch";
+ 
+export const SITE_URL = "https://www.themagorium.com";
+export const BRAND_NAME = "The Magorium";
+export const BRAND_ALIAS = "Magorium";
+export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
+export const SEO_ASSET_VERSION = "20260523-2022";
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png?v=${SEO_ASSET_VERSION}`;
+export const HOME_SEO_DESCRIPTION =
+  "Magorium — The Magorium. A curated luxury lifestyle magazine covering travel, fashion, art, yachting, motorsport, golf, tennis, wellness, equestrian and global events. Where Curated Becomes Legend.";
+ 
+// ── Slugify ────────────────────────────────────────────────────────────────
+export function slugifyText(value: string): string {
+  return (value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+ 
+// ── Author name normalisation ──────────────────────────────────────────────
+export function canonicalAuthorName(author?: string): string {
+  const trimmed = (author || "").trim();
+  if (!trimmed) return STAFF_AUTHOR_NAME;
+  const normalized = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  if (
+    normalized === "magorium" ||
+    normalized === "the magorium" ||
+    normalized === "staff" ||
+    normalized === "editorial staff" ||
+    normalized === "magorium staff" ||
+    normalized === "the magorium staff" ||
+    normalized === "the magorium editorial staff" ||
+    normalized === "editor"
+  ) {
+    return STAFF_AUTHOR_NAME;
+  }
+  return trimmed;
+}
+ 
+export function guessAuthorNameFromSlug(slug: string): string {
+  if (!slug) return STAFF_AUTHOR_NAME;
+  const normalized = (slug || "").toLowerCase().trim();
+  if (normalized === "staff" || normalized === "the-magorium-staff") {
+    return STAFF_AUTHOR_NAME;
+  }
+  // Convert slug back to title case name
+  return slug
+    .replace(/-/g, " ")
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+ 
+export function getAuthorPath(author?: string): string {
+  const authorName = canonicalAuthorName(author);
+  if (authorName === STAFF_AUTHOR_NAME) return "/author/staff";
+  const slug = slugifyText(authorName);
+  return `/author/${slug || "staff"}`;
+}
+ 
+// ── Content path builder ───────────────────────────────────────────────────
+export function buildContentPath(id: string, title: string): string {
+  const titleSlug = slugifyText(title || id);
+  return `/articles/${titleSlug}--${id}`;
+}
+ 
+// ── Content identifier matching ────────────────────────────────────────────
+function tokenizeForMatch(value: string): string[] {
+  return slugifyText(value)
+    .split("-")
+    .filter((token) => token.length > 1);
+}
+ 
+function hasStrongTokenOverlap(title: string, candidateSlug: string): boolean {
+  const candidateTokens = tokenizeForMatch(candidateSlug);
+  if (candidateTokens.length < 2) return false;
+  const titleTokens = new Set(tokenizeForMatch(title));
+  const overlapCount = candidateTokens.filter((token) => titleTokens.has(token)).length;
+  return overlapCount >= 2 && overlapCount / candidateTokens.length >= 0.6;
+}
+ 
+export function contentIdentifierMatches(
+  item: { id: string; title: string; legacySlugs?: string[] },
+  identifier: string,
+): boolean {
+  const decoded = decodeURIComponent(identifier || "")
+    .trim()
+    .toLowerCase()
+    .split("?")[0]
+    .split("#")[0]
+    .replace(/^\/+|\/+$/g, "");
+  const candidate = decoded.split("/").pop() || decoded;
+  const itemId = item.id.toLowerCase();
+  const titleSlug = slugifyText(item.title || item.id);
+  const legacySlugs = (item.legacySlugs || []).map((s) => slugifyText(s));
+  if (!candidate) return false;
+  if (candidate === itemId) return true;
+  if (candidate === titleSlug) return true;
+  if (candidate === `${titleSlug}--${itemId}`) return true;
+  if (candidate.endsWith(`--${itemId}`)) return true;
+  if (legacySlugs.includes(candidate)) return true;
+  return hasStrongTokenOverlap(item.title, candidate);
+}
+ 
+// ── HTML escaping ──────────────────────────────────────────────────────────
+export function escapeHtml(str?: string): string {
+  return (str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+ 
+// ── Placeholder detection ──────────────────────────────────────────────────
 const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
 const PLACEHOLDER_COPY_PATTERNS = [
   /^add your (first|second|third|fourth)\s+hero story$/i,
   /^add your (first|second|third|fourth)\s+article$/i,
   /^add your .* story$/i,
-  /^add your .* article$/i,
   /^add story text$/i,
   /^add (first|second|third|fourth) body paragraph$/i,
   /^upload photo or video$/i,
 ];
-
-type ArchiveStory = {
-  title: string;
-  category: string;
-  author?: string;
-  imageUrl?: string;
-  searchableText: string;
-};
-
-type ArchiveEdition = {
-  key: string;
-  label: string;
-  heroCount: number;
-  articleCount: number;
-  coverImage?: string;
-  searchableText: string;
-  stories: ArchiveStory[];
-};
-
+ 
+function isPlaceholderTitle(title?: string): boolean {
+  const normalized = (title || "").trim();
+  if (!normalized) return true;
+  return PLACEHOLDER_TITLE_PATTERN.test(normalized);
+}
+ 
 function isPlaceholderCopy(value?: string): boolean {
   const text = (value || "").trim();
-  if (!text) return false;
-  return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
+  if (!text) return true;
+  return PLACEHOLDER_COPY_PATTERNS.some((p) => p.test(text));
 }
-
-function isPublishReadyTitle(title?: string): boolean {
-  const normalized = (title || "").trim();
-  if (!normalized) return false;
-  return !PLACEHOLDER_TITLE_PATTERN.test(normalized);
-}
-
-// ── ACCEPTED: incoming (main) ──────────────────────────────────────────────
-// Uses getStoryCardImageUrl + hasUsableStoryImageUrl from story-media lib.
-// Removes local normalizeCardImageUrl / firstBodyImageUrl / resolveStoryCardImage
-// which duplicated logic already in story-media and caused favicon.png leakage.
-
-function buildArchiveStorySearchText(story: ArchiveStory): string {
-  return [story.title, story.category, story.author]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-}
-
-function heroToArchiveStory(hero: HeroItem): ArchiveStory {
-  const story = {
-    title: hero.title,
-    category: hero.category,
-    author: hero.author,
-    imageUrl: getStoryCardImageUrl(hero.imageUrl, hero.body),
-    searchableText: "",
-  };
-  return {
-    ...story,
-    searchableText: buildArchiveStorySearchText(story),
-  };
-}
-
-function articleToArchiveStory(article: Article): ArchiveStory {
-  const story = {
-    title: article.title,
-    category: article.category,
-    author: article.author,
-    imageUrl: getStoryCardImageUrl(article.imageUrl, article.body),
-    searchableText: "",
-  };
-  return {
-    ...story,
-    searchableText: buildArchiveStorySearchText(story),
-  };
-}
-
-function firstUsableStoryImage(stories: ArchiveStory[]): string {
-  return (
-    stories.find((story) => hasUsableStoryImageUrl(story.imageUrl))?.imageUrl ||
-    ""
-  );
-}
-
-function pickArchiveCoverImage(
-  edition: ArchiveEdition,
-  searchQuery: string
-): string {
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-  const matchingStories = normalizedQuery
-    ? edition.stories.filter((story) =>
-        story.searchableText.includes(normalizedQuery)
-      )
-    : edition.stories;
-  return (
-    firstUsableStoryImage(matchingStories) ||
-    firstUsableStoryImage(edition.stories) ||
-    edition.coverImage ||
-    ""
-  );
-}
-// ── END CONFLICT RESOLUTION ────────────────────────────────────────────────
-
-export default function ArchivePage() {
-  useSyncPublishedContent();
-  const [searchParams] = useSearchParams();
-  const categoryFilter = searchParams.get("category") || "";
-  const [search, setSearch] = useState(categoryFilter);
-  const [editions, setEditions] = useState<ArchiveEdition[]>([]);
-
-  useEffect(() => {
-    let active = true;
-    getPublishedContentSnapshot().then((snapshot) => {
-      if (!active) return;
-      const editionKeys = new Set<string>();
-      snapshot.heroes.forEach((h) => editionKeys.add(h.edition));
-      snapshot.articles.forEach((a) => editionKeys.add(a.edition));
-
-      const nextEditions = Array.from(editionKeys)
-        .sort()
-        .reverse()
-        .map((ed) => {
-          const heroes = snapshot.heroes.filter(
-            (h) =>
-              h.edition === ed &&
-              isPublishReadyTitle(h.title) &&
-              !isPlaceholderCopy(h.subtitle)
-          );
-          const articles = snapshot.articles.filter(
-            (a) =>
-              a.edition === ed &&
-              isPublishReadyTitle(a.title) &&
-              !isPlaceholderCopy(a.excerpt)
-          );
-          if (heroes.length === 0 && articles.length === 0) {
-            return null;
-          }
-
-          const heroStories = heroes.map(heroToArchiveStory);
-          const articleStories = articles.map(articleToArchiveStory);
-          const stories = [...heroStories, ...articleStories];
-
-          // Single coverImage declaration — no duplicate
-          const coverImage =
-            firstUsableStoryImage(heroStories) ||
-            firstUsableStoryImage(stories);
-
-          const searchableText = [
-            ed,
-            formatEditionLabel(ed),
-            ...heroes.map(
-              (h) => `${h.title} ${h.category} ${h.author || ""}`
-            ),
-            ...articles.map(
-              (a) => `${a.title} ${a.category} ${a.author}`
-            ),
-          ]
-            .join(" ")
-            .toLowerCase();
-
-          return {
-            key: ed,
-            label: formatEditionLabel(ed),
-            heroCount: heroes.slice(0, 3).length,
-            articleCount: articles.slice(0, 4).length,
-            coverImage,
-            searchableText,
-            stories,
-          };
-        })
-        .filter(
-          (edition): edition is NonNullable<typeof edition> =>
-            Boolean(edition)
-        );
-
-      setEditions(nextEditions);
+ 
+// ── Story type ─────────────────────────────────────────────────────────────
+export type SeoStory = {
+  id: string;
+  title: string;
+  category: string;
+  author: string;
+  date: string;
+  path: string;
+  imageUrl?: string;
+  excerpt?: string;
+  legacySlugs?: string[];
+};
+ 
+// ── Fetch published stories from the CMS API ───────────────────────────────
+export async function getPublishedSeoStories(): Promise<SeoStory[]> {
+  try {
+    const response = await fetch(`${SITE_URL}/api/content`, {
+      headers: { "User-Agent": "MagoriumSeoBot/1.0" },
     });
-
-    return () => {
-      active = false;
+    if (!response.ok) return [];
+    const payload = (await response.json()) as {
+      ok?: boolean;
+      success?: boolean;
+      payload?: {
+        heroes?: Array<{
+          id: string;
+          title: string;
+          subtitle?: string;
+          excerpt?: string;
+          category: string;
+          author?: string;
+          date: string;
+          imageUrl?: string;
+          legacySlugs?: string[];
+        }>;
+        articles?: Array<{
+          id: string;
+          title: string;
+          excerpt?: string;
+          category: string;
+          author: string;
+          date: string;
+          imageUrl?: string;
+          legacySlugs?: string[];
+        }>;
+      };
+      content?: {
+        heroes?: Array<{
+          id: string;
+          title: string;
+          subtitle?: string;
+          excerpt?: string;
+          category: string;
+          author?: string;
+          date: string;
+          imageUrl?: string;
+          legacySlugs?: string[];
+        }>;
+        articles?: Array<{
+          id: string;
+          title: string;
+          excerpt?: string;
+          category: string;
+          author: string;
+          date: string;
+          imageUrl?: string;
+          legacySlugs?: string[];
+        }>;
+      };
     };
-  }, []);
-
-  const filtered = useMemo(() => {
-    if (!search.trim()) return editions;
-    const q = search.toLowerCase();
-    return editions.filter((e) => e.searchableText.includes(q));
-  }, [search, editions]);
-
-  useEffect(() => {
-    const q = search.trim().toLowerCase();
-    if (q === "magorium" || q === "the magorium" || q === "magorum") {
-      applyHomeSeo();
-      return;
+ 
+    const raw = payload?.payload || payload?.content;
+    if (!raw) return [];
+ 
+    const stories: SeoStory[] = [];
+ 
+    for (const hero of raw.heroes || []) {
+      if (isPlaceholderTitle(hero.title)) continue;
+      if (isPlaceholderCopy(hero.subtitle) && isPlaceholderCopy(hero.excerpt)) continue;
+      stories.push({
+        id: hero.id,
+        title: hero.title,
+        category: hero.category,
+        author: canonicalAuthorName(hero.author),
+        date: hero.date,
+        path: buildContentPath(hero.id, hero.title),
+        imageUrl: hero.imageUrl,
+        excerpt: hero.excerpt || hero.subtitle,
+        legacySlugs: hero.legacySlugs,
+      });
     }
-    if (
-      q === "millie sealana" ||
-      q === "charlotte thames" ||
-      q === "staff" ||
-      q === "the magorium"
-    ) {
-      applyCollectionSeo(
-        `Stories by ${search.trim()} | The Magorium`,
-        `Explore The Magorium stories by ${search.trim()}.`,
-        `/archive?category=${encodeURIComponent(search.trim())}`
-      );
-      return;
+ 
+    for (const article of raw.articles || []) {
+      if (isPlaceholderTitle(article.title)) continue;
+      if (isPlaceholderCopy(article.excerpt)) continue;
+      stories.push({
+        id: article.id,
+        title: article.title,
+        category: article.category,
+        author: canonicalAuthorName(article.author),
+        date: article.date,
+        path: buildContentPath(article.id, article.title),
+        imageUrl: article.imageUrl,
+        excerpt: article.excerpt,
+        legacySlugs: article.legacySlugs,
+      });
     }
-    applyCollectionSeo(
-      "Archive | The Magorium",
-      "Browse The Magorium archive by edition, author, and category.",
-      "/archive"
-    );
-  }, [search]);
-
-  return (
-    <div className="min-h-screen bg-background">
-      <EditorialHeader />
-
-      <section className="container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto text-center mb-10">
-          <h2 className="font-editorial text-4xl md:text-5xl font-bold text-foreground mb-3">
-            <span className="text-primary">Archive</span>
-          </h2>
-          <p className="text-muted-foreground font-sans text-sm tracking-wide">
-            Search by volume or category.
-          </p>
-        </div>
-
-        <div className="max-w-lg mx-auto mb-12 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search volumes — e.g. February 2026, Travel, Fashion…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground"
-          />
-        </div>
-
-        {filtered.length === 0 ? (
-          <p className="text-center text-muted-foreground font-sans">
-            No volumes match your search.
-          </p>
-        ) : (
-          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((ed) => {
-              const coverImage = pickArchiveCoverImage(ed, search);
-              return (
-                <Link
-                  key={ed.key}
-                  to={`/archive/${ed.key}`}
-                  className="group block border border-border rounded overflow-hidden hover:border-primary transition-colors"
-                >
-                  {coverImage && (
-                    <div
-                      data-archive-media
-                      className="aspect-[16/9] overflow-hidden"
-                    >
-                      <img
-                        src={coverImage}
-                        alt={ed.label}
-                        className="w-full h-full object-cover bg-card transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                        decoding="async"
-                        sizes="(min-width: 1024px) 282px, (min-width: 768px) 50vw, 100vw"
-                        onError={(event) => {
-                          event.currentTarget
-                            .closest("[data-archive-media]")
-                            ?.classList.add("hidden");
-                        }}
-                      />
-                    </div>
-                  )}
-                  <div className="p-5 bg-card">
-                    <div className="flex items-center gap-3 mb-2">
-                      <BookOpen className="w-4 h-4 text-primary" />
-                      <h3 className="font-editorial text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
-                        {ed.label}
-                      </h3>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      <EditorialFooter />
-    </div>
-  );
+ 
+    return stories.sort((a, b) => +new Date(b.date) - +new Date(a.date));
+  } catch {
+    return [];
+  }
 }
+ 
+// ── SEO HTML document renderer ─────────────────────────────────────────────
+export function renderSeoDocument(options: {
+  title: string;
+  description: string;
+  canonicalUrl: string;
+  keywords?: string;
+  ogType?: string;
+  bodyHtml: string;
+  jsonLd?: unknown;
+  imageUrl?: string;
+  noIndex?: boolean;
+}): string {
+  const {
+    title,
+    description,
+    canonicalUrl,
+    keywords,
+    ogType = "website",
+    bodyHtml,
+    jsonLd,
+    imageUrl,
+    noIndex,
+  } = options;
+ 
+  const ogImage = imageUrl && !imageUrl.startsWith("/assets/") && !imageUrl.startsWith("data:")
+    ? imageUrl
+    : DEFAULT_OG_IMAGE;
+ 
+  const robotsMeta = noIndex
+    ? `<meta name="robots" content="noindex,follow">`
+    : `<meta name="robots" content="index,follow">`;
+ 
+  const jsonLdScript = jsonLd
+    ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`
+    : "";
+ 
+  const keywordsMeta = keywords
+    ? `<meta name="keywords" content="${escapeHtml(keywords)}">`
+    : "";
+ 
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(title)}</title>
+<meta name="description" content="${escapeHtml(description)}">
+${keywordsMeta}
+<meta name="author" content="${escapeHtml(BRAND_NAME)}">
+${robotsMeta}
+<link rel="canonical" href="${escapeHtml(canonicalUrl)}">
+<meta property="og:title" content="${escapeHtml(title)}">
+<meta property="og:description" content="${escapeHtml(description)}">
+<meta property="og:type" content="${escapeHtml(ogType)}">
+<meta property="og:url" content="${escapeHtml(canonicalUrl)}">
+<meta property="og:image" content="${escapeHtml(ogImage)}">
+<meta property="og:site_name" content="${escapeHtml(BRAND_ALIAS)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${escapeHtml(title)}">
+<meta name="twitter:description" content="${escapeHtml(description)}">
+<meta name="twitter:image" content="${escapeHtml(ogImage)}">
+${jsonLdScript}
+<style>
+  body{font-family:Georgia,serif;max-width:800px;margin:40px auto;padding:0 20px;color:#1a1a3e;background:#fff;line-height:1.6}
+  h1{font-size:2rem;margin-bottom:0.5rem;color:#1a1a3e}
+  h2{font-size:1.25rem;color:#1a1a3e;margin-top:2rem}
+  a{color:#b8860b;text-decoration:none}
+  a:hover{text-decoration:underline}
+  ul{list-style:none;padding:0}
+  li{padding:0.75rem 0;border-bottom:1px solid #eee}
+  .muted{color:#666;font-size:0.875rem}
+  .tag{display:inline-block;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:#b8860b;border:1px solid #b8860b;padding:2px 6px;border-radius:2px;margin-right:8px}
+  .brand{font-size:0.875rem;color:#666;margin-bottom:2rem}
+</style>
+</head>
+<body>
+<p class="brand"><a href="${SITE_URL}">${escapeHtml(BRAND_NAME)}</a> &middot; Where Curated Becomes Legend</p>
+${bodyHtml}
+</body>
+</html>`;
+}
+ 

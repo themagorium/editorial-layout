@@ -45,6 +45,7 @@ export interface HeroItem {
   excerpt?: string;
   legacySlugs?: string[];
   seoTags?: string[];
+  sources?: string;
   subtitle: string;
   category: Category;
   imageUrl: string;
@@ -74,6 +75,7 @@ export interface Article {
   excerpt: string;
   legacySlugs?: string[];
   seoTags?: string[];
+   sources?: string;  
   category: Category;
   imageUrl: string;
   videoUrl?: string;

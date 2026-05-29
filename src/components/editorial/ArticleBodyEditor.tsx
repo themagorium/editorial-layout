@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import type { ArticleBodyBlock } from "@/lib/content-store";
-import { Trash2, Image, Video, Type, GripVertical, Heading, Bold, Italic } from "lucide-react";
+import { Trash2, Image, Video, Type, GripVertical, Heading, Bold, Italic, BookOpen } from "lucide-react";
 import { fileToOptimizedDataUrl } from "@/lib/media-optimizer";
 
 interface Props {
@@ -8,6 +8,8 @@ interface Props {
   onChange: (blocks: ArticleBodyBlock[]) => void;
   heading?: string;
   preferredPattern?: boolean;
+  sources?: string;
+  onSourcesChange?: (value: string) => void;
 }
 
 const IMAGE_WIDTH_LABELS: Record<NonNullable<ArticleBodyBlock["imageWidth"]>, string> = {
@@ -26,7 +28,6 @@ const IMAGE_ALIGN_LABELS: Record<NonNullable<ArticleBodyBlock["imageAlign"]>, st
 function getImageLayoutClasses(block: ArticleBodyBlock) {
   const width = block.imageWidth || "full";
   const align = block.imageAlign || "center";
-
   const widthClassMap: Record<NonNullable<ArticleBodyBlock["imageWidth"]>, string> = {
     small: "w-1/2",
     medium: "w-2/3",
@@ -38,11 +39,17 @@ function getImageLayoutClasses(block: ArticleBodyBlock) {
     center: "mx-auto",
     right: "ml-auto",
   };
-
   return `${widthClassMap[width]} ${alignClassMap[align]}`;
 }
 
-export default function ArticleBodyEditor({ blocks, onChange, heading = "Article Body", preferredPattern = false }: Props) {
+export default function ArticleBodyEditor({
+  blocks,
+  onChange,
+  heading = "Article Body",
+  preferredPattern = false,
+  sources = "",
+  onSourcesChange,
+}: Props) {
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
   const pendingInsertIndex = useRef<number>(blocks.length);
@@ -114,21 +121,16 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
     const hasItalic = isStyleActive(block, "italic");
     const nextBold = style === "bold" ? !hasBold : hasBold;
     const nextItalic = style === "italic" ? !hasItalic : hasItalic;
-
     const nextStyle: ArticleBodyBlock["textStyle"] = nextBold && nextItalic
       ? "bold-italic"
-      : nextBold
-        ? "bold"
-        : nextItalic
-          ? "italic"
-          : "normal";
-
+      : nextBold ? "bold"
+      : nextItalic ? "italic"
+      : "normal";
     updateBlock(block.id, { textStyle: nextStyle });
   };
 
   const removeBlock = (id: string) => {
-    const next = blocks.filter((b) => b.id !== id);
-    onChange(next);
+    onChange(blocks.filter((b) => b.id !== id));
   };
 
   const moveBlock = (id: string, direction: -1 | 1) => {
@@ -176,13 +178,10 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           <div className="flex items-center gap-2 mb-2">
             <GripVertical className="w-3 h-3 text-muted-foreground" />
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
-              {block.type === "text"
-                ? "Text"
-                : block.type === "heading"
-                  ? "Heading"
-                  : block.type === "image"
-                    ? "Image"
-                    : "Video"}
+              {block.type === "text" ? "Text"
+                : block.type === "heading" ? "Heading"
+                : block.type === "image" ? "Image"
+                : "Video"}
             </span>
             <div className="ml-auto flex items-center gap-1">
               {idx > 0 && (
@@ -200,26 +199,12 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           {block.type === "text" && (
             <div className="space-y-2">
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => toggleStyle(block, "bold")}
-                  className={`px-2 py-1 rounded text-xs border transition-colors ${
-                    isStyleActive(block, "bold")
-                      ? "border-primary text-primary bg-primary/10"
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  }`}
-                >
+                <button type="button" onClick={() => toggleStyle(block, "bold")}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${isStyleActive(block, "bold") ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
                   <Bold className="w-3 h-3" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => toggleStyle(block, "italic")}
-                  className={`px-2 py-1 rounded text-xs border transition-colors ${
-                    isStyleActive(block, "italic")
-                      ? "border-primary text-primary bg-primary/10"
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  }`}
-                >
+                <button type="button" onClick={() => toggleStyle(block, "italic")}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${isStyleActive(block, "italic") ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
                   <Italic className="w-3 h-3" />
                 </button>
               </div>
@@ -236,33 +221,18 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
           {block.type === "heading" && (
             <div className="space-y-2">
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => toggleStyle(block, "bold")}
-                  className={`px-2 py-1 rounded text-xs border transition-colors ${
-                    isStyleActive(block, "bold")
-                      ? "border-primary text-primary bg-primary/10"
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  }`}
-                >
+                <button type="button" onClick={() => toggleStyle(block, "bold")}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${isStyleActive(block, "bold") ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
                   <Bold className="w-3 h-3" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => toggleStyle(block, "italic")}
-                  className={`px-2 py-1 rounded text-xs border transition-colors ${
-                    isStyleActive(block, "italic")
-                      ? "border-primary text-primary bg-primary/10"
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  }`}
-                >
+                <button type="button" onClick={() => toggleStyle(block, "italic")}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${isStyleActive(block, "italic") ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
                   <Italic className="w-3 h-3" />
                 </button>
                 <select
                   value={block.headingVariant || "subsection"}
                   onChange={(e) => updateBlock(block.id, { headingVariant: e.target.value as "title" | "subsection" })}
-                  className="bg-background text-foreground px-2 py-1 rounded text-xs border border-border"
-                >
+                  className="bg-background text-foreground px-2 py-1 rounded text-xs border border-border">
                   <option value="title">Title</option>
                   <option value="subsection">Sub-section</option>
                 </select>
@@ -286,77 +256,36 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
               <div className="flex gap-2">
                 <label className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors cursor-pointer">
                   Replace Image
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        void replaceMediaBlock(block.id, file);
-                      }
-                      e.target.value = "";
-                    }}
-                  />
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={(e) => { const file = e.target.files?.[0]; if (file) void replaceMediaBlock(block.id, file); e.target.value = ""; }} />
                 </label>
-                <button
-                  type="button"
-                  onClick={() => updateBlock(block.id, { content: "" })}
-                  className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
-                >
+                <button type="button" onClick={() => updateBlock(block.id, { content: "" })}
+                  className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-destructive hover:border-destructive transition-colors">
                   Clear
                 </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <select
-                  value={block.imageAlign || "center"}
-                  onChange={(e) =>
-                    updateBlock(block.id, {
-                      imageAlign: e.target.value as NonNullable<ArticleBodyBlock["imageAlign"]>,
-                    })
-                  }
-                  className="bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
-                >
+                <select value={block.imageAlign || "center"}
+                  onChange={(e) => updateBlock(block.id, { imageAlign: e.target.value as NonNullable<ArticleBodyBlock["imageAlign"]> })}
+                  className="bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans">
                   {Object.entries(IMAGE_ALIGN_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      Align: {label}
-                    </option>
+                    <option key={value} value={value}>Align: {label}</option>
                   ))}
                 </select>
-                <select
-                  value={block.imageWidth || "full"}
-                  onChange={(e) =>
-                    updateBlock(block.id, {
-                      imageWidth: e.target.value as NonNullable<ArticleBodyBlock["imageWidth"]>,
-                    })
-                  }
-                  className="bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
-                >
+                <select value={block.imageWidth || "full"}
+                  onChange={(e) => updateBlock(block.id, { imageWidth: e.target.value as NonNullable<ArticleBodyBlock["imageWidth"]> })}
+                  className="bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans">
                   {Object.entries(IMAGE_WIDTH_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      Size: {label}
-                    </option>
+                    <option key={value} value={value}>Size: {label}</option>
                   ))}
                 </select>
               </div>
-              <input
-                value={block.content || ""}
-                onChange={(e) => updateBlock(block.id, { content: e.target.value })}
-                placeholder="Image URL or data URI"
-                className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
-              />
-              <input
-                value={block.caption || ""}
-                onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
-                placeholder="Image caption (optional)"
-                className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
-              />
-              <input
-                value={block.citation || ""}
-                onChange={(e) => updateBlock(block.id, { citation: e.target.value })}
-                placeholder="Photo credit / citation (e.g. Photo: John Smith / Getty)"
-                className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans text-right"
-              />
+              <input value={block.content || ""} onChange={(e) => updateBlock(block.id, { content: e.target.value })}
+                placeholder="Image URL or data URI" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans" />
+              <input value={block.caption || ""} onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
+                placeholder="Image caption (optional)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans" />
+              <input value={block.citation || ""} onChange={(e) => updateBlock(block.id, { citation: e.target.value })}
+                placeholder="Photo credit / citation (e.g. Photo: John Smith / Getty)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans text-right" />
             </div>
           )}
 
@@ -366,98 +295,69 @@ export default function ArticleBodyEditor({ blocks, onChange, heading = "Article
               <div className="flex gap-2">
                 <label className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors cursor-pointer">
                   Replace Video
-                  <input
-                    type="file"
-                    accept="video/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        void replaceMediaBlock(block.id, file);
-                      }
-                      e.target.value = "";
-                    }}
-                  />
+                  <input type="file" accept="video/*" className="hidden"
+                    onChange={(e) => { const file = e.target.files?.[0]; if (file) void replaceMediaBlock(block.id, file); e.target.value = ""; }} />
                 </label>
-                <button
-                  type="button"
-                  onClick={() => updateBlock(block.id, { content: "" })}
-                  className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
-                >
+                <button type="button" onClick={() => updateBlock(block.id, { content: "" })}
+                  className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-destructive hover:border-destructive transition-colors">
                   Clear
                 </button>
               </div>
-              <input
-                value={block.content || ""}
-                onChange={(e) => updateBlock(block.id, { content: e.target.value })}
-                placeholder="Video URL or data URI"
-                className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
-              />
-              <input
-                value={block.caption || ""}
-                onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
-                placeholder="Video caption (optional)"
-                className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans"
-              />
-              <input
-                value={block.citation || ""}
-                onChange={(e) => updateBlock(block.id, { citation: e.target.value })}
-                placeholder="Video credit / citation (e.g. Video: BBC Sport)"
-                className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans text-right"
-              />
+              <input value={block.content || ""} onChange={(e) => updateBlock(block.id, { content: e.target.value })}
+                placeholder="Video URL or data URI" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans" />
+              <input value={block.caption || ""} onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
+                placeholder="Video caption (optional)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans" />
+              <input value={block.citation || ""} onChange={(e) => updateBlock(block.id, { citation: e.target.value })}
+                placeholder="Video credit / citation (e.g. Video: BBC Sport)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans text-right" />
             </div>
           )}
         </div>
       ))}
 
-      {/* Add block buttons */}
       <div className="flex gap-2 pt-1">
-        <button
-          type="button"
-          onClick={() => addTextBlock()}
+        <button type="button" onClick={() => addTextBlock()}
           disabled={preferredPattern && blocks.length % 2 === 0}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-        >
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
           <Type className="w-3 h-3" /> Add Text
         </button>
-        <button
-          type="button"
-          onClick={() => addHeadingBlock()}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-        >
+        <button type="button" onClick={() => addHeadingBlock()}
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
           <Heading className="w-3 h-3" /> Add Heading
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            if (preferredPattern) {
-              ensurePreferredPattern("image", {} as File);
-              return;
-            }
-            pendingInsertIndex.current = blocks.length;
-            imgRef.current?.click();
-          }}
+        <button type="button"
+          onClick={() => { if (preferredPattern) { ensurePreferredPattern("image", {} as File); return; } pendingInsertIndex.current = blocks.length; imgRef.current?.click(); }}
           disabled={preferredPattern && blocks.length % 2 === 1}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-        >
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
           <Image className="w-3 h-3" /> Add Image
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            if (preferredPattern) {
-              ensurePreferredPattern("video", {} as File);
-              return;
-            }
-            pendingInsertIndex.current = blocks.length;
-            vidRef.current?.click();
-          }}
+        <button type="button"
+          onClick={() => { if (preferredPattern) { ensurePreferredPattern("video", {} as File); return; } pendingInsertIndex.current = blocks.length; vidRef.current?.click(); }}
           disabled={preferredPattern && blocks.length % 2 === 1}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-        >
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider border border-dashed border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
           <Video className="w-3 h-3" /> Add Video
         </button>
       </div>
+
+      {onSourcesChange !== undefined && (
+        <div className="mt-6 pt-4 border-t border-border space-y-2">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-3 h-3 text-muted-foreground" />
+            <h4 className="text-xs uppercase tracking-widest text-muted-foreground font-sans font-medium">
+              Sources & Verification
+            </h4>
+          </div>
+          <p className="text-[10px] text-muted-foreground font-sans">
+            Appears at the bottom of the article in small footnote text. Paste all source credits here.
+          </p>
+          <textarea
+            value={sources}
+            onChange={(e) => onSourcesChange(e.target.value)}
+            placeholder="Sources & Verification · e.g. Monochrome Watches (Apr 14), Robb Report (Apr 15), Patek Philippe official site..."
+            rows={4}
+            className="w-full bg-background text-foreground px-3 py-2 rounded text-xs font-sans resize-y border border-border"
+          />
+        </div>
+      )}
 
       <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImageFile} />
       <input ref={vidRef} type="file" accept="video/*" className="hidden" onChange={handleVideoFile} />

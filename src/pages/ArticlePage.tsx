@@ -207,7 +207,16 @@ export default function ArticlePage() {
         />
         <div className="article-overlay absolute inset-0" />
       </div>
-
+{content.sources && content.sources.trim() && (
+          <div className="mt-12 pt-6 border-t border-border/30">
+            <p className="font-sans text-[10px] text-muted-foreground/50 leading-relaxed tracking-wide">
+              <span className="font-semibold text-muted-foreground/60 uppercase tracking-widest text-[9px]">
+                Sources & Verification &nbsp;·&nbsp;{" "}
+              </span>
+              {content.sources}
+            </p>
+          </div>
+        )}
       <article className="container mx-auto px-4 max-w-3xl py-10">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-sans mb-8">
           <ArrowLeft className="w-4 h-4" /> Back to stories

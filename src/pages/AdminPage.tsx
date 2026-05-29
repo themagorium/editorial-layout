@@ -662,19 +662,19 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
                 body: value,
               })
             }
-            onNormalizeBody={() =>
+           onNormalizeBody={() =>
               update(hero.id, {
                 body: normalizeBodyFlow(hero.body || [], hero.imageUrl, hero.videoUrl),
               })
             }
+            sources={hero.sources || ""}
+            onSourcesChange={(value) => update(hero.id, { sources: value })}
           />
         </ContentCard>
       ))}
     </div>
   );
 }
-sources={hero.sources || ""}
-            onSourcesChange={(value) => update(hero.id, { sources: value })}
 /* ---- Articles Manager ---- */
 function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string }) {
   const addArticle = () => {
@@ -721,16 +721,19 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
                 body: value,
               })
             }
-            onNormalizeBody={() =>
+           onNormalizeBody={() =>
               update(article.id, {
                 body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl),
               })
             }
+            sources={article.sources || ""}
+            onSourcesChange={(value) => update(article.id, { sources: value })}
           />
         </ContentCard>
       ))}
-      sources={article.sources || ""}
-            onSourcesChange={(value) => update(article.id, { sources: value })}
+    </div>
+  );
+}
     </div>
   );
 }
@@ -779,8 +782,10 @@ function EditableStoryForm({
   onFeaturedChange: (value: boolean) => void;
   onImageChange: (value: string) => void;
   onVideoChange: (value: string) => void;
-  onBodyChange: (value: ArticleBodyBlock[]) => void;
+ onBodyChange: (value: ArticleBodyBlock[]) => void;
   onNormalizeBody: () => void;
+  sources?: string;
+  onSourcesChange?: (value: string) => void;
 }) {
   const isArticle = kind === "article";
   const [seoTagDraft, setSeoTagDraft] = useState("");

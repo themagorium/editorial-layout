@@ -673,7 +673,8 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
     </div>
   );
 }
-
+sources={hero.sources || ""}
+            onSourcesChange={(value) => update(hero.id, { sources: value })}
 /* ---- Articles Manager ---- */
 function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string }) {
   const addArticle = () => {
@@ -728,6 +729,8 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
           />
         </ContentCard>
       ))}
+      sources={article.sources || ""}
+            onSourcesChange={(value) => update(article.id, { sources: value })}
     </div>
   );
 }

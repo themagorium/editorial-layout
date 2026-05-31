@@ -4,7 +4,7 @@ export const SITE_URL = "https://www.themagorium.com";
 export const BRAND_NAME = "The Magorium";
 export const BRAND_ALIAS = "Magorium";
 export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
-export const SEO_ASSET_VERSION = "20260523-2022";
+export const SEO_ASSET_VERSION = "og-image.png?v=20260531-001";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png?v=${SEO_ASSET_VERSION}`;
 export const HOME_SEO_DESCRIPTION =
   "Magorium — The Magorium. A curated luxury lifestyle magazine covering travel, fashion, art, yachting, motorsport, golf, tennis, wellness, equestrian and global events. Where Curated Becomes Legend.";

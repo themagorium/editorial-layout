@@ -364,7 +364,7 @@ function AdminDashboard() {
 
     const label = formatEditionLabel(currentEdition);
     const ok = window.confirm(
-      `Delete the entire ${label} edition? This will remove all heroes and articles for that edition.\n\nClick “Save Changes” after deleting to make it permanent.`,
+      `Delete the entire ${label} edition? This will remove all heroes and articles for that edition.\n\nClick "Save Changes" after deleting to make it permanent.`,
     );
     if (!ok) return;
 
@@ -388,7 +388,6 @@ function AdminDashboard() {
 
     const stamp = Date.now();
 
-    // Create starter template content for new edition
     const starterHeroes: HeroItem[] = [
       {
         id: `h-${stamp}-1`,
@@ -657,12 +656,8 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
             onFeaturedChange={(value) => update(hero.id, { featured: value })}
             onImageChange={(value) => update(hero.id, { imageUrl: value })}
             onVideoChange={(value) => update(hero.id, { videoUrl: value })}
-            onBodyChange={(value) =>
-              update(hero.id, {
-                body: value,
-              })
-            }
-           onNormalizeBody={() =>
+            onBodyChange={(value) => update(hero.id, { body: value })}
+            onNormalizeBody={() =>
               update(hero.id, {
                 body: normalizeBodyFlow(hero.body || [], hero.imageUrl, hero.videoUrl),
               })
@@ -675,6 +670,7 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
     </div>
   );
 }
+
 /* ---- Articles Manager ---- */
 function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string }) {
   const addArticle = () => {
@@ -716,12 +712,8 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
             onFeaturedChange={(value) => update(article.id, { featured: value })}
             onImageChange={(value) => update(article.id, { imageUrl: value })}
             onVideoChange={(value) => update(article.id, { videoUrl: value })}
-            onBodyChange={(value) =>
-              update(article.id, {
-                body: value,
-              })
-            }
-           onNormalizeBody={() =>
+            onBodyChange={(value) => update(article.id, { body: value })}
+            onNormalizeBody={() =>
               update(article.id, {
                 body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl),
               })
@@ -734,10 +726,8 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
     </div>
   );
 }
-    </div>
-  );
-}
 
+/* ---- Editable Story Form ---- */
 function EditableStoryForm({
   kind,
   title,
@@ -761,6 +751,8 @@ function EditableStoryForm({
   onVideoChange,
   onBodyChange,
   onNormalizeBody,
+  sources,
+  onSourcesChange,
 }: {
   kind: "hero" | "article";
   title: string;
@@ -782,7 +774,7 @@ function EditableStoryForm({
   onFeaturedChange: (value: boolean) => void;
   onImageChange: (value: string) => void;
   onVideoChange: (value: string) => void;
- onBodyChange: (value: ArticleBodyBlock[]) => void;
+  onBodyChange: (value: ArticleBodyBlock[]) => void;
   onNormalizeBody: () => void;
   sources?: string;
   onSourcesChange?: (value: string) => void;
@@ -882,7 +874,6 @@ function EditableStoryForm({
               {seoTags.length}/25
             </span>
           </div>
-
           <div className="rounded-md border border-border bg-background/80 p-3 min-h-[44px]">
             <div className="flex flex-wrap gap-2">
               {seoTags.length > 0 ? (
@@ -905,7 +896,6 @@ function EditableStoryForm({
               )}
             </div>
           </div>
-
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={seoTagDraft}
@@ -950,6 +940,23 @@ function EditableStoryForm({
             onChange={onBodyChange}
           />
         </div>
+        {onSourcesChange && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">
+              Sources & Verification
+            </label>
+            <textarea
+              value={sources || ""}
+              onChange={(e) => onSourcesChange(e.target.value)}
+              placeholder="List your sources here, e.g. The Guardian (May 2026), Reuters (Apr 15)…"
+              rows={3}
+              className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none"
+            />
+            <p className="text-[10px] text-muted-foreground font-sans mt-1">
+              Appears as small footnote text at the bottom of the live article. Hidden if empty.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -989,9 +996,9 @@ function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => v
             />
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <select 
-                  value={ad.position} 
-                  onChange={(e) => update(ad.id, { position: e.target.value as AdSlot["position"] })} 
+                <select
+                  value={ad.position}
+                  onChange={(e) => update(ad.id, { position: e.target.value as AdSlot["position"] })}
                   className="category-pill bg-secondary text-foreground border-none"
                 >
                   <option value="hero-sidebar">Hero Sidebar</option>
@@ -1055,8 +1062,8 @@ function normalizeBodyFlow(
         id: `auto-i-${Date.now()}`,
         type: "image",
         content: imageUrl || "",
-          imageAlign: "center",
-          imageWidth: "full",
+        imageAlign: "center",
+        imageWidth: "full",
         caption: imageUrl ? "Featured image" : "Upload photo or video",
       });
     }
@@ -1163,7 +1170,6 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
 
   return (
     <div className="space-y-8">
-      {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={<Eye className="w-5 h-5" />} label="Total Views" value={totals.totalViews} />
         <StatCard icon={<MousePointer className="w-5 h-5" />} label="Total Clicks" value={totals.totalClicks} />
@@ -1175,7 +1181,6 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
         <StatCard icon={<Globe className="w-5 h-5" />} label="Unique Locations" value={totals.uniqueLocations} />
       </div>
 
-      {/* Filter + clear */}
       <div className="flex flex-wrap items-center gap-3">
         {(["all", "article", "hero", "ad"] as const).map((f) => (
           <button
@@ -1198,7 +1203,6 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
         </button>
       </div>
 
-      {/* Content table */}
       <div className="bg-card border border-border rounded overflow-hidden">
         <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
           <span>Content</span>
@@ -1234,7 +1238,6 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
         )}
       </div>
 
-      {/* Viewer Locations */}
       <div>
         <h3 className="font-serif text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
           <MapPin className="w-5 h-5 text-primary" /> Viewer Locations
@@ -1272,7 +1275,6 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
         </div>
       </div>
 
-      {/* Recent events log */}
       <div>
         <h3 className="font-serif text-lg font-semibold mb-3 text-foreground">Recent Events</h3>
         <div className="bg-card border border-border rounded max-h-72 overflow-y-auto">

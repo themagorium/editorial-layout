@@ -1,14 +1,14 @@
 import fetch from "node-fetch";
- 
+
 export const SITE_URL = "https://www.themagorium.com";
 export const BRAND_NAME = "The Magorium";
 export const BRAND_ALIAS = "Magorium";
 export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
-export const SEO_ASSET_VERSION = "og-image.png?v=20260531-001";
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png?v=${SEO_ASSET_VERSION}`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
+export const DEFAULT_FAVICON = `${SITE_URL}/favicon.png`;
 export const HOME_SEO_DESCRIPTION =
-  "Magorium — The Magorium. A curated luxury lifestyle magazine covering travel, fashion, art, yachting, motorsport, golf, tennis, wellness, equestrian and global events. Where Curated Becomes Legend.";
- 
+  "The Magorium — also known as Magorium and TheMagorium — is a global curated magazine covering luxury, technology, business, sport, arts, fashion, travel, and culture. Where Curated Becomes Legend.";
+
 // ── Slugify ────────────────────────────────────────────────────────────────
 export function slugifyText(value: string): string {
   return (value || "")
@@ -18,7 +18,7 @@ export function slugifyText(value: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
- 
+
 // ── Author name normalisation ──────────────────────────────────────────────
 export function canonicalAuthorName(author?: string): string {
   const trimmed = (author || "").trim();
@@ -38,40 +38,39 @@ export function canonicalAuthorName(author?: string): string {
   }
   return trimmed;
 }
- 
+
 export function guessAuthorNameFromSlug(slug: string): string {
   if (!slug) return STAFF_AUTHOR_NAME;
   const normalized = (slug || "").toLowerCase().trim();
   if (normalized === "staff" || normalized === "the-magorium-staff") {
     return STAFF_AUTHOR_NAME;
   }
-  // Convert slug back to title case name
   return slug
     .replace(/-/g, " ")
     .trim()
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
- 
+
 export function getAuthorPath(author?: string): string {
   const authorName = canonicalAuthorName(author);
   if (authorName === STAFF_AUTHOR_NAME) return "/author/staff";
   const slug = slugifyText(authorName);
   return `/author/${slug || "staff"}`;
 }
- 
+
 // ── Content path builder ───────────────────────────────────────────────────
 export function buildContentPath(id: string, title: string): string {
   const titleSlug = slugifyText(title || id);
   return `/articles/${titleSlug}--${id}`;
 }
- 
+
 // ── Content identifier matching ────────────────────────────────────────────
 function tokenizeForMatch(value: string): string[] {
   return slugifyText(value)
     .split("-")
     .filter((token) => token.length > 1);
 }
- 
+
 function hasStrongTokenOverlap(title: string, candidateSlug: string): boolean {
   const candidateTokens = tokenizeForMatch(candidateSlug);
   if (candidateTokens.length < 2) return false;
@@ -79,7 +78,7 @@ function hasStrongTokenOverlap(title: string, candidateSlug: string): boolean {
   const overlapCount = candidateTokens.filter((token) => titleTokens.has(token)).length;
   return overlapCount >= 2 && overlapCount / candidateTokens.length >= 0.6;
 }
- 
+
 export function contentIdentifierMatches(
   item: { id: string; title: string; legacySlugs?: string[] },
   identifier: string,
@@ -102,7 +101,7 @@ export function contentIdentifierMatches(
   if (legacySlugs.includes(candidate)) return true;
   return hasStrongTokenOverlap(item.title, candidate);
 }
- 
+
 // ── HTML escaping ──────────────────────────────────────────────────────────
 export function escapeHtml(str?: string): string {
   return (str || "")
@@ -112,7 +111,7 @@ export function escapeHtml(str?: string): string {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
- 
+
 // ── Placeholder detection ──────────────────────────────────────────────────
 const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
 const PLACEHOLDER_COPY_PATTERNS = [
@@ -123,19 +122,19 @@ const PLACEHOLDER_COPY_PATTERNS = [
   /^add (first|second|third|fourth) body paragraph$/i,
   /^upload photo or video$/i,
 ];
- 
+
 function isPlaceholderTitle(title?: string): boolean {
   const normalized = (title || "").trim();
   if (!normalized) return true;
   return PLACEHOLDER_TITLE_PATTERN.test(normalized);
 }
- 
+
 function isPlaceholderCopy(value?: string): boolean {
   const text = (value || "").trim();
   if (!text) return true;
   return PLACEHOLDER_COPY_PATTERNS.some((p) => p.test(text));
 }
- 
+
 // ── Story type ─────────────────────────────────────────────────────────────
 export type SeoStory = {
   id: string;
@@ -148,7 +147,7 @@ export type SeoStory = {
   excerpt?: string;
   legacySlugs?: string[];
 };
- 
+
 // ── Fetch published stories from the CMS API ───────────────────────────────
 export async function getPublishedSeoStories(): Promise<SeoStory[]> {
   try {
@@ -206,12 +205,12 @@ export async function getPublishedSeoStories(): Promise<SeoStory[]> {
         }>;
       };
     };
- 
+
     const raw = payload?.payload || payload?.content;
     if (!raw) return [];
- 
+
     const stories: SeoStory[] = [];
- 
+
     for (const hero of raw.heroes || []) {
       if (isPlaceholderTitle(hero.title)) continue;
       if (isPlaceholderCopy(hero.subtitle) && isPlaceholderCopy(hero.excerpt)) continue;
@@ -227,7 +226,7 @@ export async function getPublishedSeoStories(): Promise<SeoStory[]> {
         legacySlugs: hero.legacySlugs,
       });
     }
- 
+
     for (const article of raw.articles || []) {
       if (isPlaceholderTitle(article.title)) continue;
       if (isPlaceholderCopy(article.excerpt)) continue;
@@ -243,13 +242,13 @@ export async function getPublishedSeoStories(): Promise<SeoStory[]> {
         legacySlugs: article.legacySlugs,
       });
     }
- 
+
     return stories.sort((a, b) => +new Date(b.date) - +new Date(a.date));
   } catch {
     return [];
   }
 }
- 
+
 // ── SEO HTML document renderer ─────────────────────────────────────────────
 export function renderSeoDocument(options: {
   title: string;
@@ -273,23 +272,23 @@ export function renderSeoDocument(options: {
     imageUrl,
     noIndex,
   } = options;
- 
+
   const ogImage = imageUrl && !imageUrl.startsWith("/assets/") && !imageUrl.startsWith("data:")
     ? imageUrl
     : DEFAULT_OG_IMAGE;
- 
+
   const robotsMeta = noIndex
     ? `<meta name="robots" content="noindex,follow">`
     : `<meta name="robots" content="index,follow">`;
- 
+
   const jsonLdScript = jsonLd
     ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`
     : "";
- 
+
   const keywordsMeta = keywords
     ? `<meta name="keywords" content="${escapeHtml(keywords)}">`
     : "";
- 
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -306,7 +305,9 @@ ${robotsMeta}
 <meta property="og:type" content="${escapeHtml(ogType)}">
 <meta property="og:url" content="${escapeHtml(canonicalUrl)}">
 <meta property="og:image" content="${escapeHtml(ogImage)}">
-<meta property="og:site_name" content="${escapeHtml(BRAND_ALIAS)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="${escapeHtml(BRAND_NAME)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${escapeHtml(title)}">
 <meta name="twitter:description" content="${escapeHtml(description)}">
@@ -331,4 +332,3 @@ ${bodyHtml}
 </body>
 </html>`;
 }
- 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+\import { useState, useEffect, useRef, useMemo } from "react";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import ArticleBodyEditor from "@/components/editorial/ArticleBodyEditor";
 import {
@@ -266,8 +266,13 @@ function AdminDashboard() {
         toast.error("Admin session expired. Please sign in again to publish live.");
         return;
       }
+
+      // ✅ FIX: Always clear old local draft storage FIRST before attempting anything
+      clearLocalDraftStorage();
+
       const contentToPublish: EditableContentPayload = { heroes, articles, ads };
       const published = await publishEditorialContent(contentToPublish, publishToken);
+
       if (!published.success) {
         const fallbackMessage = published.error || "Could not publish content to live";
         let draftStored = true;

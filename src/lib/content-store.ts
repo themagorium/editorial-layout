@@ -943,6 +943,8 @@ export function clearLocalDraftStorage() {
   localStorage.removeItem(STORAGE_KEYS.heroes);
   localStorage.removeItem(STORAGE_KEYS.articles);
   localStorage.removeItem(STORAGE_KEYS.ads);
+  localStorage.removeItem(STORAGE_KEYS.latestSnapshot);
+  localStorage.removeItem(STORAGE_KEYS.version);
   clearLocalDraftFlag();
 }
 

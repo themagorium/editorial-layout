@@ -32,7 +32,7 @@ import {
   MapPin,
   Globe,
   Calendar,
-  ChevronDown,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -41,7 +41,6 @@ import {
   getRecentEvents,
   getLocationStats,
   clearAnalytics,
-  type ContentStats,
 } from "@/lib/analytics";
 import {
   getAdminPublishToken,
@@ -62,61 +61,52 @@ function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[]
 function createOctoberPatternBody(seed: string): ArticleBodyBlock[] {
   return [
     { id: `${seed}-t1`, type: "text", content: "Add first body paragraph" },
-    {
-      id: `${seed}-m1`,
-      type: "image",
-      content: "",
-      imageAlign: "center",
-      imageWidth: "full",
-      caption: "Upload photo or video",
-    },
+    { id: `${seed}-m1`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "Upload photo or video" },
     { id: `${seed}-t2`, type: "text", content: "Add second body paragraph" },
-    {
-      id: `${seed}-m2`,
-      type: "image",
-      content: "",
-      imageAlign: "center",
-      imageWidth: "full",
-      caption: "Upload photo or video",
-    },
+    { id: `${seed}-m2`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "Upload photo or video" },
     { id: `${seed}-t3`, type: "text", content: "Add third body paragraph" },
-    {
-      id: `${seed}-m3`,
-      type: "image",
-      content: "",
-      imageAlign: "center",
-      imageWidth: "full",
-      caption: "Upload photo or video",
-    },
+    { id: `${seed}-m3`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "Upload photo or video" },
   ];
 }
 
 function parseSeoTagsInput(value: string): string[] {
   const seen = new Set<string>();
   const tags: string[] = [];
-  value
-    .split(",")
-    .map((token) => token.replace(/\s+/g, " ").trim())
-    .filter(Boolean)
-    .forEach((token) => {
-      const key = token.toLowerCase();
-      if (seen.has(key)) return;
-      seen.add(key);
-      tags.push(token);
-    });
+  value.split(",").map((token) => token.replace(/\s+/g, " ").trim()).filter(Boolean).forEach((token) => {
+    const key = token.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    tags.push(token);
+  });
   return tags.slice(0, 25);
 }
 
-type EditableContentPayload = {
-  heroes: HeroItem[];
-  articles: Article[];
-  ads: AdSlot[];
+type EditableContentPayload = { heroes: HeroItem[]; articles: Article[]; ads: AdSlot[] };
+
+type PageContent = {
+  editorsLetter: { quote: string; body1: string; body2: string; body3: string; signoff: string; logoUrl: string };
+  about: { heading: string; body: string };
+  masthead: { editorInChief: string; contributors: string; contact: string };
+};
+
+const DEFAULT_PAGE_CONTENT: PageContent = {
+  editorsLetter: {
+    quote: "The world is full of extraordinary things quietly waiting for our wits to grow sharper.",
+    body1: "Welcome to The Magorium — a private-view journal for those who believe luxury is not a price point but a perspective. Each month, we curate a single volume of the events, destinations, and cultural moments that define the season.",
+    body2: "From the frozen polo fields of St. Moritz to the fashion ateliers of Paris, from the tech salons of Davos to the design studios of Cape Town — we seek the stories behind the spectacle. Our editorial lens is deliberate: fewer stories, told with greater depth.",
+    body3: "This is not a news publication. It is a curated companion for the globally curious — those who travel with intention, collect with knowledge, and engage with culture as participants, not spectators.",
+    signoff: "With warm regards,\nThe Editorial Desk",
+    logoUrl: "",
+  },
+  about: {
+    heading: "About The Magorium",
+    body: "The Magorium is a private-view journal covering luxury, travel, culture, sport, and design. Where Curated Becomes Legend.",
+  },
+  masthead: { editorInChief: "", contributors: "", contact: "" },
 };
 
 export default function AdminPage() {
-  const [authenticated, setAuthenticated] = useState(() => {
-    return isAdminAuthenticated();
-  });
+  const [authenticated, setAuthenticated] = useState(() => isAdminAuthenticated());
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -125,12 +115,10 @@ export default function AdminPage() {
     const url = new URL(window.location.href);
     const resetToken = url.searchParams.get("resetToken");
     if (!resetToken) return;
-
     resetAdminPasswordAccess();
     setAuthenticated(false);
     setPasswordInput("");
     setPasswordError(false);
-
     url.searchParams.delete("resetToken");
     window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
     toast.success("Reset link used.");
@@ -146,11 +134,10 @@ export default function AdminPage() {
         body: JSON.stringify({ password: passwordInput }),
       });
       const payload = await response.json().catch(() => ({} as { success?: boolean; token?: string }));
-      const normalizedPassword = passwordInput.trim();
       if (response.ok && payload.success) {
         setAuthenticated(true);
         setAdminAuthenticated(true);
-        setAdminPublishToken(typeof payload.token === "string" ? payload.token : normalizedPassword);
+        setAdminPublishToken(typeof payload.token === "string" ? payload.token : passwordInput.trim());
         setPasswordInput("");
         setPasswordError(false);
         return;
@@ -164,11 +151,7 @@ export default function AdminPage() {
   };
 
   const handleResetAccess = () => {
-    const confirmReset = window.confirm(
-      "Reset admin password access? This will sign out any current admin session.",
-    );
-    if (!confirmReset) return;
-
+    if (!window.confirm("Reset admin password access? This will sign out any current admin session.")) return;
     resetAdminPasswordAccess();
     setAuthenticated(false);
     setPasswordInput("");
@@ -194,21 +177,11 @@ export default function AdminPage() {
               className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               autoFocus
             />
-            {passwordError && (
-              <p className="text-sm text-destructive">Incorrect password</p>
-            )}
-            <button
-              type="submit"
-              disabled={isLoggingIn}
-              className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-70"
-            >
+            {passwordError && <p className="text-sm text-destructive">Incorrect password</p>}
+            <button type="submit" disabled={isLoggingIn} className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-70">
               {isLoggingIn ? "Signing In..." : "Sign In"}
             </button>
-            <button
-              type="button"
-              onClick={handleResetAccess}
-              className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
+            <button type="button" onClick={handleResetAccess} className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Reset Admin Password Access
             </button>
           </div>
@@ -224,33 +197,26 @@ function AdminDashboard() {
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<AdSlot[]>([]);
-  const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics">("heroes");
+  const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics" | "pages">("heroes");
   const [currentEdition, setCurrentEdition] = useState<string>("");
   const [showNewEdition, setShowNewEdition] = useState(false);
   const [newEditionMonth, setNewEditionMonth] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [pageContent, setPageContent] = useState<PageContent>(DEFAULT_PAGE_CONTENT);
 
   useEffect(() => {
     let active = true;
     const initialize = async () => {
       const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: true });
       if (!active) return;
-      const initialHeroes = snapshot.heroes;
-      const initialArticles = snapshot.articles;
-      const initialAds = snapshot.ads;
-
-      setHeroes(initialHeroes);
-      setArticles(initialArticles);
-      setAds(initialAds);
-
-      const initialEditions = getEditionsFromState(initialHeroes, initialArticles);
+      setHeroes(snapshot.heroes);
+      setArticles(snapshot.articles);
+      setAds(snapshot.ads);
+      const initialEditions = getEditionsFromState(snapshot.heroes, snapshot.articles);
       if (initialEditions.length > 0) setCurrentEdition(initialEditions[0]);
     };
-
     void initialize();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
   const editions = useMemo(() => getEditionsFromState(heroes, articles), [heroes, articles]);
@@ -262,17 +228,10 @@ function AdminDashboard() {
     setIsSaving(true);
     try {
       const publishToken = getAdminPublishToken();
-      if (!publishToken) {
-        toast.error("Admin session expired. Please sign in again to publish live.");
-        return;
-      }
-
-      // ✅ FIX: Always clear old local draft storage FIRST before attempting anything
+      if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
       clearLocalDraftStorage();
-
       const contentToPublish: EditableContentPayload = { heroes, articles, ads };
       const published = await publishEditorialContent(contentToPublish, publishToken);
-
       if (!published.success) {
         const fallbackMessage = published.error || "Could not publish content to live";
         let draftStored = true;
@@ -281,25 +240,18 @@ function AdminDashboard() {
           saveArticles(contentToPublish.articles);
           saveAds(contentToPublish.ads);
         } catch (error) {
-          if (!isStorageQuotaExceededError(error)) {
-            throw error;
-          }
+          if (!isStorageQuotaExceededError(error)) throw error;
           draftStored = false;
           clearLocalDraftStorage();
         }
-        if (draftStored) {
-          toast.warning(`${fallbackMessage}. Local draft was still saved in this browser.`);
-          return;
-        }
+        if (draftStored) { toast.warning(`${fallbackMessage}. Local draft was still saved in this browser.`); return; }
         toast.error(`${fallbackMessage}. Browser storage is full, so local draft backup could not be saved.`);
         return;
       }
-
       clearLocalDraftStorage();
       toast.success("Content published to live.");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not save content";
-      toast.error(message);
+      toast.error(error instanceof Error ? error.message : "Could not save content");
     } finally {
       setIsSaving(false);
     }
@@ -317,48 +269,22 @@ function AdminDashboard() {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      const restoredHeroes = DEFAULT_PUBLISHED_CONTENT.heroes.map((hero) => ({
-        ...hero,
-        body: (hero.body || []).map((block) => ({ ...block })),
-        seoTags: [...(hero.seoTags || [])],
-      }));
-      const restoredArticles = DEFAULT_PUBLISHED_CONTENT.articles.map((article) => ({
-        ...article,
-        body: (article.body || []).map((block) => ({ ...block })),
-        seoTags: [...(article.seoTags || [])],
-      }));
-      const restoredAds = DEFAULT_PUBLISHED_CONTENT.ads.map((ad) => ({ ...ad }));
-
+      const restoredHeroes = DEFAULT_PUBLISHED_CONTENT.heroes.map((h) => ({ ...h, body: (h.body || []).map((b) => ({ ...b })), seoTags: [...(h.seoTags || [])] }));
+      const restoredArticles = DEFAULT_PUBLISHED_CONTENT.articles.map((a) => ({ ...a, body: (a.body || []).map((b) => ({ ...b })), seoTags: [...(a.seoTags || [])] }));
+      const restoredAds = DEFAULT_PUBLISHED_CONTENT.ads.map((a) => ({ ...a }));
       setHeroes(restoredHeroes);
       setArticles(restoredArticles);
       setAds(restoredAds);
-
       const restoredEditions = getEditionsFromState(restoredHeroes, restoredArticles);
-      if (restoredEditions.length > 0) {
-        setCurrentEdition(restoredEditions[0]);
-      }
-
+      if (restoredEditions.length > 0) setCurrentEdition(restoredEditions[0]);
       const publishToken = getAdminPublishToken();
-      if (!publishToken) {
-        toast.error("Admin session expired. Please sign in again to publish live.");
-        return;
-      }
-      const published = await publishEditorialContent({
-        heroes: restoredHeroes,
-        articles: restoredArticles,
-        ads: restoredAds,
-      }, publishToken);
-      if (!published.success) {
-        const fallbackMessage = published.error || "Could not publish restored backup to live";
-        toast.warning(`${fallbackMessage}. Backup is loaded in the editor, but publish did not complete.`);
-        return;
-      }
-
+      if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
+      const published = await publishEditorialContent({ heroes: restoredHeroes, articles: restoredArticles, ads: restoredAds }, publishToken);
+      if (!published.success) { toast.warning(`${published.error || "Could not publish restored backup to live"}. Backup loaded but publish did not complete.`); return; }
       clearLocalDraftStorage();
       toast.success("Baseline backup restored and published.");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not restore backup";
-      toast.error(message);
+      toast.error(error instanceof Error ? error.message : "Could not restore backup");
     } finally {
       setIsSaving(false);
     }
@@ -366,123 +292,31 @@ function AdminDashboard() {
 
   const deleteCurrentEdition = () => {
     if (!currentEdition) return;
-
     const label = formatEditionLabel(currentEdition);
-    const ok = window.confirm(
-      `Delete the entire ${label} edition? This will remove all heroes and articles for that edition.\n\nClick "Save Changes" after deleting to make it permanent.`,
-    );
-    if (!ok) return;
-
+    if (!window.confirm(`Delete the entire ${label} edition? This will remove all heroes and articles for that edition.\n\nClick "Save Changes" after deleting to make it permanent.`)) return;
     const nextHeroes = heroes.filter((h) => h.edition !== currentEdition);
     const nextArticles = articles.filter((a) => a.edition !== currentEdition);
-
     setHeroes(nextHeroes);
     setArticles(nextArticles);
-
-    const remainingEditions = getEditionsFromState(nextHeroes, nextArticles);
-    setCurrentEdition(remainingEditions[0] ?? "");
-
+    setCurrentEdition(getEditionsFromState(nextHeroes, nextArticles)[0] ?? "");
     toast.success(`Deleted edition: ${label}.`);
   };
 
   const createNewEdition = () => {
-    if (!newEditionMonth) {
-      toast.error("Please select a month for the new edition");
-      return;
-    }
-
+    if (!newEditionMonth) { toast.error("Please select a month for the new edition"); return; }
     const stamp = Date.now();
-
+    const today = new Date().toISOString().split("T")[0];
     const starterHeroes: HeroItem[] = [
-      {
-        id: `h-${stamp}-1`,
-        title: "New Hero 1",
-        subtitle: "Add your first hero story",
-        seoTags: [],
-        category: "Travel",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`h-${stamp}-1`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `h-${stamp}-2`,
-        title: "New Hero 2",
-        subtitle: "Add your second hero story",
-        seoTags: [],
-        category: "Fashion",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`h-${stamp}-2`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `h-${stamp}-3`,
-        title: "New Hero 3",
-        subtitle: "Add your third hero story",
-        seoTags: [],
-        category: "Art & Design",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`h-${stamp}-3`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
+      { id: `h-${stamp}-1`, title: "New Hero 1", subtitle: "Add your first hero story", seoTags: [], category: "Travel", imageUrl: "", author: "Editor", body: createOctoberPatternBody(`h-${stamp}-1`), date: today, edition: newEditionMonth },
+      { id: `h-${stamp}-2`, title: "New Hero 2", subtitle: "Add your second hero story", seoTags: [], category: "Fashion", imageUrl: "", author: "Editor", body: createOctoberPatternBody(`h-${stamp}-2`), date: today, edition: newEditionMonth },
+      { id: `h-${stamp}-3`, title: "New Hero 3", subtitle: "Add your third hero story", seoTags: [], category: "Art & Design", imageUrl: "", author: "Editor", body: createOctoberPatternBody(`h-${stamp}-3`), date: today, edition: newEditionMonth },
     ];
-
     const starterArticles: Article[] = [
-      {
-        id: `a-${stamp}-1`,
-        title: "New Article 1",
-        excerpt: "Add your first article",
-        seoTags: [],
-        category: "Yachting",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-1`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `a-${stamp}-2`,
-        title: "New Article 2",
-        excerpt: "Add your second article",
-        seoTags: [],
-        category: "Sports",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-2`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `a-${stamp}-3`,
-        title: "New Article 3",
-        excerpt: "Add your third article",
-        seoTags: [],
-        category: "Golf",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-3`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
-      {
-        id: `a-${stamp}-4`,
-        title: "New Article 4",
-        excerpt: "Add your fourth article",
-        seoTags: [],
-        category: "Tennis",
-        imageUrl: "",
-        author: "Editor",
-        body: createOctoberPatternBody(`a-${stamp}-4`),
-        date: new Date().toISOString().split("T")[0],
-        edition: newEditionMonth,
-      },
+      { id: `a-${stamp}-1`, title: "New Article 1", excerpt: "Add your first article", seoTags: [], category: "Yachting", imageUrl: "", author: "Editor", body: createOctoberPatternBody(`a-${stamp}-1`), date: today, edition: newEditionMonth },
+      { id: `a-${stamp}-2`, title: "New Article 2", excerpt: "Add your second article", seoTags: [], category: "Sports", imageUrl: "", author: "Editor", body: createOctoberPatternBody(`a-${stamp}-2`), date: today, edition: newEditionMonth },
+      { id: `a-${stamp}-3`, title: "New Article 3", excerpt: "Add your third article", seoTags: [], category: "Golf", imageUrl: "", author: "Editor", body: createOctoberPatternBody(`a-${stamp}-3`), date: today, edition: newEditionMonth },
+      { id: `a-${stamp}-4`, title: "New Article 4", excerpt: "Add your fourth article", seoTags: [], category: "Tennis", imageUrl: "", author: "Editor", body: createOctoberPatternBody(`a-${stamp}-4`), date: today, edition: newEditionMonth },
     ];
-
     setHeroes([...heroes, ...starterHeroes]);
     setArticles([...articles, ...starterArticles]);
     setCurrentEdition(newEditionMonth);
@@ -504,106 +338,71 @@ function AdminDashboard() {
             <button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 text-sm border border-border rounded text-muted-foreground hover:text-foreground transition-colors">
               <RotateCcw className="w-4 h-4" /> Reset
             </button>
-            <button
-              onClick={handleRestoreBackup}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-4 py-2 text-sm border border-primary rounded text-primary hover:bg-primary/10 transition-colors disabled:opacity-70"
-            >
+            <button onClick={handleRestoreBackup} disabled={isSaving} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary rounded text-primary hover:bg-primary/10 transition-colors disabled:opacity-70">
               <RotateCcw className="w-4 h-4" /> Restore Backup
             </button>
-            <button
-              onClick={save}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-70"
-            >
+            <button onClick={save} disabled={isSaving} className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-70">
               {isSaving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
 
-        {/* Edition Selector */}
-        <div className="bg-card border border-border rounded-lg p-4 mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-primary" />
-              <span className="text-sm font-sans uppercase tracking-wider text-muted-foreground">Current Edition:</span>
-              <select
-                value={currentEdition}
-                onChange={(e) => setCurrentEdition(e.target.value)}
-                className="bg-secondary text-foreground px-4 py-2 rounded font-serif text-lg border-0"
-              >
-                {editions.map((ed) => (
-                  <option key={ed} value={ed}>{formatEditionLabel(ed)}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={deleteCurrentEdition}
-                disabled={!currentEdition}
-                className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive text-destructive rounded hover:bg-destructive/10 transition-colors disabled:pointer-events-none disabled:opacity-50"
-              >
-                <Trash2 className="w-4 h-4" /> Delete Edition
-              </button>
-
-              {showNewEdition ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="month"
-                    value={newEditionMonth}
-                    onChange={(e) => setNewEditionMonth(e.target.value)}
-                    className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
-                  />
-                  <button onClick={createNewEdition} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded">
-                    Create
-                  </button>
-                  <button onClick={() => setShowNewEdition(false)} className="px-3 py-2 text-sm text-muted-foreground">
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowNewEdition(true)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"
-                >
-                  <Plus className="w-4 h-4" /> New Edition
+        {/* Edition Selector — hidden on Pages tab */}
+        {tab !== "pages" && (
+          <div className="bg-card border border-border rounded-lg p-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Calendar className="w-5 h-5 text-primary" />
+                <span className="text-sm font-sans uppercase tracking-wider text-muted-foreground">Current Edition:</span>
+                <select value={currentEdition} onChange={(e) => setCurrentEdition(e.target.value)} className="bg-secondary text-foreground px-4 py-2 rounded font-serif text-lg border-0">
+                  {editions.map((ed) => <option key={ed} value={ed}>{formatEditionLabel(ed)}</option>)}
+                </select>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <button onClick={deleteCurrentEdition} disabled={!currentEdition} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive text-destructive rounded hover:bg-destructive/10 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                  <Trash2 className="w-4 h-4" /> Delete Edition
                 </button>
-              )}
+                {showNewEdition ? (
+                  <div className="flex items-center gap-2">
+                    <input type="month" value={newEditionMonth} onChange={(e) => setNewEditionMonth(e.target.value)} className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+                    <button onClick={createNewEdition} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded">Create</button>
+                    <button onClick={() => setShowNewEdition(false)} className="px-3 py-2 text-sm text-muted-foreground">Cancel</button>
+                  </div>
+                ) : (
+                  <button onClick={() => setShowNewEdition(true)} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors">
+                    <Plus className="w-4 h-4" /> New Edition
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="mt-3 text-xs text-muted-foreground font-sans">
+              {filteredHeroes.length} heroes · {filteredArticles.length} articles in this edition
             </div>
           </div>
-          <div className="mt-3 text-xs text-muted-foreground font-sans">
-            {filteredHeroes.length} heroes · {filteredArticles.length} articles in this edition
-          </div>
-        </div>
+        )}
 
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-border mb-8">
-          {(["heroes", "articles", "ads", "analytics"] as const).map((t) => (
+        <div className="flex gap-1 border-b border-border mb-8 overflow-x-auto">
+          {(["heroes", "articles", "ads", "analytics", "pages"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${
+              className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
                 tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {t === "analytics" && <BarChart3 className="w-4 h-4" />}
-              {t === "ads" ? "Advertising" : t === "analytics" ? "Analytics" : t}
+              {t === "pages" && <FileText className="w-4 h-4" />}
+              {t === "ads" ? "Advertising" : t === "analytics" ? "Analytics" : t === "pages" ? "Pages" : t}
             </button>
           ))}
         </div>
 
-        {tab === "heroes" && (
-          <HeroesManager heroes={heroes} setHeroes={setHeroes} filteredHeroes={filteredHeroes} currentEdition={currentEdition} />
-        )}
-        {tab === "articles" && (
-          <ArticlesManager articles={articles} setArticles={setArticles} filteredArticles={filteredArticles} currentEdition={currentEdition} />
-        )}
-        {tab === "ads" && (
-          <AdsManager ads={ads} setAds={setAds} />
-        )}
-        {tab === "analytics" && (
-          <AnalyticsDashboard articles={articles} heroes={heroes} ads={ads} />
-        )}
+        {tab === "heroes" && <HeroesManager heroes={heroes} setHeroes={setHeroes} filteredHeroes={filteredHeroes} currentEdition={currentEdition} />}
+        {tab === "articles" && <ArticlesManager articles={articles} setArticles={setArticles} filteredArticles={filteredArticles} currentEdition={currentEdition} />}
+        {tab === "ads" && <AdsManager ads={ads} setAds={setAds} />}
+        {tab === "analytics" && <AnalyticsDashboard articles={articles} heroes={heroes} ads={ads} />}
+        {tab === "pages" && <PagesManager pageContent={pageContent} setPageContent={setPageContent} />}
       </div>
     </div>
   );
@@ -611,64 +410,19 @@ function AdminDashboard() {
 
 /* ---- Heroes Manager ---- */
 function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { heroes: HeroItem[]; setHeroes: (h: HeroItem[]) => void; filteredHeroes: HeroItem[]; currentEdition: string }) {
-  const addHero = () => {
-    setHeroes([
-      {
-        id: `h-${Date.now()}`,
-        title: "New Hero",
-        subtitle: "",
-        seoTags: [],
-        category: "Travel",
-        imageUrl: "",
-        author: "",
-        body: [],
-        date: new Date().toISOString().split("T")[0],
-        edition: currentEdition || new Date().toISOString().slice(0, 7),
-      },
-      ...heroes,
-    ]);
-  };
-
-  const update = (id: string, patch: Partial<HeroItem>) => {
-    setHeroes(heroes.map((h) => (h.id === id ? { ...h, ...patch } : h)));
-  };
-
+  const addHero = () => setHeroes([{ id: `h-${Date.now()}`, title: "New Hero", subtitle: "", seoTags: [], category: "Travel", imageUrl: "", author: "", body: [], date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) }, ...heroes]);
+  const update = (id: string, patch: Partial<HeroItem>) => setHeroes(heroes.map((h) => (h.id === id ? { ...h, ...patch } : h)));
   const remove = (id: string) => setHeroes(heroes.filter((h) => h.id !== id));
-
   return (
     <div className="space-y-6">
-      <AddButton onClick={addHero} label={`Add Hero to ${currentEdition ? formatEditionLabel(currentEdition) : 'Edition'}`} />
+      <AddButton onClick={addHero} label={`Add Hero to ${currentEdition ? formatEditionLabel(currentEdition) : "Edition"}`} />
       {filteredHeroes.map((hero) => (
         <ContentCard key={hero.id} onRemove={() => remove(hero.id)}>
           <EditableStoryForm
-            kind="hero"
-            title={hero.title}
-            summary={hero.subtitle}
-            category={hero.category}
-            author={hero.author || ""}
-            seoTags={hero.seoTags || []}
-            date={hero.date}
-            featured={hero.featured}
-            imageUrl={hero.imageUrl}
-            videoUrl={hero.videoUrl}
-            body={hero.body || []}
-            onTitleChange={(value) => update(hero.id, { title: value })}
-            onSummaryChange={(value) => update(hero.id, { subtitle: value })}
-            onCategoryChange={(value) => update(hero.id, { category: value })}
-            onAuthorChange={(value) => update(hero.id, { author: value })}
-            onSeoTagsChange={(value) => update(hero.id, { seoTags: value })}
-            onDateChange={(value) => update(hero.id, { date: value })}
-            onFeaturedChange={(value) => update(hero.id, { featured: value })}
-            onImageChange={(value) => update(hero.id, { imageUrl: value })}
-            onVideoChange={(value) => update(hero.id, { videoUrl: value })}
-            onBodyChange={(value) => update(hero.id, { body: value })}
-            onNormalizeBody={() =>
-              update(hero.id, {
-                body: normalizeBodyFlow(hero.body || [], hero.imageUrl, hero.videoUrl),
-              })
-            }
-            sources={hero.sources || ""}
-            onSourcesChange={(value) => update(hero.id, { sources: value })}
+            kind="hero" title={hero.title} summary={hero.subtitle} category={hero.category} author={hero.author || ""} seoTags={hero.seoTags || []} date={hero.date} featured={hero.featured} imageUrl={hero.imageUrl} videoUrl={hero.videoUrl} body={hero.body || []}
+            onTitleChange={(v) => update(hero.id, { title: v })} onSummaryChange={(v) => update(hero.id, { subtitle: v })} onCategoryChange={(v) => update(hero.id, { category: v })} onAuthorChange={(v) => update(hero.id, { author: v })} onSeoTagsChange={(v) => update(hero.id, { seoTags: v })} onDateChange={(v) => update(hero.id, { date: v })} onFeaturedChange={(v) => update(hero.id, { featured: v })} onImageChange={(v) => update(hero.id, { imageUrl: v })} onVideoChange={(v) => update(hero.id, { videoUrl: v })} onBodyChange={(v) => update(hero.id, { body: v })}
+            onNormalizeBody={() => update(hero.id, { body: normalizeBodyFlow(hero.body || [], hero.imageUrl, hero.videoUrl) })}
+            sources={hero.sources || ""} onSourcesChange={(v) => update(hero.id, { sources: v })}
           />
         </ContentCard>
       ))}
@@ -678,53 +432,19 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
 
 /* ---- Articles Manager ---- */
 function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string }) {
-  const addArticle = () => {
-    setArticles([
-      { id: `a-${Date.now()}`, title: "New Article", excerpt: "", seoTags: [], category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) },
-      ...articles,
-    ]);
-  };
-
-  const update = (id: string, patch: Partial<Article>) => {
-    setArticles(articles.map((a) => (a.id === id ? { ...a, ...patch } : a)));
-  };
-
+  const addArticle = () => setArticles([{ id: `a-${Date.now()}`, title: "New Article", excerpt: "", seoTags: [], category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) }, ...articles]);
+  const update = (id: string, patch: Partial<Article>) => setArticles(articles.map((a) => (a.id === id ? { ...a, ...patch } : a)));
   const remove = (id: string) => setArticles(articles.filter((a) => a.id !== id));
-
   return (
     <div className="space-y-6">
-      <AddButton onClick={addArticle} label={`Add Article to ${currentEdition ? formatEditionLabel(currentEdition) : 'Edition'}`} />
+      <AddButton onClick={addArticle} label={`Add Article to ${currentEdition ? formatEditionLabel(currentEdition) : "Edition"}`} />
       {filteredArticles.map((article) => (
         <ContentCard key={article.id} onRemove={() => remove(article.id)}>
           <EditableStoryForm
-            kind="article"
-            title={article.title}
-            summary={article.excerpt}
-            category={article.category}
-            author={article.author}
-            seoTags={article.seoTags || []}
-            date={article.date}
-            featured={article.featured}
-            imageUrl={article.imageUrl}
-            videoUrl={article.videoUrl}
-            body={article.body || []}
-            onTitleChange={(value) => update(article.id, { title: value })}
-            onSummaryChange={(value) => update(article.id, { excerpt: value })}
-            onCategoryChange={(value) => update(article.id, { category: value })}
-            onAuthorChange={(value) => update(article.id, { author: value })}
-            onSeoTagsChange={(value) => update(article.id, { seoTags: value })}
-            onDateChange={(value) => update(article.id, { date: value })}
-            onFeaturedChange={(value) => update(article.id, { featured: value })}
-            onImageChange={(value) => update(article.id, { imageUrl: value })}
-            onVideoChange={(value) => update(article.id, { videoUrl: value })}
-            onBodyChange={(value) => update(article.id, { body: value })}
-            onNormalizeBody={() =>
-              update(article.id, {
-                body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl),
-              })
-            }
-            sources={article.sources || ""}
-            onSourcesChange={(value) => update(article.id, { sources: value })}
+            kind="article" title={article.title} summary={article.excerpt} category={article.category} author={article.author} seoTags={article.seoTags || []} date={article.date} featured={article.featured} imageUrl={article.imageUrl} videoUrl={article.videoUrl} body={article.body || []}
+            onTitleChange={(v) => update(article.id, { title: v })} onSummaryChange={(v) => update(article.id, { excerpt: v })} onCategoryChange={(v) => update(article.id, { category: v })} onAuthorChange={(v) => update(article.id, { author: v })} onSeoTagsChange={(v) => update(article.id, { seoTags: v })} onDateChange={(v) => update(article.id, { date: v })} onFeaturedChange={(v) => update(article.id, { featured: v })} onImageChange={(v) => update(article.id, { imageUrl: v })} onVideoChange={(v) => update(article.id, { videoUrl: v })} onBodyChange={(v) => update(article.id, { body: v })}
+            onNormalizeBody={() => update(article.id, { body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl) })}
+            sources={article.sources || ""} onSourcesChange={(v) => update(article.id, { sources: v })}
           />
         </ContentCard>
       ))}
@@ -733,137 +453,46 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
 }
 
 /* ---- Editable Story Form ---- */
-function EditableStoryForm({
-  kind,
-  title,
-  summary,
-  category,
-  author,
-  seoTags,
-  date,
-  featured,
-  imageUrl,
-  videoUrl,
-  body,
-  onTitleChange,
-  onSummaryChange,
-  onCategoryChange,
-  onAuthorChange,
-  onSeoTagsChange,
-  onDateChange,
-  onFeaturedChange,
-  onImageChange,
-  onVideoChange,
-  onBodyChange,
-  onNormalizeBody,
-  sources,
-  onSourcesChange,
-}: {
-  kind: "hero" | "article";
-  title: string;
-  summary: string;
-  category: Category;
-  author: string;
-  seoTags: string[];
-  date: string;
-  featured?: boolean;
-  imageUrl?: string;
-  videoUrl?: string;
-  body: ArticleBodyBlock[];
-  onTitleChange: (value: string) => void;
-  onSummaryChange: (value: string) => void;
-  onCategoryChange: (value: Category) => void;
-  onAuthorChange: (value: string) => void;
-  onSeoTagsChange: (value: string[]) => void;
-  onDateChange: (value: string) => void;
-  onFeaturedChange: (value: boolean) => void;
-  onImageChange: (value: string) => void;
-  onVideoChange: (value: string) => void;
-  onBodyChange: (value: ArticleBodyBlock[]) => void;
-  onNormalizeBody: () => void;
-  sources?: string;
-  onSourcesChange?: (value: string) => void;
+function EditableStoryForm({ kind, title, summary, category, author, seoTags, date, featured, imageUrl, videoUrl, body, onTitleChange, onSummaryChange, onCategoryChange, onAuthorChange, onSeoTagsChange, onDateChange, onFeaturedChange, onImageChange, onVideoChange, onBodyChange, onNormalizeBody, sources, onSourcesChange }: {
+  kind: "hero" | "article"; title: string; summary: string; category: Category; author: string; seoTags: string[]; date: string; featured?: boolean; imageUrl?: string; videoUrl?: string; body: ArticleBodyBlock[];
+  onTitleChange: (v: string) => void; onSummaryChange: (v: string) => void; onCategoryChange: (v: Category) => void; onAuthorChange: (v: string) => void; onSeoTagsChange: (v: string[]) => void; onDateChange: (v: string) => void; onFeaturedChange: (v: boolean) => void; onImageChange: (v: string) => void; onVideoChange: (v: string) => void; onBodyChange: (v: ArticleBodyBlock[]) => void; onNormalizeBody: () => void; sources?: string; onSourcesChange?: (v: string) => void;
 }) {
   const isArticle = kind === "article";
   const [seoTagDraft, setSeoTagDraft] = useState("");
 
   const addSeoTagsFromDraft = () => {
     const draftTags = parseSeoTagsInput(seoTagDraft);
-    if (draftTags.length === 0) {
-      setSeoTagDraft("");
-      return;
-    }
-
-    const existing = new Set(seoTags.map((tag) => tag.toLowerCase()));
+    if (draftTags.length === 0) { setSeoTagDraft(""); return; }
+    const existing = new Set(seoTags.map((t) => t.toLowerCase()));
     const merged = [...seoTags];
     draftTags.forEach((tag) => {
       const key = tag.toLowerCase();
-      if (existing.has(key)) return;
-      if (merged.length >= 25) return;
-      existing.add(key);
-      merged.push(tag);
+      if (existing.has(key) || merged.length >= 25) return;
+      existing.add(key); merged.push(tag);
     });
-
     onSeoTagsChange(merged);
     setSeoTagDraft("");
   };
 
-  const removeSeoTag = (tagToRemove: string) => {
-    onSeoTagsChange(seoTags.filter((tag) => tag.toLowerCase() !== tagToRemove.toLowerCase()));
-  };
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
-      <MediaUpload
-        imageUrl={imageUrl}
-        videoUrl={videoUrl}
-        onImage={onImageChange}
-        onVideo={onVideoChange}
-      />
+      <MediaUpload imageUrl={imageUrl} videoUrl={videoUrl} onImage={onImageChange} onVideo={onVideoChange} />
       <div className="space-y-3">
-        <input
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          placeholder={isArticle ? "Article title" : "Hero title"}
-          className="w-full bg-secondary text-foreground px-3 py-2 rounded font-serif text-lg"
-        />
-        <textarea
-          value={summary}
-          onChange={(e) => onSummaryChange(e.target.value)}
-          placeholder={isArticle ? "Excerpt" : "Subtitle / deck"}
-          rows={2}
-          className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none"
-        />
+        <input value={title} onChange={(e) => onTitleChange(e.target.value)} placeholder={isArticle ? "Article title" : "Hero title"} className="w-full bg-secondary text-foreground px-3 py-2 rounded font-serif text-lg" />
+        <textarea value={summary} onChange={(e) => onSummaryChange(e.target.value)} placeholder={isArticle ? "Excerpt" : "Subtitle / deck"} rows={2} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
         <div className="flex flex-wrap gap-3">
           <select value={category} onChange={(e) => onCategoryChange(e.target.value as Category)} className="bg-secondary text-foreground px-3 py-2 rounded text-sm">
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <input
-            value={author}
-            onChange={(e) => onAuthorChange(e.target.value)}
-            placeholder="Writer / Journalist Name"
-            className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
-          />
+          <input value={author} onChange={(e) => onAuthorChange(e.target.value)} placeholder="Writer / Journalist Name" className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Published</span>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => onDateChange(e.target.value)}
-              className="bg-secondary text-foreground px-3 py-2 rounded text-sm"
-            />
-            <button
-              type="button"
-              onClick={() => onDateChange(new Date().toISOString().split("T")[0])}
-              className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-            >
-              Today
-            </button>
+            <input type="date" value={date} onChange={(e) => onDateChange(e.target.value)} className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+            <button type="button" onClick={() => onDateChange(new Date().toISOString().split("T")[0])} className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">Today</button>
           </div>
           {isArticle && (
             <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-              <input type="checkbox" checked={featured || false} onChange={(e) => onFeaturedChange(e.target.checked)} className="accent-primary" />
-              Featured
+              <input type="checkbox" checked={featured || false} onChange={(e) => onFeaturedChange(e.target.checked)} className="accent-primary" /> Featured
             </label>
           )}
         </div>
@@ -871,95 +500,37 @@ function EditableStoryForm({
           <div className="flex items-start justify-between gap-3">
             <div>
               <h4 className="text-sm font-semibold text-primary font-sans">Dedicated SEO Tag Box</h4>
-              <p className="text-[11px] text-muted-foreground font-sans mt-1">
-                Add and manage search keywords for this story. Each bubble is one SEO tag.
-              </p>
+              <p className="text-[11px] text-muted-foreground font-sans mt-1">Add and manage search keywords for this story. Each bubble is one SEO tag.</p>
             </div>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans bg-background px-2 py-1 rounded border border-border">
-              {seoTags.length}/25
-            </span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans bg-background px-2 py-1 rounded border border-border">{seoTags.length}/25</span>
           </div>
           <div className="rounded-md border border-border bg-background/80 p-3 min-h-[44px]">
             <div className="flex flex-wrap gap-2">
-              {seoTags.length > 0 ? (
-                seoTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => removeSeoTag(tag)}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-sans hover:bg-primary/15"
-                    title="Remove tag"
-                  >
-                    #{tag}
-                    <span className="text-[10px]">x</span>
-                  </button>
-                ))
-              ) : (
-                <p className="text-xs text-muted-foreground font-sans">
-                  No SEO tags added yet.
-                </p>
-              )}
+              {seoTags.length > 0 ? seoTags.map((tag) => (
+                <button key={tag} type="button" onClick={() => onSeoTagsChange(seoTags.filter((t) => t.toLowerCase() !== tag.toLowerCase()))} className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-sans hover:bg-primary/15" title="Remove tag">
+                  #{tag}<span className="text-[10px]">x</span>
+                </button>
+              )) : <p className="text-xs text-muted-foreground font-sans">No SEO tags added yet.</p>}
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              value={seoTagDraft}
-              onChange={(e) => setSeoTagDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addSeoTagsFromDraft();
-                }
-              }}
-              placeholder="Add tag(s), comma-separated. Example: Formula 1, Austin Grand Prix"
-              className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm"
-            />
-            <button
-              type="button"
-              onClick={addSeoTagsFromDraft}
-              className="px-3 py-2 text-xs uppercase tracking-wider border border-primary text-primary rounded hover:bg-primary/10 transition-colors"
-            >
-              Add Tag
-            </button>
+            <input value={seoTagDraft} onChange={(e) => setSeoTagDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSeoTagsFromDraft(); } }} placeholder="Add tag(s), comma-separated. Example: Formula 1, Austin Grand Prix" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+            <button type="button" onClick={addSeoTagsFromDraft} className="px-3 py-2 text-xs uppercase tracking-wider border border-primary text-primary rounded hover:bg-primary/10 transition-colors">Add Tag</button>
           </div>
-          <p className="text-[10px] text-muted-foreground font-sans">
-            Tip: click any bubble to remove it. You can paste multiple tags separated by commas.
-          </p>
+          <p className="text-[10px] text-muted-foreground font-sans">Tip: click any bubble to remove it. You can paste multiple tags separated by commas.</p>
         </section>
         <div className="mt-4 pt-4 border-t border-border">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
-              Preferred flow: {formatEditionLabel(date.slice(0, 7))} · photo/video → text → photo/video → text
-            </p>
-            <button
-              type="button"
-              onClick={onNormalizeBody}
-              className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-            >
-              Auto Arrange
-            </button>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Preferred flow: {formatEditionLabel(date.slice(0, 7))} · photo/video → text → photo/video → text</p>
+            <button type="button" onClick={onNormalizeBody} className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">Auto Arrange</button>
           </div>
-          <ArticleBodyEditor
-            blocks={body}
-            heading={isArticle ? "Article Body" : "Hero Body"}
-            onChange={onBodyChange}
-          />
+          <ArticleBodyEditor blocks={body} heading={isArticle ? "Article Body" : "Hero Body"} onChange={onBodyChange} />
         </div>
         {onSourcesChange && (
           <div className="mt-4 pt-4 border-t border-border">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">
-              Sources & Verification
-            </label>
-            <textarea
-              value={sources || ""}
-              onChange={(e) => onSourcesChange(e.target.value)}
-              placeholder="List your sources here, e.g. The Guardian (May 2026), Reuters (Apr 15)…"
-              rows={3}
-              className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none"
-            />
-            <p className="text-[10px] text-muted-foreground font-sans mt-1">
-              Appears as small footnote text at the bottom of the live article. Hidden if empty.
-            </p>
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Sources & Verification</label>
+            <textarea value={sources || ""} onChange={(e) => onSourcesChange(e.target.value)} placeholder="List your sources here, e.g. The Guardian (May 2026), Reuters (Apr 15)…" rows={3} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
+            <p className="text-[10px] text-muted-foreground font-sans mt-1">Appears as small footnote text at the bottom of the live article. Hidden if empty.</p>
           </div>
         )}
       </div>
@@ -969,43 +540,22 @@ function EditableStoryForm({
 
 /* ---- Ads Manager ---- */
 function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => void }) {
-  const addAd = () => {
-    setAds([
-      ...ads,
-      { id: `ad-${Date.now()}`, label: "New Ad Slot", position: "mid-feed", width: 728, height: 90 },
-    ]);
-  };
-
-  const update = (id: string, patch: Partial<AdSlot>) => {
-    setAds(ads.map((a) => (a.id === id ? { ...a, ...patch } : a)));
-  };
-
+  const addAd = () => setAds([...ads, { id: `ad-${Date.now()}`, label: "New Ad Slot", position: "mid-feed", width: 728, height: 90 }]);
+  const update = (id: string, patch: Partial<AdSlot>) => setAds(ads.map((a) => (a.id === id ? { ...a, ...patch } : a)));
   const remove = (id: string) => setAds(ads.filter((a) => a.id !== id));
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground font-sans">Upload images or videos for each ad placement. These slots appear throughout the editorial layout.</p>
-        <button onClick={addAd} className="px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Slot
-        </button>
+        <button onClick={addAd} className="px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors flex items-center gap-2"><Plus className="w-4 h-4" /> Add Slot</button>
       </div>
       {ads.map((ad) => (
         <ContentCard key={ad.id} onRemove={() => remove(ad.id)}>
           <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
-            <MediaUpload
-              imageUrl={ad.imageUrl}
-              videoUrl={ad.videoUrl}
-              onImage={(url) => update(ad.id, { imageUrl: url })}
-              onVideo={(url) => update(ad.id, { videoUrl: url })}
-            />
+            <MediaUpload imageUrl={ad.imageUrl} videoUrl={ad.videoUrl} onImage={(url) => update(ad.id, { imageUrl: url })} onVideo={(url) => update(ad.id, { videoUrl: url })} />
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <select
-                  value={ad.position}
-                  onChange={(e) => update(ad.id, { position: e.target.value as AdSlot["position"] })}
-                  className="category-pill bg-secondary text-foreground border-none"
-                >
+                <select value={ad.position} onChange={(e) => update(ad.id, { position: e.target.value as AdSlot["position"] })} className="category-pill bg-secondary text-foreground border-none">
                   <option value="hero-sidebar">Hero Sidebar</option>
                   <option value="mid-feed">Mid Feed</option>
                   <option value="bottom-banner">Bottom Banner</option>
@@ -1022,6 +572,113 @@ function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => v
           </div>
         </ContentCard>
       ))}
+    </div>
+  );
+}
+
+/* ---- Pages Manager ---- */
+function PagesManager({ pageContent, setPageContent }: { pageContent: PageContent; setPageContent: (c: PageContent) => void }) {
+  const [activePage, setActivePage] = useState<"editorsLetter" | "about" | "masthead">("editorsLetter");
+  const imgRef = useRef<HTMLInputElement>(null);
+
+  const updateEL = (patch: Partial<PageContent["editorsLetter"]>) => setPageContent({ ...pageContent, editorsLetter: { ...pageContent.editorsLetter, ...patch } });
+  const updateAbout = (patch: Partial<PageContent["about"]>) => setPageContent({ ...pageContent, about: { ...pageContent.about, ...patch } });
+  const updateMasthead = (patch: Partial<PageContent["masthead"]>) => setPageContent({ ...pageContent, masthead: { ...pageContent.masthead, ...patch } });
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) updateEL({ logoUrl: await fileToOptimizedDataUrl(file) });
+    e.target.value = "";
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-card border border-border rounded-lg p-4">
+        <p className="text-sm text-muted-foreground font-sans">Edit static pages — Editor's Letter, About, and Masthead. Click <strong>Save Changes</strong> above when done.</p>
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        {([{ key: "editorsLetter" as const, label: "Editor's Letter" }, { key: "about" as const, label: "About" }, { key: "masthead" as const, label: "Masthead" }]).map(({ key, label }) => (
+          <button key={key} onClick={() => setActivePage(key)} className={`px-5 py-2.5 text-sm rounded font-sans transition-colors ${activePage === key ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:text-foreground"}`}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activePage === "editorsLetter" && (
+        <div className="space-y-5">
+          <div className="bg-card border border-border rounded-lg p-5">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Logo / Brand Image — Admin Only</label>
+            <div className="flex items-center gap-4 flex-wrap">
+              {pageContent.editorsLetter.logoUrl ? (
+                <img src={pageContent.editorsLetter.logoUrl} alt="Logo preview" className="h-16 object-contain rounded border border-border bg-secondary p-2" />
+              ) : (
+                <div className="h-16 w-48 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No logo uploaded</div>
+              )}
+              <div className="flex flex-col gap-2">
+                <button type="button" onClick={() => imgRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors">
+                  <Upload className="w-4 h-4" /> Upload Logo
+                </button>
+                {pageContent.editorsLetter.logoUrl && (
+                  <button type="button" onClick={() => updateEL({ logoUrl: "" })} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive/40 text-destructive rounded hover:bg-destructive/10 transition-colors">
+                    <Trash2 className="w-4 h-4" /> Remove Logo
+                  </button>
+                )}
+              </div>
+            </div>
+            <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+            <p className="text-[10px] text-muted-foreground font-sans mt-3">Shown at the top of the Editor's Letter page. Leave empty to hide.</p>
+          </div>
+
+          <div className="bg-card border border-border rounded-lg p-5">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Opening Quote</label>
+            <textarea value={pageContent.editorsLetter.quote} onChange={(e) => updateEL({ quote: e.target.value })} rows={2} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" placeholder="Opening italic quote..." />
+            <p className="text-[10px] text-muted-foreground font-sans mt-1">Displayed in italics at the top of the page.</p>
+          </div>
+
+          {(["body1", "body2", "body3"] as const).map((field, i) => (
+            <div key={field} className="bg-card border border-border rounded-lg p-5">
+              <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Paragraph {i + 1}</label>
+              <textarea value={pageContent.editorsLetter[field]} onChange={(e) => updateEL({ [field]: e.target.value })} rows={4} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
+            </div>
+          ))}
+
+          <div className="bg-card border border-border rounded-lg p-5">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Sign-off</label>
+            <textarea value={pageContent.editorsLetter.signoff} onChange={(e) => updateEL({ signoff: e.target.value })} rows={2} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" placeholder={"With warm regards,\nThe Editorial Desk"} />
+          </div>
+        </div>
+      )}
+
+      {activePage === "about" && (
+        <div className="space-y-5">
+          <div className="bg-card border border-border rounded-lg p-5">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Page Heading</label>
+            <input value={pageContent.about.heading} onChange={(e) => updateAbout({ heading: e.target.value })} className="w-full bg-secondary text-foreground px-3 py-2 rounded font-serif text-lg" placeholder="About The Magorium" />
+          </div>
+          <div className="bg-card border border-border rounded-lg p-5">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Body Text</label>
+            <textarea value={pageContent.about.body} onChange={(e) => updateAbout({ body: e.target.value })} rows={12} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" placeholder="About page content..." />
+          </div>
+        </div>
+      )}
+
+      {activePage === "masthead" && (
+        <div className="space-y-5">
+          <div className="bg-card border border-border rounded-lg p-5">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Editor in Chief</label>
+            <input value={pageContent.masthead.editorInChief} onChange={(e) => updateMasthead({ editorInChief: e.target.value })} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" placeholder="Name" />
+          </div>
+          <div className="bg-card border border-border rounded-lg p-5">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Contributors</label>
+            <textarea value={pageContent.masthead.contributors} onChange={(e) => updateMasthead({ contributors: e.target.value })} rows={8} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" placeholder="One contributor per line..." />
+          </div>
+          <div className="bg-card border border-border rounded-lg p-5">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Contact / Editorial Enquiries</label>
+            <input value={pageContent.masthead.contact} onChange={(e) => updateMasthead({ contact: e.target.value })} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" placeholder="editorial@themagorium.com" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1048,107 +705,47 @@ function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
   );
 }
 
-function normalizeBodyFlow(
-  blocks: ArticleBodyBlock[],
-  imageUrl?: string,
-  videoUrl?: string,
-): ArticleBodyBlock[] {
+function normalizeBodyFlow(blocks: ArticleBodyBlock[], imageUrl?: string, videoUrl?: string): ArticleBodyBlock[] {
   const source = blocks.filter(Boolean);
   const textBlocks = source.filter((b) => b.type === "text" || b.type === "heading");
   const mediaBlocks = source.filter((b) => b.type === "image" || b.type === "video");
   const ordered: ArticleBodyBlock[] = [];
-
   if (textBlocks.length === 0) {
     ordered.push({ id: `auto-t-${Date.now()}`, type: "text", content: "Add body text" });
-    if (videoUrl) {
-      ordered.push({ id: `auto-v-${Date.now()}`, type: "video", content: videoUrl, caption: "Featured video" });
-    } else {
-      ordered.push({
-        id: `auto-i-${Date.now()}`,
-        type: "image",
-        content: imageUrl || "",
-        imageAlign: "center",
-        imageWidth: "full",
-        caption: imageUrl ? "Featured image" : "Upload photo or video",
-      });
-    }
+    if (videoUrl) ordered.push({ id: `auto-v-${Date.now()}`, type: "video", content: videoUrl, caption: "Featured video" });
+    else ordered.push({ id: `auto-i-${Date.now()}`, type: "image", content: imageUrl || "", imageAlign: "center", imageWidth: "full", caption: imageUrl ? "Featured image" : "Upload photo or video" });
     return ordered;
   }
-
   const max = Math.max(textBlocks.length, mediaBlocks.length || 1);
   for (let i = 0; i < max; i += 1) {
-    if (textBlocks[i]) {
-      ordered.push(textBlocks[i]);
-    }
-    if (mediaBlocks[i]) {
-      ordered.push(mediaBlocks[i]);
-    } else if (i < textBlocks.length) {
-      if (videoUrl) {
-        ordered.push({
-          id: `auto-v-${Date.now()}-${i}`,
-          type: "video",
-          content: videoUrl,
-          caption: "Featured video",
-        });
-      } else {
-        ordered.push({
-          id: `auto-i-${Date.now()}-${i}`,
-          type: "image",
-          content: imageUrl || "",
-          imageAlign: "center",
-          imageWidth: "full",
-          caption: imageUrl ? "Featured image" : "Upload photo or video",
-        });
-      }
+    if (textBlocks[i]) ordered.push(textBlocks[i]);
+    if (mediaBlocks[i]) ordered.push(mediaBlocks[i]);
+    else if (i < textBlocks.length) {
+      if (videoUrl) ordered.push({ id: `auto-v-${Date.now()}-${i}`, type: "video", content: videoUrl, caption: "Featured video" });
+      else ordered.push({ id: `auto-i-${Date.now()}-${i}`, type: "image", content: imageUrl || "", imageAlign: "center", imageWidth: "full", caption: imageUrl ? "Featured image" : "Upload photo or video" });
     }
   }
-
   return ordered;
 }
 
-function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: {
-  imageUrl?: string; videoUrl?: string;
-  onImage: (url: string) => void; onVideo: (url: string) => void;
-}) {
+function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: { imageUrl?: string; videoUrl?: string; onImage: (url: string) => void; onVideo: (url: string) => void }) {
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
-
-  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) onImage(await fileToOptimizedDataUrl(file));
-    e.target.value = "";
-  };
-
-  const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) onVideo(await fileToOptimizedDataUrl(file));
-    e.target.value = "";
-  };
-
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) onImage(await fileToOptimizedDataUrl(file)); e.target.value = ""; };
+  const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) onVideo(await fileToOptimizedDataUrl(file)); e.target.value = ""; };
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
-        <span>Featured Media</span>
-        <span>Click Photo or Video to Upload</span>
+        <span>Featured Media</span><span>Click Photo or Video to Upload</span>
       </div>
       <div className="aspect-video bg-secondary rounded overflow-hidden flex items-center justify-center">
-        {imageUrl ? (
-          <img src={imageUrl} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <Image className="w-8 h-8 text-muted-foreground" />
-        )}
+        {imageUrl ? <img src={imageUrl} alt="" className="w-full h-full object-cover" /> : <Image className="w-8 h-8 text-muted-foreground" />}
       </div>
       <div className="flex gap-2">
-        <button type="button" onClick={() => imgRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-          <Upload className="w-3 h-3" /> Photo
-        </button>
-        <button type="button" onClick={() => vidRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-          <Video className="w-3 h-3" /> Video
-        </button>
+        <button type="button" onClick={() => imgRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"><Upload className="w-3 h-3" /> Photo</button>
+        <button type="button" onClick={() => vidRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"><Video className="w-3 h-3" /> Video</button>
       </div>
-      <p className="text-[10px] text-muted-foreground font-sans">
-        Supported uploads: image/* and video/* files from your device.
-      </p>
+      <p className="text-[10px] text-muted-foreground font-sans">Supported uploads: image/* and video/* files from your device.</p>
       {videoUrl && <p className="text-[10px] text-primary truncate">Video attached ✓</p>}
       <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
       <input ref={vidRef} type="file" accept="video/*" className="hidden" onChange={handleVideo} />
@@ -1163,150 +760,78 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
   const summary = getAnalyticsSummary(articles, heroes, ads);
   const recent = getRecentEvents(30);
   const locations = getLocationStats();
-
   const filtered = filter === "all" ? summary : summary.filter((s) => s.contentType === filter);
   const sorted = [...filtered].sort((a, b) => b.views - a.views);
-
-  const handleClear = () => {
-    clearAnalytics();
-    toast.success("Analytics data cleared.");
-    window.location.reload();
-  };
+  const handleClear = () => { clearAnalytics(); toast.success("Analytics data cleared."); window.location.reload(); };
 
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={<Eye className="w-5 h-5" />} label="Total Views" value={totals.totalViews} />
         <StatCard icon={<MousePointer className="w-5 h-5" />} label="Total Clicks" value={totals.totalClicks} />
-        <StatCard
-          icon={<TrendingUp className="w-5 h-5" />}
-          label="Click-Through Rate"
-          value={totals.totalViews > 0 ? `${((totals.totalClicks / totals.totalViews) * 100).toFixed(1)}%` : "—"}
-        />
+        <StatCard icon={<TrendingUp className="w-5 h-5" />} label="Click-Through Rate" value={totals.totalViews > 0 ? `${((totals.totalClicks / totals.totalViews) * 100).toFixed(1)}%` : "—"} />
         <StatCard icon={<Globe className="w-5 h-5" />} label="Unique Locations" value={totals.uniqueLocations} />
       </div>
-
       <div className="flex flex-wrap items-center gap-3">
         {(["all", "article", "hero", "ad"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-2 text-xs uppercase tracking-widest font-sans border rounded transition-colors ${
-              filter === f
-                ? "border-primary text-primary bg-primary/10"
-                : "border-border text-muted-foreground hover:text-foreground"
-            }`}
-          >
+          <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 text-xs uppercase tracking-widest font-sans border rounded transition-colors ${filter === f ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
             {f === "all" ? "All Content" : f === "ad" ? "Ads" : `${f}s`}
           </button>
         ))}
-        <button
-          onClick={handleClear}
-          className="ml-auto px-4 py-2 text-xs uppercase tracking-widest font-sans border border-destructive/30 text-destructive rounded hover:bg-destructive/10 transition-colors"
-        >
-          Clear Data
-        </button>
+        <button onClick={handleClear} className="ml-auto px-4 py-2 text-xs uppercase tracking-widest font-sans border border-destructive/30 text-destructive rounded hover:bg-destructive/10 transition-colors">Clear Data</button>
       </div>
-
       <div className="bg-card border border-border rounded overflow-hidden">
         <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
-          <span>Content</span>
-          <span className="text-center">Type</span>
-          <span className="text-center">Views</span>
-          <span className="text-center">Clicks</span>
-          <span className="text-center">CTR</span>
+          <span>Content</span><span className="text-center">Type</span><span className="text-center">Views</span><span className="text-center">Clicks</span><span className="text-center">CTR</span>
         </div>
         {sorted.length === 0 ? (
           <div className="px-5 py-8 text-center text-muted-foreground text-sm font-sans">No data yet. Views and clicks are tracked as visitors interact with content.</div>
-        ) : (
-          sorted.map((item) => {
-            const ctr = item.views > 0 ? ((item.clicks / item.views) * 100).toFixed(1) : "0.0";
-            return (
-              <div
-                key={`${item.contentType}:${item.contentId}`}
-                className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors"
-              >
-                <span className="truncate text-foreground">{item.label || item.contentId}</span>
-                <span className="text-center">
-                  <span className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider rounded ${
-                    item.contentType === "article" ? "bg-primary/10 text-primary" :
-                    item.contentType === "hero" ? "bg-accent/10 text-accent" :
-                    "bg-muted text-muted-foreground"
-                  }`}>{item.contentType}</span>
-                </span>
-                <span className="text-center text-foreground font-medium">{item.views}</span>
-                <span className="text-center text-foreground font-medium">{item.clicks}</span>
-                <span className="text-center text-primary font-medium">{ctr}%</span>
-              </div>
-            );
-          })
-        )}
+        ) : sorted.map((item) => {
+          const ctr = item.views > 0 ? ((item.clicks / item.views) * 100).toFixed(1) : "0.0";
+          return (
+            <div key={`${item.contentType}:${item.contentId}`} className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors">
+              <span className="truncate text-foreground">{item.label || item.contentId}</span>
+              <span className="text-center"><span className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider rounded ${item.contentType === "article" ? "bg-primary/10 text-primary" : item.contentType === "hero" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground"}`}>{item.contentType}</span></span>
+              <span className="text-center text-foreground font-medium">{item.views}</span>
+              <span className="text-center text-foreground font-medium">{item.clicks}</span>
+              <span className="text-center text-primary font-medium">{ctr}%</span>
+            </div>
+          );
+        })}
       </div>
-
       <div>
-        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-primary" /> Viewer Locations
-        </h3>
+        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> Viewer Locations</h3>
         <div className="bg-card border border-border rounded overflow-hidden">
           <div className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
-            <span>City</span>
-            <span>Country</span>
-            <span className="text-center">Views</span>
-            <span className="text-center">Clicks</span>
+            <span>City</span><span>Country</span><span className="text-center">Views</span><span className="text-center">Clicks</span>
           </div>
           {locations.length === 0 ? (
-            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">
-              No location data yet. Locations are captured automatically from viewer IP addresses.
+            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No location data yet. Locations are captured automatically from viewer IP addresses.</div>
+          ) : locations.map((loc) => (
+            <div key={`${loc.city}|${loc.country}`} className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors">
+              <span className="text-foreground flex items-center gap-2"><MapPin className="w-3 h-3 text-primary shrink-0" />{loc.city}</span>
+              <span className="text-muted-foreground flex items-center gap-1.5"><span className="text-xs">{loc.countryCode}</span>{loc.country}</span>
+              <span className="text-center text-foreground font-medium">{loc.views}</span>
+              <span className="text-center text-foreground font-medium">{loc.clicks}</span>
             </div>
-          ) : (
-            locations.map((loc) => (
-              <div
-                key={`${loc.city}|${loc.country}`}
-                className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors"
-              >
-                <span className="text-foreground flex items-center gap-2">
-                  <MapPin className="w-3 h-3 text-primary shrink-0" />
-                  {loc.city}
-                </span>
-                <span className="text-muted-foreground flex items-center gap-1.5">
-                  <span className="text-xs">{loc.countryCode}</span>
-                  {loc.country}
-                </span>
-                <span className="text-center text-foreground font-medium">{loc.views}</span>
-                <span className="text-center text-foreground font-medium">{loc.clicks}</span>
-              </div>
-            ))
-          )}
+          ))}
         </div>
       </div>
-
       <div>
         <h3 className="font-serif text-lg font-semibold mb-3 text-foreground">Recent Events</h3>
         <div className="bg-card border border-border rounded max-h-72 overflow-y-auto">
           {recent.length === 0 ? (
             <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No events recorded yet.</div>
-          ) : (
-            recent.map((ev) => (
-              <div key={ev.id} className="flex items-center gap-3 px-4 py-2.5 text-xs font-sans border-b border-border/30">
-                <span className={`w-2 h-2 rounded-full shrink-0 ${ev.eventType === "view" ? "bg-primary/50" : "bg-primary"}`} />
-                <span className="text-muted-foreground w-36 shrink-0">
-                  {new Date(ev.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                </span>
-                <span className="text-foreground">{ev.eventType}</span>
-                <span className="text-muted-foreground">·</span>
-                <span className="text-muted-foreground truncate">{ev.contentType} — {ev.contentId}</span>
-                {ev.location && (
-                  <>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-primary/70 shrink-0 flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {ev.location.city}, {ev.location.countryCode}
-                    </span>
-                  </>
-                )}
-              </div>
-            ))
-          )}
+          ) : recent.map((ev) => (
+            <div key={ev.id} className="flex items-center gap-3 px-4 py-2.5 text-xs font-sans border-b border-border/30">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${ev.eventType === "view" ? "bg-primary/50" : "bg-primary"}`} />
+              <span className="text-muted-foreground w-36 shrink-0">{new Date(ev.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+              <span className="text-foreground">{ev.eventType}</span>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-muted-foreground truncate">{ev.contentType} — {ev.contentId}</span>
+              {ev.location && (<><span className="text-muted-foreground">·</span><span className="text-primary/70 shrink-0 flex items-center gap-1"><MapPin className="w-3 h-3" />{ev.location.city}, {ev.location.countryCode}</span></>)}
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -1316,9 +841,7 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
   return (
     <div className="bg-card border border-border rounded p-5 flex items-center gap-4">
-      <div className="w-10 h-10 rounded flex items-center justify-center bg-primary/10 text-primary">
-        {icon}
-      </div>
+      <div className="w-10 h-10 rounded flex items-center justify-center bg-primary/10 text-primary">{icon}</div>
       <div>
         <p className="text-2xl font-serif font-bold text-foreground">{value}</p>
         <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{label}</p>

@@ -8,7 +8,7 @@ const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 const BRAND_NAME = "The Magorium";
 const BRAND_ALIAS = "Magorium";
 export const HOME_SEO_DESCRIPTION =
-  "Magorium — a curated luxury lifestyle magazine covering travel, fashion, art, yachting, motorsport, golf, tennis, wellness and global events. Where Curated Becomes Legend.";
+  "The Magorium is a globally curated lifestyle magazine covering luxury travel, yachting, motorsport, equestrian, tennis, golf, tech & AI, art & design, fashion, film, music, wellness and global culture. Where Curated Becomes Legend.";
 const HOME_SEO_KEYWORDS = [
   BRAND_NAME,
   "curated lifestyle magazine",

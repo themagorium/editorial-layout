@@ -190,15 +190,25 @@ function normalizeContributorStoryPaths(
 }
 
 function setHomeStructuredData(storyPaths: string[] = []) {
-  upsertStructuredDataScript("organization-jsonld", {
+ upsertStructuredDataScript("organization-jsonld", {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": "https://www.themagorium.com/#organization",
     name: BRAND_NAME,
+    alternateName: ["Magorium", "TheMagorium", "The Magorium Magazine"],
     url: SITE_URL,
+    description: HOME_SEO_DESCRIPTION,
+    slogan: "Where Curated Becomes Legend",
     logo: {
       "@type": "ImageObject",
       url: DEFAULT_FAVICON,
     },
+    sameAs: [
+      "https://twitter.com/TheMagorium",
+      "https://www.instagram.com/themagorium",
+      "https://www.linkedin.com/company/themagorium",
+      "https://www.facebook.com/TheMagorium",
+    ],
   });
 
   upsertStructuredDataScript("website-jsonld", {

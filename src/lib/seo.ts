@@ -11,14 +11,23 @@ export const HOME_SEO_DESCRIPTION =
   "The Magorium is a globally curated lifestyle magazine covering luxury travel, yachting, motorsport, equestrian, tennis, golf, tech & AI, art & design, fashion, film, music, wellness and global culture. Where Curated Becomes Legend.";
 const HOME_SEO_KEYWORDS = [
   BRAND_NAME,
-  "curated lifestyle magazine",
-  "travel",
-  "art",
-  "culture",
-  "fashion",
-  "motorsport",
+  "The Magorium",
+  "Magorium",
+  "TheMagorium",
+  "globally curated lifestyle magazine",
+  "luxury travel",
   "yachting",
-  "global events",
+  "motorsport",
+  "equestrian",
+  "tennis",
+  "golf",
+  "tech and AI",
+  "art and design",
+  "fashion",
+  "film",
+  "music",
+  "wellness",
+  "global culture",
 ];
 
 function upsertMeta(name: string, content: string, property = false) {
@@ -151,6 +160,7 @@ function setStructuredData(
     creator: writerEntity,
     publisher: {
       "@type": "Organization",
+      "@id": "https://www.themagorium.com/#organization",
       name: "The Magorium",
       logo: {
         "@type": "ImageObject",
@@ -190,7 +200,7 @@ function normalizeContributorStoryPaths(
 }
 
 function setHomeStructuredData(storyPaths: string[] = []) {
- upsertStructuredDataScript("organization-jsonld", {
+  upsertStructuredDataScript("organization-jsonld", {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": "https://www.themagorium.com/#organization",
@@ -214,12 +224,24 @@ function setHomeStructuredData(storyPaths: string[] = []) {
   upsertStructuredDataScript("website-jsonld", {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": "https://www.themagorium.com/#website",
     name: BRAND_NAME,
+    alternateName: ["Magorium", "TheMagorium"],
     url: SITE_URL,
+    description: HOME_SEO_DESCRIPTION,
     publisher: {
       "@type": "Organization",
+      "@id": "https://www.themagorium.com/#organization",
       name: BRAND_NAME,
       url: SITE_URL,
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/magorium?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
     },
   });
 
@@ -238,7 +260,7 @@ function setHomeStructuredData(storyPaths: string[] = []) {
 
 export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
   void queryHint;
-  const title = BRAND_NAME;
+  const title = `${BRAND_NAME} | Global Curated Lifestyle Magazine — Luxury, Sport, Technology, Arts & Culture`;
   const description = HOME_SEO_DESCRIPTION;
   const keywords = HOME_SEO_KEYWORDS.join(", ");
 
@@ -256,6 +278,7 @@ export function applyHomeSeo(queryHint?: string, storyPaths: string[] = []) {
   upsertMeta("og:site_name", BRAND_NAME, true);
 
   upsertMeta("twitter:card", "summary_large_image");
+  upsertMeta("twitter:site", "@TheMagorium");
   upsertMeta("twitter:title", title);
   upsertMeta("twitter:description", description);
   upsertMeta("twitter:image", DEFAULT_OG_IMAGE);
@@ -304,6 +327,7 @@ export function applyArticleSeo(content: Article | (HeroItem & { excerpt?: strin
   upsertMeta("og:site_name", brandName, true);
 
   upsertMeta("twitter:card", "summary_large_image");
+  upsertMeta("twitter:site", "@TheMagorium");
   upsertMeta("twitter:title", title);
   upsertMeta("twitter:description", description);
   upsertMeta("twitter:image", content.imageUrl || DEFAULT_OG_IMAGE);
@@ -353,6 +377,8 @@ export function applyContributorsSeo(
   upsertMeta("og:image", DEFAULT_OG_IMAGE, true);
   upsertMeta("og:site_name", BRAND_NAME, true);
 
+  upsertMeta("twitter:card", "summary_large_image");
+  upsertMeta("twitter:site", "@TheMagorium");
   upsertMeta("twitter:title", title);
   upsertMeta("twitter:description", description);
   upsertMeta("twitter:image", DEFAULT_OG_IMAGE);
@@ -431,6 +457,8 @@ export function applyCollectionSeo(title: string, description: string, path: str
   upsertMeta("og:image", DEFAULT_OG_IMAGE, true);
   upsertMeta("og:site_name", BRAND_NAME, true);
 
+  upsertMeta("twitter:card", "summary_large_image");
+  upsertMeta("twitter:site", "@TheMagorium");
   upsertMeta("twitter:title", title);
   upsertMeta("twitter:description", description);
   upsertMeta("twitter:image", DEFAULT_OG_IMAGE);
@@ -497,9 +525,8 @@ export function applyAuthorSeo(authorName: string, storyCount: number, storyPath
 }
 
 export function applyMagoriumBrandSeo(path = "/magorium") {
-  const isAliasPage = path.trim() !== "" && path.trim() !== "/";
-  const canonicalUrl = `${SITE_URL}/`;
-  const title = BRAND_NAME;
+  const canonicalUrl = `${SITE_URL}${path}`;
+  const title = `${BRAND_NAME} | Global Curated Lifestyle Magazine — Luxury, Sport, Technology, Arts & Culture`;
   const description = HOME_SEO_DESCRIPTION;
   const keywords = HOME_SEO_KEYWORDS.join(", ");
 
@@ -507,7 +534,7 @@ export function applyMagoriumBrandSeo(path = "/magorium") {
   upsertMeta("description", description);
   upsertMeta("author", BRAND_NAME);
   upsertMeta("keywords", keywords);
-  upsertMeta("robots", isAliasPage ? "noindex,follow" : "index,follow");
+  upsertMeta("robots", "index,follow");
 
   upsertMeta("og:title", title, true);
   upsertMeta("og:description", description, true);
@@ -517,6 +544,7 @@ export function applyMagoriumBrandSeo(path = "/magorium") {
   upsertMeta("og:site_name", BRAND_NAME, true);
 
   upsertMeta("twitter:card", "summary_large_image");
+  upsertMeta("twitter:site", "@TheMagorium");
   upsertMeta("twitter:title", title);
   upsertMeta("twitter:description", description);
   upsertMeta("twitter:image", DEFAULT_OG_IMAGE);
@@ -527,10 +555,14 @@ export function applyMagoriumBrandSeo(path = "/magorium") {
   upsertStructuredDataScript("magorium-brand-jsonld", {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": "https://www.themagorium.com/#website",
     name: BRAND_NAME,
-    url: canonicalUrl,
+    alternateName: ["Magorium", "TheMagorium"],
+    url: SITE_URL,
+    description: HOME_SEO_DESCRIPTION,
     publisher: {
       "@type": "Organization",
+      "@id": "https://www.themagorium.com/#organization",
       name: BRAND_NAME,
       url: SITE_URL,
     },
@@ -567,6 +599,7 @@ export function applySeoHistorySeo(storyPaths: string[] = [], contributorNames: 
   upsertMeta("og:site_name", BRAND_NAME, true);
 
   upsertMeta("twitter:card", "summary_large_image");
+  upsertMeta("twitter:site", "@TheMagorium");
   upsertMeta("twitter:title", title);
   upsertMeta("twitter:description", description);
   upsertMeta("twitter:image", DEFAULT_OG_IMAGE);

@@ -29,12 +29,25 @@ export default function EditorsLetterPage() {
   return (
     <ContentPage title="Editor's Letter">
       {content.logoUrl && (
-        <div className="mb-8 flex justify-center w-full">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            marginBottom: "2rem",
+          }}
+        >
           <img
             src={content.logoUrl}
             alt="The Magorium"
-            className="w-full max-w-sm object-contain rounded"
-            style={{ maxHeight: "280px", display: "block" }}
+            style={{
+              display: "block",
+              width: "100%",
+              maxWidth: "400px",
+              maxHeight: "280px",
+              objectFit: "contain",
+              borderRadius: "8px",
+            }}
           />
         </div>
       )}

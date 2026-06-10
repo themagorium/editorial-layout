@@ -30,7 +30,7 @@ export default function EditorsLetterPage() {
     <ContentPage title="Editor's Letter">
       {content.logoUrl && (
         <div className="mb-8 flex justify-center">
-          <img src={content.logoUrl} alt="The Magorium" className="max-h-24 object-contain" />
+          <img src={content.logoUrl} alt="The Magorium" className="max-h-64 object-contain" />
         </div>
       )}
       <p className="text-lg font-editorial italic text-foreground">

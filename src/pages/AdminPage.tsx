@@ -8,14 +8,7 @@ import {
   saveHeroes,
   saveArticles,
   saveAds,
-  publishEditorialContent,
-  getPublishedContentSnapshot,
-  DEFAULT_PUBLISHED_CONTENT,
-  resetToDefaults,
-  clearLocalDraftStorage,
-  isStorageQuotaExceededError,
-  CATEGORIES,
-  formatEditionLabel,
+  publishEditorialContent,type
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
 import {
@@ -83,10 +76,21 @@ function parseSeoTagsInput(value: string): string[] {
 
 type EditableContentPayload = { heroes: HeroItem[]; articles: Article[]; ads: AdSlot[] };
 
-type PageContent = {
-  editorsLetter: { quote: string; body1: string; body2: string; body3: string; signoff: string; logoUrl: string };
-  about: { heading: string; body: string };
-  masthead: { editorInChief: string; contributors: string; contact: string };
+const STORAGE_KEY = "magorium_page_content";
+
+const DEFAULT_PAGE_CONTENT: PageContent = {
+  editorsLetter: {
+    quote: "The world is full of extraordinary things quietly waiting for our wits to grow sharper.",
+    body1: "Welcome to The Magorium — a private-view journal for those who believe luxury is not a price point but a perspective. Each month, we curate a single volume of the events, destinations, and cultural moments that define the season.",
+    body2: "From the frozen polo fields of St. Moritz to the fashion ateliers of Paris, from the tech salons of Davos to the design studios of Cape Town — we seek the stories behind the spectacle. Our editorial lens is deliberate: fewer stories, told with greater depth.",
+    body3: "This is not a news publication. It is a curated companion for the globally curious — those who travel with intention, collect with knowledge, and engage with culture as participants, not spectators.",
+    signoff: "With warm regards,\nThe Editorial Desk",
+    logoUrl: "",
+  },
+  about: { heading: "About The Magorium", body: "The Magorium is a private-view journal covering luxury, travel, culture, sport, and design. Where Curated Becomes Legend." },
+  masthead: { editorInChief: "", contributors: "", contact: "" },
+  contributors: { logoUrl: "", images: [] },
+  partnerships: { logoUrl: "", images: [] },
 };
 
 const DEFAULT_PAGE_CONTENT: PageContent = {

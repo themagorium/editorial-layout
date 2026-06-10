@@ -44,7 +44,7 @@ export default function EditorsLetterPage() {
               display: "block",
               width: "100%",
               maxWidth: "800px",
-              maxHeight: "480px",
+              maxHeight: "380px",
               objectFit: "contain",
               borderRadius: "12px",
             }}

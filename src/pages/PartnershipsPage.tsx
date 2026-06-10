@@ -26,15 +26,26 @@ export default function PartnershipsPage() {
   return (
     <ContentPage title="Partnerships">
       {logoUrl && (
-        <div className="mb-8 flex justify-center">
-          <img src={logoUrl} alt="Partner" className="max-h-24 object-contain" />
+        <div className="mb-6 flex justify-center w-full">
+          <img
+            src={logoUrl}
+            alt="Partner"
+            className="w-full max-w-xs object-contain rounded"
+            style={{ maxHeight: "160px", display: "block" }}
+          />
         </div>
       )}
 
       {images.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8 w-full">
           {images.map((src, i) => (
-            <img key={i} src={src} alt="" className="w-full h-40 object-cover rounded-lg" />
+            <img
+              key={i}
+              src={src}
+              alt=""
+              className="w-full object-cover rounded-lg"
+              style={{ height: "120px", display: "block" }}
+            />
           ))}
         </div>
       )}
@@ -51,7 +62,7 @@ export default function PartnershipsPage() {
       </ul>
       <h2 className="text-foreground font-editorial text-xl font-semibold mt-8">Get in Touch</h2>
       <p>For partnership enquiries, editorial features, and brand placements, contact our private desk:</p>
-      <p className="text-foreground font-medium">concierge@themagorium.com</p>
+      <p className="text-foreground font-medium">partnerships@themagorium.com</p>
     </ContentPage>
   );
 }

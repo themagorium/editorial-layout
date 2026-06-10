@@ -43,10 +43,10 @@ export default function EditorsLetterPage() {
             style={{
               display: "block",
               width: "100%",
-              maxWidth: "400px",
+              maxWidth: "600px",
               maxHeight: "280px",
               objectFit: "contain",
-              borderRadius: "8px",
+              borderRadius: "12px",
             }}
           />
         </div>

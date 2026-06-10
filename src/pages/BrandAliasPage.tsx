@@ -1,9 +1,14 @@
-import StoryFeedPage from "@/components/editorial/StoryFeedPage";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-type BrandAliasPageProps = {
-  queryHint?: string;
+const BrandAliasPage = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate("/", { replace: true });
+  }, [navigate]);
+
+  return null;
 };
 
-export default function BrandAliasPage({ queryHint }: BrandAliasPageProps) {
-  return <StoryFeedPage seoHint={queryHint} canonicalAliasPath="/magorium" />;
-}
+export default BrandAliasPage;

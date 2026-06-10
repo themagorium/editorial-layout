@@ -43,8 +43,8 @@ export default function EditorsLetterPage() {
             style={{
               display: "block",
               width: "100%",
-              maxWidth: "600px",
-              maxHeight: "280px",
+              maxWidth: "800px",
+              maxHeight: "480px",
               objectFit: "contain",
               borderRadius: "12px",
             }}

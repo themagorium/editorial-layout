@@ -1,256 +1,51 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
  
-  <!-- HOMEPAGE -->
+  <!-- HOMEPAGE — do not change this entry -->
   <url>
-    <loc>https://www.themagorium.com/</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>daily</changefreq>
+    <loc>https://themagorium.com/</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
  
-  <!-- BRAND / DISAMBIGUATION PAGES — HIGH PRIORITY FOR GOOGLE -->
+  <!-- ═══════════════════════════════════ -->
+  <!-- APRIL 2026 EDITION                  -->
+  <!-- ═══════════════════════════════════ -->
+ 
   <url>
-    <loc>https://www.themagorium.com/about</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://themagorium.com/articles/the-architecture-of-precision-sport--h-apr26-1</loc>
+    <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/magorium</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/the-magorium</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/magorum</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <!-- ARCHIVE & CONTRIBUTORS -->
-  <url>
-    <loc>https://www.themagorium.com/archive</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
  
   <url>
-    <loc>https://www.themagorium.com/contributors</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://themagorium.com/articles/the-world-reorganises-its-financial-architecture--h-apr26-2</loc>
+    <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <!-- AUTHOR PAGES -->
-  <url>
-    <loc>https://www.themagorium.com/author/millie-sealana</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
  
   <url>
-    <loc>https://www.themagorium.com/author/charlotte-thames</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://themagorium.com/articles/from-models-to-infrastructure-stacks--h-apr26-3</loc>
+    <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
  
   <url>
-    <loc>https://www.themagorium.com/author/elena-voss</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://themagorium.com/articles/time-recalibrated--a-apr26-2</loc>
+    <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
  
-  <url>
-    <loc>https://www.themagorium.com/author/james-whitfield</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/author/marcus-chen</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/author/staff</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/author/the-magorium-staff</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
- 
-  <!-- ARTICLES -->
-  <url>
-    <loc>https://www.themagorium.com/articles/super-bowl-lx-stadium-lights-bay-area-glamour--a2</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/rio-carnival-2026-samba-under-the-stars--a1</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/dubai-international-boat-show-the-middle-easts-premier-superyacht-gathering--a3</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/at-t-pebble-beach-pro-am-where-golf-meets-the-pacific--a4</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/the-98th-academy-awards-hollywoods-grandest-night-returns--v2-oscars</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/art-sg-2026-southeast-asias-leading-art-fair-expands-its-global-reach--v2-art-sg</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/abu-dhabi-art-2026-the-gulfs-most-ambitious-cultural-moment--v2-abu-dhabi-art</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/australian-open-2026-grand-slam-glory-under-melbourne-skies--v2-aus-open</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/132nd-hurlingham-open-la-natividad-la-dolfina-establish-a-new-standard-under-pressure--v1-cambiaso</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/blazy-takes-in-paris-fashion-week--v1-pfw</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/kusama-before-the-crowds--v1-kusama</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/engadin-awaits-the-winter--v1-engadin</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/winter-olympics-xxv-milano-cortina-2026--h1</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/milan-fashion-week-fw26-power-precision-italian-glamour--h2</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/sothebys-magnificent-jewels-a-new-york-evening-sale--h3</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/davos-2026-the-world-economic-forums-annual-meeting--h-wef</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/41st-snow-polo-world-cup-st-moritz--h-snow-polo</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/paris-haute-couture-week-ss26-the-art-of-the-extraordinary--h-haute-couture</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/sailgp-from-geneva-to-cadiz--h-sailgp</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/cv-summit-2025-kongresshaus-zurich-september-23-24-2025--h-cv-summit</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
- 
-  <url>
-    <loc>https://www.themagorium.com/articles/f1-returns-to-american-soil-in-the-tech-haven-of-austin--h-f1-austin</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
+  <!-- ═══════════════════════════════════ -->
+  <!-- ADD FUTURE EDITIONS BELOW THIS LINE -->
+  <!-- Copy one <url> block per article.   -->
+  <!-- Update loc and lastmod each time.   -->
+  <!-- ═══════════════════════════════════ -->
  
 </urlset>
- 

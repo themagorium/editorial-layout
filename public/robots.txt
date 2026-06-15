@@ -1,29 +1,14 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
-User-agent: LinkedInBot
-Allow: /
-
-User-agent: Slurp
-Allow: /
-
-User-agent: DuckDuckBot
-Allow: /
-
-User-agent: Applebot
-Allow: /
 
 User-agent: *
 Allow: /
-
-Sitemap: https://www.themagorium.com/sitemap.xml
-Sitemap: https://www.themagorium.com/api/sitemap
+ 
+User-agent: Googlebot
+Allow: /
+ 
+User-agent: Bingbot
+Allow: /
+ 
+User-agent: facebookexternalhit
+Allow: /
+ 
+Sitemap: https://themagorium.com/sitemap.xml

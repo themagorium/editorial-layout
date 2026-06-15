@@ -1,4 +1,31 @@
 {
+  "redirects": [
+    {
+      "source": "/magorium",
+      "destination": "https://themagorium.com",
+      "permanent": true
+    },
+    {
+      "source": "/magorium/:path*",
+      "destination": "https://themagorium.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/Magorium",
+      "destination": "https://themagorium.com",
+      "permanent": true
+    },
+    {
+      "source": "/themagorium",
+      "destination": "https://themagorium.com",
+      "permanent": true
+    },
+    {
+      "source": "/TheMagorium",
+      "destination": "https://themagorium.com",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

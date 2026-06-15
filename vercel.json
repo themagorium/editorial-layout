@@ -1,146 +1,58 @@
+
 {
-  "routes": [
+  "redirects": [
     {
-      "src": "/BingSiteAuth\\.xml",
-      "dest": "/BingSiteAuth.xml"
-    },
-    {
-      "src": "/favicon\\.ico",
-      "dest": "/favicon.png"
-    },
-    {
-      "src": "/favicon\\.png",
-      "dest": "/favicon.png"
-    },
-    {
-      "src": "/og-image\\.jpg",
-      "dest": "/og-image.png"
-    },
-    {
-      "src": "/magorium-mark\\.svg",
-      "dest": "/favicon.png"
-    },
-    {
-      "src": "/placeholder\\.svg",
-      "dest": "/favicon.png"
-    },
-    {
-      "src": "/sitemap.xml",
-      "dest": "/api/sitemap"
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "/api/robots"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/articles/(.+)",
+      "source": "/(.*)",
       "has": [
         {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
+          "type": "host",
+          "value": "www.themagorium.com"
         }
       ],
-      "dest": "/api/seo-article?identifier=$1"
-    },
+      "destination": "https://themagorium.com/$1",
+      "permanent": true
+    }
+  ],
+  "headers": [
     {
-      "src": "/author/(.+)",
-      "has": [
+      "source": "/(.*)",
+      "headers": [
         {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
-        }
-      ],
-      "dest": "/api/seo-author?slug=$1"
-    },
-    {
-      "src": "/category/(.+)",
-      "has": [
+          "key": "X-Robots-Tag",
+          "value": "index, follow"
+        },
         {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
-        }
-      ],
-      "dest": "/api/seo-category?slug=$1"
-    },
-    {
-      "src": "/categories/(.+)",
-      "has": [
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
         {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
         }
-      ],
-      "dest": "/api/seo-category?slug=$1"
+      ]
     },
     {
-      "src": "/contributors/?",
-      "has": [
+      "source": "/sitemap.xml",
+      "headers": [
         {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
-        }
-      ],
-      "dest": "/api/seo-contributors"
-    },
-    {
-      "src": "/seo-history/?",
-      "has": [
+          "key": "Content-Type",
+          "value": "application/xml"
+        },
         {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, s-maxage=86400"
         }
-      ],
-      "dest": "/api/seo-history"
+      ]
     },
     {
-      "src": "/(magorium|magorum|magoriium|the-magorium|the-magoriium|themagorium|themagoriium)/?",
-      "has": [
+      "source": "/robots.txt",
+      "headers": [
         {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
+          "key": "Content-Type",
+          "value": "text/plain"
         }
-      ],
-      "dest": "/api/seo-home?hint=magorium&path=/$1"
-    },
-    {
-      "src": "/$",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
-        }
-      ],
-      "dest": "/api/seo-home?hint=the-magorium&path=/"
-    },
-    {
-      "src": "/(.*)",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|Applebot).*"
-        }
-      ],
-      "dest": "/api/seo-home?path=/$1"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      ]
     }
   ]
 }
+ 

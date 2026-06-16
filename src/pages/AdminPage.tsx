@@ -609,8 +609,17 @@ function EditableStoryForm({
             )}
           </div>
 
-          {secondaryImageUrl ? (
-            <img src={secondaryImageUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
+        {secondaryImageUrl ? (
+            <div className="relative">
+              <img src={secondaryImageUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
+              <button
+                type="button"
+                onClick={() => { onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }}
+                className="absolute top-2 right-2 flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-destructive text-white rounded shadow hover:bg-destructive/90 transition-colors"
+              >
+                <Trash2 className="w-3 h-3" /> Remove Photo
+              </button>
+            </div>
           ) : (
             <div className="w-full h-24 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">
               No opening photo uploaded

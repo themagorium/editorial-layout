@@ -543,7 +543,8 @@ function EditableStoryForm({
 }) {
   const isArticle = kind === "article";
 const [seoTagDraft, setSeoTagDraft] = useState("");
-  const [localSecondaryUrl, setLocalSecondaryUrl] = useState(secondaryImageUrl || "");
+const [localSecondaryUrl, setLocalSecondaryUrl] = useState(secondaryImageUrl || "");
+  useEffect(() => { setLocalSecondaryUrl(secondaryImageUrl || ""); }, [secondaryImageUrl]);
   const secondaryImgRef = useRef<HTMLInputElement>(null);
 
   const addSeoTagsFromDraft = () => {

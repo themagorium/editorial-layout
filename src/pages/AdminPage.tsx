@@ -588,8 +588,7 @@ function EditableStoryForm({
           )}
         </div>
 
-        {/* ── SECONDARY IMAGE UPLOAD ── */}
-        {/* This photo appears on the article page between the headline and the first paragraph */}
+     {/* ── SECONDARY IMAGE UPLOAD ── */}
         <div className="mt-2 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -598,10 +597,9 @@ function EditableStoryForm({
                 Appears below the headline, above the first paragraph. Leave empty to skip.
               </p>
             </div>
-            )}
           </div>
 
-        {secondaryImageUrl ? (
+          {secondaryImageUrl ? (
             <div className="relative">
               <img src={secondaryImageUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
               <button

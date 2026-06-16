@@ -287,7 +287,7 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
         <img
           src={block.content}
           alt={block.caption || ""}
-          className="w-full rounded"
+          className="w-full md:w-4/5 mx-auto block rounded"
           loading="lazy"
           onError={(e) => { const fig = e.currentTarget.closest("figure"); if (fig) (fig as HTMLElement).style.display = "none"; }}
         />

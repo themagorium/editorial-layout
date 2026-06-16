@@ -49,6 +49,9 @@ export interface HeroItem {
   subtitle: string;
   category: Category;
   imageUrl: string;
+  secondaryImageUrl?: string;
+  secondaryImageCaption?: string;
+  secondaryImageCitation?: string;
   videoUrl?: string;
   author?: string;
   date: string;

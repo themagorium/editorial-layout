@@ -41,6 +41,10 @@ type ArticlePayload = {
   category: string;
   imageUrl: string;
   videoUrl?: string;
+  secondaryImageUrl?: string;
+  secondaryImageCaption?: string;
+  secondaryImageCitation?: string;
+  sources?: string;
   author: string;
   date: string;
   featured?: boolean;

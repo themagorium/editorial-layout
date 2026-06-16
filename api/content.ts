@@ -214,7 +214,10 @@ function sanitizeBody(blocks: BodyBlock[] | undefined): BodyBlock[] {
     if (!block || typeof block !== "object") return false;
     const type = block.type;
     if (type !== "text" && type !== "heading" && type !== "image" && type !== "video") return false;
-    return Boolean((block.content || "").trim());
+    if (type === "text" || type === "heading") {
+      return Boolean((block.content || "").trim());
+    }
+    return true;
   });
 }
 
@@ -239,16 +242,7 @@ function sanitizeSeoTags(tags: unknown): string[] {
 function sanitizePayload(input: unknown): PublishPayload {
   const payload = (input || {}) as Partial<PublishPayload>;
 
-  const heroes = ensureArray<HeroPayload>(payload.heroes).map((hero) => ({
-    ...hero,
-    seoTags: sanitizeSeoTags(hero.seoTags),
-    body: sanitizeBody(hero.body),
-  }));
-  const articles = ensureArray<ArticlePayload>(payload.articles).map((article) => ({
-    ...article,
-    seoTags: sanitizeSeoTags(article.seoTags),
-    body: sanitizeBody(article.body),
-  }));
+
   const ads = ensureArray<AdPayload>(payload.ads);
 
   return { heroes, articles, ads };
@@ -257,7 +251,24 @@ function sanitizePayload(input: unknown): PublishPayload {
 function slugifyText(value: string): string {
   return value
     .toLowerCase()
-    .trim()
+    .trim()const heroes = ensureArray<HeroPayload>(payload.heroes).map((hero) => ({
+    ...hero,
+    seoTags: sanitizeSeoTags(hero.seoTags),
+    body: sanitizeBody(hero.body),
+    secondaryImageUrl: (hero as any).secondaryImageUrl,
+    secondaryImageCaption: (hero as any).secondaryImageCaption,
+    secondaryImageCitation: (hero as any).secondaryImageCitation,
+    sources: (hero as any).sources,
+  }));
+  const articles = ensureArray<ArticlePayload>(payload.articles).map((article) => ({
+    ...article,
+    seoTags: sanitizeSeoTags(article.seoTags),
+    body: sanitizeBody(article.body),
+    secondaryImageUrl: (article as any).secondaryImageUrl,
+    secondaryImageCaption: (article as any).secondaryImageCaption,
+    secondaryImageCitation: (article as any).secondaryImageCitation,
+    sources: (article as any).sources,
+  }));
     .replace(/['"]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");

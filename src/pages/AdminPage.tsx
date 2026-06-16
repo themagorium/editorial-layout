@@ -97,7 +97,7 @@ const DEFAULT_PAGE_CONTENT: PageContent = {
   editorsLetter: {
     quote: "The world is full of extraordinary things quietly waiting for our wits to grow sharper.",
     body1: "Welcome to The Magorium — a private-view journal for those who believe luxury is not a price point but a perspective. Each month, we curate a single volume of the events, destinations, and cultural moments that define the season.",
-   body2: "From the frozen polo fields of St. Moritz to the fashion ateliers of Paris, from the tech salons of Davos to the design studios of Cape Town. We seek the stories behind the spectacle. Our editorial lens is deliberate: fewer stories, told with greater depth.",
+    body2: "From the frozen polo fields of St. Moritz to the fashion ateliers of Paris, from the tech salons of Davos to the design studios of Cape Town. We seek the stories behind the spectacle. Our editorial lens is deliberate: fewer stories, told with greater depth.",
     body3: "This is not a news publication. It is a curated companion for the globally curious — those who travel with intention, collect with knowledge, and engage with culture as participants, not spectators.",
     signoff: "With warm regards,\nThe Editorial Desk",
     logoUrl: "",
@@ -426,10 +426,36 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
       {filteredHeroes.map((hero) => (
         <ContentCard key={hero.id} onRemove={() => remove(hero.id)}>
           <EditableStoryForm
-            kind="hero" title={hero.title} summary={hero.subtitle} category={hero.category} author={hero.author || ""} seoTags={hero.seoTags || []} date={hero.date} featured={hero.featured} imageUrl={hero.imageUrl} videoUrl={hero.videoUrl} body={hero.body || []}
-            onTitleChange={(v) => update(hero.id, { title: v })} onSummaryChange={(v) => update(hero.id, { subtitle: v })} onCategoryChange={(v) => update(hero.id, { category: v })} onAuthorChange={(v) => update(hero.id, { author: v })} onSeoTagsChange={(v) => update(hero.id, { seoTags: v })} onDateChange={(v) => update(hero.id, { date: v })} onFeaturedChange={(v) => update(hero.id, { featured: v })} onImageChange={(v) => update(hero.id, { imageUrl: v })} onVideoChange={(v) => update(hero.id, { videoUrl: v })} onBodyChange={(v) => update(hero.id, { body: v })}
+            kind="hero"
+            title={hero.title}
+            summary={hero.subtitle}
+            category={hero.category}
+            author={hero.author || ""}
+            seoTags={hero.seoTags || []}
+            date={hero.date}
+            featured={hero.featured}
+            imageUrl={hero.imageUrl}
+            videoUrl={hero.videoUrl}
+            secondaryImageUrl={hero.secondaryImageUrl || ""}
+            secondaryImageCaption={hero.secondaryImageCaption || ""}
+            secondaryImageCitation={hero.secondaryImageCitation || ""}
+            body={hero.body || []}
+            onTitleChange={(v) => update(hero.id, { title: v })}
+            onSummaryChange={(v) => update(hero.id, { subtitle: v })}
+            onCategoryChange={(v) => update(hero.id, { category: v })}
+            onAuthorChange={(v) => update(hero.id, { author: v })}
+            onSeoTagsChange={(v) => update(hero.id, { seoTags: v })}
+            onDateChange={(v) => update(hero.id, { date: v })}
+            onFeaturedChange={(v) => update(hero.id, { featured: v })}
+            onImageChange={(v) => update(hero.id, { imageUrl: v })}
+            onVideoChange={(v) => update(hero.id, { videoUrl: v })}
+            onSecondaryImageChange={(v) => update(hero.id, { secondaryImageUrl: v })}
+            onSecondaryImageCaptionChange={(v) => update(hero.id, { secondaryImageCaption: v })}
+            onSecondaryImageCitationChange={(v) => update(hero.id, { secondaryImageCitation: v })}
+            onBodyChange={(v) => update(hero.id, { body: v })}
             onNormalizeBody={() => update(hero.id, { body: normalizeBodyFlow(hero.body || [], hero.imageUrl, hero.videoUrl) })}
-            sources={hero.sources || ""} onSourcesChange={(v) => update(hero.id, { sources: v })}
+            sources={hero.sources || ""}
+            onSourcesChange={(v) => update(hero.id, { sources: v })}
           />
         </ContentCard>
       ))}
@@ -448,10 +474,36 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
       {filteredArticles.map((article) => (
         <ContentCard key={article.id} onRemove={() => remove(article.id)}>
           <EditableStoryForm
-            kind="article" title={article.title} summary={article.excerpt} category={article.category} author={article.author} seoTags={article.seoTags || []} date={article.date} featured={article.featured} imageUrl={article.imageUrl} videoUrl={article.videoUrl} body={article.body || []}
-            onTitleChange={(v) => update(article.id, { title: v })} onSummaryChange={(v) => update(article.id, { excerpt: v })} onCategoryChange={(v) => update(article.id, { category: v })} onAuthorChange={(v) => update(article.id, { author: v })} onSeoTagsChange={(v) => update(article.id, { seoTags: v })} onDateChange={(v) => update(article.id, { date: v })} onFeaturedChange={(v) => update(article.id, { featured: v })} onImageChange={(v) => update(article.id, { imageUrl: v })} onVideoChange={(v) => update(article.id, { videoUrl: v })} onBodyChange={(v) => update(article.id, { body: v })}
+            kind="article"
+            title={article.title}
+            summary={article.excerpt}
+            category={article.category}
+            author={article.author}
+            seoTags={article.seoTags || []}
+            date={article.date}
+            featured={article.featured}
+            imageUrl={article.imageUrl}
+            videoUrl={article.videoUrl}
+            secondaryImageUrl={article.secondaryImageUrl || ""}
+            secondaryImageCaption={article.secondaryImageCaption || ""}
+            secondaryImageCitation={article.secondaryImageCitation || ""}
+            body={article.body || []}
+            onTitleChange={(v) => update(article.id, { title: v })}
+            onSummaryChange={(v) => update(article.id, { excerpt: v })}
+            onCategoryChange={(v) => update(article.id, { category: v })}
+            onAuthorChange={(v) => update(article.id, { author: v })}
+            onSeoTagsChange={(v) => update(article.id, { seoTags: v })}
+            onDateChange={(v) => update(article.id, { date: v })}
+            onFeaturedChange={(v) => update(article.id, { featured: v })}
+            onImageChange={(v) => update(article.id, { imageUrl: v })}
+            onVideoChange={(v) => update(article.id, { videoUrl: v })}
+            onSecondaryImageChange={(v) => update(article.id, { secondaryImageUrl: v })}
+            onSecondaryImageCaptionChange={(v) => update(article.id, { secondaryImageCaption: v })}
+            onSecondaryImageCitationChange={(v) => update(article.id, { secondaryImageCitation: v })}
+            onBodyChange={(v) => update(article.id, { body: v })}
             onNormalizeBody={() => update(article.id, { body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl) })}
-            sources={article.sources || ""} onSourcesChange={(v) => update(article.id, { sources: v })}
+            sources={article.sources || ""}
+            onSourcesChange={(v) => update(article.id, { sources: v })}
           />
         </ContentCard>
       ))}
@@ -460,12 +512,39 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
 }
 
 /* ---- Editable Story Form ---- */
-function EditableStoryForm({ kind, title, summary, category, author, seoTags, date, featured, imageUrl, videoUrl, body, onTitleChange, onSummaryChange, onCategoryChange, onAuthorChange, onSeoTagsChange, onDateChange, onFeaturedChange, onImageChange, onVideoChange, onBodyChange, onNormalizeBody, sources, onSourcesChange }: {
-  kind: "hero" | "article"; title: string; summary: string; category: Category; author: string; seoTags: string[]; date: string; featured?: boolean; imageUrl?: string; videoUrl?: string; body: ArticleBodyBlock[];
-  onTitleChange: (v: string) => void; onSummaryChange: (v: string) => void; onCategoryChange: (v: Category) => void; onAuthorChange: (v: string) => void; onSeoTagsChange: (v: string[]) => void; onDateChange: (v: string) => void; onFeaturedChange: (v: boolean) => void; onImageChange: (v: string) => void; onVideoChange: (v: string) => void; onBodyChange: (v: ArticleBodyBlock[]) => void; onNormalizeBody: () => void; sources?: string; onSourcesChange?: (v: string) => void;
+function EditableStoryForm({
+  kind, title, summary, category, author, seoTags, date, featured,
+  imageUrl, videoUrl,
+  secondaryImageUrl, secondaryImageCaption, secondaryImageCitation,
+  body,
+  onTitleChange, onSummaryChange, onCategoryChange, onAuthorChange,
+  onSeoTagsChange, onDateChange, onFeaturedChange,
+  onImageChange, onVideoChange,
+  onSecondaryImageChange, onSecondaryImageCaptionChange, onSecondaryImageCitationChange,
+  onBodyChange, onNormalizeBody,
+  sources, onSourcesChange,
+}: {
+  kind: "hero" | "article";
+  title: string; summary: string; category: Category; author: string;
+  seoTags: string[]; date: string; featured?: boolean;
+  imageUrl?: string; videoUrl?: string;
+  secondaryImageUrl?: string; secondaryImageCaption?: string; secondaryImageCitation?: string;
+  body: ArticleBodyBlock[];
+  onTitleChange: (v: string) => void; onSummaryChange: (v: string) => void;
+  onCategoryChange: (v: Category) => void; onAuthorChange: (v: string) => void;
+  onSeoTagsChange: (v: string[]) => void; onDateChange: (v: string) => void;
+  onFeaturedChange: (v: boolean) => void;
+  onImageChange: (v: string) => void; onVideoChange: (v: string) => void;
+  onSecondaryImageChange: (v: string) => void;
+  onSecondaryImageCaptionChange: (v: string) => void;
+  onSecondaryImageCitationChange: (v: string) => void;
+  onBodyChange: (v: ArticleBodyBlock[]) => void; onNormalizeBody: () => void;
+  sources?: string; onSourcesChange?: (v: string) => void;
 }) {
   const isArticle = kind === "article";
   const [seoTagDraft, setSeoTagDraft] = useState("");
+  const secondaryImgRef = useRef<HTMLInputElement>(null);
+
   const addSeoTagsFromDraft = () => {
     const draftTags = parseSeoTagsInput(seoTagDraft);
     if (draftTags.length === 0) { setSeoTagDraft(""); return; }
@@ -479,6 +558,13 @@ function EditableStoryForm({ kind, title, summary, category, author, seoTags, da
     onSeoTagsChange(merged);
     setSeoTagDraft("");
   };
+
+  const handleSecondaryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onSecondaryImageChange(await fileToOptimizedDataUrl(file));
+    e.target.value = "";
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
       <MediaUpload imageUrl={imageUrl} videoUrl={videoUrl} onImage={onImageChange} onVideo={onVideoChange} />
@@ -501,6 +587,61 @@ function EditableStoryForm({ kind, title, summary, category, author, seoTags, da
             </label>
           )}
         </div>
+
+        {/* ── SECONDARY IMAGE UPLOAD ── */}
+        {/* This photo appears on the article page between the headline and the first paragraph */}
+        <div className="mt-2 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h4 className="text-sm font-semibold text-primary font-sans">Article Opening Photo</h4>
+              <p className="text-[11px] text-muted-foreground font-sans mt-0.5">
+                Appears below the headline, above the first paragraph. Leave empty to skip.
+              </p>
+            </div>
+            {secondaryImageUrl && (
+              <button
+                type="button"
+                onClick={() => { onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }}
+                className="flex items-center gap-1 px-2 py-1 text-[10px] uppercase tracking-wider border border-destructive/40 text-destructive rounded hover:bg-destructive/10 transition-colors shrink-0"
+              >
+                <Trash2 className="w-3 h-3" /> Remove
+              </button>
+            )}
+          </div>
+
+          {secondaryImageUrl ? (
+            <img src={secondaryImageUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
+          ) : (
+            <div className="w-full h-24 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">
+              No opening photo uploaded
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => secondaryImgRef.current?.click()}
+            className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"
+          >
+            <Upload className="w-4 h-4" /> Upload Opening Photo
+          </button>
+          <input ref={secondaryImgRef} type="file" accept="image/*" className="hidden" onChange={handleSecondaryImageUpload} />
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              value={secondaryImageCaption || ""}
+              onChange={(e) => onSecondaryImageCaptionChange(e.target.value)}
+              placeholder="Caption (optional)"
+              className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans"
+            />
+            <input
+              value={secondaryImageCitation || ""}
+              onChange={(e) => onSecondaryImageCitationChange(e.target.value)}
+              placeholder="Photo credit (optional)"
+              className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans"
+            />
+          </div>
+        </div>
+
         <section className="rounded-lg border-2 border-primary/35 bg-primary/5 p-4 space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -524,6 +665,7 @@ function EditableStoryForm({ kind, title, summary, category, author, seoTags, da
           </div>
           <p className="text-[10px] text-muted-foreground font-sans">Tip: click any bubble to remove it.</p>
         </section>
+
         <div className="mt-4 pt-4 border-t border-border">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Preferred flow: photo/video → text → photo/video → text</p>
@@ -531,6 +673,7 @@ function EditableStoryForm({ kind, title, summary, category, author, seoTags, da
           </div>
           <ArticleBodyEditor blocks={body} heading={isArticle ? "Article Body" : "Hero Body"} onChange={onBodyChange} />
         </div>
+
         {onSourcesChange && (
           <div className="mt-4 pt-4 border-t border-border">
             <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Sources & Verification</label>
@@ -609,323 +752,4 @@ function PagesManager({ pageContent, setPageContent }: { pageContent: PageConten
 
   const addImage = async (e: React.ChangeEvent<HTMLInputElement>, current: string[], onUpdate: (imgs: string[]) => void) => {
     const file = e.target.files?.[0];
-    if (file) onUpdate([...current, await fileToOptimizedDataUrl(file)]);
-    e.target.value = "";
-  };
-
-  const removeImage = (index: number, current: string[], onUpdate: (imgs: string[]) => void) => onUpdate(current.filter((_, i) => i !== index));
-
-  const pages = [
-    { key: "editorsLetter" as const, label: "Editor's Letter" },
-    { key: "contributors" as const, label: "Contributors" },
-    { key: "partnerships" as const, label: "Partnerships" },
-    { key: "masthead" as const, label: "Masthead" },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div className="bg-card border border-border rounded-lg p-4">
-        <p className="text-sm text-muted-foreground font-sans">Edit static pages. Changes save instantly to the live site.</p>
-      </div>
-
-      <div className="flex gap-2 flex-wrap">
-        {pages.map(({ key, label }) => (
-          <button key={key} onClick={() => setActivePage(key)} className={`px-5 py-2.5 text-sm rounded font-sans transition-colors ${activePage === key ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:text-foreground"}`}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {/* Editor's Letter */}
-      {activePage === "editorsLetter" && (
-        <div className="space-y-5">
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Logo / Brand Image — Admin Only</label>
-            <div className="flex items-center gap-4 flex-wrap">
-              {pageContent.editorsLetter.logoUrl
-                ? <img src={pageContent.editorsLetter.logoUrl} alt="Logo" className="h-16 object-contain rounded border border-border bg-secondary p-2" />
-                : <div className="h-16 w-48 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No logo uploaded</div>
-              }
-              <div className="flex flex-col gap-2">
-                <button type="button" onClick={() => logoRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Logo</button>
-                {pageContent.editorsLetter.logoUrl && <button type="button" onClick={() => updateEL({ logoUrl: "" })} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive/40 text-destructive rounded hover:bg-destructive/10 transition-colors"><Trash2 className="w-4 h-4" /> Remove</button>}
-              </div>
-            </div>
-            <input ref={logoRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, (url) => updateEL({ logoUrl: url }))} />
-            <p className="text-[10px] text-muted-foreground font-sans mt-3">Shown at the top of the Editor's Letter page. Leave empty to hide.</p>
-          </div>
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Opening Quote</label>
-            <textarea value={pageContent.editorsLetter.quote} onChange={(e) => updateEL({ quote: e.target.value })} rows={2} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
-          </div>
-          {(["body1", "body2", "body3"] as const).map((field, i) => (
-            <div key={field} className="bg-card border border-border rounded-lg p-5">
-              <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Paragraph {i + 1}</label>
-              <textarea value={pageContent.editorsLetter[field]} onChange={(e) => updateEL({ [field]: e.target.value })} rows={4} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
-            </div>
-          ))}
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Sign-off</label>
-            <textarea value={pageContent.editorsLetter.signoff} onChange={(e) => updateEL({ signoff: e.target.value })} rows={2} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
-          </div>
-        </div>
-      )}
-
-      {/* Contributors */}
-      {activePage === "contributors" && (
-        <div className="space-y-5">
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Logo / Brand Image</label>
-            <div className="flex items-center gap-4 flex-wrap">
-              {pageContent.contributors.logoUrl
-                ? <img src={pageContent.contributors.logoUrl} alt="Logo" className="h-16 object-contain rounded border border-border bg-secondary p-2" />
-                : <div className="h-16 w-48 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No logo uploaded</div>
-              }
-              <div className="flex flex-col gap-2">
-                <button type="button" onClick={() => contribLogoRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Logo</button>
-                {pageContent.contributors.logoUrl && <button type="button" onClick={() => updateContribs({ logoUrl: "" })} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive/40 text-destructive rounded hover:bg-destructive/10 transition-colors"><Trash2 className="w-4 h-4" /> Remove</button>}
-              </div>
-            </div>
-            <input ref={contribLogoRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, (url) => updateContribs({ logoUrl: url }))} />
-          </div>
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Additional Photos</label>
-            {pageContent.contributors.images.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                {pageContent.contributors.images.map((src, i) => (
-                  <div key={i} className="relative group">
-                    <img src={src} alt="" className="w-full h-32 object-cover rounded-lg border border-border" />
-                    <button type="button" onClick={() => removeImage(i, pageContent.contributors.images, (imgs) => updateContribs({ images: imgs }))} className="absolute top-1 right-1 p-1 bg-destructive text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <button type="button" onClick={() => contribImgRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Plus className="w-4 h-4" /> Add Photo</button>
-            <input ref={contribImgRef} type="file" accept="image/*" className="hidden" onChange={(e) => addImage(e, pageContent.contributors.images, (imgs) => updateContribs({ images: imgs }))} />
-            <p className="text-[10px] text-muted-foreground font-sans mt-2">Photos appear as a grid at the top of the Contributors page.</p>
-          </div>
-        </div>
-      )}
-
-      {/* Partnerships */}
-      {activePage === "partnerships" && (
-        <div className="space-y-5">
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Partner Logo / Brand Image</label>
-            <div className="flex items-center gap-4 flex-wrap">
-              {pageContent.partnerships.logoUrl
-                ? <img src={pageContent.partnerships.logoUrl} alt="Logo" className="h-16 object-contain rounded border border-border bg-secondary p-2" />
-                : <div className="h-16 w-48 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No logo uploaded</div>
-              }
-              <div className="flex flex-col gap-2">
-                <button type="button" onClick={() => partnerLogoRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Logo</button>
-                {pageContent.partnerships.logoUrl && <button type="button" onClick={() => updatePartners({ logoUrl: "" })} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive/40 text-destructive rounded hover:bg-destructive/10 transition-colors"><Trash2 className="w-4 h-4" /> Remove</button>}
-              </div>
-            </div>
-            <input ref={partnerLogoRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, (url) => updatePartners({ logoUrl: url }))} />
-          </div>
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Partner Photos</label>
-            {pageContent.partnerships.images.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                {pageContent.partnerships.images.map((src, i) => (
-                  <div key={i} className="relative group">
-                    <img src={src} alt="" className="w-full h-32 object-cover rounded-lg border border-border" />
-                    <button type="button" onClick={() => removeImage(i, pageContent.partnerships.images, (imgs) => updatePartners({ images: imgs }))} className="absolute top-1 right-1 p-1 bg-destructive text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <button type="button" onClick={() => partnerImgRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Plus className="w-4 h-4" /> Add Photo</button>
-            <input ref={partnerImgRef} type="file" accept="image/*" className="hidden" onChange={(e) => addImage(e, pageContent.partnerships.images, (imgs) => updatePartners({ images: imgs }))} />
-            <p className="text-[10px] text-muted-foreground font-sans mt-2">Photos appear as a grid at the top of the Partnerships page.</p>
-          </div>
-        </div>
-      )}
-
-      {/* Masthead */}
-      {activePage === "masthead" && (
-        <div className="space-y-5">
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Editor in Chief</label>
-            <input value={pageContent.masthead.editorInChief} onChange={(e) => updateMasthead({ editorInChief: e.target.value })} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" placeholder="Name" />
-          </div>
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Contributors</label>
-            <textarea value={pageContent.masthead.contributors} onChange={(e) => updateMasthead({ contributors: e.target.value })} rows={8} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" placeholder="One contributor per line..." />
-          </div>
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Contact / Editorial Enquiries</label>
-            <input value={pageContent.masthead.contact} onChange={(e) => updateMasthead({ contact: e.target.value })} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" placeholder="editorial@themagorium.com" />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ---- Shared Components ---- */
-function ContentCard({ children, onRemove }: { children: React.ReactNode; onRemove?: () => void }) {
-  return (
-    <div className="bg-card border border-border rounded p-5 relative group">
-      {children}
-      {onRemove && (
-        <button onClick={onRemove} className="absolute top-3 right-3 p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100">
-          <Trash2 className="w-4 h-4" />
-        </button>
-      )}
-    </div>
-  );
-}
-
-function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
-  return (
-    <button onClick={onClick} className="w-full border border-dashed border-border rounded p-4 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-      <Plus className="w-4 h-4" /> {label}
-    </button>
-  );
-}
-
-function normalizeBodyFlow(blocks: ArticleBodyBlock[], imageUrl?: string, videoUrl?: string): ArticleBodyBlock[] {
-  const source = blocks.filter(Boolean);
-  const textBlocks = source.filter((b) => b.type === "text" || b.type === "heading");
-  const mediaBlocks = source.filter((b) => b.type === "image" || b.type === "video");
-  const ordered: ArticleBodyBlock[] = [];
-  if (textBlocks.length === 0) {
-    ordered.push({ id: `auto-t-${Date.now()}`, type: "text", content: "Add body text" });
-    if (videoUrl) ordered.push({ id: `auto-v-${Date.now()}`, type: "video", content: videoUrl, caption: "Featured video" });
-    else ordered.push({ id: `auto-i-${Date.now()}`, type: "image", content: imageUrl || "", imageAlign: "center", imageWidth: "full", caption: imageUrl ? "Featured image" : "Upload photo or video" });
-    return ordered;
-  }
-  const max = Math.max(textBlocks.length, mediaBlocks.length || 1);
-  for (let i = 0; i < max; i += 1) {
-    if (textBlocks[i]) ordered.push(textBlocks[i]);
-    if (mediaBlocks[i]) ordered.push(mediaBlocks[i]);
-    else if (i < textBlocks.length) {
-      if (videoUrl) ordered.push({ id: `auto-v-${Date.now()}-${i}`, type: "video", content: videoUrl, caption: "Featured video" });
-      else ordered.push({ id: `auto-i-${Date.now()}-${i}`, type: "image", content: imageUrl || "", imageAlign: "center", imageWidth: "full", caption: imageUrl ? "Featured image" : "Upload photo or video" });
-    }
-  }
-  return ordered;
-}
-
-function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: { imageUrl?: string; videoUrl?: string; onImage: (url: string) => void; onVideo: (url: string) => void }) {
-  const imgRef = useRef<HTMLInputElement>(null);
-  const vidRef = useRef<HTMLInputElement>(null);
-  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) onImage(await fileToOptimizedDataUrl(file)); e.target.value = ""; };
-  const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) onVideo(await fileToOptimizedDataUrl(file)); e.target.value = ""; };
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
-        <span>Featured Media</span><span>Click Photo or Video to Upload</span>
-      </div>
-      <div className="aspect-video bg-secondary rounded overflow-hidden flex items-center justify-center">
-        {imageUrl ? <img src={imageUrl} alt="" className="w-full h-full object-cover" /> : <Image className="w-8 h-8 text-muted-foreground" />}
-      </div>
-      <div className="flex gap-2">
-        <button type="button" onClick={() => imgRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"><Upload className="w-3 h-3" /> Photo</button>
-        <button type="button" onClick={() => vidRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"><Video className="w-3 h-3" /> Video</button>
-      </div>
-      <p className="text-[10px] text-muted-foreground font-sans">Supported uploads: image/* and video/* files from your device.</p>
-      {videoUrl && <p className="text-[10px] text-primary truncate">Video attached ✓</p>}
-      <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
-      <input ref={vidRef} type="file" accept="video/*" className="hidden" onChange={handleVideo} />
-    </div>
-  );
-}
-
-/* ---- Analytics Dashboard ---- */
-function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; heroes: HeroItem[]; ads: AdSlot[] }) {
-  const [filter, setFilter] = useState<"all" | "article" | "hero" | "ad">("all");
-  const totals = getTotalStats();
-  const summary = getAnalyticsSummary(articles, heroes, ads);
-  const recent = getRecentEvents(30);
-  const locations = getLocationStats();
-  const filtered = filter === "all" ? summary : summary.filter((s) => s.contentType === filter);
-  const sorted = [...filtered].sort((a, b) => b.views - a.views);
-  const handleClear = () => { clearAnalytics(); toast.success("Analytics data cleared."); window.location.reload(); };
-  return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<Eye className="w-5 h-5" />} label="Total Views" value={totals.totalViews} />
-        <StatCard icon={<MousePointer className="w-5 h-5" />} label="Total Clicks" value={totals.totalClicks} />
-        <StatCard icon={<TrendingUp className="w-5 h-5" />} label="Click-Through Rate" value={totals.totalViews > 0 ? `${((totals.totalClicks / totals.totalViews) * 100).toFixed(1)}%` : "—"} />
-        <StatCard icon={<Globe className="w-5 h-5" />} label="Unique Locations" value={totals.uniqueLocations} />
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
-        {(["all", "article", "hero", "ad"] as const).map((f) => (
-          <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 text-xs uppercase tracking-widest font-sans border rounded transition-colors ${filter === f ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
-            {f === "all" ? "All Content" : f === "ad" ? "Ads" : `${f}s`}
-          </button>
-        ))}
-        <button onClick={handleClear} className="ml-auto px-4 py-2 text-xs uppercase tracking-widest font-sans border border-destructive/30 text-destructive rounded hover:bg-destructive/10 transition-colors">Clear Data</button>
-      </div>
-      <div className="bg-card border border-border rounded overflow-hidden">
-        <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
-          <span>Content</span><span className="text-center">Type</span><span className="text-center">Views</span><span className="text-center">Clicks</span><span className="text-center">CTR</span>
-        </div>
-        {sorted.length === 0 ? (
-          <div className="px-5 py-8 text-center text-muted-foreground text-sm font-sans">No data yet.</div>
-        ) : sorted.map((item) => {
-          const ctr = item.views > 0 ? ((item.clicks / item.views) * 100).toFixed(1) : "0.0";
-          return (
-            <div key={`${item.contentType}:${item.contentId}`} className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors">
-              <span className="truncate text-foreground">{item.label || item.contentId}</span>
-              <span className="text-center"><span className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider rounded ${item.contentType === "article" ? "bg-primary/10 text-primary" : item.contentType === "hero" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground"}`}>{item.contentType}</span></span>
-              <span className="text-center text-foreground font-medium">{item.views}</span>
-              <span className="text-center text-foreground font-medium">{item.clicks}</span>
-              <span className="text-center text-primary font-medium">{ctr}%</span>
-            </div>
-          );
-        })}
-      </div>
-      <div>
-        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> Viewer Locations</h3>
-        <div className="bg-card border border-border rounded overflow-hidden">
-          <div className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
-            <span>City</span><span>Country</span><span className="text-center">Views</span><span className="text-center">Clicks</span>
-          </div>
-          {locations.length === 0 ? (
-            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No location data yet.</div>
-          ) : locations.map((loc) => (
-            <div key={`${loc.city}|${loc.country}`} className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors">
-              <span className="text-foreground flex items-center gap-2"><MapPin className="w-3 h-3 text-primary shrink-0" />{loc.city}</span>
-              <span className="text-muted-foreground flex items-center gap-1.5"><span className="text-xs">{loc.countryCode}</span>{loc.country}</span>
-              <span className="text-center text-foreground font-medium">{loc.views}</span>
-              <span className="text-center text-foreground font-medium">{loc.clicks}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div>
-        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground">Recent Events</h3>
-        <div className="bg-card border border-border rounded max-h-72 overflow-y-auto">
-          {recent.length === 0 ? (
-            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No events recorded yet.</div>
-          ) : recent.map((ev) => (
-            <div key={ev.id} className="flex items-center gap-3 px-4 py-2.5 text-xs font-sans border-b border-border/30">
-              <span className={`w-2 h-2 rounded-full shrink-0 ${ev.eventType === "view" ? "bg-primary/50" : "bg-primary"}`} />
-              <span className="text-muted-foreground w-36 shrink-0">{new Date(ev.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-              <span className="text-foreground">{ev.eventType}</span>
-              <span className="text-muted-foreground">·</span>
-              <span className="text-muted-foreground truncate">{ev.contentType} — {ev.contentId}</span>
-              {ev.location && (<><span className="text-muted-foreground">·</span><span className="text-primary/70 shrink-0 flex items-center gap-1"><MapPin className="w-3 h-3" />{ev.location.city}, {ev.location.countryCode}</span></>)}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
-  return (
-    <div className="bg-card border border-border rounded p-5 flex items-center gap-4">
-      <div className="w-10 h-10 rounded flex items-center justify-center bg-primary/10 text-primary">{icon}</div>
-      <div>
-        <p className="text-2xl font-serif font-bold text-foreground">{value}</p>
-        <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{label}</p>
-      </div>
-    </div>
-  );
-}
+    if (file) onUpdate(

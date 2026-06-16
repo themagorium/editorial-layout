@@ -1,8 +1,3 @@
-The file now contains chat transcript text mixed into the code — it's completely corrupted. The only reliable fix is to delete it and recreate it cleanly.
-Do this:
-Step 1 — Go to src/pages/ArticlePage.tsx on GitHub → pencil → Ctrl+A → Delete everything
-Step 2 — Paste only this, nothing else:
-tsximport { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   contentIdentifierMatches,
@@ -323,3 +318,6 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
 
   return null;
 }
+Stop copying here ↑
+The first line must be import { useEffect and the last line must be } with nothing after it.Claude Fable 5 is currently unavailable.Learn more(opens in new tab)
+Sonnet 4.6 Low

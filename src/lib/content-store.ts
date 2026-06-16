@@ -48,7 +48,7 @@ export interface HeroItem {
   sources?: string;
   subtitle: string;
   category: Category;
-  imageUrl: string;
+  
   secondaryImageUrl?: string;
   secondaryImageCaption?: string;
   secondaryImageCitation?: string;
@@ -81,6 +81,9 @@ export interface Article {
    sources?: string;  
   category: Category;
   imageUrl: string;
+  secondaryImageUrl?: string;
+  secondaryImageCaption?: string;
+  secondaryImageCitation?: string;
   videoUrl?: string;
   author: string;
   date: string;

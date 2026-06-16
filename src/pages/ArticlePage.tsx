@@ -153,6 +153,9 @@ export default function ArticlePage() {
       seoTags: heroAsArticle.seoTags,
       category: heroAsArticle.category,
       imageUrl: heroAsArticle.imageUrl,
+      secondaryImageUrl: heroAsArticle.secondaryImageUrl,
+      secondaryImageCaption: heroAsArticle.secondaryImageCaption,
+      secondaryImageCitation: heroAsArticle.secondaryImageCitation,
       videoUrl: heroAsArticle.videoUrl,
       author: heroAsArticle.author || "The Magorium Staff",
       date: heroAsArticle.date,
@@ -185,11 +188,15 @@ export default function ArticlePage() {
     );
   }
 
+  const secondaryImage = isUsableImageUrl(content.secondaryImageUrl)
+    ? content.secondaryImageUrl
+    : null;
+
   return (
     <div className="min-h-screen bg-background">
       <EditorialHeader />
 
-      {/* Hero image */}
+      {/* MAIN HERO IMAGE — always at top */}
       <div className="relative w-full aspect-[21/9] max-h-[500px] overflow-hidden">
         <img
           src={getStoryCardImageUrl(content.imageUrl, content.body)}
@@ -238,6 +245,38 @@ export default function ArticlePage() {
           <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
         </div>
 
+        {/* SECONDARY IMAGE — appears between byline and first paragraph */}
+        {/* Populated via secondaryImageUrl field. If empty, nothing renders. */}
+        {secondaryImage && (
+          <figure className="my-8 w-full">
+            <img
+              src={secondaryImage}
+              alt={content.secondaryImageCaption || content.title}
+              className="w-full rounded object-cover"
+              loading="eager"
+              onError={(e) => {
+                const fig = e.currentTarget.closest("figure");
+                if (fig) (fig as HTMLElement).style.display = "none";
+              }}
+            />
+            {(isMeaningfulCaption(content.secondaryImageCaption) || content.secondaryImageCitation) && (
+              <div className="flex items-start justify-between mt-2 gap-4">
+                {isMeaningfulCaption(content.secondaryImageCaption) && (
+                  <figcaption className="font-sans text-xs text-muted-foreground italic">
+                    {content.secondaryImageCaption}
+                  </figcaption>
+                )}
+                {content.secondaryImageCitation && (
+                  <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap">
+                    {content.secondaryImageCitation}
+                  </span>
+                )}
+              </div>
+            )}
+          </figure>
+        )}
+
+        {/* ARTICLE BODY */}
         <div className="mt-10 space-y-8">
           {content.body && content.body.filter(hasRealBodyContent).length > 0
             ? content.body.filter(hasRealBodyContent).map((block) => <BodyBlock key={block.id} block={block} />)

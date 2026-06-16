@@ -598,14 +598,6 @@ function EditableStoryForm({
                 Appears below the headline, above the first paragraph. Leave empty to skip.
               </p>
             </div>
-            {secondaryImageUrl && (
-              <button
-                type="button"
-                onClick={() => { onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }}
-                className="flex items-center gap-1 px-2 py-1 text-[10px] uppercase tracking-wider border border-destructive/40 text-destructive rounded hover:bg-destructive/10 transition-colors shrink-0"
-              >
-                <Trash2 className="w-3 h-3" /> Remove
-              </button>
             )}
           </div>
 

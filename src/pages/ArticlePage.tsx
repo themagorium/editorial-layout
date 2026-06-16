@@ -318,6 +318,3 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
 
   return null;
 }
-Stop copying here ↑
-The first line must be import { useEffect and the last line must be } with nothing after it.Claude Fable 5 is currently unavailable.Learn more(opens in new tab)
-Sonnet 4.6 Low

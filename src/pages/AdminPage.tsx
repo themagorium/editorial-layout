@@ -560,9 +560,13 @@ const [seoTagDraft, setSeoTagDraft] = useState("");
     setSeoTagDraft("");
   };
 
-  const handleSecondaryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+ const handleSecondaryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onSecondaryImageChange(await fileToOptimizedDataUrl(file));
+    if (file) {
+      const url = await fileToOptimizedDataUrl(file);
+      setLocalSecondaryUrl(url);
+      onSecondaryImageChange(url);
+    }
     e.target.value = "";
   };
 
@@ -600,12 +604,12 @@ const [seoTagDraft, setSeoTagDraft] = useState("");
             </div>
           </div>
 
-          {secondaryImageUrl ? (
+          {localSecondaryUrl ? (
             <div className="relative">
-              <img src={secondaryImageUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
+             <img src={localSecondaryUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
               <button
                 type="button"
-                onClick={() => { onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }}
+           onClick={() => { setLocalSecondaryUrl(""); onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }}
                 className="absolute top-2 right-2 flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-destructive text-white rounded shadow hover:bg-destructive/90 transition-colors"
               >
                 <Trash2 className="w-3 h-3" /> Remove Photo

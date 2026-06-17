@@ -238,8 +238,8 @@ function AdminDashboard() {
     try {
       const publishToken = getAdminPublishToken();
       if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
+   const contentToPublish: EditableContentPayload = { heroes, articles, ads };
       clearLocalDraftStorage();
-      const contentToPublish: EditableContentPayload = { heroes, articles, ads };
       const published = await publishEditorialContent(contentToPublish, publishToken);
       if (!published.success) {
         const fallbackMessage = published.error || "Could not publish content to live";

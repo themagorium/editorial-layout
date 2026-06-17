@@ -149,9 +149,9 @@ export default function AdminPage() {
 }
 
 function AdminDashboard() {
-  const [heroes, setHeroes] = useState<HeroItem[]>([]);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [ads, setAds] = useState<AdSlot[]>([]);
+setHeroes(snapshot.heroes || []);
+      setArticles(snapshot.articles || []);
+      setAds(snapshot.ads || []);
   const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics" | "pages">("heroes");
   const [currentEdition, setCurrentEdition] = useState<string>("");
   const [showNewEdition, setShowNewEdition] = useState(false);
@@ -190,7 +190,7 @@ function AdminDashboard() {
     try {
       const publishToken = getAdminPublishToken();
       if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
-      const contentToPublish: EditableContentPayload = { heroes, articles, ads };
+     const contentToPublish: EditableContentPayload = { heroes: heroes || [], articles: articles || [], ads: ads || [] };
       clearLocalDraftStorage();
       const published = await publishEditorialContent(contentToPublish, publishToken);
       if (!published.success) {

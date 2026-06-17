@@ -1294,9 +1294,9 @@ export async function getPublishedContentSnapshot(options?: {
   if (typeof window === "undefined") {
     return DEFAULT_PUBLISHED_CONTENT;
   }
-  void options;
+ const allowLocalDraft = options?.allowLocalDraft ?? false;
   ensureFreshDefaults();
-  const hasLocalDraft = hasLocalEditsAvailable();
+ const hasLocalDraft = allowLocalDraft && hasLocalEditsAvailable();
   if (hasLocalDraft) {
     return {
       heroes: getHeroes(),

@@ -711,7 +711,7 @@ async function verifyBearerPublishToken(token: string, adminPassword: string): P
   if (!token || !adminPassword) return false;
   try {
     const tokenModule = await import("./lib/publish-token.js");
-    return tokenModule.verifyPublishToken(token, adminPassword);
+    const { token, expiresAt } = tokenModule.createPublishToken(adminPassword);
   } catch {
     return false;
   }

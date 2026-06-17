@@ -710,7 +710,7 @@ async function readUploadedContent(uploadId: string): Promise<string> {
 async function verifyBearerPublishToken(token: string, adminPassword: string): Promise<boolean> {
   if (!token || !adminPassword) return false;
   try {
-    const tokenModule = await import("./lib/publish-token");
+    const tokenModule = await import("./lib/publish-token.js");
     return tokenModule.verifyPublishToken(token, adminPassword);
   } catch {
     return false;

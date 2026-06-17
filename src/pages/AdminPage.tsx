@@ -2,53 +2,16 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import ArticleBodyEditor from "@/components/editorial/ArticleBodyEditor";
 import {
-  getHeroes,
-  getArticles,
-  getAds,
-  saveHeroes,
-  saveArticles,
-  saveAds,
-  publishEditorialContent,
-  getPublishedContentSnapshot,
-  DEFAULT_PUBLISHED_CONTENT,
-  resetToDefaults,
-  clearLocalDraftStorage,
-  isStorageQuotaExceededError,
-  CATEGORIES,
-  formatEditionLabel,
+  getHeroes, getArticles, getAds, saveHeroes, saveArticles, saveAds,
+  publishEditorialContent, getPublishedContentSnapshot, DEFAULT_PUBLISHED_CONTENT,
+  resetToDefaults, clearLocalDraftStorage, isStorageQuotaExceededError,
+  CATEGORIES, formatEditionLabel,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
-import {
-  Trash2,
-  Plus,
-  Upload,
-  RotateCcw,
-  Image,
-  Video,
-  BarChart3,
-  Eye,
-  MousePointer,
-  TrendingUp,
-  MapPin,
-  Globe,
-  Calendar,
-  FileText,
-} from "lucide-react";
+import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, FileText } from "lucide-react";
 import { toast } from "sonner";
-import {
-  getAnalyticsSummary,
-  getTotalStats,
-  getRecentEvents,
-  getLocationStats,
-  clearAnalytics,
-} from "@/lib/analytics";
-import {
-  getAdminPublishToken,
-  isAdminAuthenticated,
-  setAdminPublishToken,
-  setAdminAuthenticated,
-  resetAdminPasswordAccess,
-} from "@/lib/admin-auth";
+import { getAnalyticsSummary, getTotalStats, getRecentEvents, getLocationStats, clearAnalytics } from "@/lib/analytics";
+import { getAdminPublishToken, isAdminAuthenticated, setAdminPublishToken, setAdminAuthenticated, resetAdminPasswordAccess } from "@/lib/admin-auth";
 import { fileToOptimizedDataUrl } from "@/lib/media-optimizer";
 
 const STORAGE_KEY = "magorium_page_content";
@@ -172,21 +135,10 @@ export default function AdminPage() {
           </h1>
           <p className="text-sm text-muted-foreground uppercase tracking-widest">Content Manager</p>
           <div className="space-y-3">
-            <input
-              type="password"
-              value={passwordInput}
-              onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }}
-              placeholder="Enter password"
-              className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              autoFocus
-            />
+            <input type="password" value={passwordInput} onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }} placeholder="Enter password" className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" autoFocus />
             {passwordError && <p className="text-sm text-destructive">Incorrect password</p>}
-            <button type="submit" disabled={isLoggingIn} className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-70">
-              {isLoggingIn ? "Signing In..." : "Sign In"}
-            </button>
-            <button type="button" onClick={handleResetAccess} className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Reset Admin Password Access
-            </button>
+            <button type="submit" disabled={isLoggingIn} className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-70">{isLoggingIn ? "Signing In..." : "Sign In"}</button>
+            <button type="button" onClick={handleResetAccess} className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Reset Admin Password Access</button>
           </div>
         </form>
       </div>
@@ -238,7 +190,7 @@ function AdminDashboard() {
     try {
       const publishToken = getAdminPublishToken();
       if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
-   const contentToPublish: EditableContentPayload = { heroes, articles, ads };
+      const contentToPublish: EditableContentPayload = { heroes, articles, ads };
       clearLocalDraftStorage();
       const published = await publishEditorialContent(contentToPublish, publishToken);
       if (!published.success) {
@@ -344,15 +296,9 @@ function AdminDashboard() {
             <p className="text-sm text-muted-foreground font-sans mt-1">Upload and manage articles, heroes, and advertising</p>
           </div>
           <div className="flex gap-3">
-            <button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 text-sm border border-border rounded text-muted-foreground hover:text-foreground transition-colors">
-              <RotateCcw className="w-4 h-4" /> Reset
-            </button>
-            <button onClick={handleRestoreBackup} disabled={isSaving} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary rounded text-primary hover:bg-primary/10 transition-colors disabled:opacity-70">
-              <RotateCcw className="w-4 h-4" /> Restore Backup
-            </button>
-            <button onClick={save} disabled={isSaving} className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-70">
-              {isSaving ? "Saving..." : "Save Changes"}
-            </button>
+            <button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 text-sm border border-border rounded text-muted-foreground hover:text-foreground transition-colors"><RotateCcw className="w-4 h-4" /> Reset</button>
+            <button onClick={handleRestoreBackup} disabled={isSaving} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary rounded text-primary hover:bg-primary/10 transition-colors disabled:opacity-70"><RotateCcw className="w-4 h-4" /> Restore Backup</button>
+            <button onClick={save} disabled={isSaving} className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-70">{isSaving ? "Saving..." : "Save Changes"}</button>
           </div>
         </div>
 
@@ -367,9 +313,7 @@ function AdminDashboard() {
                 </select>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <button onClick={deleteCurrentEdition} disabled={!currentEdition} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive text-destructive rounded hover:bg-destructive/10 transition-colors disabled:pointer-events-none disabled:opacity-50">
-                  <Trash2 className="w-4 h-4" /> Delete Edition
-                </button>
+                <button onClick={deleteCurrentEdition} disabled={!currentEdition} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive text-destructive rounded hover:bg-destructive/10 transition-colors disabled:pointer-events-none disabled:opacity-50"><Trash2 className="w-4 h-4" /> Delete Edition</button>
                 {showNewEdition ? (
                   <div className="flex items-center gap-2">
                     <input type="month" value={newEditionMonth} onChange={(e) => setNewEditionMonth(e.target.value)} className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
@@ -377,27 +321,17 @@ function AdminDashboard() {
                     <button onClick={() => setShowNewEdition(false)} className="px-3 py-2 text-sm text-muted-foreground">Cancel</button>
                   </div>
                 ) : (
-                  <button onClick={() => setShowNewEdition(true)} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors">
-                    <Plus className="w-4 h-4" /> New Edition
-                  </button>
+                  <button onClick={() => setShowNewEdition(true)} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Plus className="w-4 h-4" /> New Edition</button>
                 )}
               </div>
             </div>
-            <div className="mt-3 text-xs text-muted-foreground font-sans">
-              {filteredHeroes.length} heroes · {filteredArticles.length} articles in this edition
-            </div>
+            <div className="mt-3 text-xs text-muted-foreground font-sans">{filteredHeroes.length} heroes · {filteredArticles.length} articles in this edition</div>
           </div>
         )}
 
         <div className="flex gap-1 border-b border-border mb-8 overflow-x-auto">
           {(["heroes", "articles", "ads", "analytics", "pages"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
-                tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
+            <button key={t} onClick={() => setTab(t)} className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
               {t === "analytics" && <BarChart3 className="w-4 h-4" />}
               {t === "pages" && <FileText className="w-4 h-4" />}
               {t === "ads" ? "Advertising" : t === "analytics" ? "Analytics" : t === "pages" ? "Pages" : t}
@@ -415,7 +349,6 @@ function AdminDashboard() {
   );
 }
 
-/* ---- Heroes Manager ---- */
 function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { heroes: HeroItem[]; setHeroes: (h: HeroItem[]) => void; filteredHeroes: HeroItem[]; currentEdition: string }) {
   const addHero = () => setHeroes([{ id: `h-${Date.now()}`, title: "New Hero", subtitle: "", seoTags: [], category: "Travel", imageUrl: "", author: "", body: [], date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) }, ...heroes]);
   const update = (id: string, patch: Partial<HeroItem>) => setHeroes(heroes.map((h) => (h.id === id ? { ...h, ...patch } : h)));
@@ -426,36 +359,8 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
       {filteredHeroes.map((hero) => (
         <ContentCard key={hero.id} onRemove={() => remove(hero.id)}>
           <EditableStoryForm
-            kind="hero"
-            title={hero.title}
-            summary={hero.subtitle}
-            category={hero.category}
-            author={hero.author || ""}
-            seoTags={hero.seoTags || []}
-            date={hero.date}
-            featured={hero.featured}
-            imageUrl={hero.imageUrl}
-            videoUrl={hero.videoUrl}
-            secondaryImageUrl={hero.secondaryImageUrl || ""}
-            secondaryImageCaption={hero.secondaryImageCaption || ""}
-            secondaryImageCitation={hero.secondaryImageCitation || ""}
-            body={hero.body || []}
-            onTitleChange={(v) => update(hero.id, { title: v })}
-            onSummaryChange={(v) => update(hero.id, { subtitle: v })}
-            onCategoryChange={(v) => update(hero.id, { category: v })}
-            onAuthorChange={(v) => update(hero.id, { author: v })}
-            onSeoTagsChange={(v) => update(hero.id, { seoTags: v })}
-            onDateChange={(v) => update(hero.id, { date: v })}
-            onFeaturedChange={(v) => update(hero.id, { featured: v })}
-            onImageChange={(v) => update(hero.id, { imageUrl: v })}
-            onVideoChange={(v) => update(hero.id, { videoUrl: v })}
-            onSecondaryImageChange={(v) => update(hero.id, { secondaryImageUrl: v })}
-            onSecondaryImageCaptionChange={(v) => update(hero.id, { secondaryImageCaption: v })}
-            onSecondaryImageCitationChange={(v) => update(hero.id, { secondaryImageCitation: v })}
-            onBodyChange={(v) => update(hero.id, { body: v })}
-            onNormalizeBody={() => update(hero.id, { body: normalizeBodyFlow(hero.body || [], hero.imageUrl, hero.videoUrl) })}
-            sources={hero.sources || ""}
-            onSourcesChange={(v) => update(hero.id, { sources: v })}
+            kind="hero" title={hero.title} summary={hero.subtitle} category={hero.category} author={hero.author || ""} seoTags={hero.seoTags || []} date={hero.date} featured={hero.featured} imageUrl={hero.imageUrl} videoUrl={hero.videoUrl} secondaryImageUrl={hero.secondaryImageUrl || ""} secondaryImageCaption={hero.secondaryImageCaption || ""} secondaryImageCitation={hero.secondaryImageCitation || ""} body={hero.body || []}
+            onTitleChange={(v) => update(hero.id, { title: v })} onSummaryChange={(v) => update(hero.id, { subtitle: v })} onCategoryChange={(v) => update(hero.id, { category: v })} onAuthorChange={(v) => update(hero.id, { author: v })} onSeoTagsChange={(v) => update(hero.id, { seoTags: v })} onDateChange={(v) => update(hero.id, { date: v })} onFeaturedChange={(v) => update(hero.id, { featured: v })} onImageChange={(v) => update(hero.id, { imageUrl: v })} onVideoChange={(v) => update(hero.id, { videoUrl: v })} onSecondaryImageChange={(v) => update(hero.id, { secondaryImageUrl: v })} onSecondaryImageCaptionChange={(v) => update(hero.id, { secondaryImageCaption: v })} onSecondaryImageCitationChange={(v) => update(hero.id, { secondaryImageCitation: v })} onBodyChange={(v) => update(hero.id, { body: v })} onNormalizeBody={() => update(hero.id, { body: normalizeBodyFlow(hero.body || [], hero.imageUrl, hero.videoUrl) })} sources={hero.sources || ""} onSourcesChange={(v) => update(hero.id, { sources: v })}
           />
         </ContentCard>
       ))}
@@ -463,7 +368,6 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
   );
 }
 
-/* ---- Articles Manager ---- */
 function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string }) {
   const addArticle = () => setArticles([{ id: `a-${Date.now()}`, title: "New Article", excerpt: "", seoTags: [], category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) }, ...articles]);
   const update = (id: string, patch: Partial<Article>) => setArticles(articles.map((a) => (a.id === id ? { ...a, ...patch } : a)));
@@ -474,36 +378,8 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
       {filteredArticles.map((article) => (
         <ContentCard key={article.id} onRemove={() => remove(article.id)}>
           <EditableStoryForm
-            kind="article"
-            title={article.title}
-            summary={article.excerpt}
-            category={article.category}
-            author={article.author}
-            seoTags={article.seoTags || []}
-            date={article.date}
-            featured={article.featured}
-            imageUrl={article.imageUrl}
-            videoUrl={article.videoUrl}
-            secondaryImageUrl={article.secondaryImageUrl || ""}
-            secondaryImageCaption={article.secondaryImageCaption || ""}
-            secondaryImageCitation={article.secondaryImageCitation || ""}
-            body={article.body || []}
-            onTitleChange={(v) => update(article.id, { title: v })}
-            onSummaryChange={(v) => update(article.id, { excerpt: v })}
-            onCategoryChange={(v) => update(article.id, { category: v })}
-            onAuthorChange={(v) => update(article.id, { author: v })}
-            onSeoTagsChange={(v) => update(article.id, { seoTags: v })}
-            onDateChange={(v) => update(article.id, { date: v })}
-            onFeaturedChange={(v) => update(article.id, { featured: v })}
-            onImageChange={(v) => update(article.id, { imageUrl: v })}
-            onVideoChange={(v) => update(article.id, { videoUrl: v })}
-            onSecondaryImageChange={(v) => update(article.id, { secondaryImageUrl: v })}
-            onSecondaryImageCaptionChange={(v) => update(article.id, { secondaryImageCaption: v })}
-            onSecondaryImageCitationChange={(v) => update(article.id, { secondaryImageCitation: v })}
-            onBodyChange={(v) => update(article.id, { body: v })}
-            onNormalizeBody={() => update(article.id, { body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl) })}
-            sources={article.sources || ""}
-            onSourcesChange={(v) => update(article.id, { sources: v })}
+            kind="article" title={article.title} summary={article.excerpt} category={article.category} author={article.author} seoTags={article.seoTags || []} date={article.date} featured={article.featured} imageUrl={article.imageUrl} videoUrl={article.videoUrl} secondaryImageUrl={article.secondaryImageUrl || ""} secondaryImageCaption={article.secondaryImageCaption || ""} secondaryImageCitation={article.secondaryImageCitation || ""} body={article.body || []}
+            onTitleChange={(v) => update(article.id, { title: v })} onSummaryChange={(v) => update(article.id, { excerpt: v })} onCategoryChange={(v) => update(article.id, { category: v })} onAuthorChange={(v) => update(article.id, { author: v })} onSeoTagsChange={(v) => update(article.id, { seoTags: v })} onDateChange={(v) => update(article.id, { date: v })} onFeaturedChange={(v) => update(article.id, { featured: v })} onImageChange={(v) => update(article.id, { imageUrl: v })} onVideoChange={(v) => update(article.id, { videoUrl: v })} onSecondaryImageChange={(v) => update(article.id, { secondaryImageUrl: v })} onSecondaryImageCaptionChange={(v) => update(article.id, { secondaryImageCaption: v })} onSecondaryImageCitationChange={(v) => update(article.id, { secondaryImageCitation: v })} onBodyChange={(v) => update(article.id, { body: v })} onNormalizeBody={() => update(article.id, { body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl) })} sources={article.sources || ""} onSourcesChange={(v) => update(article.id, { sources: v })}
           />
         </ContentCard>
       ))}
@@ -511,41 +387,33 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
   );
 }
 
-/* ---- Editable Story Form ---- */
 function EditableStoryForm({
   kind, title, summary, category, author, seoTags, date, featured,
-  imageUrl, videoUrl,
-  secondaryImageUrl, secondaryImageCaption, secondaryImageCitation,
-  body,
-  onTitleChange, onSummaryChange, onCategoryChange, onAuthorChange,
-  onSeoTagsChange, onDateChange, onFeaturedChange,
-  onImageChange, onVideoChange,
+  imageUrl, videoUrl, secondaryImageUrl, secondaryImageCaption, secondaryImageCitation,
+  body, onTitleChange, onSummaryChange, onCategoryChange, onAuthorChange,
+  onSeoTagsChange, onDateChange, onFeaturedChange, onImageChange, onVideoChange,
   onSecondaryImageChange, onSecondaryImageCaptionChange, onSecondaryImageCitationChange,
-  onBodyChange, onNormalizeBody,
-  sources, onSourcesChange,
+  onBodyChange, onNormalizeBody, sources, onSourcesChange,
 }: {
-  kind: "hero" | "article";
-  title: string; summary: string; category: Category; author: string;
-  seoTags: string[]; date: string; featured?: boolean;
-  imageUrl?: string; videoUrl?: string;
+  kind: "hero" | "article"; title: string; summary: string; category: Category; author: string;
+  seoTags: string[]; date: string; featured?: boolean; imageUrl?: string; videoUrl?: string;
   secondaryImageUrl?: string; secondaryImageCaption?: string; secondaryImageCitation?: string;
   body: ArticleBodyBlock[];
   onTitleChange: (v: string) => void; onSummaryChange: (v: string) => void;
   onCategoryChange: (v: Category) => void; onAuthorChange: (v: string) => void;
   onSeoTagsChange: (v: string[]) => void; onDateChange: (v: string) => void;
-  onFeaturedChange: (v: boolean) => void;
-  onImageChange: (v: string) => void; onVideoChange: (v: string) => void;
-  onSecondaryImageChange: (v: string) => void;
-  onSecondaryImageCaptionChange: (v: string) => void;
-  onSecondaryImageCitationChange: (v: string) => void;
+  onFeaturedChange: (v: boolean) => void; onImageChange: (v: string) => void;
+  onVideoChange: (v: string) => void; onSecondaryImageChange: (v: string) => void;
+  onSecondaryImageCaptionChange: (v: string) => void; onSecondaryImageCitationChange: (v: string) => void;
   onBodyChange: (v: ArticleBodyBlock[]) => void; onNormalizeBody: () => void;
   sources?: string; onSourcesChange?: (v: string) => void;
 }) {
   const isArticle = kind === "article";
-const [seoTagDraft, setSeoTagDraft] = useState("");
-const [localSecondaryUrl, setLocalSecondaryUrl] = useState(secondaryImageUrl || "");
-  useEffect(() => { setLocalSecondaryUrl(secondaryImageUrl || ""); }, [secondaryImageUrl]);
+  const [seoTagDraft, setSeoTagDraft] = useState("");
+  const [localSecondaryUrl, setLocalSecondaryUrl] = useState(secondaryImageUrl || "");
   const secondaryImgRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setLocalSecondaryUrl(secondaryImageUrl || ""); }, [secondaryImageUrl]);
 
   const addSeoTagsFromDraft = () => {
     const draftTags = parseSeoTagsInput(seoTagDraft);
@@ -561,7 +429,7 @@ const [localSecondaryUrl, setLocalSecondaryUrl] = useState(secondaryImageUrl || 
     setSeoTagDraft("");
   };
 
- const handleSecondaryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSecondaryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const url = await fileToOptimizedDataUrl(file);
@@ -594,56 +462,26 @@ const [localSecondaryUrl, setLocalSecondaryUrl] = useState(secondaryImageUrl || 
           )}
         </div>
 
-     {/* ── SECONDARY IMAGE UPLOAD ── */}
         <div className="mt-2 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h4 className="text-sm font-semibold text-primary font-sans">Article Opening Photo</h4>
-              <p className="text-[11px] text-muted-foreground font-sans mt-0.5">
-                Appears below the headline, above the first paragraph. Leave empty to skip.
-              </p>
-            </div>
+          <div>
+            <h4 className="text-sm font-semibold text-primary font-sans">Article Opening Photo</h4>
+            <p className="text-[11px] text-muted-foreground font-sans mt-0.5">Appears below the headline, above the first paragraph. Leave empty to skip.</p>
           </div>
-
           {localSecondaryUrl ? (
             <div className="relative">
-             <img src={localSecondaryUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
-              <button
-                type="button"
-           onClick={() => { setLocalSecondaryUrl(""); onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }}
-                className="absolute top-2 right-2 flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-destructive text-white rounded shadow hover:bg-destructive/90 transition-colors"
-              >
+              <img src={localSecondaryUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
+              <button type="button" onClick={() => { setLocalSecondaryUrl(""); onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }} className="absolute top-2 right-2 flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-destructive text-white rounded shadow hover:bg-destructive/90 transition-colors">
                 <Trash2 className="w-3 h-3" /> Remove Photo
               </button>
             </div>
           ) : (
-            <div className="w-full h-24 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">
-              No opening photo uploaded
-            </div>
+            <div className="w-full h-24 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No opening photo uploaded</div>
           )}
-
-          <button
-            type="button"
-            onClick={() => secondaryImgRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"
-          >
-            <Upload className="w-4 h-4" /> Upload Opening Photo
-          </button>
+          <button type="button" onClick={() => secondaryImgRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Opening Photo</button>
           <input ref={secondaryImgRef} type="file" accept="image/*" className="hidden" onChange={handleSecondaryImageUpload} />
-
           <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              value={secondaryImageCaption || ""}
-              onChange={(e) => onSecondaryImageCaptionChange(e.target.value)}
-              placeholder="Caption (optional)"
-              className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans"
-            />
-            <input
-              value={secondaryImageCitation || ""}
-              onChange={(e) => onSecondaryImageCitationChange(e.target.value)}
-              placeholder="Photo credit (optional)"
-              className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans"
-            />
+            <input value={secondaryImageCaption || ""} onChange={(e) => onSecondaryImageCaptionChange(e.target.value)} placeholder="Caption (optional)" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
+            <input value={secondaryImageCitation || ""} onChange={(e) => onSecondaryImageCitationChange(e.target.value)} placeholder="Photo credit (optional)" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
           </div>
         </div>
 
@@ -658,9 +496,7 @@ const [localSecondaryUrl, setLocalSecondaryUrl] = useState(secondaryImageUrl || 
           <div className="rounded-md border border-border bg-background/80 p-3 min-h-[44px]">
             <div className="flex flex-wrap gap-2">
               {seoTags.length > 0 ? seoTags.map((tag) => (
-                <button key={tag} type="button" onClick={() => onSeoTagsChange(seoTags.filter((t) => t.toLowerCase() !== tag.toLowerCase()))} className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-sans hover:bg-primary/15">
-                  #{tag}<span className="text-[10px]">x</span>
-                </button>
+                <button key={tag} type="button" onClick={() => onSeoTagsChange(seoTags.filter((t) => t.toLowerCase() !== tag.toLowerCase()))} className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-sans hover:bg-primary/15">#{tag}<span className="text-[10px]">x</span></button>
               )) : <p className="text-xs text-muted-foreground font-sans">No SEO tags added yet.</p>}
             </div>
           </div>
@@ -691,7 +527,6 @@ const [localSecondaryUrl, setLocalSecondaryUrl] = useState(secondaryImageUrl || 
   );
 }
 
-/* ---- Ads Manager ---- */
 function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => void }) {
   const addAd = () => setAds([...ads, { id: `ad-${Date.now()}`, label: "New Ad Slot", position: "mid-feed", width: 728, height: 90 }]);
   const update = (id: string, patch: Partial<AdSlot>) => setAds(ads.map((a) => (a.id === id ? { ...a, ...patch } : a)));
@@ -714,10 +549,7 @@ function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => v
                   <option value="bottom-banner">Bottom Banner</option>
                   <option value="sidebar">Sidebar</option>
                 </select>
-                <span className="text-xs text-muted-foreground">
-                  W: <input type="number" value={ad.width} onChange={(e) => update(ad.id, { width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
-                  × H: <input type="number" value={ad.height} onChange={(e) => update(ad.id, { height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
-                </span>
+                <span className="text-xs text-muted-foreground">W: <input type="number" value={ad.width} onChange={(e) => update(ad.id, { width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" /> × H: <input type="number" value={ad.height} onChange={(e) => update(ad.id, { height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" /></span>
               </div>
               <input value={ad.label} onChange={(e) => update(ad.id, { label: e.target.value })} placeholder="Ad label (internal use)" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm" />
               <input value={ad.linkUrl || ""} onChange={(e) => update(ad.id, { linkUrl: e.target.value })} placeholder="Click-through URL" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
@@ -729,7 +561,6 @@ function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => v
   );
 }
 
-/* ---- Pages Manager ---- */
 function PagesManager({ pageContent, setPageContent }: { pageContent: PageContent; setPageContent: (c: PageContent) => void }) {
   const [activePage, setActivePage] = useState<"editorsLetter" | "contributors" | "partnerships" | "masthead">("editorsLetter");
   const logoRef = useRef<HTMLInputElement>(null);
@@ -754,6 +585,7 @@ function PagesManager({ pageContent, setPageContent }: { pageContent: PageConten
     if (file) onUrl(await fileToOptimizedDataUrl(file));
     e.target.value = "";
   };
+
   const addImage = async (e: React.ChangeEvent<HTMLInputElement>, current: string[], onUpdate: (imgs: string[]) => void) => {
     const file = e.target.files?.[0];
     if (file) onUpdate([...current, await fileToOptimizedDataUrl(file)]);
@@ -776,9 +608,7 @@ function PagesManager({ pageContent, setPageContent }: { pageContent: PageConten
       </div>
       <div className="flex gap-2 flex-wrap">
         {pages.map(({ key, label }) => (
-          <button key={key} onClick={() => setActivePage(key)} className={`px-5 py-2.5 text-sm rounded font-sans transition-colors ${activePage === key ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:text-foreground"}`}>
-            {label}
-          </button>
+          <button key={key} onClick={() => setActivePage(key)} className={`px-5 py-2.5 text-sm rounded font-sans transition-colors ${activePage === key ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:text-foreground"}`}>{label}</button>
         ))}
       </div>
 
@@ -787,9 +617,7 @@ function PagesManager({ pageContent, setPageContent }: { pageContent: PageConten
           <div className="bg-card border border-border rounded-lg p-5">
             <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Logo / Brand Image — Admin Only</label>
             <div className="flex items-center gap-4 flex-wrap">
-              {pageContent.editorsLetter.logoUrl
-                ? <img src={pageContent.editorsLetter.logoUrl} alt="Logo" className="h-16 object-contain rounded border border-border bg-secondary p-2" />
-                : <div className="h-16 w-48 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No logo uploaded</div>}
+              {pageContent.editorsLetter.logoUrl ? <img src={pageContent.editorsLetter.logoUrl} alt="Logo" className="h-16 object-contain rounded border border-border bg-secondary p-2" /> : <div className="h-16 w-48 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No logo uploaded</div>}
               <div className="flex flex-col gap-2">
                 <button type="button" onClick={() => logoRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Logo</button>
                 {pageContent.editorsLetter.logoUrl && <button type="button" onClick={() => updateEL({ logoUrl: "" })} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive/40 text-destructive rounded hover:bg-destructive/10 transition-colors"><Trash2 className="w-4 h-4" /> Remove</button>}
@@ -820,9 +648,7 @@ function PagesManager({ pageContent, setPageContent }: { pageContent: PageConten
           <div className="bg-card border border-border rounded-lg p-5">
             <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Logo / Brand Image</label>
             <div className="flex items-center gap-4 flex-wrap">
-              {pageContent.contributors.logoUrl
-                ? <img src={pageContent.contributors.logoUrl} alt="Logo" className="h-16 object-contain rounded border border-border bg-secondary p-2" />
-                : <div className="h-16 w-48 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No logo uploaded</div>}
+              {pageContent.contributors.logoUrl ? <img src={pageContent.contributors.logoUrl} alt="Logo" className="h-16 object-contain rounded border border-border bg-secondary p-2" /> : <div className="h-16 w-48 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No logo uploaded</div>}
               <div className="flex flex-col gap-2">
                 <button type="button" onClick={() => contribLogoRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Logo</button>
                 {pageContent.contributors.logoUrl && <button type="button" onClick={() => updateContribs({ logoUrl: "" })} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive/40 text-destructive rounded hover:bg-destructive/10 transition-colors"><Trash2 className="w-4 h-4" /> Remove</button>}
@@ -854,9 +680,7 @@ function PagesManager({ pageContent, setPageContent }: { pageContent: PageConten
           <div className="bg-card border border-border rounded-lg p-5">
             <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Partner Logo / Brand Image</label>
             <div className="flex items-center gap-4 flex-wrap">
-              {pageContent.partnerships.logoUrl
-                ? <img src={pageContent.partnerships.logoUrl} alt="Logo" className="h-16 object-contain rounded border border-border bg-secondary p-2" />
-                : <div className="h-16 w-48 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No logo uploaded</div>}
+              {pageContent.partnerships.logoUrl ? <img src={pageContent.partnerships.logoUrl} alt="Logo" className="h-16 object-contain rounded border border-border bg-secondary p-2" /> : <div className="h-16 w-48 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No logo uploaded</div>}
               <div className="flex flex-col gap-2">
                 <button type="button" onClick={() => partnerLogoRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Logo</button>
                 {pageContent.partnerships.logoUrl && <button type="button" onClick={() => updatePartners({ logoUrl: "" })} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive/40 text-destructive rounded hover:bg-destructive/10 transition-colors"><Trash2 className="w-4 h-4" /> Remove</button>}
@@ -903,15 +727,12 @@ function PagesManager({ pageContent, setPageContent }: { pageContent: PageConten
   );
 }
 
-/* ---- Shared Components ---- */
 function ContentCard({ children, onRemove }: { children: React.ReactNode; onRemove?: () => void }) {
   return (
     <div className="bg-card border border-border rounded p-5 relative group">
       {children}
       {onRemove && (
-        <button onClick={onRemove} className="absolute top-3 right-3 p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100">
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <button onClick={onRemove} className="absolute top-3 right-3 p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4" /></button>
       )}
     </div>
   );
@@ -919,9 +740,7 @@ function ContentCard({ children, onRemove }: { children: React.ReactNode; onRemo
 
 function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <button onClick={onClick} className="w-full border border-dashed border-border rounded p-4 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-      <Plus className="w-4 h-4" /> {label}
-    </button>
+    <button onClick={onClick} className="w-full border border-dashed border-border rounded p-4 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary hover:border-primary transition-colors"><Plus className="w-4 h-4" /> {label}</button>
   );
 }
 
@@ -973,7 +792,6 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: { imageUrl?: stri
   );
 }
 
-/* ---- Analytics Dashboard ---- */
 function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; heroes: HeroItem[]; ads: AdSlot[] }) {
   const [filter, setFilter] = useState<"all" | "article" | "hero" | "ad">("all");
   const totals = getTotalStats();

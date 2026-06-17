@@ -238,20 +238,10 @@ function sanitizeSeoTags(tags: unknown): string[] {
   }
   return normalized;
 }
-
 function sanitizePayload(input: unknown): PublishPayload {
   const payload = (input || {}) as Partial<PublishPayload>;
 
-
-  const ads = ensureArray<AdPayload>(payload.ads);
-
-  return { heroes, articles, ads };
-}
-
-function slugifyText(value: string): string {
-  return value
-    .toLowerCase()
-    .trim()const heroes = ensureArray<HeroPayload>(payload.heroes).map((hero) => ({
+  const heroes = ensureArray<HeroPayload>(payload.heroes).map((hero) => ({
     ...hero,
     seoTags: sanitizeSeoTags(hero.seoTags),
     body: sanitizeBody(hero.body),
@@ -260,6 +250,7 @@ function slugifyText(value: string): string {
     secondaryImageCitation: (hero as any).secondaryImageCitation,
     sources: (hero as any).sources,
   }));
+
   const articles = ensureArray<ArticlePayload>(payload.articles).map((article) => ({
     ...article,
     seoTags: sanitizeSeoTags(article.seoTags),
@@ -269,6 +260,16 @@ function slugifyText(value: string): string {
     secondaryImageCitation: (article as any).secondaryImageCitation,
     sources: (article as any).sources,
   }));
+
+  const ads = ensureArray<AdPayload>(payload.ads);
+
+  return { heroes, articles, ads };
+}
+
+function slugifyText(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
     .replace(/['"]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");

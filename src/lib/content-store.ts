@@ -366,8 +366,14 @@ function normalizeHero(hero: HeroItem): HeroItem {
     subtitle,
     excerpt,
     imageUrl,
+    secondaryImageUrl: upgraded.secondaryImageUrl,
+    secondaryImageCaption: upgraded.secondaryImageCaption,
+    secondaryImageCitation: upgraded.secondaryImageCitation,
+    sources: upgraded.sources,
     seoTags: normalizeSeoTags(upgraded.seoTags),
-    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
+    body: upgraded.body && upgraded.body.length > 0
+      ? upgraded.body
+      : normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
   };
 }
 
@@ -380,8 +386,14 @@ function normalizeArticle(article: Article): Article {
     ...upgraded,
     excerpt,
     imageUrl,
+    secondaryImageUrl: upgraded.secondaryImageUrl,
+    secondaryImageCaption: upgraded.secondaryImageCaption,
+    secondaryImageCitation: upgraded.secondaryImageCitation,
+    sources: upgraded.sources,
     seoTags: normalizeSeoTags(upgraded.seoTags),
-    body: normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
+    body: upgraded.body && upgraded.body.length > 0
+      ? upgraded.body
+      : normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
   };
 }
 

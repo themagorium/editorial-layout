@@ -149,9 +149,9 @@ export default function AdminPage() {
 }
 
 function AdminDashboard() {
-setHeroes(snapshot.heroes || []);
-      setArticles(snapshot.articles || []);
-      setAds(snapshot.ads || []);
+  const [heroes, setHeroes] = useState<HeroItem[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [ads, setAds] = useState<AdSlot[]>([]);
   const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics" | "pages">("heroes");
   const [currentEdition, setCurrentEdition] = useState<string>("");
   const [showNewEdition, setShowNewEdition] = useState(false);

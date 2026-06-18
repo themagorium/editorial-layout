@@ -504,6 +504,11 @@ function toLatestArticleSummary(article: ArticlePayload): ArticlePayload {
     category: article.category,
     imageUrl,
     videoUrl: normalizeLatestVideoUrl(article.videoUrl),
+    secondaryImageUrl: normalizeLatestImageUrl(article.secondaryImageUrl),
+    secondaryImageCaption: article.secondaryImageCaption,
+    secondaryImageCitation: article.secondaryImageCitation,
+    secondaryImageAlign: article.secondaryImageAlign,
+    secondaryImageWidth: article.secondaryImageWidth,
     author: article.author,
     date: article.date,
     featured: article.featured,
@@ -511,7 +516,6 @@ function toLatestArticleSummary(article: ArticlePayload): ArticlePayload {
     body: [],
   };
 }
-
 function toLatestAdSummary(ad: AdPayload): AdPayload {
   return {
     id: ad.id,

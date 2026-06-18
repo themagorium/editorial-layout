@@ -12,6 +12,20 @@ export function hasUsableStoryImageUrl(value?: string): boolean {
   return true;
 }
 
+export const STORY_IMAGE_FALLBACK = "/magorium-m-icon.svg";
+
+export function hasUsableStoryImageUrl(value?: string): boolean {
+  const normalized = (value || "").trim();
+  if (!normalized) return false;
+  if (normalized === "undefined" || normalized === "null") return false;
+  if (normalized.startsWith("blob:")) return false;
+  if (normalized.includes("/favicon.png")) return false;
+  if (normalized.includes("/og-image.jpg")) return false;
+  if (normalized.includes("/og-image.png")) return false;
+  if (normalized.includes("/placeholder.svg")) return false;
+  return true;
+}
+
 export function getStoryCardImageUrl(imageUrl?: string, body?: StoryMediaBlock[]): string {
   const normalized = (imageUrl || "").trim();
   if (hasUsableStoryImageUrl(normalized)) return normalized;
@@ -19,7 +33,6 @@ export function getStoryCardImageUrl(imageUrl?: string, body?: StoryMediaBlock[]
   if (bodyImage) return bodyImage;
   return "";
 }
-
 
 export type StoryMediaBlock = {
   type?: string;

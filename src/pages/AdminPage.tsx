@@ -482,8 +482,21 @@ function EditableStoryForm({
           ) : (
             <div className="w-full h-24 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No opening photo uploaded</div>
           )}
-          <button type="button" onClick={() => secondaryImgRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Opening Photo</button>
+       <button type="button" onClick={() => secondaryImgRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Opening Photo</button>
           <input ref={secondaryImgRef} type="file" accept="image/*" className="hidden" onChange={handleSecondaryImageUpload} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <select value={secondaryImageAlign || "center"} onChange={(e) => onSecondaryImageAlignChange(e.target.value as "left" | "center" | "right")} className="bg-secondary text-foreground px-3 py-1.5 rounded text-xs font-sans">
+              <option value="left">Align: Left</option>
+              <option value="center">Align: Center</option>
+              <option value="right">Align: Right</option>
+            </select>
+            <select value={secondaryImageWidth || "full"} onChange={(e) => onSecondaryImageWidthChange(e.target.value as "small" | "medium" | "large" | "full")} className="bg-secondary text-foreground px-3 py-1.5 rounded text-xs font-sans">
+              <option value="small">Size: Small</option>
+              <option value="medium">Size: Medium</option>
+              <option value="large">Size: Large</option>
+              <option value="full">Size: Full Width</option>
+            </select>
+          </div>
           <div className="flex flex-col sm:flex-row gap-2">
             <input value={secondaryImageCaption || ""} onChange={(e) => onSecondaryImageCaptionChange(e.target.value)} placeholder="Caption (optional)" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
             <input value={secondaryImageCitation || ""} onChange={(e) => onSecondaryImageCitationChange(e.target.value)} placeholder="Photo credit (optional)" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />

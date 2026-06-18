@@ -73,7 +73,18 @@ export interface ArticleBodyBlock {
   citation?: string;
 }
 
-export interface Article {
+
+
+export interface AdSlot {
+  id: string;
+  label: string;
+  position: "hero-sidebar" | "mid-feed" | "bottom-banner" | "sidebar";
+  imageUrl?: string;
+  videoUrl?: string;
+  linkUrl?: string;
+  width: number;
+  height: number;
+}export interface Article {
   id: string;
   title: string;
   excerpt: string;
@@ -85,23 +96,14 @@ export interface Article {
   secondaryImageUrl?: string;
   secondaryImageCaption?: string;
   secondaryImageCitation?: string;
+  secondaryImageAlign?: "left" | "center" | "right";
+  secondaryImageWidth?: "small" | "medium" | "large" | "full";
   videoUrl?: string;
   author: string;
   date: string;
   featured?: boolean;
   body?: ArticleBodyBlock[];
   edition: string;
-}
-
-export interface AdSlot {
-  id: string;
-  label: string;
-  position: "hero-sidebar" | "mid-feed" | "bottom-banner" | "sidebar";
-  imageUrl?: string;
-  videoUrl?: string;
-  linkUrl?: string;
-  width: number;
-  height: number;
 }
 
 export interface PublishedEditorialContent {

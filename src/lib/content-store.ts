@@ -38,7 +38,6 @@ export const CATEGORIES: Category[] = [
   "Travel", "Yachting", "Art & Design", "Fashion", "Tech & AI",
   "Motorsport", "Film & Festivals", "Music", "Golf", "Tennis", "Wellness", "Equestrian", "Sports", "Finance/ Global Economy"
 ];
-
 export interface HeroItem {
   id: string;
   title: string;
@@ -48,6 +47,7 @@ export interface HeroItem {
   sources?: string;
   subtitle: string;
   category: Category;
+  
   secondaryImageUrl?: string;
   secondaryImageCaption?: string;
   secondaryImageCitation?: string;

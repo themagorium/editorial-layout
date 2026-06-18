@@ -48,10 +48,11 @@ export interface HeroItem {
   sources?: string;
   subtitle: string;
   category: Category;
-  
   secondaryImageUrl?: string;
   secondaryImageCaption?: string;
   secondaryImageCitation?: string;
+  secondaryImageAlign?: "left" | "center" | "right";
+  secondaryImageWidth?: "small" | "medium" | "large" | "full";
   videoUrl?: string;
   author?: string;
   date: string;

@@ -483,6 +483,8 @@ function toLatestHeroSummary(hero: HeroPayload): HeroPayload {
     secondaryImageUrl: normalizeLatestImageUrl(hero.secondaryImageUrl),
     secondaryImageCaption: hero.secondaryImageCaption,
     secondaryImageCitation: hero.secondaryImageCitation,
+    secondaryImageAlign: hero.secondaryImageAlign,
+    secondaryImageWidth: hero.secondaryImageWidth,
     author: hero.author,
     date: hero.date,
     featured: hero.featured,

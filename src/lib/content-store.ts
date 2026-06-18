@@ -357,7 +357,6 @@ function backfillMissingStoryMedia<T extends HeroItem | Article>(stories: T[]): 
     };
   });
 }
-
 function normalizeHero(hero: HeroItem): HeroItem {
   const upgraded = upgradeLegacyHeroCopy(hero);
   const canonical = HERO_DEFAULT_BY_ID.get(upgraded.id);
@@ -372,6 +371,8 @@ function normalizeHero(hero: HeroItem): HeroItem {
     secondaryImageUrl: upgraded.secondaryImageUrl,
     secondaryImageCaption: upgraded.secondaryImageCaption,
     secondaryImageCitation: upgraded.secondaryImageCitation,
+    secondaryImageAlign: upgraded.secondaryImageAlign,
+    secondaryImageWidth: upgraded.secondaryImageWidth,
     sources: upgraded.sources,
     seoTags: normalizeSeoTags(upgraded.seoTags),
     body: upgraded.body && upgraded.body.length > 0

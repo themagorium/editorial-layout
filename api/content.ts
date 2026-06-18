@@ -46,6 +46,8 @@ type ArticlePayload = {
   secondaryImageUrl?: string;
   secondaryImageCaption?: string;
   secondaryImageCitation?: string;
+  secondaryImageAlign?: "left" | "center" | "right";
+  secondaryImageWidth?: "small" | "medium" | "large" | "full";
   sources?: string;
   author: string;
   date: string;
@@ -53,7 +55,6 @@ type ArticlePayload = {
   edition: string;
   body?: BodyBlock[];
 };
-
 type AdPayload = {
   id: string;
   label: string;

@@ -380,7 +380,6 @@ function normalizeHero(hero: HeroItem): HeroItem {
       : normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
   };
 }
-
 function normalizeArticle(article: Article): Article {
   const upgraded = upgradeLegacyArticleCopy(article);
   const canonical = ARTICLE_DEFAULT_BY_ID.get(upgraded.id);
@@ -393,6 +392,8 @@ function normalizeArticle(article: Article): Article {
     secondaryImageUrl: upgraded.secondaryImageUrl,
     secondaryImageCaption: upgraded.secondaryImageCaption,
     secondaryImageCitation: upgraded.secondaryImageCitation,
+    secondaryImageAlign: upgraded.secondaryImageAlign,
+    secondaryImageWidth: upgraded.secondaryImageWidth,
     sources: upgraded.sources,
     seoTags: normalizeSeoTags(upgraded.seoTags),
     body: upgraded.body && upgraded.body.length > 0

@@ -272,8 +272,6 @@ function sanitizePayload(input: unknown): PublishPayload {
 
   return { heroes, articles, ads };
 }
-  return { heroes, articles, ads };
-}
 
 function slugifyText(value: string): string {
   return value

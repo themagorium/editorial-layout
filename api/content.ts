@@ -251,6 +251,8 @@ function sanitizePayload(input: unknown): PublishPayload {
     secondaryImageUrl: (hero as any).secondaryImageUrl,
     secondaryImageCaption: (hero as any).secondaryImageCaption,
     secondaryImageCitation: (hero as any).secondaryImageCitation,
+    secondaryImageAlign: (hero as any).secondaryImageAlign,
+    secondaryImageWidth: (hero as any).secondaryImageWidth,
     sources: (hero as any).sources,
   }));
 
@@ -261,11 +263,15 @@ function sanitizePayload(input: unknown): PublishPayload {
     secondaryImageUrl: (article as any).secondaryImageUrl,
     secondaryImageCaption: (article as any).secondaryImageCaption,
     secondaryImageCitation: (article as any).secondaryImageCitation,
+    secondaryImageAlign: (article as any).secondaryImageAlign,
+    secondaryImageWidth: (article as any).secondaryImageWidth,
     sources: (article as any).sources,
   }));
 
   const ads = ensureArray<AdPayload>(payload.ads);
 
+  return { heroes, articles, ads };
+}
   return { heroes, articles, ads };
 }
 

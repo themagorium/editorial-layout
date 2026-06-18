@@ -12,9 +12,12 @@ export function hasUsableStoryImageUrl(value?: string): boolean {
   return true;
 }
 
-export function getStoryImageUrl(value?: string): string {
-  const normalized = (value || "").trim();
-  return hasUsableStoryImageUrl(normalized) ? normalized : STORY_IMAGE_FALLBACK;
+export function getStoryCardImageUrl(imageUrl?: string, body?: StoryMediaBlock[]): string {
+  const normalized = (imageUrl || "").trim();
+  if (hasUsableStoryImageUrl(normalized)) return normalized;
+  const bodyImage = getFirstBodyImageUrl(body);
+  if (bodyImage) return bodyImage;
+  return "";
 }
 
 

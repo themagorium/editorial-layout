@@ -390,14 +390,17 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
 function EditableStoryForm({
   kind, title, summary, category, author, seoTags, date, featured,
   imageUrl, videoUrl, secondaryImageUrl, secondaryImageCaption, secondaryImageCitation,
+  secondaryImageAlign, secondaryImageWidth,
   body, onTitleChange, onSummaryChange, onCategoryChange, onAuthorChange,
   onSeoTagsChange, onDateChange, onFeaturedChange, onImageChange, onVideoChange,
   onSecondaryImageChange, onSecondaryImageCaptionChange, onSecondaryImageCitationChange,
+  onSecondaryImageAlignChange, onSecondaryImageWidthChange,
   onBodyChange, onNormalizeBody, sources, onSourcesChange,
 }: {
   kind: "hero" | "article"; title: string; summary: string; category: Category; author: string;
   seoTags: string[]; date: string; featured?: boolean; imageUrl?: string; videoUrl?: string;
   secondaryImageUrl?: string; secondaryImageCaption?: string; secondaryImageCitation?: string;
+  secondaryImageAlign?: "left" | "center" | "right"; secondaryImageWidth?: "small" | "medium" | "large" | "full";
   body: ArticleBodyBlock[];
   onTitleChange: (v: string) => void; onSummaryChange: (v: string) => void;
   onCategoryChange: (v: Category) => void; onAuthorChange: (v: string) => void;
@@ -405,6 +408,8 @@ function EditableStoryForm({
   onFeaturedChange: (v: boolean) => void; onImageChange: (v: string) => void;
   onVideoChange: (v: string) => void; onSecondaryImageChange: (v: string) => void;
   onSecondaryImageCaptionChange: (v: string) => void; onSecondaryImageCitationChange: (v: string) => void;
+  onSecondaryImageAlignChange: (v: "left" | "center" | "right") => void;
+  onSecondaryImageWidthChange: (v: "small" | "medium" | "large" | "full") => void;
   onBodyChange: (v: ArticleBodyBlock[]) => void; onNormalizeBody: () => void;
   sources?: string; onSourcesChange?: (v: string) => void;
 }) {

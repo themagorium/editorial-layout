@@ -219,9 +219,8 @@ export default function ArticlePage() {
           <span className="text-primary">·</span>
           <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
         </div>
-
-        {secondaryImage && (
-          <figure className="my-8 w-full">
+{secondaryImage && (
+          <figure className={`my-8 ${getSecondaryImageLayoutClasses(content)}`}>
             <img
               src={secondaryImage}
               alt={content.secondaryImageCaption || content.title}

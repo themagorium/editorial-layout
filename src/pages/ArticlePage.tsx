@@ -94,7 +94,6 @@ function bylineCreditLabel(author?: string) {
   if (/staff/i.test(normalized)) return "By The Magorium Editorial Staff";
   return `By ${normalized}`;
 }
-
 function getBodyImageLayoutClasses(block: ArticleBodyBlock) {
   const width = block.imageWidth || "full";
   const align = block.imageAlign || "center";
@@ -103,6 +102,13 @@ function getBodyImageLayoutClasses(block: ArticleBodyBlock) {
   return `${widthClassMap[width]} ${alignClassMap[align]}`;
 }
 
+function getSecondaryImageLayoutClasses(content: { secondaryImageWidth?: "small" | "medium" | "large" | "full"; secondaryImageAlign?: "left" | "center" | "right" }) {
+  const width = content.secondaryImageWidth || "full";
+  const align = content.secondaryImageAlign || "center";
+  const widthClassMap = { small: "w-full md:w-1/2", medium: "w-full md:w-2/3", large: "w-full md:w-5/6", full: "w-full" } as const;
+  const alignClassMap = { left: "mr-auto", center: "mx-auto", right: "ml-auto" } as const;
+  return `${widthClassMap[width]} ${alignClassMap[align]}`;
+}
 export default function ArticlePage() {
   useSyncPublishedContent();
   const { id } = useParams<{ id: string }>();

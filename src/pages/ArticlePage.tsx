@@ -147,6 +147,8 @@ export default function ArticlePage() {
       secondaryImageUrl: heroAsArticle.secondaryImageUrl,
       secondaryImageCaption: heroAsArticle.secondaryImageCaption,
       secondaryImageCitation: heroAsArticle.secondaryImageCitation,
+      secondaryImageAlign: heroAsArticle.secondaryImageAlign,
+      secondaryImageWidth: heroAsArticle.secondaryImageWidth,
       videoUrl: heroAsArticle.videoUrl,
       author: heroAsArticle.author || "The Magorium Staff",
       date: heroAsArticle.date,

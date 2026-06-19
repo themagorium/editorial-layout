@@ -40,8 +40,8 @@ function HeroCard({ hero, prioritizeMedia }: { hero: HeroItem; prioritizeMedia: 
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground mt-2 leading-snug font-editorial">
             {hero.title}
           </h2>
-          <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
-  {article.excerpt}
+         <p className="font-sans text-sm md:text-base text-muted-foreground mt-2 line-clamp-3">
+  {hero.subtitle}
 </p>
         </div>
       </Link>

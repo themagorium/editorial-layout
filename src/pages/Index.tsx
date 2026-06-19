@@ -79,7 +79,7 @@ function ArticleCard({ article }: { article: Article }) {
           <h3 className="font-editorial font-semibold mt-1 sm:mt-2 leading-snug group-hover:text-primary transition-colors text-sm sm:text-base md:text-lg">
             {article.title}
           </h3>
-          <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 hidden sm:block">
+          <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 >
             {article.excerpt}
           </p>
         </div>

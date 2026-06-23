@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { CATEGORIES, PUBLIC_ARCHIVE_EDITIONS, formatEditionLabel } from "@/lib/content-public";
-import { Link } from "react-router-dom";
+
+import { Link } from "react-router-dom";import { useState, useEffect } from "react";
+import { CATEGORIES, formatEditionLabel } from "@/lib/content-public";
+import { getPublishedContentSnapshot } from "@/lib/content-store";
 import PrivacyPopupButton from "@/components/editorial/PrivacyPopupButton";
 import { toast } from "sonner";
 

@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";import { useState, useEffect } from "react";
 import { CATEGORIES, formatEditionLabel } from "@/lib/content-public";
 import { getPublishedContentSnapshot } from "@/lib/content-store";
@@ -51,6 +50,24 @@ function SubscribeSection() {
 }
 
 export default function EditorialFooter() {
+  const [recentEditions, setRecentEditions] = useState<string[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    getPublishedContentSnapshot().then((snapshot) => {
+      if (!active) return;
+      const editionKeys = new Set<string>();
+      snapshot.heroes.forEach((h) => editionKeys.add(h.edition));
+      snapshot.articles.forEach((a) => editionKeys.add(a.edition));
+      const sorted = Array.from(editionKeys).sort().reverse();
+      setRecentEditions(sorted.slice(0, 3));
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return (
   return (
     <footer className="border-t border-border mt-20">
       <SubscribeSection />

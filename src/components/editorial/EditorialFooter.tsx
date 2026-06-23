@@ -83,7 +83,7 @@ export default function EditorialFooter() {
             <div className="mt-5">
               <h4 className="text-xs font-sans uppercase tracking-widest text-primary mb-3">Archive</h4>
               <div className="space-y-2">
-                {PUBLIC_ARCHIVE_EDITIONS.map((ed) => (
+               {recentEditions.map((ed) => (
                   <Link key={ed} to={`/archive/${ed}`} className="block text-sm font-sans text-muted-foreground hover:text-foreground transition-colors">
                     {formatEditionLabel(ed)}
                   </Link>

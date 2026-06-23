@@ -68,7 +68,6 @@ export default function EditorialFooter() {
   }, []);
 
   return (
-  return (
     <footer className="border-t border-border mt-20">
       <SubscribeSection />
       <div className="container mx-auto px-4 py-14">

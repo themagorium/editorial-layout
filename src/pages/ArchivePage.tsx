@@ -140,21 +140,20 @@ export default function ArchivePage() {
         .sort()
         .reverse()
         .map((ed) => {
-          const heroes = snapshot.heroes.filter(
-            (h) =>
-              h.edition === ed &&
-              isPublishReadyTitle(h.title) &&
-              !isPlaceholderCopy(h.subtitle)
-          );
-          const articles = snapshot.articles.filter(
-            (a) =>
-              a.edition === ed &&
-              isPublishReadyTitle(a.title) &&
-              !isPlaceholderCopy(a.excerpt)
-          );
-          if (heroes.length === 0 && articles.length === 0) {
-            return null;
-          }
+         const allHeroesForEdition = snapshot.heroes.filter((h) => h.edition === ed);
+const allArticlesForEdition = snapshot.articles.filter((a) => a.edition === ed);
+
+const readyHeroes = allHeroesForEdition.filter(
+  (h) => isPublishReadyTitle(h.title) && !isPlaceholderCopy(h.subtitle)
+);
+const readyArticles = allArticlesForEdition.filter(
+  (a) => isPublishReadyTitle(a.title) && !isPlaceholderCopy(a.excerpt)
+);
+
+// Always show the edition. Prefer publish-ready content, but fall back
+// to whatever exists so an edition never vanishes from the archive.
+const heroes = readyHeroes.length > 0 ? readyHeroes : allHeroesForEdition;
+const articles = readyArticles.length > 0 ? readyArticles : allArticlesForEdition;
 
           const heroStories = heroes.map(heroToArchiveStory);
           const articleStories = articles.map(articleToArchiveStory);

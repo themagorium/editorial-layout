@@ -133,7 +133,7 @@ export default function EditorialFooter() {
               For editorial features and brand placements, contact our private desk.
             </p>
             
-             href="mailto:concierge@themagorium.com"
+              href="mailto:concierge@themagorium.com"
               className="text-sm text-foreground font-sans mt-3 inline-block underline-offset-2 hover:underline transition-colors"
             >
               concierge@themagorium.com

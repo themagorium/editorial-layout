@@ -12,7 +12,11 @@ function SubscribeSection() {
     <div className="bg-background border-t border-border">
       <div className="container mx-auto px-4 py-14">
         <h3 style={{ fontFamily: "'Playfair Display', serif", textTransform: "none" }} className="text-lg md:text-xl font-semibold italic text-foreground mb-2 tracking-tight">Stay in the Loop</h3>
-        <p className="text-sm font-sans text-muted-foreground mb-6 max-w-2xl">
+        href="mailto:concierge@themagorium.com"
+              className="text-sm text-foreground font-sans mt-3 inline-block underline-offset-2 hover:underline transition-colors"
+            >
+              concierge@themagorium.com
+            </a>
           Subscribe to The Magorium for the latest on art, culture, travel, tech, motorsport, sailing, fashion, and more.
         <const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();

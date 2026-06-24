@@ -7,27 +7,38 @@ import { toast } from "sonner";
 function SubscribeSection() {
   const [email, setEmail] = useState("");
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.error("Please enter a valid email address.");
-      return;
-    }
-    // Send subscription via mailto link
-    window.open(`mailto:subscribe@themagorium.com?subject=New Subscription&body=Please subscribe me: ${encodeURIComponent(email)}`);
-    toast("Thank you for subscribing", {
-      style: { background: "hsl(248, 44%, 26%)", color: "hsl(40, 60%, 65%)", border: "1px solid hsl(40, 60%, 65%, 0.3)" },
-    });
-    setEmail("");
-  };
-
+  
   return (
     <div className="bg-background border-t border-border">
       <div className="container mx-auto px-4 py-14">
         <h3 style={{ fontFamily: "'Playfair Display', serif", textTransform: "none" }} className="text-lg md:text-xl font-semibold italic text-foreground mb-2 tracking-tight">Stay in the Loop</h3>
         <p className="text-sm font-sans text-muted-foreground mb-6 max-w-2xl">
           Subscribe to The Magorium for the latest on art, culture, travel, tech, motorsport, sailing, fashion, and more.
-        </p>
+        <const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    // TODO: send `email` to your actual subscription endpoint/service here
+    // (e.g. fetch('/api/subscribe', { method: 'POST', body: JSON.stringify({ email }) }))
+
+    toast(
+      <span
+        style={{
+          fontFamily: "'Playfair Display', serif",
+          fontStyle: "italic",
+          color: "hsl(40, 60%, 65%)",
+        }}
+      >
+        Thank you for subscribing to the Magorium.
+      </span>,
+      {
+        style: { background: "hsl(248, 44%, 26%)", border: "1px solid hsl(40, 60%, 65%, 0.3)" },
+      }
+    );
+    setEmail("");
+  };/p>
         <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-2xl">
           <input
             type="email"

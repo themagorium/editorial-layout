@@ -7,18 +7,7 @@ import { toast } from "sonner";
 function SubscribeSection() {
   const [email, setEmail] = useState("");
 
-  
-  return (
-    <div className="bg-background border-t border-border">
-      <div className="container mx-auto px-4 py-14">
-        <h3 style={{ fontFamily: "'Playfair Display', serif", textTransform: "none" }} className="text-lg md:text-xl font-semibold italic text-foreground mb-2 tracking-tight">Stay in the Loop</h3>
-        href="mailto:concierge@themagorium.com"
-              className="text-sm text-foreground font-sans mt-3 inline-block underline-offset-2 hover:underline transition-colors"
-            >
-              concierge@themagorium.com
-            </a>
-          Subscribe to The Magorium for the latest on art, culture, travel, tech, motorsport, sailing, fashion, and more.
-        <const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       toast.error("Please enter a valid email address.");
@@ -42,7 +31,15 @@ function SubscribeSection() {
       }
     );
     setEmail("");
-  };/p>
+  };
+
+  return (
+    <div className="bg-background border-t border-border">
+      <div className="container mx-auto px-4 py-14">
+        <h3 style={{ fontFamily: "'Playfair Display', serif", textTransform: "none" }} className="text-lg md:text-xl font-semibold italic text-foreground mb-2 tracking-tight">Stay in the Loop</h3>
+        <p className="text-sm font-sans text-muted-foreground mb-6 max-w-2xl">
+          Subscribe to The Magorium for the latest on art, culture, travel, tech, motorsport, sailing, fashion, and more.
+        </p>
         <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-2xl">
           <input
             type="email"
@@ -135,7 +132,12 @@ export default function EditorialFooter() {
             <p className="text-sm text-muted-foreground font-sans leading-relaxed">
               For editorial features and brand placements, contact our private desk.
             </p>
-            <p className="text-sm text-foreground font-sans mt-3">concierge@themagorium.com</p>
+            
+              href="mailto:concierge@themagorium.com"
+              className="text-sm text-foreground font-sans mt-3 inline-block underline-offset-2 hover:underline transition-colors"
+            >
+              concierge@themagorium.com
+            </a>
           </div>
         </div>
 

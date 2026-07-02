@@ -23,9 +23,9 @@ type ContributorProfile = {
 };
 
 const CONTRIBUTOR_PROFILE_BY_NAME: Record<string, Omit<ContributorProfile, "name" | "storyCount">> = {
-  "Elena Chen": {
+  "Wilhelmina St. Germain ": {
     role: "Fashion & Couture Editor",
-    bio: "Former fashion director at Condé Nast Traveller. Elena covers haute couture, ready-to-wear, and the intersection of fashion and cultural identity from Paris, Milan, and London.",
+    bio: "Former fashion director at Condé Nast Traveller. Wilhelmina covers haute couture, ready-to-wear, and the intersection of fashion and cultural identity from Paris, Milan, and London.",
   },
   "Marcus Demallier": {
     role: "Culture & Music Correspondent",
@@ -35,10 +35,7 @@ const CONTRIBUTOR_PROFILE_BY_NAME: Record<string, Omit<ContributorProfile, "name
     role: "Travel & Luxury Editor",
     bio: "Charlotte writes about the world's most compelling destinations, luxury hospitality, and the evolving definition of modern travel. Previously at Financial Times HTSI.",
   },
-  "James Canter": {
-    role: "Sport & Lifestyle Editor",
-    bio: "James covers motorsport, polo, sailing, and the luxury lifestyle ecosystem surrounding major sporting events. Based between London and Monaco.",
-  },
+ 
   "Millie Sealana": {
     role: "Managing Editor",
     bio: "Millie reports on contemporary art, business, music, sports, wellness and the tech world's cultural impact. A regular contributor to ART, Equestrian sports, Fashion and Technology.",

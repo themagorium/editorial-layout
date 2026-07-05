@@ -98,13 +98,18 @@ export interface AdSlot {
   secondaryImageCitation?: string;
   secondaryImageAlign?: "left" | "center" | "right";
   secondaryImageWidth?: "small" | "medium" | "large" | "full";
-  videoUrl?: string;
+videoUrl?: string;
   author: string;
   date: string;
   featured?: boolean;
   body?: ArticleBodyBlock[];
   edition: string;
+  ad?: AdSlot;
 }
+
+export interface PublishedEditorialContent {
+
+export interface PublishedEditorialContent {
 
 export interface PublishedEditorialContent {
   heroes: HeroItem[];

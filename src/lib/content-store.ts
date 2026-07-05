@@ -78,12 +78,14 @@ export interface ArticleBodyBlock {
 export interface AdSlot {
   id: string;
   label: string;
-  position: "hero-sidebar" | "mid-feed" | "bottom-banner" | "sidebar";
+  position: "hero-sidebar" | "mid-feed" | "bottom-banner" | "sidebar" | "inline-hero" | "inline-article";
+  placement?: "top" | "center" | "bottom-left" | "bottom-right" | "mid-left" | "mid-right";
   imageUrl?: string;
   videoUrl?: string;
   linkUrl?: string;
   width: number;
   height: number;
+}
 }export interface Article {
   id: string;
   title: string;

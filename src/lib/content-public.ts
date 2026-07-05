@@ -63,6 +63,7 @@ export interface HeroItem {
   featured?: boolean;
   edition: string;
   body?: ArticleBodyBlock[];
+   ad?: AdSlot;
 }
 
 export interface Article {
@@ -79,12 +80,13 @@ export interface Article {
   featured?: boolean;
   body?: ArticleBodyBlock[];
   edition: string;
+  ad?: AdSlot;
 }
 
 export interface AdSlot {
   id: string;
   label: string;
-  position: "hero-sidebar" | "mid-feed" | "bottom-banner" | "sidebar";
+position: "hero-sidebar" | "mid-feed" | "bottom-banner" | "sidebar" | "inline-hero" | "inline-article";
   imageUrl?: string;
   videoUrl?: string;
   linkUrl?: string;

@@ -56,3 +56,4 @@ export default function AdPlacement({ ad, className = "" }: Props) {
       {content}
     </div>
   );
+}

@@ -411,7 +411,8 @@ function EditableStoryForm({
   onSecondaryImageAlignChange: (v: "left" | "center" | "right") => void;
   onSecondaryImageWidthChange: (v: "small" | "medium" | "large" | "full") => void;
   onBodyChange: (v: ArticleBodyBlock[]) => void; onNormalizeBody: () => void;
-  sources?: string; onSourcesChange?: (v: string) => void;
+sources?: string; onSourcesChange?: (v: string) => void;
+  ad?: AdSlot; onAdChange: (v: AdSlot | undefined) => void;
 }) {
   const isArticle = kind === "article";
   const [seoTagDraft, setSeoTagDraft] = useState("");
@@ -533,13 +534,55 @@ function EditableStoryForm({
           <ArticleBodyEditor blocks={body} heading={isArticle ? "Article Body" : "Hero Body"} onChange={onBodyChange} />
         </div>
 
-        {onSourcesChange && (
+      {onSourcesChange && (
           <div className="mt-4 pt-4 border-t border-border">
             <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Sources & Verification</label>
             <textarea value={sources || ""} onChange={(e) => onSourcesChange(e.target.value)} placeholder="List your sources here, e.g. The Guardian (May 2026), Reuters (Apr 15)…" rows={3} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
             <p className="text-[10px] text-muted-foreground font-sans mt-1">Appears as footnote at the bottom of the live article. Hidden if empty.</p>
           </div>
         )}
+
+        <div className="mt-4 pt-4 border-t border-border">
+          <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+            <input
+              type="checkbox"
+              checked={Boolean(ad)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  onAdChange({
+                    id: `inline-ad-${Date.now()}`,
+                    label: isArticle ? "Article Ad" : "Hero Ad",
+                    position: isArticle ? "inline-article" : "inline-hero",
+                    width: 300,
+                    height: 250,
+                  });
+                } else {
+                  onAdChange(undefined);
+                }
+              }}
+              className="accent-primary"
+            />
+            Attach an ad to this {isArticle ? "article" : "hero"}
+          </label>
+
+          {ad && (
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 mt-3">
+              <MediaUpload
+                imageUrl={ad.imageUrl}
+                videoUrl={ad.videoUrl}
+                onImage={(url) => onAdChange({ ...ad, imageUrl: url })}
+                onVideo={(url) => onAdChange({ ...ad, videoUrl: url })}
+              />
+              <div className="space-y-3">
+                <span className="text-xs text-muted-foreground">
+                  W: <input type="number" value={ad.width} onChange={(e) => onAdChange({ ...ad, width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
+                  {" "}× H: <input type="number" value={ad.height} onChange={(e) => onAdChange({ ...ad, height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
+                </span>
+                <input value={ad.linkUrl || ""} onChange={(e) => onAdChange({ ...ad, linkUrl: e.target.value })} placeholder="Click-through URL" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

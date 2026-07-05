@@ -84,9 +84,10 @@ export interface AdSlot {
   videoUrl?: string;
   linkUrl?: string;
   width: number;
-  height: number;
+ height: number;
 }
-}export interface Article {
+
+export interface Article {
   id: string;
   title: string;
   excerpt: string;

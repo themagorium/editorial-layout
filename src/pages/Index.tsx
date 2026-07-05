@@ -201,9 +201,9 @@ export default function Index() {
         )}
       </section>
 
-      {bottomAd && (
+    {bottomAd && (
         <section className="container mx-auto px-4 mt-12">
-          <AdPlacement ad={bottomAd} className="w-full" />
+          <AdPlacement ad={bottomAd} className="w-full mx-auto" />
         </section>
       )}
 

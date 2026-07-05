@@ -241,7 +241,7 @@ export default function ArticlePage() {
           <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
         </div>
 
-        {content.ad && content.ad.placement === "top" && (
+        {content.ad && (content.ad.placement || "center") === "top" && (
           <div className={`my-6 ${getAdPlacementClasses(content.ad.placement)}`}>
             <AdPlacement ad={content.ad} className="w-full" />
           </div>
@@ -273,7 +273,7 @@ export default function ArticlePage() {
           {(() => {
             const blocks = content.body ? content.body.filter(hasRealBodyContent) : [];
             const midInsertIndex = Math.ceil(blocks.length / 2);
-            const isMidPlacement = content.ad && ["center", "mid-left", "mid-right"].includes(content.ad.placement || "");
+            const isMidPlacement = content.ad && ["center", "mid-left", "mid-right"].includes(content.ad.placement || "center");
             const rendered: React.ReactNode[] = [];
             blocks.forEach((block, index) => {
               rendered.push(<BodyBlock key={block.id} block={block} />);
@@ -289,7 +289,7 @@ export default function ArticlePage() {
           })()}
         </div>
 
-        {content.ad && ["bottom-left", "bottom-right"].includes(content.ad.placement || "") && (
+        {content.ad && ["bottom-left", "bottom-right"].includes(content.ad.placement || "center") && (
           <div className={`mt-8 ${getAdPlacementClasses(content.ad.placement)}`}>
             <AdPlacement ad={content.ad} className="w-full" />
           </div>

@@ -107,9 +107,6 @@ videoUrl?: string;
   ad?: AdSlot;
 }
 
-export interface PublishedEditorialContent {
-
-export interface PublishedEditorialContent {
 
 export interface PublishedEditorialContent {
   heroes: HeroItem[];

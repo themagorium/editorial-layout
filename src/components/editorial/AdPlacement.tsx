@@ -48,9 +48,11 @@ export default function AdPlacement({ ad, className = "" }: Props) {
     </a>
   );
 
-  return (
-    <div className={`ad-slot rounded overflow-hidden ${className}`} style={{ minHeight: Math.min(ad.height, 250) }}>
+ return (
+    <div
+      className={`ad-slot rounded overflow-hidden ${className}`}
+      style={{ width: ad.width, height: ad.height }}
+    >
       {content}
     </div>
   );
-}

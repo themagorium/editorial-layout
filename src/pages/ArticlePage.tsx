@@ -7,9 +7,10 @@ import {
   getPublishedContentSnapshot,
   slugifyText,
 } from "@/lib/content-store";
-import type { ArticleBodyBlock } from "@/lib/content-store";
+import type { ArticleBodyBlock, AdSlot } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
+import AdPlacement from "@/components/editorial/AdPlacement";
 import { ArrowLeft } from "lucide-react";
 import { applyArticleSeo } from "@/lib/seo";
 import { getFirstBodyImageUrl, getStoryCardImageUrl, STORY_IMAGE_FALLBACK } from "@/lib/story-media";
@@ -94,6 +95,7 @@ function bylineCreditLabel(author?: string) {
   if (/staff/i.test(normalized)) return "By The Magorium Editorial Staff";
   return `By ${normalized}`;
 }
+
 function getBodyImageLayoutClasses(block: ArticleBodyBlock) {
   const width = block.imageWidth || "full";
   const align = block.imageAlign || "center";
@@ -109,6 +111,24 @@ function getSecondaryImageLayoutClasses(content: { secondaryImageWidth?: "small"
   const alignClassMap = { left: "mr-auto", center: "mx-auto", right: "ml-auto" } as const;
   return `${widthClassMap[width]} ${alignClassMap[align]}`;
 }
+
+function getAdPlacementClasses(placement?: AdSlot["placement"]): string {
+  switch (placement) {
+    case "mid-left":
+      return "float-left mr-6 mb-4 w-full max-w-xs clear-left";
+    case "mid-right":
+      return "float-right ml-6 mb-4 w-full max-w-xs clear-right";
+    case "bottom-left":
+      return "mr-auto";
+    case "bottom-right":
+      return "ml-auto";
+    case "top":
+    case "center":
+    default:
+      return "mx-auto";
+  }
+}
+
 export default function ArticlePage() {
   useSyncPublishedContent();
   const { id } = useParams<{ id: string }>();
@@ -155,6 +175,7 @@ export default function ArticlePage() {
       body: (heroAsArticle.body || []) as ArticleBodyBlock[],
       edition: heroAsArticle.edition,
       sources: heroAsArticle.sources,
+      ad: heroAsArticle.ad,
     };
   }, [publishedArticles, publishedHeroes, id]);
 
@@ -219,7 +240,14 @@ export default function ArticlePage() {
           <span className="text-primary">·</span>
           <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
         </div>
-{secondaryImage && (
+
+        {content.ad && content.ad.placement === "top" && (
+          <div className={`my-6 ${getAdPlacementClasses(content.ad.placement)}`}>
+            <AdPlacement ad={content.ad} className="w-full" />
+          </div>
+        )}
+
+        {secondaryImage && (
           <figure className={`my-8 ${getSecondaryImageLayoutClasses(content)}`}>
             <img
               src={secondaryImage}
@@ -242,10 +270,30 @@ export default function ArticlePage() {
         )}
 
         <div className="mt-10 space-y-8">
-          {content.body && content.body.filter(hasRealBodyContent).length > 0
-            ? content.body.filter(hasRealBodyContent).map((block) => <BodyBlock key={block.id} block={block} />)
-            : null}
+          {(() => {
+            const blocks = content.body ? content.body.filter(hasRealBodyContent) : [];
+            const midInsertIndex = Math.ceil(blocks.length / 2);
+            const isMidPlacement = content.ad && ["center", "mid-left", "mid-right"].includes(content.ad.placement || "");
+            const rendered: React.ReactNode[] = [];
+            blocks.forEach((block, index) => {
+              rendered.push(<BodyBlock key={block.id} block={block} />);
+              if (isMidPlacement && content.ad && index === midInsertIndex - 1) {
+                rendered.push(
+                  <div key={`${content.ad.id}-inline`} className={getAdPlacementClasses(content.ad.placement)}>
+                    <AdPlacement ad={content.ad} className="w-full" />
+                  </div>,
+                );
+              }
+            });
+            return rendered;
+          })()}
         </div>
+
+        {content.ad && ["bottom-left", "bottom-right"].includes(content.ad.placement || "") && (
+          <div className={`mt-8 ${getAdPlacementClasses(content.ad.placement)}`}>
+            <AdPlacement ad={content.ad} className="w-full" />
+          </div>
+        )}
 
         {content.sources && content.sources.trim() && (
           <div className="mt-12 pt-6 border-t border-border/30">

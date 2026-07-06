@@ -1846,3 +1846,35 @@ export function enforceEditionPattern(heroes: HeroItem[], articles: Article[]) {
   }));
   return { heroes: normalizedHeroes, articles: normalizedArticles };
 }
+export async function publishStory(
+  edition: string,
+  storyType: "hero" | "article",
+  story: HeroItem | Article,
+  adminPasswordOrToken?: string,
+) {
+  try {
+    const authValue = (adminPasswordOrToken || getAdminPublishCredentialFromBrowserStorage() || "").trim();
+    if (!authValue) {
+      return { success: false as const, configured: true, error: "Admin session expired. Please sign in again to publish live." };
+    }
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authValue}`,
+        "x-admin-password": authValue,
+      },
+      body: JSON.stringify({ phase: "story", edition, storyType, story }),
+    });
+    const payload = (await response.json().catch(() => ({}))) as {
+      ok?: boolean; success?: boolean; error?: string; publishedAt?: string; updatedAt?: string;
+    };
+    const ok = payload.ok ?? payload.success ?? false;
+    if (!response.ok || !ok) {
+      return { success: false as const, configured: true, error: payload.error || "Publish request failed." };
+    }
+    return { success: true as const, configured: true, publishedAt: payload.publishedAt || payload.updatedAt };
+  } catch {
+    return { success: false as const, configured: false, error: "Network error while publishing content." };
+  }
+}

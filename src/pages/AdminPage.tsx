@@ -136,7 +136,7 @@ export default function AdminPage() {
           <p className="text-sm text-muted-foreground uppercase tracking-widest">Content Manager</p>
           <div className="space-y-3">
             <input type="password" value={passwordInput} onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }} placeholder="Enter password" className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" autoFocus />
-            {passwordError  <p className="text-sm text-destructive">Incorrect password</p>}
+           {passwordError && <p className="text-sm text-destructive">Incorrect password</p>}
             <button type="submit" disabled={isLoggingIn} className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-70">{isLoggingIn ? "Signing In..." : "Sign In"}</button>
             <button type="button" onClick={handleResetAccess} className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Reset Admin Password Access</button>
           </div>

@@ -1503,7 +1503,7 @@ export async function publishEditorialContent(
   adminPasswordOrToken?: string,
 ) {
   const publishByChunks = async (authValue: string) => {
-    const chunkSize = 450_000;
+    const chunkSize = 500_000;
     const serialized = JSON.stringify(content);
     const totalChunks = Math.max(1, Math.ceil(serialized.length / chunkSize));
     const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;

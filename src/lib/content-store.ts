@@ -118,7 +118,95 @@ export interface PublishedEditorialContent {
   publishedAt: string;
   updatedAt?: string;
 }
+export async function publishEdition(
+  edition: string,
+  heroes: HeroItem[],
+  articles: Article[],
+  ads: AdSlot[],
+  adminPasswordOrToken?: string,
+) {
+  try {
+    const authValue = (adminPasswordOrToken || getAdminPublishCredentialFromBrowserStorage() || "").trim();
+    if (!authValue) {
+      return {
+        success: false as const,
+        configured: true,
+        error: "Admin session expired. Please sign in again to publish live.",
+      };
+    }
 
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authValue}`,
+        "x-admin-password": authValue,
+      },
+      body: JSON.stringify({ phase: "edition", edition, heroes, articles, ads }),
+    });
+
+    const payload = (await response.json().catch(() => ({}))) as {
+      ok?: boolean;
+      success?: boolean;
+      error?: string;
+      publishedAt?: string;
+      updatedAt?: string;
+    };
+    const ok = payload.ok ?? payload.success ?? false;
+    if (!response.ok || !ok) {
+      return {
+        success: false as const,
+        configured: true,
+        error: payload.error || "Publish request failed.",
+      };
+    }
+    return {
+      success: true as const,
+      configured: true,
+      publishedAt: payload.publishedAt || payload.updatedAt,
+    };
+  } catch {
+    return {
+      success: false as const,
+      configured: false,
+      error: "Network error while publishing content.",
+    };
+  }
+}
+
+export async function getEditionSnapshot(edition: string): Promise<{
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+}> {
+  try {
+    const response = await fetch(`${PUBLISHED_CONTENT_ENDPOINT}?edition=${encodeURIComponent(edition)}`, {
+      cache: "no-store",
+    });
+    if (!response.ok) return { heroes: [], articles: [], ads: [] };
+    const payload = await response.json().catch(() => null as any);
+    const raw = payload?.content || payload?.payload;
+    if (!raw) return { heroes: [], articles: [], ads: [] };
+    return {
+      heroes: (raw.heroes || []).map(normalizeHero),
+      articles: (raw.articles || []).map(normalizeArticle),
+      ads: raw.ads || [],
+    };
+  } catch {
+    return { heroes: [], articles: [], ads: [] };
+  }
+}
+
+export async function getKnownEditions(): Promise<string[]> {
+  try {
+    const response = await fetch(`${PUBLISHED_CONTENT_ENDPOINT}?list=editions`, { cache: "no-store" });
+    if (!response.ok) return [];
+    const payload = await response.json().catch(() => null as any);
+    return Array.isArray(payload?.editions) ? payload.editions : [];
+  } catch {
+    return [];
+  }
+}
 export function slugifyText(value: string): string {
   return value
     .toLowerCase()

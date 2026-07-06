@@ -5,7 +5,7 @@ import {
   getHeroes, getArticles, getAds, saveHeroes, saveArticles, saveAds,
   publishEditorialContent, getPublishedContentSnapshot, DEFAULT_PUBLISHED_CONTENT,
   resetToDefaults, clearLocalDraftStorage, isStorageQuotaExceededError,
-  CATEGORIES, formatEditionLabel,
+  CATEGORIES, formatEditionLabel, publishStory,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
 import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, FileText } from "lucide-react";
@@ -136,7 +136,7 @@ export default function AdminPage() {
           <p className="text-sm text-muted-foreground uppercase tracking-widest">Content Manager</p>
           <div className="space-y-3">
             <input type="password" value={passwordInput} onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }} placeholder="Enter password" className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" autoFocus />
-            {passwordError && <p className="text-sm text-destructive">Incorrect password</p>}
+            {passwordError  <p className="text-sm text-destructive">Incorrect password</p>}
             <button type="submit" disabled={isLoggingIn} className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-70">{isLoggingIn ? "Signing In..." : "Sign In"}</button>
             <button type="button" onClick={handleResetAccess} className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Reset Admin Password Access</button>
           </div>
@@ -340,7 +340,7 @@ function AdminDashboard() {
         </div>
 
         {tab === "heroes" && <HeroesManager heroes={heroes} setHeroes={setHeroes} filteredHeroes={filteredHeroes} currentEdition={currentEdition} />}
-        {tab === "articles" && <ArticlesManager articles={articles} setArticles={setArticles} filteredArticles={filteredArticles} currentEdition={currentEdition} />}
+       {tab === "articles" && <ArticlesManager articles={articles} setArticles={setArticles} filteredArticles={filteredArticles} currentEdition={currentEdition} publishToken={getAdminPublishToken()} />}
         {tab === "ads" && <AdsManager ads={ads} setAds={setAds} />}
         {tab === "analytics" && <AnalyticsDashboard articles={articles} heroes={heroes} ads={ads} />}
         {tab === "pages" && <PagesManager pageContent={pageContent} setPageContent={setPageContent} />}
@@ -368,10 +368,16 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
   );
 }
 
-function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string }) {
+function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition, publishToken }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string; publishToken: string | null }) {
   const addArticle = () => setArticles([{ id: `a-${Date.now()}`, title: "New Article", excerpt: "", seoTags: [], category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) }, ...articles]);
   const update = (id: string, patch: Partial<Article>) => setArticles(articles.map((a) => (a.id === id ? { ...a, ...patch } : a)));
   const remove = (id: string) => setArticles(articles.filter((a) => a.id !== id));
+  const saveArticleLive = async (article: Article) => {
+    if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
+    const result = await publishStory(currentEdition, "article", article, publishToken);
+    if (result.success) toast.success(`"${article.title}" published.`);
+    else toast.error(result.error || "Could not publish this article.");
+  };
   return (
     <div className="space-y-6">
       <AddButton onClick={addArticle} label={`Add Article to ${currentEdition ? formatEditionLabel(currentEdition) : "Edition"}`} />
@@ -381,6 +387,9 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
             kind="article" title={article.title} summary={article.excerpt} category={article.category} author={article.author} seoTags={article.seoTags || []} date={article.date} featured={article.featured} imageUrl={article.imageUrl} videoUrl={article.videoUrl} secondaryImageUrl={article.secondaryImageUrl || ""} secondaryImageCaption={article.secondaryImageCaption || ""} secondaryImageCitation={article.secondaryImageCitation || ""} secondaryImageAlign={article.secondaryImageAlign || "center"} secondaryImageWidth={article.secondaryImageWidth || "full"} body={article.body || []}
             onTitleChange={(v) => update(article.id, { title: v })} onSummaryChange={(v) => update(article.id, { excerpt: v })} onCategoryChange={(v) => update(article.id, { category: v })} onAuthorChange={(v) => update(article.id, { author: v })} onSeoTagsChange={(v) => update(article.id, { seoTags: v })} onDateChange={(v) => update(article.id, { date: v })} onFeaturedChange={(v) => update(article.id, { featured: v })} onImageChange={(v) => update(article.id, { imageUrl: v })} onVideoChange={(v) => update(article.id, { videoUrl: v })} onSecondaryImageChange={(v) => update(article.id, { secondaryImageUrl: v })} onSecondaryImageCaptionChange={(v) => update(article.id, { secondaryImageCaption: v })} onSecondaryImageCitationChange={(v) => update(article.id, { secondaryImageCitation: v })} onSecondaryImageAlignChange={(v) => update(article.id, { secondaryImageAlign: v })} onSecondaryImageWidthChange={(v) => update(article.id, { secondaryImageWidth: v })} onBodyChange={(v) => update(article.id, { body: v })} onNormalizeBody={() => update(article.id, { body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl) })} sources={article.sources || ""} onSourcesChange={(v) => update(article.id, { sources: v })} ad={article.ad} onAdChange={(v) => update(article.id, { ad: v })}
           />
+          <button type="button" onClick={() => saveArticleLive(article)} className="mt-3 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity">
+            Save This Article
+          </button>
         </ContentCard>
       ))}
     </div>

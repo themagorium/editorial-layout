@@ -118,10 +118,11 @@ function getAdPlacementClasses(placement?: AdSlot["placement"]): string {
       return "float-left mr-6 mb-4 w-full max-w-xs clear-left";
     case "mid-right":
       return "float-right ml-6 mb-4 w-full max-w-xs clear-right";
-    case "bottom-left":
+   case "bottom-left":
       return "mr-auto";
     case "bottom-right":
       return "ml-auto";
+    case "bottom-center":
     case "top":
     case "center":
     default:
@@ -241,7 +242,7 @@ export default function ArticlePage() {
           <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
         </div>
 
-        {content.ad && (content.ad.placement || "center") === "top" && (
+    {content.ad && ["bottom-left", "bottom-center", "bottom-right"].includes(content.ad.placement || "center") && (
           <div className={`my-6 ${getAdPlacementClasses(content.ad.placement)}`}>
             <AdPlacement ad={content.ad} className="w-full" />
           </div>

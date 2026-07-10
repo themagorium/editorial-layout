@@ -1,6 +1,17 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|Bingbot|GPTBot|OAI-SearchBot|ClaudeBot|anthropic-ai|PerplexityBot|CCBot|Bytespider|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo-home"
+    },
+    {
       "source": "/articles/:slug",
       "has": [
         {
@@ -10,6 +21,17 @@
         }
       ],
       "destination": "/api/seo-article?identifier=:slug"
+    },
+    {
+      "source": "/author/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|Bingbot|GPTBot|OAI-SearchBot|ClaudeBot|anthropic-ai|PerplexityBot|CCBot|Bytespider|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo-author?slug=:slug"
     },
     { "source": "/(.*)", "destination": "/index.html" }
   ],

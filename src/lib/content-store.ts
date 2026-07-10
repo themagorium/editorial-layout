@@ -79,7 +79,7 @@ export interface AdSlot {
   id: string;
   label: string;
   position: "hero-sidebar" | "mid-feed" | "bottom-banner" | "sidebar" | "inline-hero" | "inline-article";
-  placement?: "top" | "center" | "bottom-left" | "bottom-right" | "mid-left" | "mid-right";
+  placement?: "top" | "center" | "bottom-left" | "bottom-center" | "bottom-right" | "mid-left" | "mid-right";
   imageUrl?: string;
   videoUrl?: string;
   linkUrl?: string;

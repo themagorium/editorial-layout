@@ -579,11 +579,12 @@ sources?: string; onSourcesChange?: (v: string) => void;
               type="checkbox"
               checked={Boolean(ad)}
               onChange={(e) => {
-                if (e.target.checked) {
+               if (e.target.checked) {
                   onAdChange({
                     id: `inline-ad-${Date.now()}`,
                     label: isArticle ? "Article Ad" : "Hero Ad",
                     position: isArticle ? "inline-article" : "inline-hero",
+                    placement: "center",
                     width: 300,
                     height: 250,
                   });

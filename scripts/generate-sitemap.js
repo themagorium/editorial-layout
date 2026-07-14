@@ -1,4 +1,4 @@
-import fs from "fs";
+\import fs from "fs";
 import fetch from "node-fetch";
 
 const SITE_URL = "https://www.themagorium.com";

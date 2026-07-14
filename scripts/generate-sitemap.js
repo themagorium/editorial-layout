@@ -1,100 +1,404 @@
-import fs from 'fs';
-import fetch from 'node-fetch';
+import fs from "fs";
+import fetch from "node-fetch";
 
-const SITE_URL = 'https://www.themagorium.com';
+const SITE_URL = "https://www.themagorium.com";
 
-// ── Same slugify logic as api/lib/seo-runtime.ts, kept in sync ─────────────
-function slugifyText(value) {
-  return (value || '')
+const IMAGE_NAMESPACE =
+  "http://www.google.com/schemas/sitemap-image/1.1";
+
+function slugifyText(value = "") {
+  return value
     .toLowerCase()
     .trim()
-    .replace(/['"]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
-function buildContentPath(id, title) {
-  const slug = slugifyText(title || id);
-  return `/articles/${slug}--${id}`;
+function buildContentPath(id: string, title: string) {
+  return `/articles/${slugifyText(title || id)}--${id}`;
 }
 
-// ── Same placeholder detection as seo-runtime.ts, so drafts never leak in ──
-const PLACEHOLDER_TITLE_PATTERN = /^new\s+(hero|article)(\s+\d+)?$/i;
+function canonicalAuthorSlug(author = "") {
+  const slug = slugifyText(author);
+  return slug && slug !== "staff" ? slug : "staff";
+}
+
+function cleanDate(value?: string) {
+  if (!value) {
+    return new Date().toISOString().split("T")[0];
+  }
+
+  return value.split("T")[0];
+}
+
+const PLACEHOLDER_TITLE_PATTERN =
+  /^new\s+(hero|article)(\s+\d+)?$/i;
+
 const PLACEHOLDER_COPY_PATTERNS = [
-  /^add your (first|second|third|fourth)\s+hero story$/i,
-  /^add your (first|second|third|fourth)\s+article$/i,
   /^add your .* story$/i,
+  /^add your .* article$/i,
   /^add story text$/i,
-  /^add (first|second|third|fourth) body paragraph$/i,
   /^upload photo or video$/i,
 ];
 
-function isPlaceholderTitle(title) {
-  const normalized = (title || '').trim();
-  if (!normalized) return true;
-  return PLACEHOLDER_TITLE_PATTERN.test(normalized);
-}
+function isPlaceholder(value = "") {
+  const text = value.trim();
 
-function isPlaceholderCopy(value) {
-  const text = (value || '').trim();
   if (!text) return true;
-  return PLACEHOLDER_COPY_PATTERNS.some((p) => p.test(text));
+
+  if (PLACEHOLDER_TITLE_PATTERN.test(text)) return true;
+
+  return PLACEHOLDER_COPY_PATTERNS.some((p) =>
+    p.test(text)
+  );
 }
 
-async function fetchLiveContent() {
-  try {
-    const response = await fetch(`${SITE_URL}/api/content`, {
-      headers: { 'User-Agent': 'MagoriumSitemapBuilder/1.0' },
-    });
-    if (!response.ok) {
-      console.error(`/api/content responded with ${response.status}, using homepage-only sitemap.`);
-      return { heroes: [], articles: [] };
+
+async function fetchArchive() {
+  const response = await fetch(
+    `${SITE_URL}/api/content`,
+    {
+      headers: {
+        "User-Agent":
+          "Magorium-Sitemap-Builder/2.0",
+      },
     }
-    const payload = await response.json();
-    const raw = payload?.payload || payload?.content || {};
-    return { heroes: raw.heroes || [], articles: raw.articles || [] };
-  } catch (err) {
-    console.error('Could not reach /api/content, using homepage-only sitemap:', err.message);
-    return { heroes: [], articles: [] };
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `/api/content failed ${response.status}`
+    );
   }
+
+  const json = await response.json();
+
+  return (
+    json.content ||
+    json.payload ||
+    {
+      heroes: [],
+      articles: [],
+    }
+  );
 }
+
+
+type SitemapEntry = {
+  loc: string;
+  lastmod: string;
+  priority: string;
+  changefreq: string;
+  image?: string;
+};
+
 
 async function generateSitemap() {
-  const today = new Date().toISOString().split('T')[0];
-  const { heroes, articles } = await fetchLiveContent();
 
-  const entries = [];
+  const archive = await fetchArchive();
 
-  for (const hero of heroes) {
-    if (isPlaceholderTitle(hero.title)) continue;
-    if (isPlaceholderCopy(hero.subtitle) && isPlaceholderCopy(hero.excerpt)) continue;
+  const entries: SitemapEntry[] = [];
+
+  const today =
+    new Date()
+      .toISOString()
+      .split("T")[0];
+
+
+  //
+  // Homepage
+  //
+  entries.push({
+    loc: `${SITE_URL}/`,
+    lastmod: today,
+    priority: "1.0",
+    changefreq: "daily",
+  });
+
+
+  //
+  // Heroes
+  //
+  for (const hero of archive.heroes || []) {
+
+    if (isPlaceholder(hero.title)) continue;
+
+    if (
+      isPlaceholder(hero.subtitle) &&
+      isPlaceholder(hero.excerpt)
+    ) continue;
+
+
     entries.push({
-      loc: `${SITE_URL}${buildContentPath(hero.id, hero.title)}`,
-      lastmod: (hero.date || today).split('T')[0],
+
+      loc:
+        SITE_URL +
+        buildContentPath(
+          hero.id,
+          hero.title
+        ),
+
+      lastmod:
+        cleanDate(
+          hero.date
+        ),
+
+      priority: "0.95",
+
+      changefreq: "weekly",
+
+      image:
+        hero.imageUrl,
+
     });
+
+
+    if (hero.author) {
+
+      entries.push({
+
+        loc:
+          `${SITE_URL}/author/${canonicalAuthorSlug(hero.author)}`,
+
+        lastmod:
+          cleanDate(hero.date),
+
+        priority:
+          "0.5",
+
+        changefreq:
+          "monthly",
+
+      });
+
+    }
+
+
+    if (hero.category) {
+
+      entries.push({
+
+        loc:
+          `${SITE_URL}/category/${slugifyText(hero.category)}`,
+
+        lastmod:
+          cleanDate(hero.date),
+
+        priority:
+          "0.6",
+
+        changefreq:
+          "monthly",
+
+      });
+
+    }
+
   }
 
-  for (const article of articles) {
-    if (isPlaceholderTitle(article.title)) continue;
-    if (isPlaceholderCopy(article.excerpt)) continue;
+
+
+  //
+  // Articles
+  //
+  for (const article of archive.articles || []) {
+
+    if (isPlaceholder(article.title)) continue;
+
+    if (isPlaceholder(article.excerpt)) continue;
+
+
     entries.push({
-      loc: `${SITE_URL}${buildContentPath(article.id, article.title)}`,
-      lastmod: (article.date || today).split('T')[0],
+
+      loc:
+        SITE_URL +
+        buildContentPath(
+          article.id,
+          article.title
+        ),
+
+      lastmod:
+        cleanDate(article.date),
+
+      priority:
+        "0.85",
+
+      changefreq:
+        "monthly",
+
+      image:
+        article.imageUrl,
+
     });
+
+
+
+    if (article.author) {
+
+      entries.push({
+
+        loc:
+          `${SITE_URL}/author/${canonicalAuthorSlug(article.author)}`,
+
+        lastmod:
+          cleanDate(article.date),
+
+        priority:
+          "0.5",
+
+        changefreq:
+          "monthly",
+
+      });
+
+    }
+
+
+    if (article.category) {
+
+      entries.push({
+
+        loc:
+          `${SITE_URL}/category/${slugifyText(article.category)}`,
+
+        lastmod:
+          cleanDate(article.date),
+
+        priority:
+          "0.6",
+
+        changefreq:
+          "monthly",
+
+      });
+
+    }
+
   }
 
-  const urls = [
-    `  <url>\n    <loc>${SITE_URL}/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>`,
-    ...entries.map(
-      (e) =>
-        `  <url>\n    <loc>${e.loc}</loc>\n    <lastmod>${e.lastmod}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>`
-    ),
-  ];
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
 
-  fs.writeFileSync('public/sitemap.xml', xml);
-  console.log(`Sitemap generated with ${entries.length} live content URLs.`);
+  //
+  // Edition archives
+  //
+  const editions = new Set<string>();
+
+  [
+    ...(archive.heroes || []),
+    ...(archive.articles || []),
+
+  ].forEach((item)=>{
+
+    if(item.edition)
+      editions.add(item.edition);
+
+  });
+
+
+  for(const edition of editions){
+
+    entries.push({
+
+      loc:
+        `${SITE_URL}/archive/${edition}`,
+
+      lastmod:
+        today,
+
+      priority:
+        "0.7",
+
+      changefreq:
+        "monthly",
+
+    });
+
+  }
+
+
+
+  //
+  // Remove duplicates
+  //
+  const unique =
+    Array.from(
+      new Map(
+        entries.map(
+          item => [
+            item.loc,
+            item
+          ]
+        )
+      ).values()
+    );
+
+
+
+  const urls =
+    unique.map(entry=>`
+
+<url>
+
+<loc>${entry.loc}</loc>
+
+<lastmod>${entry.lastmod}</lastmod>
+
+<changefreq>${entry.changefreq}</changefreq>
+
+<priority>${entry.priority}</priority>
+
+${
+entry.image
+?
+`
+<image:image>
+
+<image:loc>${entry.image}</image:loc>
+
+</image:image>
+`
+:
+""
 }
 
-generateSitemap();
+</url>
+
+`).join("");
+
+
+
+const xml =
+`<?xml version="1.0" encoding="UTF-8"?>
+
+<urlset 
+xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+xmlns:image="${IMAGE_NAMESPACE}">
+
+${urls}
+
+</urlset>`;
+
+
+fs.writeFileSync(
+  "public/sitemap.xml",
+  xml
+);
+
+
+console.log(
+  `Generated sitemap with ${unique.length} URLs`
+);
+
+
+}
+
+
+generateSitemap()
+.catch(err=>{
+
+console.error(err);
+
+process.exit(1);
+
+});

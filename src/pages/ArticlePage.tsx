@@ -180,10 +180,58 @@ export default function ArticlePage() {
     };
   }, [publishedArticles, publishedHeroes, id]);
 
-  useEffect(() => {
-    if (!content) return;
-    applyArticleSeo({ ...content, excerpt: isMeaningfulText(content.excerpt) ? content.excerpt : "" });
-  }, [content]);
+useEffect(() => {
+  if (!content) return;
+
+  const cleanAuthor = normalizeBylineAuthor(content.author);
+
+  applyArticleSeo({
+    ...content,
+    excerpt: isMeaningfulText(content.excerpt)
+      ? content.excerpt
+      : "",
+  });
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": content.title,
+    "description": content.excerpt || "",
+    "image": content.imageUrl,
+    "datePublished": content.date,
+    "dateModified": content.date,
+    "author": {
+      "@type": "Person",
+      "name": cleanAuthor
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "The Magorium",
+      "url": "https://www.themagorium.com"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": window.location.href
+    }
+  };
+
+  let script = document.querySelector(
+    'script[data-magorium-schema="article"]'
+  );
+
+  if (!script) {
+    script = document.createElement("script");
+    script.setAttribute(
+      "data-magorium-schema",
+      "article"
+    );
+    script.type = "application/ld+json";
+    document.head.appendChild(script);
+  }
+
+  script.textContent = JSON.stringify(schema);
+
+}, [content]);
 
   if (!content) {
     return (

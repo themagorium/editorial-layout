@@ -3,35 +3,6 @@ import fetch from "node-fetch";
 
 const SITE_URL = "https://www.themagorium.com";
 
-const IMAGE_NAMESPACE =
-  "http://www.google.com/schemas/sitemap-image/1.1";
-
-function slugifyText(value = "") {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/['"]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function buildContentPath(id: string, title: string) {
-  return `/articles/${slugifyText(title || id)}--${id}`;
-}
-
-function canonicalAuthorSlug(author = "") {
-  const slug = slugifyText(author);
-  return slug && slug !== "staff" ? slug : "staff";
-}
-
-function cleanDate(value?: string) {
-  if (!value) {
-    return new Date().toISOString().split("T")[0];
-  }
-
-  return value.split("T")[0];
-}
-
 const PLACEHOLDER_TITLE_PATTERN =
   /^new\s+(hero|article)(\s+\d+)?$/i;
 
@@ -42,302 +13,450 @@ const PLACEHOLDER_COPY_PATTERNS = [
   /^upload photo or video$/i,
 ];
 
-function isPlaceholder(value = "") {
-  const text = value.trim();
-
-  if (!text) return true;
-
-  if (PLACEHOLDER_TITLE_PATTERN.test(text)) return true;
-
-  return PLACEHOLDER_COPY_PATTERNS.some((p) =>
-    p.test(text)
-  );
+function slugify(value = "") {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 
-async function fetchArchive() {
+function articleUrl(id:string,title:string){
+
+  return `${SITE_URL}/articles/${slugify(title || id)}--${id}`;
+
+}
+
+
+function authorUrl(author:string){
+
+  return `${SITE_URL}/author/${slugify(author || "staff")}`;
+
+}
+
+
+function categoryUrl(category:string){
+
+  return `${SITE_URL}/category/${slugify(category)}`;
+
+}
+
+
+function archiveUrl(edition:string){
+
+  return `${SITE_URL}/archive/${edition}`;
+
+}
+
+
+
+function cleanDate(date?:string){
+
+  if(!date)
+    return new Date().toISOString().split("T")[0];
+
+  return date.split("T")[0];
+
+}
+
+
+
+function isPlaceholder(value=""){
+
+  const text=value.trim();
+
+  if(!text)
+    return true;
+
+
+  if(PLACEHOLDER_TITLE_PATTERN.test(text))
+    return true;
+
+
+  return PLACEHOLDER_COPY_PATTERNS.some(
+    pattern=>pattern.test(text)
+  );
+
+}
+
+
+
+
+async function getFullArchive(){
+
   const response = await fetch(
     `${SITE_URL}/api/content`,
     {
-      headers: {
+      headers:{
         "User-Agent":
-          "Magorium-Sitemap-Builder/2.0",
-      },
+        "TheMagorium-Sitemap-Crawler/1.0"
+      }
     }
   );
 
-  if (!response.ok) {
+
+  if(!response.ok){
+
     throw new Error(
-      `/api/content failed ${response.status}`
+      `Content API failed ${response.status}`
     );
+
   }
 
+
   const json = await response.json();
+
+
+  /*
+     IMPORTANT:
+
+     We use content/payload,
+     NEVER view=latest.
+
+     latest only contains homepage stories.
+  */
+
 
   return (
     json.content ||
     json.payload ||
     {
-      heroes: [],
-      articles: [],
+      heroes:[],
+      articles:[]
     }
   );
+
 }
 
 
+
+
 type SitemapEntry = {
-  loc: string;
-  lastmod: string;
-  priority: string;
-  changefreq: string;
-  image?: string;
+
+  loc:string;
+
+  lastmod:string;
+
+  priority:string;
+
+  changefreq:string;
+
+  image?:string;
+
 };
 
 
-async function generateSitemap() {
 
-  const archive = await fetchArchive();
 
-  const entries: SitemapEntry[] = [];
 
-  const today =
-    new Date()
-      .toISOString()
-      .split("T")[0];
+async function generate(){
 
 
-  //
-  // Homepage
-  //
-  entries.push({
-    loc: `${SITE_URL}/`,
-    lastmod: today,
-    priority: "1.0",
-    changefreq: "daily",
-  });
+const archive =
+ await getFullArchive();
 
 
-  //
-  // Heroes
-  //
-  for (const hero of archive.heroes || []) {
 
-    if (isPlaceholder(hero.title)) continue;
+const entries:SitemapEntry[]=[];
 
-    if (
-      isPlaceholder(hero.subtitle) &&
-      isPlaceholder(hero.excerpt)
-    ) continue;
 
 
-    entries.push({
+function add(entry:SitemapEntry){
 
-      loc:
-        SITE_URL +
-        buildContentPath(
-          hero.id,
-          hero.title
-        ),
+ entries.push(entry);
 
-      lastmod:
-        cleanDate(
-          hero.date
-        ),
+}
 
-      priority: "0.95",
 
-      changefreq: "weekly",
 
-      image:
-        hero.imageUrl,
+//
+// Homepage
+//
 
-    });
+add({
 
+ loc:`${SITE_URL}/`,
 
-    if (hero.author) {
+ lastmod:
+ cleanDate(
+  archive.updatedAt ||
+  archive.publishedAt
+ ),
 
-      entries.push({
+ changefreq:"daily",
 
-        loc:
-          `${SITE_URL}/author/${canonicalAuthorSlug(hero.author)}`,
+ priority:"1.0"
 
-        lastmod:
-          cleanDate(hero.date),
+});
 
-        priority:
-          "0.5",
 
-        changefreq:
-          "monthly",
 
-      });
 
-    }
 
+//
+// HEROES
+//
 
-    if (hero.category) {
+for(const hero of archive.heroes || []){
 
-      entries.push({
 
-        loc:
-          `${SITE_URL}/category/${slugifyText(hero.category)}`,
+ if(isPlaceholder(hero.title))
+    continue;
 
-        lastmod:
-          cleanDate(hero.date),
 
-        priority:
-          "0.6",
+ if(
+   isPlaceholder(hero.subtitle) &&
+   isPlaceholder(hero.excerpt)
+ )
+    continue;
 
-        changefreq:
-          "monthly",
 
-      });
 
-    }
+add({
 
-  }
+ loc:
+ articleUrl(
+   hero.id,
+   hero.title
+ ),
 
+ lastmod:
+ cleanDate(hero.date),
 
+ changefreq:
+ "weekly",
 
-  //
-  // Articles
-  //
-  for (const article of archive.articles || []) {
+ priority:
+ "0.95",
 
-    if (isPlaceholder(article.title)) continue;
+ image:
+ hero.imageUrl
 
-    if (isPlaceholder(article.excerpt)) continue;
+});
 
 
-    entries.push({
 
-      loc:
-        SITE_URL +
-        buildContentPath(
-          article.id,
-          article.title
-        ),
+if(hero.author){
 
-      lastmod:
-        cleanDate(article.date),
+ add({
 
-      priority:
-        "0.85",
+  loc:
+  authorUrl(hero.author),
 
-      changefreq:
-        "monthly",
+  lastmod:
+  cleanDate(hero.date),
 
-      image:
-        article.imageUrl,
+  changefreq:
+  "monthly",
 
-    });
+  priority:
+  "0.5"
 
+ });
 
+}
 
-    if (article.author) {
 
-      entries.push({
 
-        loc:
-          `${SITE_URL}/author/${canonicalAuthorSlug(article.author)}`,
+if(hero.category){
 
-        lastmod:
-          cleanDate(article.date),
+ add({
 
-        priority:
-          "0.5",
+  loc:
+  categoryUrl(hero.category),
 
-        changefreq:
-          "monthly",
+  lastmod:
+  cleanDate(hero.date),
 
-      });
+  changefreq:
+  "monthly",
 
-    }
+  priority:
+  "0.6"
 
+ });
 
-    if (article.category) {
+}
 
-      entries.push({
 
-        loc:
-          `${SITE_URL}/category/${slugifyText(article.category)}`,
+}
 
-        lastmod:
-          cleanDate(article.date),
 
-        priority:
-          "0.6",
 
-        changefreq:
-          "monthly",
 
-      });
+//
+// ARTICLES
+//
 
-    }
+for(const article of archive.articles || []){
 
-  }
 
+ if(isPlaceholder(article.title))
+    continue;
 
 
-  //
-  // Edition archives
-  //
-  const editions = new Set<string>();
+ if(isPlaceholder(article.excerpt))
+    continue;
 
-  [
-    ...(archive.heroes || []),
-    ...(archive.articles || []),
 
-  ].forEach((item)=>{
 
-    if(item.edition)
-      editions.add(item.edition);
+add({
 
-  });
+ loc:
+ articleUrl(
+  article.id,
+  article.title
+ ),
 
+ lastmod:
+ cleanDate(article.date),
 
-  for(const edition of editions){
+ changefreq:
+ "monthly",
 
-    entries.push({
+ priority:
+ "0.85",
 
-      loc:
-        `${SITE_URL}/archive/${edition}`,
+ image:
+ article.imageUrl
 
-      lastmod:
-        today,
+});
 
-      priority:
-        "0.7",
 
-      changefreq:
-        "monthly",
 
-    });
+if(article.author){
 
-  }
+ add({
 
+  loc:
+  authorUrl(article.author),
 
+  lastmod:
+  cleanDate(article.date),
 
-  //
-  // Remove duplicates
-  //
-  const unique =
-    Array.from(
-      new Map(
-        entries.map(
-          item => [
-            item.loc,
-            item
-          ]
-        )
-      ).values()
-    );
+  changefreq:
+  "monthly",
 
+  priority:
+  "0.5"
 
+ });
 
-  const urls =
-    unique.map(entry=>`
+}
 
+
+
+if(article.category){
+
+ add({
+
+  loc:
+  categoryUrl(article.category),
+
+  lastmod:
+  cleanDate(article.date),
+
+  changefreq:
+  "monthly",
+
+  priority:
+  "0.6"
+
+ });
+
+}
+
+
+}
+
+
+
+
+//
+// EDITION ARCHIVES
+//
+
+const editions =
+new Set<string>();
+
+
+for(const item of [
+
+ ...(archive.heroes || []),
+
+ ...(archive.articles || [])
+
+]){
+
+ if(item.edition)
+    editions.add(item.edition);
+
+}
+
+
+
+for(const edition of editions){
+
+
+ add({
+
+  loc:
+  archiveUrl(edition),
+
+  lastmod:
+  cleanDate(
+    archive.updatedAt ||
+    archive.publishedAt
+  ),
+
+  changefreq:
+  "monthly",
+
+  priority:
+  "0.7"
+
+ });
+
+
+}
+
+
+
+
+
+//
+// REMOVE DUPLICATES
+//
+
+const unique =
+Array.from(
+
+ new Map(
+
+  entries.map(
+   entry=>[
+    entry.loc,
+    entry
+   ]
+  )
+
+ ).values()
+
+);
+
+
+
+
+
+
+
+const xmlEntries =
+unique.map(entry=>{
+
+
+return `
 <url>
 
 <loc>${entry.loc}</loc>
@@ -353,9 +472,7 @@ entry.image
 ?
 `
 <image:image>
-
 <image:loc>${entry.image}</image:loc>
-
 </image:image>
 `
 :
@@ -363,42 +480,56 @@ entry.image
 }
 
 </url>
+`;
 
-`).join("");
+}).join("");
+
+
+
 
 
 
 const xml =
 `<?xml version="1.0" encoding="UTF-8"?>
 
-<urlset 
+<urlset
+
 xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-xmlns:image="${IMAGE_NAMESPACE}">
 
-${urls}
+xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 
-</urlset>`;
+${xmlEntries}
+
+</urlset>
+`;
+
+
+
+
 
 
 fs.writeFileSync(
-  "public/sitemap.xml",
-  xml
+ "public/sitemap.xml",
+ xml
 );
+
 
 
 console.log(
-  `Generated sitemap with ${unique.length} URLs`
+`✅ Sitemap created: ${unique.length} URLs`
 );
+
 
 
 }
 
 
-generateSitemap()
-.catch(err=>{
 
-console.error(err);
+generate()
+.catch(error=>{
 
-process.exit(1);
+ console.error(error);
+
+ process.exit(1);
 
 });

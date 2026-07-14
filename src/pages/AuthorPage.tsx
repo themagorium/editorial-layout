@@ -1,178 +1,58 @@
-import { Link, useParams } from "react-router-dom";
-import EditorialHeader from "@/components/editorial/EditorialHeader";
-import EditorialFooter from "@/components/editorial/EditorialFooter";
-import { buildContentPath, getPublishedContentSnapshot, slugifyText } from "@/lib/content-store";
-import { applyAuthorSeo, canonicalAuthorName } from "@/lib/seo";
-import { useEffect, useMemo, useState } from "react";
-import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
-import { getStoryCardImageUrl } from "@/lib/story-media";
-import { isPublishReadyArticle, isPublishReadyHero } from "@/lib/content-selection";
+import { useParams } from "react-router-dom";
+import { getArticles, getHeroes } from "@/lib/content-store";
+import { slugifyText } from "@/lib/content-store";
+import { Link } from "react-router-dom";
 
-type StorySummary = {
-  id: string;
-  title: string;
-  excerpt: string;
-  imageUrl: string;
-  date: string;
-  category: string;
-  author: string;
-};
+export default function AuthorPage(){
 
-export function normalizeAuthor(author: string) {
-  return canonicalAuthorName(author);
-}
+const {author=""}=useParams();
 
-export default function AuthorPage() {
-  useSyncPublishedContent();
-  const { slug = "" } = useParams<{ slug: string }>();
-  const [allStories, setAllStories] = useState<StorySummary[]>([]);
-  const [loaded, setLoaded] = useState(false);
+const name =
+author
+.replace(/-/g," ")
+.replace(/\b\w/g,c=>c.toUpperCase());
 
-  useEffect(() => {
-    let active = true;
 
-    const hydrate = async () => {
-      const snapshot = await getPublishedContentSnapshot();
-      if (!active) return;
+const articles=[
+...getArticles(),
+...getHeroes()
+];
 
-      const stories: StorySummary[] = [
-        ...snapshot.articles
-          .filter(isPublishReadyArticle)
-          .map((a) => ({
-            id: a.id,
-            title: a.title,
-            excerpt: a.excerpt,
-            imageUrl: getStoryCardImageUrl(a.imageUrl, a.body),
-            date: a.date,
-            category: a.category,
-            author: normalizeAuthor(a.author),
-          })),
-        ...snapshot.heroes
-          .filter(isPublishReadyHero)
-          .map((h) => ({
-            id: h.id,
-            title: h.title,
-            excerpt: h.excerpt || h.subtitle,
-            imageUrl: getStoryCardImageUrl(h.imageUrl, h.body),
-            date: h.date,
-            category: h.category,
-            author: normalizeAuthor(h.author || "The Magorium Staff"),
-          })),
-      ];
+const results =
+articles.filter(
+(article:any)=>
+slugifyText(article.author||"")
+===
+slugifyText(author)
+);
 
-      setAllStories(stories);
-      setLoaded(true);
-    };
 
-    const handleSynced = () => {
-      void hydrate();
-    };
+return (
 
-    void hydrate();
-    window.addEventListener("magorium-content-synced", handleSynced);
-    return () => {
-      active = false;
-      window.removeEventListener("magorium-content-synced", handleSynced);
-    };
-  }, []);
+<div className="container mx-auto px-4 py-16">
 
-  const authorName = useMemo(() => {
-    const normalizedSlug = slugifyText(slug || "");
-    const direct = allStories.find((s) => slugifyText(s.author) === normalizedSlug)?.author;
-    if (direct) return direct;
-    if (normalizedSlug === "staff" || normalizedSlug === "the-magorium-staff") {
-      return "The Magorium Editorial Staff";
-    }
-    // Decode unknown slugs into a readable byline so deep links still resolve to author archives.
-    const guessed = (slug || "")
-      .replace(/-/g, " ")
-      .trim()
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-    return guessed || "The Magorium Editorial Staff";
-  }, [allStories, slug]);
+<h1 className="text-5xl font-serif mb-8">
+{name}
+</h1>
 
-  const stories = useMemo(() => {
-    const targetSlug = slugifyText(authorName);
-    return allStories
-      .filter((s) => slugifyText(s.author) === targetSlug)
-      .sort((a, b) => +new Date(b.date) - +new Date(a.date));
-  }, [allStories, authorName]);
 
-  useEffect(() => {
-    applyAuthorSeo(
-      authorName,
-      stories.length,
-      stories.map((story) => buildContentPath(story.id, story.title)),
-    );
-  }, [authorName, stories]);
+{results.map((article:any)=>(
 
-  return (
-    <div className="min-h-screen bg-background">
-      <EditorialHeader />
-      <section className="container mx-auto px-4 py-12">
-        <Link to="/archive" className="text-xs font-sans text-muted-foreground hover:text-primary transition-colors">
-          ← Back to Archive
-        </Link>
-        <h1 className="font-editorial text-4xl md:text-5xl mt-4 text-foreground">{authorName}</h1>
-        <p className="text-sm text-muted-foreground font-sans mt-3">
-          {stories.length} published {stories.length === 1 ? "story" : "stories"} on The Magorium
-        </p>
+<Link
+key={article.id}
+to={`/articles/${article.title.toLowerCase().replace(/[^a-z0-9]+/g,"-")}--${article.id}`}
+>
 
-        {!loaded ? (
-          <p className="text-sm text-muted-foreground font-sans mt-10">
-            Loading stories...
-          </p>
-        ) : stories.length === 0 ? (
-          <p className="text-sm text-muted-foreground font-sans mt-10">
-            No stories found for this contributor yet.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-            {stories.map((story) => (
-              <Link
-                key={story.id}
-                to={buildContentPath(story.id, story.title)}
-                className="group border border-border rounded overflow-hidden hover:border-primary transition-colors"
-              >
-                {story.imageUrl && (
-                  <div data-story-media className="aspect-[16/9] overflow-hidden">
-                    <img
-                      src={story.imageUrl}
-                      alt={story.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                      decoding="async"
-                      onError={(event) => {
-                        event.currentTarget.closest("[data-story-media]")?.classList.add("hidden");
-                      }}
-                    />
-                  </div>
-                )}
-                <div className="p-4">
-                  <Link
-                    to={`/category/${slugifyText(story.category)}`}
-                    className="category-pill text-[10px] hover:opacity-90 inline-block"
-                  >
-                    {story.category}
-                  </Link>
-                  <h2 className="font-editorial text-xl mt-2 group-hover:text-primary transition-colors">
-                    {story.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{story.excerpt}</p>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    {new Date(story.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-      <EditorialFooter />
-    </div>
-  );
+<h2 className="text-2xl mb-4">
+{article.title}
+</h2>
+
+</Link>
+
+))}
+
+</div>
+
+);
+
 }

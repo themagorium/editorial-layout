@@ -1,10 +1,38 @@
-User-agent: *
+# robots.txt
+
+# AI Search / Answer Engines
+
+User-agent: OAI-SearchBot
 Allow: /
- 
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# Search Engines
+
 User-agent: Googlebot
 Allow: /
- 
+
 User-agent: Bingbot
 Allow: /
- 
-Sitemap: https://themagorium.com/sitemap.xml
+
+# Optional: Prevent AI Training
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+# Everyone Else
+
+User-agent: *
+Allow: /
+
+Sitemap: https://www.themagorium.com/sitemap.xml

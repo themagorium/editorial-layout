@@ -451,47 +451,31 @@ function backfillMissingStoryMedia<T extends HeroItem | Article>(stories: T[]): 
   });
 }
 function normalizeHero(hero: HeroItem): HeroItem {
-  const upgraded = upgradeLegacyHeroCopy(hero);
-  const canonical = HERO_DEFAULT_BY_ID.get(upgraded.id);
-  const imageUrl = resolveStoryImageUrl(upgraded.imageUrl, upgraded.body, canonical?.imageUrl);
-  const subtitle = stripAdminPlaceholderCopy(upgraded.subtitle);
-  const excerpt = stripAdminPlaceholderCopy(upgraded.excerpt) || subtitle;
+  const imageUrl = resolveStoryImageUrl(hero.imageUrl, hero.body);
+  const subtitle = stripAdminPlaceholderCopy(hero.subtitle);
+  const excerpt = stripAdminPlaceholderCopy(hero.excerpt) || subtitle;
   return {
-    ...upgraded,
+    ...hero,
     subtitle,
     excerpt,
     imageUrl,
-    secondaryImageUrl: upgraded.secondaryImageUrl,
-    secondaryImageCaption: upgraded.secondaryImageCaption,
-    secondaryImageCitation: upgraded.secondaryImageCitation,
-    secondaryImageAlign: upgraded.secondaryImageAlign,
-    secondaryImageWidth: upgraded.secondaryImageWidth,
-    sources: upgraded.sources,
-    seoTags: normalizeSeoTags(upgraded.seoTags),
-    body: upgraded.body && upgraded.body.length > 0
-      ? upgraded.body
-      : normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
+    seoTags: normalizeSeoTags(hero.seoTags),
+    body: hero.body && hero.body.length > 0
+      ? hero.body
+      : normalizeBodyToOctoberPattern(hero.id, hero.body, imageUrl, hero.videoUrl),
   };
 }
 function normalizeArticle(article: Article): Article {
-  const upgraded = upgradeLegacyArticleCopy(article);
-  const canonical = ARTICLE_DEFAULT_BY_ID.get(upgraded.id);
-  const imageUrl = resolveStoryImageUrl(upgraded.imageUrl, upgraded.body, canonical?.imageUrl);
-  const excerpt = stripAdminPlaceholderCopy(upgraded.excerpt);
+  const imageUrl = resolveStoryImageUrl(article.imageUrl, article.body);
+  const excerpt = stripAdminPlaceholderCopy(article.excerpt);
   return {
-    ...upgraded,
+    ...article,
     excerpt,
     imageUrl,
-    secondaryImageUrl: upgraded.secondaryImageUrl,
-    secondaryImageCaption: upgraded.secondaryImageCaption,
-    secondaryImageCitation: upgraded.secondaryImageCitation,
-    secondaryImageAlign: upgraded.secondaryImageAlign,
-    secondaryImageWidth: upgraded.secondaryImageWidth,
-    sources: upgraded.sources,
-    seoTags: normalizeSeoTags(upgraded.seoTags),
-    body: upgraded.body && upgraded.body.length > 0
-      ? upgraded.body
-      : normalizeBodyToOctoberPattern(upgraded.id, upgraded.body, imageUrl, upgraded.videoUrl),
+    seoTags: normalizeSeoTags(article.seoTags),
+    body: article.body && article.body.length > 0
+      ? article.body
+      : normalizeBodyToOctoberPattern(article.id, article.body, imageUrl, article.videoUrl),
   };
 }
 

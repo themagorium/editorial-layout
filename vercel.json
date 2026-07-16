@@ -6,7 +6,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(Googlebot|Bingbot|GPTBot|OAI-SearchBot|ClaudeBot|anthropic-ai|PerplexityBot|CCBot|Bytespider|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|[Ss]lurp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|Pinterestbot|Applebot|Google-InspectionTool|GoogleOther|Google-Extended|ChatGPT-User|OAI-SearchBot|Claude|anthropic-ai|Perplexity|CCBot|Bytespider|Amazonbot|YouBot|meta-externalagent|Diffbot|cohere-ai).*"
         }
       ],
       "destination": "/api/seo-home"
@@ -17,7 +17,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(Googlebot|Bingbot|GPTBot|OAI-SearchBot|ClaudeBot|anthropic-ai|PerplexityBot|CCBot|Bytespider|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|[Ss]lurp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|Pinterestbot|Applebot|Google-InspectionTool|GoogleOther|Google-Extended|ChatGPT-User|OAI-SearchBot|Claude|anthropic-ai|Perplexity|CCBot|Bytespider|Amazonbot|YouBot|meta-externalagent|Diffbot|cohere-ai).*"
         }
       ],
       "destination": "/api/seo-article?identifier=:slug"
@@ -28,17 +28,58 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(Googlebot|Bingbot|GPTBot|OAI-SearchBot|ClaudeBot|anthropic-ai|PerplexityBot|CCBot|Bytespider|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|[Ss]lurp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|Pinterestbot|Applebot|Google-InspectionTool|GoogleOther|Google-Extended|ChatGPT-User|OAI-SearchBot|Claude|anthropic-ai|Perplexity|CCBot|Bytespider|Amazonbot|YouBot|meta-externalagent|Diffbot|cohere-ai).*"
         }
       ],
       "destination": "/api/seo-author?slug=:slug"
     },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/category/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|[Ss]lurp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|Pinterestbot|Applebot|Google-InspectionTool|GoogleOther|Google-Extended|ChatGPT-User|OAI-SearchBot|Claude|anthropic-ai|Perplexity|CCBot|Bytespider|Amazonbot|YouBot|meta-externalagent|Diffbot|cohere-ai).*"
+        }
+      ],
+      "destination": "/api/seo-category?slug=:slug"
+    },
+    {
+      "source": "/contributors",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|[Ss]lurp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|Pinterestbot|Applebot|Google-InspectionTool|GoogleOther|Google-Extended|ChatGPT-User|OAI-SearchBot|Claude|anthropic-ai|Perplexity|CCBot|Bytespider|Amazonbot|YouBot|meta-externalagent|Diffbot|cohere-ai).*"
+        }
+      ],
+      "destination": "/api/seo-contributors"
+    },
+    {
+      "source": "/seo-history",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|[Cc]rawler|[Ss]pider|[Ss]lurp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|Pinterestbot|Applebot|Google-InspectionTool|GoogleOther|Google-Extended|ChatGPT-User|OAI-SearchBot|Claude|anthropic-ai|Perplexity|CCBot|Bytespider|Amazonbot|YouBot|meta-externalagent|Diffbot|cohere-ai).*"
+        }
+      ],
+      "destination": "/api/seo-history"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ],
   "redirects": [
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "themagorium.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "themagorium.com"
+        }
+      ],
       "destination": "https://www.themagorium.com/$1",
       "permanent": true
     },
@@ -72,21 +113,36 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "index, follow" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "index, follow"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
       ]
     },
     {
       "source": "/sitemap.xml",
       "headers": [
-        { "key": "Content-Type", "value": "application/xml" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=3600" }
+        {
+          "key": "Content-Type",
+          "value": "application/xml"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=3600"
+        }
       ]
     },
     {
       "source": "/robots.txt",
       "headers": [
-        { "key": "Content-Type", "value": "text/plain" }
+        {
+          "key": "Content-Type",
+          "value": "text/plain"
+        }
       ]
     }
   ]

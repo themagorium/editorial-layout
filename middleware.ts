@@ -1,5 +1,5 @@
 export const config = {
-  matcher: '/((?!api|_next|static|.*\\..*).*)',
+  matcher: '/((?!api|static|.*\\..*).*)',
 };
 
 const BOT_USER_AGENTS = [

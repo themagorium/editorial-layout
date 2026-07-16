@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";import { useState, useEffect } from "react";
 import { CATEGORIES, formatEditionLabel } from "@/lib/content-public";
-import { getPublishedContentSnapshot } from "@/lib/content-store";
+import { getPublishedSeoContentSnapshot } from "@/lib/content-store";
 import PrivacyPopupButton from "@/components/editorial/PrivacyPopupButton";
 import { toast } from "sonner";
 
@@ -66,7 +66,7 @@ export default function EditorialFooter() {
 
   useEffect(() => {
     let active = true;
-    getPublishedContentSnapshot().then((snapshot) => {
+    getPublishedSeoContentSnapshot().then((snapshot) => {
       if (!active) return;
       const editionKeys = new Set<string>();
       snapshot.heroes.forEach((h) => editionKeys.add(h.edition));

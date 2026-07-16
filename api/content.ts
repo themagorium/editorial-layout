@@ -933,17 +933,31 @@ async function getFullContent(): Promise<StoredPayload | null> {
   await migrateLegacyBlobIfNeeded();
   const editions = await getEditionsIndex();
   if (editions.length === 0) return null;
+  const [editionContents, ads, meta] = await Promise.all([
+    Promise.all(editions.map((edition) => getEditionContent(edition))),
+    getAdsContent(),
+    getMeta(),
+  ]);
   const heroes: HeroPayload[] = [];
   const articles: ArticlePayload[] = [];
-  for (const edition of editions) {
-    const content = await getEditionContent(edition);
-    if (!content) continue;
+  editionContents.forEach((content) => {
+    if (!content) return;
     heroes.push(...content.heroes);
     articles.push(...content.articles);
-  }
-  const ads = await getAdsContent();
-  const meta = (await getMeta()) || { publishedAt: new Date(0).toISOString() };
-  return { heroes, articles, ads, publishedAt: meta.publishedAt, updatedAt: meta.updatedAt };
+  });
+  const resolvedMeta = meta || { publishedAt: new Date(0).toISOString() };
+  return { heroes, articles, ads, publishedAt: resolvedMeta.publishedAt, updatedAt: resolvedMeta.updatedAt };
+}
+
+async function getSeoContent(): Promise<StoredPayload | null> {
+  const content = await getFullContent();
+  if (!content) return null;
+  return {
+    ...content,
+    heroes: content.heroes.map(toLatestHeroSummary),
+    articles: content.articles.map(toLatestArticleSummary),
+    ads: [],
+  };
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -985,6 +999,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const latest = await getLatestView();
         const limited = latest ? applyLatestLimits(latest, heroLimit, articleLimit) : null;
         res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), content: limited, payload: limited });
+        return;
+      }
+
+      // Search-engine view — all publish-ready story metadata without heavy bodies or ads.
+      if (queryView === "seo") {
+        res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=120");
+        const content = await getSeoContent();
+        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), content, payload: content });
         return;
       }
 

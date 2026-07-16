@@ -5,7 +5,7 @@ import EditorialFooter from "@/components/editorial/EditorialFooter";
 import {
   buildContentPath,
   formatEditionLabel,
-  getPublishedContentSnapshot,
+  getPublishedSeoContentSnapshot,
   slugifyText,
   type Article,
   type HeroItem,
@@ -199,7 +199,7 @@ function mapArticle(article: Article): CategoryStory {
 }
 
 export default function CategoryPage() {
-  useSyncPublishedContent();
+  useSyncPublishedContent({ enabled: false });
   const { slug = "" } = useParams<{ slug: string }>();
   const normalizedLabel = normalizeCategoryLabel(slug);
   const [stories, setStories] = useState<CategoryStory[]>([]);
@@ -226,7 +226,7 @@ export default function CategoryPage() {
   useEffect(() => {
     let active = true;
     const hydrate = async () => {
-      const snapshot = await getPublishedContentSnapshot();
+      const snapshot = await getPublishedSeoContentSnapshot();
       if (!active) return;
       const allStories = [...snapshot.heroes.map(mapHero), ...snapshot.articles.map(mapArticle)];
       const normalizedSlug = slugifyText(normalizedLabel);

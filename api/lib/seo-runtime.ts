@@ -151,7 +151,7 @@ export type SeoStory = {
 // ── Fetch published stories from the CMS API ───────────────────────────────
 export async function getPublishedSeoStories(): Promise<SeoStory[]> {
   try {
-    const response = await fetch(`${SITE_URL}/api/content`, {
+    const response = await fetch(`${SITE_URL}/api/content?view=seo`, {
       headers: { "User-Agent": "MagoriumSeoBot/1.0" },
     });
     if (!response.ok) return [];

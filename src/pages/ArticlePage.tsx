@@ -5,6 +5,7 @@ import {
   getArticles,
   getHeroes,
   getPublishedContentSnapshot,
+  getPublishedStoryByIdentifier,
   slugifyText,
 } from "@/lib/content-store";
 import type { ArticleBodyBlock, AdSlot } from "@/lib/content-store";
@@ -131,7 +132,7 @@ function getAdPlacementClasses(placement?: AdSlot["placement"]): string {
 }
 
 export default function ArticlePage() {
-  useSyncPublishedContent();
+  useSyncPublishedContent({ enabled: false });
   const { id } = useParams<{ id: string }>();
   const [contentLoaded, setContentLoaded] = useState(false);
   const [publishedArticles, setPublishedArticles] = useState(() => getArticles());
@@ -141,6 +142,19 @@ export default function ArticlePage() {
     let active = true;
     const hydratePublishedContent = async () => {
       try {
+        const story = await getPublishedStoryByIdentifier(id || "");
+        if (!active) return;
+        if (story) {
+          if ("subtitle" in story) {
+            setPublishedHeroes([story]);
+            setPublishedArticles([]);
+          } else {
+            setPublishedArticles([story]);
+            setPublishedHeroes([]);
+          }
+          return;
+        }
+
         const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: false });
         if (!active) return;
         setPublishedArticles(snapshot.articles);

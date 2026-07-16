@@ -30,7 +30,7 @@ const BOT_USER_AGENTS = [
   'mcafeewebadvisor',
 ];
 
-export async function middleware(request: Request) {
+export default async function middleware(request: Request) {
   const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
   const isBot = BOT_USER_AGENTS.some((bot) => userAgent.includes(bot));
 

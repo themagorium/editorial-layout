@@ -23,7 +23,7 @@ function slugify(value = "") {
 }
 
 
-function articleUrl(id:string,title:string){
+function articleUrl(id, title){
 
   return `${SITE_URL}/articles/${slugify(title || id)}--${id}`;
 

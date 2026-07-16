@@ -2,7 +2,7 @@ import ContentPage from "./ContentPage";
 import { applyContributorsSeo, canonicalAuthorName } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { buildContentPath, getPublishedContentSnapshot, slugifyText } from "@/lib/content-store";
+import { buildContentPath, getPublishedSeoContentSnapshot, slugifyText } from "@/lib/content-store";
 import { isPublishReadyArticle, isPublishReadyHero } from "@/lib/content-selection";
 
 const STORAGE_KEY = "magorium_page_content";
@@ -62,7 +62,7 @@ export default function ContributorsPage() {
   useEffect(() => {
     let active = true;
     const hydrate = async () => {
-      const snapshot = await getPublishedContentSnapshot();
+      const snapshot = await getPublishedSeoContentSnapshot();
       if (!active) return;
 
       const storyPathsByContributor: Record<string, string[]> = {};

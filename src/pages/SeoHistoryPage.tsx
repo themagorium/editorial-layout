@@ -4,7 +4,7 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import {
   buildContentPath,
-  getPublishedContentSnapshot,
+  getPublishedSeoContentSnapshot,
   type Article,
   type HeroItem,
 } from "@/lib/content-store";
@@ -57,7 +57,7 @@ export default function SeoHistoryPage() {
   useEffect(() => {
     let active = true;
     const hydrate = async () => {
-      const snapshot = await getPublishedContentSnapshot();
+      const snapshot = await getPublishedSeoContentSnapshot();
       if (!active) return;
       const mapped = [...snapshot.heroes.map(mapHero), ...snapshot.articles.map(mapArticle)]
         .sort((a, b) => +new Date(b.date) - +new Date(a.date));

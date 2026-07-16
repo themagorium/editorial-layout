@@ -33,6 +33,39 @@
       ],
       "destination": "/api/seo-author?slug=:slug"
     },
+    {
+      "source": "/category/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|Bingbot|GPTBot|OAI-SearchBot|ClaudeBot|anthropic-ai|PerplexityBot|CCBot|Bytespider|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo-category?slug=:slug"
+    },
+    {
+      "source": "/contributors",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|Bingbot|GPTBot|OAI-SearchBot|ClaudeBot|anthropic-ai|PerplexityBot|CCBot|Bytespider|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo-contributors"
+    },
+    {
+      "source": "/seo-history",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|Bingbot|GPTBot|OAI-SearchBot|ClaudeBot|anthropic-ai|PerplexityBot|CCBot|Bytespider|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo-history"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [

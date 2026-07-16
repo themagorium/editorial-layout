@@ -1354,6 +1354,63 @@ function hasPublishedStoryContent(content: { heroes: HeroItem[]; articles: Artic
   return content.heroes.length > 0 || content.articles.length > 0;
 }
 
+function extractStoryIdFromIdentifier(identifier: string): string {
+  const decoded = decodeURIComponent(identifier || "")
+    .trim()
+    .split("?")[0]
+    .split("#")[0]
+    .replace(/^\/+|\/+$/g, "");
+  const candidate = decoded.split("/").pop() || decoded;
+  const [, suffix] = candidate.match(/--([a-z0-9_-]+)$/i) || [];
+  return (suffix || candidate).replace(/[^a-z0-9_-]/gi, "").slice(0, 120);
+}
+
+export async function getPublishedStoryByIdentifier(identifier: string): Promise<Article | HeroItem | null> {
+  if (typeof window === "undefined") return null;
+  const storyId = extractStoryIdFromIdentifier(identifier);
+  if (!storyId) return null;
+
+  try {
+    const [articleResponse, heroResponse] = await Promise.all([
+      fetch(`${PUBLISHED_CONTENT_ENDPOINT}?storyType=article&storyId=${encodeURIComponent(storyId)}`, { cache: "no-store" }),
+      fetch(`${PUBLISHED_CONTENT_ENDPOINT}?storyType=hero&storyId=${encodeURIComponent(storyId)}`, { cache: "no-store" }),
+    ]);
+    const [articlePayload, heroPayload] = await Promise.all([
+      articleResponse.ok ? articleResponse.json().catch(() => null) : null,
+      heroResponse.ok ? heroResponse.json().catch(() => null) : null,
+    ]);
+    const article = articlePayload?.content?.story;
+    if (article && contentIdentifierMatches(article, identifier)) return normalizeArticle(article);
+    const hero = heroPayload?.content?.story;
+    if (hero && contentIdentifierMatches(hero, identifier)) return normalizeHero(hero);
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+export async function getPublishedSeoContentSnapshot(): Promise<{
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+}> {
+  if (typeof window === "undefined") return DEFAULT_PUBLISHED_CONTENT;
+  try {
+    const response = await fetch(`${PUBLISHED_CONTENT_ENDPOINT}?view=seo`, { cache: "no-store" });
+    if (!response.ok) return DEFAULT_PUBLISHED_CONTENT;
+    const payload = await response.json().catch(() => null as any);
+    const raw = payload?.payload || payload?.content;
+    if (!raw || !Array.isArray(raw.heroes) || !Array.isArray(raw.articles)) return DEFAULT_PUBLISHED_CONTENT;
+    return {
+      heroes: raw.heroes.map(normalizeHero),
+      articles: raw.articles.map(normalizeArticle),
+      ads: Array.isArray(raw.ads) ? raw.ads : [],
+    };
+  } catch {
+    return DEFAULT_PUBLISHED_CONTENT;
+  }
+}
+
 export async function getPublishedContentSnapshot(): Promise<{
   heroes: HeroItem[];
   articles: Article[];

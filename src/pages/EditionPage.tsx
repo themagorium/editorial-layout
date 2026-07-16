@@ -5,7 +5,7 @@ import EditorialFooter from "@/components/editorial/EditorialFooter";
 import AdPlacement from "@/components/editorial/AdPlacement";
 import {
   buildContentPath,
-  getPublishedContentSnapshot,
+  getEditionSnapshot,
   formatEditionLabel,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
@@ -14,7 +14,7 @@ import { canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 export default function EditionPage() {
-  useSyncPublishedContent();
+  useSyncPublishedContent({ enabled: false });
   const { edition = "" } = useParams<{ edition: string }>();
 
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
@@ -25,11 +25,11 @@ export default function EditionPage() {
   useEffect(() => {
     if (!edition) return;
     let active = true;
-    getPublishedContentSnapshot()
+    getEditionSnapshot(edition)
       .then((snapshot) => {
         if (!active) return;
-        setHeroes(snapshot.heroes.filter((h) => h.edition === edition).slice(0, 3));
-        setArticles(snapshot.articles.filter((a) => a.edition === edition).slice(0, 4));
+        setHeroes(snapshot.heroes.slice(0, 3));
+        setArticles(snapshot.articles.slice(0, 4));
         setAds(snapshot.ads);
         setLoaded(true);
       })

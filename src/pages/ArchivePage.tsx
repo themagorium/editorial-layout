@@ -3,7 +3,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";
 import {
-  getPublishedContentSnapshot,
+  getPublishedSeoContentSnapshot,
   formatEditionLabel,
   type Article,
   type HeroItem,
@@ -122,7 +122,7 @@ function pickArchiveCoverImage(
 // ── END CONFLICT RESOLUTION ────────────────────────────────────────────────
 
 export default function ArchivePage() {
-  useSyncPublishedContent();
+  useSyncPublishedContent({ enabled: false });
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get("category") || "";
   const [search, setSearch] = useState(categoryFilter);
@@ -130,7 +130,7 @@ export default function ArchivePage() {
 
   useEffect(() => {
     let active = true;
-    getPublishedContentSnapshot().then((snapshot) => {
+    getPublishedSeoContentSnapshot().then((snapshot) => {
       if (!active) return;
       const editionKeys = new Set<string>();
       snapshot.heroes.forEach((h) => editionKeys.add(h.edition));

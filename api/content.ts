@@ -987,7 +987,64 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), content: limited, payload: limited });
         return;
       }
+// SEO/bot view — lightweight summaries only (no body content), across
+      // all editions. Previously this fell through to the full unscoped
+      // legacy branch below, which reconstructs every story's full body
+      // across every edition — a multi-MB payload taking 15+ seconds.
+      if (queryView === "seo") {
+        await migrateLegacyBlobIfNeeded();
+        const editions = await getEditionsIndex();
+        const heroes: HeroPayload[] = [];
+        const articles: ArticlePayload[] = [];
+        for (const edition of editions) {
+          const content = await getEditionContent(edition);
+          if (!content) continue;
+          heroes.push(...content.heroes);
+          articles.push(...content.articles);
+        }
+        const ads = await getAdsContent();
+        res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=120");
+        res.status(200).json({
+          ok: true,
+          success: true,
+          configured: isKvConfigured(),
+          content: {
+            heroes: heroes.map(toLatestHeroSummary),
+            articles: articles.map(toLatestArticleSummary),
+            ads: ads.map(toLatestAdSummary),
+          },
+        });
+        return;
+      }
 
+      // storyType filter without a storyId — e.g. "give me all heroes" or
+      // "all articles" for a category page. Same fix: lightweight summaries,
+      // not the full unscoped archive.
+      if (queryStoryType && !queryStoryId) {
+        await migrateLegacyBlobIfNeeded();
+        const editions = await getEditionsIndex();
+        const heroes: HeroPayload[] = [];
+        const articles: ArticlePayload[] = [];
+        for (const edition of editions) {
+          const content = await getEditionContent(edition);
+          if (!content) continue;
+          heroes.push(...content.heroes);
+          articles.push(...content.articles);
+        }
+        const ads = await getAdsContent();
+        res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=120");
+        res.status(200).json({
+          ok: true,
+          success: true,
+          configured: isKvConfigured(),
+          content: {
+            heroes: queryStoryType === "hero" ? heroes.map(toLatestHeroSummary) : [],
+            articles: queryStoryType === "article" ? articles.map(toLatestArticleSummary) : [],
+            ads: ads.map(toLatestAdSummary),
+          },
+        });
+        return;
+      }
       // Lightweight edition list — no story content, useful for an edition picker.
       if (readFirstString(req.query?.list).trim().toLowerCase() === "editions") {
         await migrateLegacyBlobIfNeeded();

@@ -3,14 +3,19 @@ import { getArticles, getHeroes } from "@/lib/content-store";
 import { slugifyText } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 
+export function normalizeAuthor(raw: string): string {
+  const lower = (raw || "").toLowerCase().trim();
+  if (["", "staff", "editorial", "the magorium", "magorium"].includes(lower)) {
+    return "The Magorium Editorial Staff";
+  }
+  return raw.trim();
+}
+
 export default function AuthorPage(){
-
 const {author=""}=useParams();
-
-const name =
-author
-.replace(/-/g," ")
-.replace(/\b\w/g,c=>c.toUpperCase());
+const name = normalizeAuthor(
+  author.replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase())
+);
 
 
 const articles=[

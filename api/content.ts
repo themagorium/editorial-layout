@@ -375,7 +375,8 @@ function slugifyText(value: string): string {
 }
 
 function buildContentPath(id: string, title: string): string {
-  return `/articles/${slugifyText(title || id)}--${id}`;
+  const slug = slugifyText(title);
+  return `/articles/${slug}--${id}`;
 }
 
 function canonicalAuthorSlug(author?: string): string {

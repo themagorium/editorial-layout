@@ -58,6 +58,11 @@
       "headers": [
         { "key": "Content-Type", "value": "text/plain" }
       ]
-    }
-  ]
+ }
+  ],
+  "functions": {
+    "api/seo-home.ts": { "includeFiles": "dist/index.html" },
+    "api/seo-article.ts": { "includeFiles": "dist/index.html" },
+    "api/seo-author.ts": { "includeFiles": "dist/index.html" }
+  }
 }

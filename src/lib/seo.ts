@@ -66,26 +66,39 @@ function upsertStructuredDataScript(key: string, payload: unknown) {
   document.head.appendChild(script);
 }
 
+const STAFF_ALIAS_SET = new Set([
+  "magorium",
+  "the magorium",
+  "staff",
+  "editor",
+  "editorial",
+  "editorial staff",
+  "magorium staff",
+  "the magorium staff",
+  "magorium editorial",
+  "the magorium editorial",
+  "magorium editorial staff",
+  "the magorium editorial staff",
+  "magorium editorial team",
+  "the magorium editorial team",
+]);
+
+// Known byline typos that should merge into the real person, not become a
+// new "author". Add an entry here whenever a typo surfaces in the future.
+const AUTHOR_TYPO_CORRECTIONS: Record<string, string> = {
+  "jeff whitfield": "James Whitfield",
+};
+
 export function canonicalAuthorName(author?: string) {
-  const trimmed = (author || "").trim();
+  // Collapse repeated internal whitespace too, so "James  Whitfield" and
+  // "James Whitfield" are treated as the same person.
+  const trimmed = (author || "").trim().replace(/\s+/g, " ");
   if (!trimmed) return STAFF_AUTHOR_NAME;
 
-  const normalized = trimmed
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
+  const normalized = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
-  if (
-    normalized === "magorium" ||
-    normalized === "the magorium" ||
-    normalized === "staff" ||
-    normalized === "editorial staff" ||
-    normalized === "magorium staff" ||
-    normalized === "the magorium staff" ||
-    normalized === "the magorium editorial staff"
-  ) {
-    return STAFF_AUTHOR_NAME;
-  }
+  if (STAFF_ALIAS_SET.has(normalized)) return STAFF_AUTHOR_NAME;
+  if (AUTHOR_TYPO_CORRECTIONS[normalized]) return AUTHOR_TYPO_CORRECTIONS[normalized];
 
   return trimmed;
 }

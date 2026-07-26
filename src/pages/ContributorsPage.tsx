@@ -42,7 +42,7 @@ const CONTRIBUTOR_PROFILE_BY_NAME: Record<string, Omit<ContributorProfile, "name
   },
   "The Magorium Editorial Staff": {
     role: "Editorial Desk",
-    bio: "The Magorium editorial staff produces collaborative reporting and curated coverage across luxury travel, art, fashion, culture, and global sport.",
+    bio: "The Magorium editorial staff produces collaborative reporting and curated coverage across finance, technology, luxury travel, art, fashion, culture, and global sport.",
   },
 };
 

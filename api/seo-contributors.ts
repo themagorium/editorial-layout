@@ -38,7 +38,10 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       "Charlotte Thames",
       "Elena Voss",
       "James Whitfield",
-      "Marcus Chen",
+      "Taylor Chen",
+      "Christoph Drachenfels",
+      "Marcus Demallier",
+      "Wilhelmina St. Germain",
       STAFF_AUTHOR_NAME,
     ];
     const contributors = authorNames.length > 0 ? authorNames : fallbackAuthorList;

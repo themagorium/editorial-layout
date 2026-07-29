@@ -62,10 +62,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  // Defensive: not every story is guaranteed to have a bodyText array
+  // (e.g. excerpt-only content). Normalize once, up front, so nothing
+  // downstream can crash on an undefined/non-array value.
+  const bodyTextParagraphs: string[] = Array.isArray(story.bodyText) ? story.bodyText : [];
+
   const canonicalUrl = `${SITE_URL}${story.path}`;
   const authorPath = getAuthorPath(story.author);
   const authorUrl = `${SITE_URL}${authorPath}`;
-  const summarySeed = story.excerpt || story.bodyText[0] || `${story.title} on ${BRAND_NAME}`;
+  const summarySeed = story.excerpt || bodyTextParagraphs[0] || `${story.title} on ${BRAND_NAME}`;
   const description = trimToSummary(
     `${story.author} on ${BRAND_NAME}: ${story.title}. ${summarySeed}`,
   );
@@ -96,6 +101,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         url: authorUrl,
       };
 
+  // imageUrl isn't guaranteed either — fall back to the brand favicon so
+  // JSON-LD never emits `image: [undefined]`, which some validators reject.
+  const articleImage = story.imageUrl || DEFAULT_FAVICON;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -105,7 +114,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         url: canonicalUrl,
         datePublished: story.date,
         dateModified: story.date,
-        image: [story.imageUrl],
+        image: [articleImage],
         description,
         keywords,
         articleSection: story.category,
@@ -139,7 +148,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ],
   };
 
-  const bodyParagraphs = story.bodyText.slice(0, 5);
+  const bodyParagraphs = bodyTextParagraphs.slice(0, 5);
   const bodyMarkup = bodyParagraphs.length > 0
     ? bodyParagraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")
     : `<p>${escapeHtml(story.excerpt || "Read this feature on The Magorium.")}</p>`;
@@ -150,7 +159,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     canonicalUrl,
     keywords,
     ogType: "article",
-    imageUrl: story.imageUrl,
+    imageUrl: articleImage,
     jsonLd,
     bodyHtml: `
       <p><a href="${SITE_URL}">Home</a> / <a href="${authorUrl}">${escapeHtml(story.author)}</a> / <a href="${SITE_URL}/seo-history">SEO History</a></p>

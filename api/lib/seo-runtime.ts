@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 export const SITE_URL = "https://www.themagorium.com";
 export const BRAND_NAME = "The Magorium";
 export const BRAND_ALIAS = "Magorium";

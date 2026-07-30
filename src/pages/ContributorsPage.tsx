@@ -23,7 +23,7 @@ type ContributorProfile = {
 };
 
 const CONTRIBUTOR_PROFILE_BY_NAME: Record<string, Omit<ContributorProfile, "name" | "storyCount">> = {
-  "Wilhelmina St. Germain ": {
+  "Wilhelmina St. Germain": {
     role: "Fashion & Couture Editor",
     bio: "Former fashion director at Condé Nast Traveller. Wilhelmina covers haute couture, ready-to-wear, and the intersection of fashion and cultural identity from Paris, Milan, and London.",
   },

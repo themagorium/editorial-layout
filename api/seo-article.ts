@@ -29,6 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const {
     BRAND_NAME,
     DEFAULT_FAVICON,
+    DEFAULT_OG_IMAGE,
     SITE_URL,
     STAFF_AUTHOR_NAME,
     contentIdentifierMatches,
@@ -62,9 +63,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  // Defensive: not every story is guaranteed to have a bodyText array
-  // (e.g. excerpt-only content). Normalize once, up front, so nothing
-  // downstream can crash on an undefined/non-array value.
   const bodyTextParagraphs: string[] = Array.isArray(story.bodyText) ? story.bodyText : [];
 
   const canonicalUrl = `${SITE_URL}${story.path}`;
@@ -101,9 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         url: authorUrl,
       };
 
-  // imageUrl isn't guaranteed either — fall back to the brand favicon so
-  // JSON-LD never emits `image: [undefined]`, which some validators reject.
-  const articleImage = story.imageUrl || DEFAULT_FAVICON;
+  const articleImage = story.imageUrl || DEFAULT_OG_IMAGE;
 
   const jsonLd = {
     "@context": "https://schema.org",

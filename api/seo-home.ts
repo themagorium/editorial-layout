@@ -100,7 +100,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ${
         editionPaths.length > 0
           ? `<section><h2>Edition Archive</h2><ul>${editionPaths
-              .map((path) => `<li><a href="${path}">${escapeHtml(path.replace("/archive/", ""))}</a></li>`)
+              .map((path: string) => `<li><a href="${path}">${escapeHtml(path.replace("/archive/", ""))}</a></li>`)
               .join("")}</ul></section>`
           : ""
       }

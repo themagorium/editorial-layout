@@ -4,6 +4,7 @@ export const BRAND_ALIAS = "Magorium";
 export const STAFF_AUTHOR_NAME = "The Magorium Editorial Staff";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
 export const DEFAULT_FAVICON = `${SITE_URL}/favicon.png`;
+export const DEFAULT_SEO_IMAGE = DEFAULT_OG_IMAGE;
 export const HOME_SEO_DESCRIPTION =
   "The Magorium — also known as Magorium and TheMagorium — is a global curated magazine covering luxury, technology, business, sport, arts, fashion, travel, and culture. Where Curated Becomes Legend.";
 
@@ -55,7 +56,20 @@ export function getAuthorPath(author?: string): string {
   const slug = slugifyText(authorName);
   return `/author/${slug || "staff"}`;
 }
+export function normalizeCategoryName(slug: string): string {
+  const trimmed = (slug || "").trim();
+  if (!trimmed || trimmed.toLowerCase() === "all") return "All";
+  return trimmed
+    .replace(/-/g, " ")
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
+export function getCategoryPath(category: string): string {
+  const normalized = (category || "").trim();
+  if (!normalized || normalized.toLowerCase() === "all") return "/category/all";
+  return `/category/${slugifyText(normalized)}`;
+}
 // ── Content path builder ───────────────────────────────────────────────────
 export function buildContentPath(id: string, title: string): string {
   const titleSlug = slugifyText(title || id);
@@ -143,7 +157,9 @@ export type SeoStory = {
   path: string;
   imageUrl?: string;
   excerpt?: string;
-  legacySlugs?: string[];
+  legacySlugs?: string[];bodyText?: string[];
+  seoTags?: string[];
+  edition?: string; 
 };
 
 // ── Fetch published stories from the CMS API ───────────────────────────────

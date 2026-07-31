@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const tokenModule = await import("./lib/publish-token");
+    const tokenModule = await import("./lib/publish-token.js");
     const { token, expiresAt } = tokenModule.createPublishToken(adminPassword);
     res.status(200).json({ success: true, token, expiresAt });
     return;

@@ -1,29 +1,5 @@
 {
-  "rewrites": [
-    {
-      "source": "/",
-      "has": [{ "type": "header", "key": "user-agent", "value": "(?i).*(bot|crawl|spider|slurp|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|discordbot|embedly|quora link preview|pinterest|redditbot|applebot|bingbot|googlebot|yandex|baiduspider|duckduckbot|ahrefsbot|semrushbot).*" }],
-      "destination": "/api/seo-home"
-    },
-    {
-      "source": "/articles/:slug",
-      "has": [{ "type": "header", "key": "user-agent", "value": "(?i).*(bot|crawl|spider|slurp|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|discordbot|embedly|quora link preview|pinterest|redditbot|applebot|bingbot|googlebot|yandex|baiduspider|duckduckbot|ahrefsbot|semrushbot).*" }],
-      "destination": "/api/seo-article?identifier=:slug"
-    },
-    {
-      "source": "/author/:slug",
-      "has": [{ "type": "header", "key": "user-agent", "value": "(?i).*(bot|crawl|spider|slurp|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|discordbot|embedly|quora link preview|pinterest|redditbot|applebot|bingbot|googlebot|yandex|baiduspider|duckduckbot|ahrefsbot|semrushbot).*" }],
-      "destination": "/api/seo-author?slug=:slug"
-    },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
   "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "themagorium.com" }],
-      "destination": "https://www.themagorium.com/$1",
-      "permanent": true
-    },
     {
       "source": "/magorium",
       "destination": "https://themagorium.com",
@@ -71,10 +47,5 @@
         { "key": "Content-Type", "value": "text/plain" }
       ]
     }
-  ],
-  "functions": {
-    "api/seo-home.ts": { "includeFiles": "dist/index.html" },
-    "api/seo-article.ts": { "includeFiles": "dist/index.html" },
-    "api/seo-author.ts": { "includeFiles": "dist/index.html" }
-  }
+  ]
 }

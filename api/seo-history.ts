@@ -4,7 +4,7 @@ async function loadSeoRuntime() {
   try {
     return await import("./lib/seo-runtime.js");
   } catch {
-    return await import("./lib/seo-runtime");
+    return await import("./lib/seo-runtime.js");
   }
 }
 

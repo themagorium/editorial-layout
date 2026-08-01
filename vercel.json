@@ -22,6 +22,10 @@
       ],
       "destination": "/api/seo-article?slug=:slug"
     },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [

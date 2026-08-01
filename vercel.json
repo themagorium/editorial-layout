@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/",
+      "source": "/(.*)",
       "has": [
         {
           "type": "header",
@@ -9,18 +9,7 @@
           "value": ".*(Googlebot|bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|facebookexternalhit|Twitterbot|LinkedInBot|Applebot|ia_archiver).*"
         }
       ],
-      "destination": "/api/seo-home"
-    },
-    {
-      "source": "/articles/:slug",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*(Googlebot|bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|facebookexternalhit|Twitterbot|LinkedInBot|Applebot|ia_archiver).*"
-        }
-      ],
-      "destination": "/api/seo-article?slug=:slug"
+      "destination": "/api/seo-router"
     },
     {
       "source": "/sitemap.xml",
@@ -29,31 +18,11 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [
-    {
-      "source": "/magorium",
-      "destination": "https://themagorium.com",
-      "permanent": true
-    },
-    {
-      "source": "/magorium/:path*",
-      "destination": "https://themagorium.com/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/Magorium",
-      "destination": "https://themagorium.com",
-      "permanent": true
-    },
-    {
-      "source": "/themagorium",
-      "destination": "https://themagorium.com",
-      "permanent": true
-    },
-    {
-      "source": "/TheMagorium",
-      "destination": "https://themagorium.com",
-      "permanent": true
-    }
+    { "source": "/magorium", "destination": "https://themagorium.com", "permanent": true },
+    { "source": "/magorium/:path*", "destination": "https://themagorium.com/:path*", "permanent": true },
+    { "source": "/Magorium", "destination": "https://themagorium.com", "permanent": true },
+    { "source": "/themagorium", "destination": "https://themagorium.com", "permanent": true },
+    { "source": "/TheMagorium", "destination": "https://themagorium.com", "permanent": true }
   ],
   "headers": [
     {
@@ -72,9 +41,7 @@
     },
     {
       "source": "/robots.txt",
-      "headers": [
-        { "key": "Content-Type", "value": "text/plain" }
-      ]
+      "headers": [{ "key": "Content-Type", "value": "text/plain" }]
     }
   ]
 }

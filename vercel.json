@@ -11,6 +11,17 @@
       ],
       "destination": "/api/seo-home"
     },
+    {
+      "source": "/articles/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|facebookexternalhit|Twitterbot|LinkedInBot|Applebot|ia_archiver).*"
+        }
+      ],
+      "destination": "/api/seo-article?slug=:slug"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [

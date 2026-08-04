@@ -47,7 +47,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const stories = await getPublishedSeoStories();
   const story = stories.find((candidate) => contentIdentifierMatches(candidate, identifier));
-
+story.title = story.title?.trim() || "Untitled Story";
+story.category = story.category?.trim() || "Uncategorized";
   if (!story) {
     const canonicalUrl = `${SITE_URL}/articles/${encodeURIComponent(identifier)}`;
     const html = renderSeoDocument({

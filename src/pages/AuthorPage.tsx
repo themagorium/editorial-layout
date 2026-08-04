@@ -22,7 +22,8 @@ export default function AuthorPage() {
     fetch("/api/content?view=seo", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
-        const all = [...(data.articles || []), ...(data.heroes || [])];
+      const source = data.content || data;
+const all = [...(source.articles || []), ...(source.heroes || [])];
         setResults(
           all.filter((a: any) => slugifyText(a.author || "") === slugifyText(slug))
         );

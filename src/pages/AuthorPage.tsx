@@ -4,11 +4,21 @@ import { slugifyText } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 
 export function normalizeAuthor(raw: string): string {
-  const lower = (raw || "").toLowerCase().trim();
-  if (["", "staff", "editorial", "the magorium", "magorium"].includes(lower)) {
+  const lower = (raw || "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, " "); // collapse double spaces
+  const staffPatterns = [
+    "", "staff", "editor", "editorial",
+    "the magorium", "magorium",
+    "magorium editorial staff",
+    "the magorium editorial",
+    "the magorium editorial staff",
+  ];
+  if (staffPatterns.includes(lower)) {
     return "The Magorium Editorial Staff";
   }
-  return raw.trim();
+  return raw.trim().replace(/\s+/g, " ");
 }
 
 export default function AuthorPage() {

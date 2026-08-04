@@ -35,7 +35,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       : "/";
     const isHiddenAliasPath = /^\/(magorium|magorum|magoriium|the-magorium|the-magoriium|themagorium|themagoriium)\/?$/i
       .test(canonicalPath);
-    const stories = await getPublishedSeoStories();
+    const stories = await getPublishedSeoStories(); stories.forEach((s) => {
+  s.title = (s.title || "").trim() || `Untitled Story — ${BRAND_NAME}`;
+  s.category = (s.category || "").trim() || "Editorial";
+});
     const topStories = stories;
     const storyItems = topStories.map((story, index) => ({
       "@type": "ListItem",

@@ -63,7 +63,10 @@ story.category = story.category?.trim() || "Uncategorized";
     res.status(404).setHeader("Content-Type", "text/html; charset=utf-8").send(html);
     return;
   }
-
+const safeTitle = (story.title || "").trim() || `Untitled Story — ${BRAND_NAME}`;
+const safeCategory = (story.category || "").trim() || "Editorial";
+story.title = safeTitle;
+story.category = safeCategory;
   const bodyTextParagraphs: string[] = Array.isArray(story.bodyText) ? story.bodyText : [];
 
   const canonicalUrl = `${SITE_URL}${story.path}`;

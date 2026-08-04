@@ -25,7 +25,7 @@ export default function AuthorPage() {
       const source = data.content || data;
 const all = [...(source.articles || []), ...(source.heroes || [])];
         setResults(
-          all.filter((a: any) => slugifyText(a.author || "") === slugifyText(slug))
+          all.filter((a: any) => normalizeAuthor(a.author || "") === name)
         );
       })
       .catch(() => setResults([]));

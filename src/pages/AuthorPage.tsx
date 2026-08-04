@@ -7,9 +7,9 @@ export function normalizeAuthor(raw: string): string {
   const lower = (raw || "")
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, " "); // collapse double spaces
+    .replace(/\s+/g, " ");
   const staffPatterns = [
-    "", "staff", "editor", "editorial",
+    "", "staff", "editorial",
     "the magorium", "magorium",
     "magorium editorial staff",
     "the magorium editorial",

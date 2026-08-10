@@ -3,7 +3,7 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import ArticleBodyEditor from "@/components/editorial/ArticleBodyEditor";
 import {
   getHeroes, getArticles, getAds, saveHeroes, saveArticles, saveAds,
-  publishEditorialContent, getPublishedContentSnapshot, DEFAULT_PUBLISHED_CONTENT,
+  publishEditorialContent, publishEdition, getPublishedContentSnapshot, DEFAULT_PUBLISHED_CONTENT,
   resetToDefaults, clearLocalDraftStorage, isStorageQuotaExceededError,
   CATEGORIES, formatEditionLabel, publishStory,
 } from "@/lib/content-store";
@@ -157,6 +157,7 @@ function AdminDashboard() {
   const [showNewEdition, setShowNewEdition] = useState(false);
   const [newEditionMonth, setNewEditionMonth] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isPublishingEdition, setIsPublishingEdition] = useState(false);
   const [pageContent, setPageContent] = useState<PageContent>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -215,6 +216,25 @@ function AdminDashboard() {
       toast.error(error instanceof Error ? error.message : "Could not save content");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const publishCurrentEditionLive = async () => {
+    if (!currentEdition || isPublishingEdition) return;
+    setIsPublishingEdition(true);
+    try {
+      const publishToken = getAdminPublishToken();
+      if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
+      const result = await publishEdition(currentEdition, filteredHeroes, filteredArticles, ads, publishToken);
+      if (!result.success) {
+        toast.error(result.error || "Could not publish this edition to live.");
+        return;
+      }
+      toast.success(`${formatEditionLabel(currentEdition)} is now live.`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not publish this edition.");
+    } finally {
+      setIsPublishingEdition(false);
     }
   };
 
@@ -278,12 +298,20 @@ function AdminDashboard() {
       { id: `a-${stamp}-3`, title: "New Article 3", excerpt: "Add your third article", seoTags: [], category: "Golf", imageUrl: "", author: "Editor", body: createOctoberPatternBody(`a-${stamp}-3`), date: today, edition: newEditionMonth },
       { id: `a-${stamp}-4`, title: "New Article 4", excerpt: "Add your fourth article", seoTags: [], category: "Tennis", imageUrl: "", author: "Editor", body: createOctoberPatternBody(`a-${stamp}-4`), date: today, edition: newEditionMonth },
     ];
-    setHeroes([...heroes, ...starterHeroes]);
-    setArticles([...articles, ...starterArticles]);
+    const nextHeroes = [...heroes, ...starterHeroes];
+    const nextArticles = [...articles, ...starterArticles];
+    setHeroes(nextHeroes);
+    setArticles(nextArticles);
+    try {
+      saveHeroes(nextHeroes);
+      saveArticles(nextArticles);
+    } catch {
+      toast.warning("New edition created, but the local safety backup couldn't save (storage full). Publish soon to be safe.");
+    }
     setCurrentEdition(newEditionMonth);
     setShowNewEdition(false);
     setNewEditionMonth("");
-    toast.success(`Created new edition: ${formatEditionLabel(newEditionMonth)} with starter content!`);
+    toast.success(`Created new edition: ${formatEditionLabel(newEditionMonth)} with starter content — it's a private draft until you click "Publish Edition Live."`);
   };
 
   return (
@@ -299,6 +327,7 @@ function AdminDashboard() {
             <button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 text-sm border border-border rounded text-muted-foreground hover:text-foreground transition-colors"><RotateCcw className="w-4 h-4" /> Reset</button>
             <button onClick={handleRestoreBackup} disabled={isSaving} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary rounded text-primary hover:bg-primary/10 transition-colors disabled:opacity-70"><RotateCcw className="w-4 h-4" /> Restore Backup</button>
             <button onClick={save} disabled={isSaving} className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-70">{isSaving ? "Saving..." : "Save Changes"}</button>
+            <button onClick={publishCurrentEditionLive} disabled={isPublishingEdition || !currentEdition} className="flex items-center gap-2 px-5 py-2 text-sm font-medium border border-primary text-primary rounded hover:bg-primary/10 transition-colors disabled:opacity-70">{isPublishingEdition ? "Publishing..." : "Publish Edition Live"}</button>
           </div>
         </div>
 

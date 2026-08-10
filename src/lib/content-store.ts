@@ -351,7 +351,6 @@ function normalizeBodyToOctoberPattern(
     normalized.push({
       ...media,
       id: `${baseId}-auto-m-${index}`,
-      // Never duplicate hero/article lead media into every generated slot.
       content: mediaBlocks[index]?.content || (index === 0 ? media.content : ""),
       caption: mediaBlocks[index]?.caption || (index === 0 ? media.caption : ""),
       citation: mediaBlocks[index]?.citation || "",
@@ -481,12 +480,8 @@ function normalizeArticle(article: Article): Article {
 
 // ===================================================================
 // HEROES — 3 per edition, unique categories per edition
-// Feb 2026: Milano-Cortina (Travel), Milan (Fashion), New York Sotheby's (Art & Design)
-// Jan 2026: Davos (Tech & AI), St. Moritz (Equestrian), Paris (Fashion)
-// Oct 2025: Buenos Aires (Equestrian), Austin (Motorsport), Cape Town (Art & Design)
 // ===================================================================
 const DEFAULT_HEROES: HeroItem[] = [
-  // --- February 2026 ---
   {
     id: "h1", title: "Winter Olympics XXV: Milano-Cortina 2026", subtitle: "The Dolomites prepare to host the world's greatest winter spectacle — a complete preview", category: "Travel", imageUrl: heroOlympics, date: "2026-02-06", edition: "2026-02",
     body: [
@@ -511,7 +506,6 @@ const DEFAULT_HEROES: HeroItem[] = [
       { id: "mf-b3", type: "text", content: "The week's revelation was Bottega Veneta under Matthieu Blazy, whose collection of artisanal leatherwork, hand-painted fabrics, and deconstructed tailoring earned a standing ovation. Milan reminded the fashion world that Italian glamour is not a trend — it is a tradition." },
     ],
   },
-  // --- January 2026 ---
   {
     id: "h-wef", title: "Davos 2026: The World Economic Forum's Annual Meeting", subtitle: "Record numbers of world leaders converge on Davos for five days of dialogue on AI, climate, and the global economy", category: "Tech & AI", imageUrl: heroDavosWef, date: "2026-01-19", edition: "2026-01",
     body: [
@@ -536,7 +530,6 @@ const DEFAULT_HEROES: HeroItem[] = [
       { id: "hc-b3", type: "text", content: "Haute Couture Week is more than fashion — it is a cultural event that brings the world's most important collectors, celebrities, and editors to Paris. The front rows at the Ritz, the private fittings at Avenue Montaigne, and the intimate dinners that follow each show create a week of unparalleled intimacy with the world's finest craft." },
     ],
   },
-  // --- October 2025 --- (Heroes: SailGP, CV Summit, F1)
   {
     id: "h-sailgp",
     title: "SailGP from Geneva to Cadiz",
@@ -547,42 +540,12 @@ const DEFAULT_HEROES: HeroItem[] = [
     date: "2025-10-04",
     edition: "2025-10",
     body: [
-      {
-        id: "sg-b1",
-        type: "text",
-        content:
-          "Last week's Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany in its first final and first win. Switzerland hosted SailGP for the first time, and the local crowd got more than just a glimpse of world-class foiling — they saw history.",
-      },
-      {
-        id: "sg-b2",
-        type: "text",
-        content:
-          "Being a freshwater venue, the conditions were challenging as teams were used to coastal and sea venues. Light winds forced teams to rethink tactics. The unpredictability of winds and shifting conditions meant that each start and positioning made a difference. SailGP commentators said the difference between success and failure was razor thin.",
-      },
-      {
-        id: "sg-b3",
-        type: "text",
-        content:
-          "The F50 catamarans require a certain wind threshold (about 28 km/h) to consistently stay foiling. In Geneva, wind speeds were often below that threshold, forcing boats to operate more in displacement mode, with hulls in the water, during parts of the race.",
-      },
-      {
-        id: "sg-b4",
-        type: "text",
-        content:
-          "Across day one and day two, New Zealand and Spain showed their strengths with wins in earlier races. Spain, led by Diego Botin and arriving from wins in San Francisco and New York, looked ready. The Black Foils, with Peter Burling at the helm, also came out strong by foiling early and securing key points.",
-      },
-      {
-        id: "sg-b5",
-        type: "text",
-        content:
-          "By the Final, Switzerland, led by Seb Schneiter and one of the league's youngest teams, had strong support from home fans but was penalized for an early start that cost them the win. Germany's victory came from precision and execution from start to finish. In fickle conditions where strategy had to adapt constantly, Germany reached its first final and first win, highlighting parity across teams.",
-      },
-      {
-        id: "sg-b6",
-        type: "text",
-        content:
-          "Next up in the run-up before the season finals is Cadiz, on Spanish home waters.",
-      },
+      { id: "sg-b1", type: "text", content: "Last week's Rolex Switzerland SailGP Grand Prix on Lake Geneva delivered a dramatic mix of tactics, light winds, and a breakthrough victory for Germany in its first final and first win. Switzerland hosted SailGP for the first time, and the local crowd got more than just a glimpse of world-class foiling — they saw history." },
+      { id: "sg-b2", type: "text", content: "Being a freshwater venue, the conditions were challenging as teams were used to coastal and sea venues. Light winds forced teams to rethink tactics. The unpredictability of winds and shifting conditions meant that each start and positioning made a difference. SailGP commentators said the difference between success and failure was razor thin." },
+      { id: "sg-b3", type: "text", content: "The F50 catamarans require a certain wind threshold (about 28 km/h) to consistently stay foiling. In Geneva, wind speeds were often below that threshold, forcing boats to operate more in displacement mode, with hulls in the water, during parts of the race." },
+      { id: "sg-b4", type: "text", content: "Across day one and day two, New Zealand and Spain showed their strengths with wins in earlier races. Spain, led by Diego Botin and arriving from wins in San Francisco and New York, looked ready. The Black Foils, with Peter Burling at the helm, also came out strong by foiling early and securing key points." },
+      { id: "sg-b5", type: "text", content: "By the Final, Switzerland, led by Seb Schneiter and one of the league's youngest teams, had strong support from home fans but was penalized for an early start that cost them the win. Germany's victory came from precision and execution from start to finish. In fickle conditions where strategy had to adapt constantly, Germany reached its first final and first win, highlighting parity across teams." },
+      { id: "sg-b6", type: "text", content: "Next up in the run-up before the season finals is Cadiz, on Spanish home waters." },
     ],
   },
   {
@@ -615,24 +578,20 @@ const DEFAULT_HEROES: HeroItem[] = [
     edition: "2025-10",
     body: [
       { id: "f1-b1", type: "text", content: "F1 returns to American soil in the tech haven of Austin." },
-      { id: "f1-b2", type: "text", content: "The Singapore Grand Prix is notorious for being one of the toughest races physically for Formula 1 drivers as it was declared the first ‘heat hazard’ race of the year, meaning drivers either had to use a cooling vest or add extra ballast to their car. Max Verstappen chose not to." },
+      { id: "f1-b2", type: "text", content: "The Singapore Grand Prix is notorious for being one of the toughest races physically for Formula 1 drivers as it was declared the first 'heat hazard' race of the year, meaning drivers either had to use a cooling vest or add extra ballast to their car. Max Verstappen chose not to." },
       { id: "f1-b3", type: "text", content: "The finals were tight as George Russell amazed the entire F1 paddock with a faultless display of skill from qualifying to the final race." },
       { id: "f1-b4", type: "text", content: "McLaren finished as Formula 1's top team at the Singapore Grand Prix on a challenging day for the 1,2, 3 finish of George Russell, Mercedes Benz AMG; Max Verstappen, Red Bull racing; and Lando Norris, McLaren." },
       { id: "f1-b5", type: "text", content: "Hamilton dropped to eighth, while Oliver Bearman was ninth for Haas and Carlos Sainz, Jr., after his win after his first podium win with Williams in Azerbaijian took a point in 10th as he had to start near the back of the grid for a technical infringement." },
-      { id: "f1-b6", type: "text", content: "Lewis said he “raced for Roscoe”. Hamilton, just coming back from the terrible blow of losing his companion of the heart, Roscoe, was visibly affected as the entire F1 community witnessed. His innate reflexive well-honed driving skills compensated for his personal ordeal. Our hearts go out to Hamilton for the upcoming races." },
-      { id: "f1-b7", type: "text", content: "Next up, F1 returns to American soil in Austin. If having Kygo and Garth Brooks as the event’s concert headliners is any indication of the disparity even in tech world Austin, the fans will undoubtedly be dazzled once again by the dramatic speed and strategy of Formula 1 racing. The official track record of 1:36.16 was set by Charles LeClerc in 2019. We will see if Carlos Sainz and his new Williams team along with the tech support of Atlassian, can on their secondary home of Austin take another podium." },
+      { id: "f1-b6", type: "text", content: "Lewis said he \"raced for Roscoe\". Hamilton, just coming back from the terrible blow of losing his companion of the heart, Roscoe, was visibly affected as the entire F1 community witnessed. His innate reflexive well-honed driving skills compensated for his personal ordeal. Our hearts go out to Hamilton for the upcoming races." },
+      { id: "f1-b7", type: "text", content: "Next up, F1 returns to American soil in Austin. If having Kygo and Garth Brooks as the event's concert headliners is any indication of the disparity even in tech world Austin, the fans will undoubtedly be dazzled once again by the dramatic speed and strategy of Formula 1 racing. The official track record of 1:36.16 was set by Charles LeClerc in 2019. We will see if Carlos Sainz and his new Williams team along with the tech support of Atlassian, can on their secondary home of Austin take another podium." },
     ],
   },
 ];
 
 // ===================================================================
 // ARTICLES — 4 per edition, unique categories (no overlap with heroes)
-// Feb 2026: Bay Area (Film & Festivals), Rio (Music), Dubai (Yachting), Pebble Beach (Golf)
-// Jan 2026: LA (Film & Festivals), Singapore (Art & Design), Abu Dhabi (Travel), Melbourne (Tennis)
-// Oct 2025: Geneva (Yachting), Zurich (Tech & AI), Basel (Travel), Marrakech (Music)
 // ===================================================================
 const DEFAULT_ARTICLES: Article[] = [
-  // ========== FEBRUARY 2026 ==========
   {
     id: "a2",
     title: "Super Bowl LX: Stadium Lights & Bay Area Glamour",
@@ -754,8 +713,6 @@ const DEFAULT_ARTICLES: Article[] = [
       { id: "ao-b3", type: "text", content: "For the luxury traveler, the Australian Open offers something no other Grand Slam can: January sunshine, world-class wine regions within an hour's drive, and a city that treats sport as culture. The Yarra Valley vineyards, the Mornington Peninsula hot springs, and the Great Ocean Road are all within reach of courtside seats." },
     ],
   },
-
-  // ========== OCTOBER 2025 ========== (Editor's Picks: Polo, PFW, Kusama, Marrakech)
   {
     id: "v1-cambiaso",
     title: "132nd Hurlingham Open: La Natividad La Dolfina Establish A New Standard Under Pressure",
@@ -766,19 +723,19 @@ const DEFAULT_ARTICLES: Article[] = [
     date: "2025-10-06",
     edition: "2025-10",
     body: [
-      { id: "polo-b1", type: "text", content: "The 132nd Hurlingham Open unfolded with two teams whom are are forced to rethink their assumptions rather than rely on routine. On the historic turf at Hurlingham, La Natividad La Dolfina, in their first title since the merger of the two teams, delivered a win that didn’t hinge on overpowering their opponent, but on interpreting a match that evolved in real time. It brought father and son, Adolfo and Poroto Cambiaso back on home soil." },
+      { id: "polo-b1", type: "text", content: "The 132nd Hurlingham Open unfolded with two teams whom are are forced to rethink their assumptions rather than rely on routine. On the historic turf at Hurlingham, La Natividad La Dolfina, in their first title since the merger of the two teams, delivered a win that didn't hinge on overpowering their opponent, but on interpreting a match that evolved in real time. It brought father and son, Adolfo and Poroto Cambiaso back on home soil." },
       { id: "polo-b2", type: "text", content: "Their 12–9 result over UAE Polo signaled far more than a strong showing at the start of the Triple Crown. It revealed a team learning to operate as a single unit, navigating momentum shifts with the kind of clarity that only comes from maturity, trust, and an unspoken internal rhythm." },
       { id: "polo-b3", type: "image", content: articleCambiasoPhoto1, caption: "Photo: La Dolfina" },
       { id: "polo-b4", type: "heading", content: "A Beginning Without Clear Lines", textStyle: "bold" },
       { id: "polo-b5", type: "text", content: "The opening chukkers felt controlled but uncertain — not chaotic, but undefined. UAE Polo entered with a familiar structure: tight spacing, disciplined rotation, and a pace that made the early exchanges feel almost cautious. Their approach limited open lanes and challenged La Natividad La Dolfina to search for patterns rather than impose them." },
-      { id: "polo-b6", type: "text", content: "Both sides tested, waited, and absorbed. The match resembled a strategic conversation where each team attempted to read the other’s intentions before revealing their own." },
+      { id: "polo-b6", type: "text", content: "Both sides tested, waited, and absorbed. The match resembled a strategic conversation where each team attempted to read the other's intentions before revealing their own." },
       { id: "polo-b7", type: "image", content: articleCambiasoPhoto2, caption: "Photo: La Dolfina" },
-      { id: "polo-b8", type: "text", content: "Camilo “Jeta” Castagnola emerged as the primary reference point. His goals — eight in total —shifting the momentum to not dip back into equilibrium. Accuracy created separation and composure controlled tempo. Bartolomé Castagnola Jr. anchored the defensive side of the equation, absorbing UAE’s heaviest attacks" },
-      { id: "polo-b9", type: "heading", content: "Cambiaso’s Signature Influence", textStyle: "bold" },
+      { id: "polo-b8", type: "text", content: "Camilo \"Jeta\" Castagnola emerged as the primary reference point. His goals — eight in total —shifting the momentum to not dip back into equilibrium. Accuracy created separation and composure controlled tempo. Bartolomé Castagnola Jr. anchored the defensive side of the equation, absorbing UAE's heaviest attacks" },
+      { id: "polo-b9", type: "heading", content: "Cambiaso's Signature Influence", textStyle: "bold" },
       { id: "polo-b10", type: "text", content: "Adolfo Cambiaso provided the layer of interpretation needed — steering tempo, adjusting field shape, and adding the two goals that mattered more for timing than for their numbers." },
-      { id: "polo-b11", type: "text", content: "Poroto Cambiaso linked the lines with fluidity, smoothing transitions from recovery to attack and ensuring the momentum held steady during the match’s most volatile periods." },
+      { id: "polo-b11", type: "text", content: "Poroto Cambiaso linked the lines with fluidity, smoothing transitions from recovery to attack and ensuring the momentum held steady during the match's most volatile periods." },
       { id: "polo-b12", type: "text", content: "Together, the four created a sense of cohesion that felt more intentional with each passing chukker." },
-      { id: "polo-b13", type: "heading", content: "UAE’s Challenge and the Defining Moment", textStyle: "bold" },
+      { id: "polo-b13", type: "heading", content: "UAE's Challenge and the Defining Moment", textStyle: "bold" },
       { id: "polo-b14", type: "text", content: "UAE Polo did not retreat. They played with a controlled edge, forcing La Natividad La Dolfina into full concentration. Their strongest sequences came at moments when the match felt poised to turn — and one late collision involving Lucas Monteverde briefly froze the stadium. A penalty there could have tightened the score and reintroduced pressure. A neutral restart. Ensued." },
       { id: "polo-b15", type: "text", content: "La Natividad La Dolfina won the toss-in immediately. Momentum shifted definitively." },
       { id: "polo-b16", type: "text", content: "It was a reminder that in matches balanced this tightly, outcomes are shaped not by a single incident, but by how quickly a team can capitalize on the window it creates." },
@@ -900,46 +857,25 @@ function applyCriticalStoryBackfill(content: { heroes: HeroItem[]; articles: Art
 function shouldUpgradeLegacyHeroCopy(hero: HeroItem) {
   const firstText = (hero.body || []).find((block) => block.type === "text")?.content || "";
   const normalizedAuthor = (hero.author || "").trim().toLowerCase();
-  if (
-    hero.id === "h-sailgp" &&
-    firstText.startsWith(
-      "The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history.",
-    )
-  ) {
+  if (hero.id === "h-sailgp" && firstText.startsWith("The Rolex Switzerland SailGP Grand Prix transformed Lake Geneva into the most spectacular racecourse in sailing history.")) {
     return true;
   }
   if (hero.id === "h-cv-summit" && hero.title === "Zurich's CV Summit: Capital Meets AI by the Lake") {
     return true;
   }
-  if (
-    hero.id === "h-f1-austin" &&
-    hero.subtitle === "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe"
-  ) {
+  if (hero.id === "h-f1-austin" && hero.subtitle === "Austin's tech haven welcomes Formula 1 — where Russell amazed and Hamilton raced for Roscoe") {
     return true;
   }
-  if (
-    hero.id === "h-f1-austin" &&
-    hero.subtitle === "Just on the heels of Singapore, F1 heads to Austin's tech haven — where Russell amazed and Hamilton raced for Roscoe."
-  ) {
+  if (hero.id === "h-f1-austin" && hero.subtitle === "Just on the heels of Singapore, F1 heads to Austin's tech haven — where Russell amazed and Hamilton raced for Roscoe.") {
     return true;
   }
   if (hero.id === "h-f1-austin" && hero.date === "2025-10-20") {
     return true;
   }
-  if (
-    hero.id === "h-f1-austin" &&
-    firstText.startsWith(
-      "The United States Grand Prix at the Circuit of the Americas delivered one of the season's most compelling weekends.",
-    )
-  ) {
+  if (hero.id === "h-f1-austin" && firstText.startsWith("The United States Grand Prix at the Circuit of the Americas delivered one of the season's most compelling weekends.")) {
     return true;
   }
-  if (
-    hero.id === "h-f1-austin" &&
-    firstText.startsWith(
-      "Just on the heels of the Singapore Grand Prix, which is notorious for being one of the toughest races physically",
-    )
-  ) {
+  if (hero.id === "h-f1-austin" && firstText.startsWith("Just on the heels of the Singapore Grand Prix, which is notorious for being one of the toughest races physically")) {
     return true;
   }
   if (hero.id === "h-f1-austin" && normalizedAuthor !== "charlotte thames") {
@@ -956,12 +892,7 @@ function shouldUpgradeLegacyArticleCopy(article: Article) {
   if (article.id === "v1-cambiaso" && article.title === "Cambiaso x Cambiaso: Hurlingham and a New Legacy Begins") {
     return true;
   }
-  if (
-    article.id === "v1-cambiaso" &&
-    firstText.startsWith(
-      "The Hurlingham Open marked a historic moment as Adolfo Cambiaso and his son Poroto took to the field together",
-    )
-  ) {
+  if (article.id === "v1-cambiaso" && firstText.startsWith("The Hurlingham Open marked a historic moment as Adolfo Cambiaso and his son Poroto took to the field together")) {
     return true;
   }
   if (article.id === "v1-engadin" && article.title === "Winter Awaits the Engadin") {
@@ -1002,7 +933,6 @@ function upgradeLegacyArticleCopy(article: Article): Article {
 }
 
 // ===== Storage & API =====
-// Bump this version whenever DEFAULT content changes to invalidate stale localStorage
 const CONTENT_VERSION = "4";
 const PUBLISHED_CONTENT_ENDPOINT = "/api/content";
 const ADMIN_PUBLISH_TOKEN_KEY = "magorium-admin-token";
@@ -1152,95 +1082,6 @@ function dedupeBodyByMediaContent(body?: ArticleBodyBlock[]): ArticleBodyBlock[]
   return deduped;
 }
 
-export function saveHeroes(heroes: HeroItem[]) {
-  const prepared = heroes.map((hero) =>
-    normalizeHero({
-      ...hero,
-      body: cleanBodyForStorage(dedupeBodyByMediaContent(hero.body)),
-    }),
-  );
-  markLocalDraftAvailable();
-  localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(prepared));
-}
-const DATA_URL_PREFIX = "data:";
-const OMITTED_MEDIA_PLACEHOLDER = "";
-
-function isHeavyDataUrl(value) {
-  return typeof value === "string" && value.startsWith(DATA_URL_PREFIX);
-}
-
-// Makes a lightweight copy for the LOCAL DRAFT BACKUP ONLY — strips out
-// base64 photos/videos so the backup fits in localStorage. This never
-// touches what actually gets published to the live site.
-function stripHeavyMediaForLocalDraft(items) {
-  return items.map((item) => {
-    const stripped = { ...item };
-    if (isHeavyDataUrl(stripped.imageUrl)) stripped.imageUrl = OMITTED_MEDIA_PLACEHOLDER;
-    if (isHeavyDataUrl(stripped.videoUrl)) stripped.videoUrl = OMITTED_MEDIA_PLACEHOLDER;
-    if (isHeavyDataUrl(stripped.secondaryImageUrl)) stripped.secondaryImageUrl = OMITTED_MEDIA_PLACEHOLDER;
-    if (Array.isArray(stripped.body)) {
-      stripped.body = stripped.body.map((block) => {
-        if ((block.type === "image" || block.type === "video") && isHeavyDataUrl(block.content)) {
-          return { ...block, content: OMITTED_MEDIA_PLACEHOLDER };
-        }
-        return block;
-      });
-    }
-    if (stripped.ad) {
-      const ad = { ...stripped.ad };
-      if (isHeavyDataUrl(ad.imageUrl)) ad.imageUrl = OMITTED_MEDIA_PLACEHOLDER;
-      if (isHeavyDataUrl(ad.videoUrl)) ad.videoUrl = OMITTED_MEDIA_PLACEHOLDER;
-      stripped.ad = ad;
-    }
-    return stripped;
-  });
-}
-
-// Writes to localStorage. If the browser reports storage is full, it
-// automatically retries with photos/videos stripped from the draft copy.
-// If it's STILL too big after that (rare), it re-throws the original
-// error so the existing catch block in AdminPage's save() still works.
-function safeLocalStorageSet(key, items) {
-  try {
-    localStorage.setItem(key, JSON.stringify(items));
-    return;
-  } catch (error) {
-    if (!isStorageQuotaExceededError(error)) throw error;
-  }
-
-  try {
-    localStorage.setItem(key, JSON.stringify(stripHeavyMediaForLocalDraft(items)));
-  } catch (error) {
-    throw error;
-  }
-}
-
-export function saveHeroes(heroes) {
-  const prepared = heroes.map((hero) =>
-    normalizeHero({
-      ...hero,
-      body: cleanBodyForStorage(dedupeBodyByMediaContent(hero.body)),
-    }),
-  );
-  markLocalDraftAvailable();
-  safeLocalStorageSet(STORAGE_KEYS.heroes, prepared);
-}
-
-export function saveArticles(articles) {
-  const prepared = articles.map((article) =>
-    normalizeArticle({
-      ...article,
-      body: cleanBodyForStorage(dedupeBodyByMediaContent(article.body)),
-    }),
-  );
-  markLocalDraftAvailable();
-  safeLocalStorageSet(STORAGE_KEYS.articles, prepared);
-}
-
-export function saveAds(ads) {
-  markLocalDraftAvailable();
-  safeLocalStorageSet(STORAGE_KEYS.ads, ads);
-}
 const DATA_URL_PREFIX = "data:";
 const OMITTED_MEDIA_PLACEHOLDER = "";
 
@@ -1518,9 +1359,9 @@ export async function getPublishedContentSnapshot(options?: {
   if (typeof window === "undefined") {
     return DEFAULT_PUBLISHED_CONTENT;
   }
- const allowLocalDraft = options?.allowLocalDraft ?? false;
+  const allowLocalDraft = options?.allowLocalDraft ?? false;
   ensureFreshDefaults();
- const hasLocalDraft = allowLocalDraft && hasLocalEditsAvailable();
+  const hasLocalDraft = allowLocalDraft && hasLocalEditsAvailable();
   if (hasLocalDraft) {
     return {
       heroes: getHeroes(),
@@ -1869,48 +1710,12 @@ export function formatEditionLabel(edition: string): string {
 function createMediaTextPatternBody(articleId: string): ArticleBodyBlock[] {
   const now = Date.now();
   return [
-    {
-      id: `${articleId}-m1-${now}`,
-      type: "image",
-      content: "",
-      imageAlign: "center",
-      imageWidth: "full",
-      caption: "",
-      citation: "",
-    },
-    {
-      id: `${articleId}-t1-${now + 1}`,
-      type: "text",
-      content: "",
-    },
-    {
-      id: `${articleId}-m2-${now + 2}`,
-      type: "image",
-      content: "",
-      imageAlign: "center",
-      imageWidth: "full",
-      caption: "",
-      citation: "",
-    },
-    {
-      id: `${articleId}-t2-${now + 3}`,
-      type: "text",
-      content: "",
-    },
-    {
-      id: `${articleId}-m3-${now + 4}`,
-      type: "image",
-      content: "",
-      imageAlign: "center",
-      imageWidth: "full",
-      caption: "",
-      citation: "",
-    },
-    {
-      id: `${articleId}-t3-${now + 5}`,
-      type: "text",
-      content: "",
-    },
+    { id: `${articleId}-m1-${now}`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "", citation: "" },
+    { id: `${articleId}-t1-${now + 1}`, type: "text", content: "" },
+    { id: `${articleId}-m2-${now + 2}`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "", citation: "" },
+    { id: `${articleId}-t2-${now + 3}`, type: "text", content: "" },
+    { id: `${articleId}-m3-${now + 4}`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "", citation: "" },
+    { id: `${articleId}-t3-${now + 5}`, type: "text", content: "" },
   ];
 }
 

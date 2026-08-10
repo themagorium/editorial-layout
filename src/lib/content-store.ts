@@ -1162,8 +1162,71 @@ export function saveHeroes(heroes: HeroItem[]) {
   markLocalDraftAvailable();
   localStorage.setItem(STORAGE_KEYS.heroes, JSON.stringify(prepared));
 }
+const DATA_URL_PREFIX = "data:";
+const OMITTED_MEDIA_PLACEHOLDER = "";
 
-export function saveArticles(articles: Article[]) {
+function isHeavyDataUrl(value) {
+  return typeof value === "string" && value.startsWith(DATA_URL_PREFIX);
+}
+
+// Makes a lightweight copy for the LOCAL DRAFT BACKUP ONLY — strips out
+// base64 photos/videos so the backup fits in localStorage. This never
+// touches what actually gets published to the live site.
+function stripHeavyMediaForLocalDraft(items) {
+  return items.map((item) => {
+    const stripped = { ...item };
+    if (isHeavyDataUrl(stripped.imageUrl)) stripped.imageUrl = OMITTED_MEDIA_PLACEHOLDER;
+    if (isHeavyDataUrl(stripped.videoUrl)) stripped.videoUrl = OMITTED_MEDIA_PLACEHOLDER;
+    if (isHeavyDataUrl(stripped.secondaryImageUrl)) stripped.secondaryImageUrl = OMITTED_MEDIA_PLACEHOLDER;
+    if (Array.isArray(stripped.body)) {
+      stripped.body = stripped.body.map((block) => {
+        if ((block.type === "image" || block.type === "video") && isHeavyDataUrl(block.content)) {
+          return { ...block, content: OMITTED_MEDIA_PLACEHOLDER };
+        }
+        return block;
+      });
+    }
+    if (stripped.ad) {
+      const ad = { ...stripped.ad };
+      if (isHeavyDataUrl(ad.imageUrl)) ad.imageUrl = OMITTED_MEDIA_PLACEHOLDER;
+      if (isHeavyDataUrl(ad.videoUrl)) ad.videoUrl = OMITTED_MEDIA_PLACEHOLDER;
+      stripped.ad = ad;
+    }
+    return stripped;
+  });
+}
+
+// Writes to localStorage. If the browser reports storage is full, it
+// automatically retries with photos/videos stripped from the draft copy.
+// If it's STILL too big after that (rare), it re-throws the original
+// error so the existing catch block in AdminPage's save() still works.
+function safeLocalStorageSet(key, items) {
+  try {
+    localStorage.setItem(key, JSON.stringify(items));
+    return;
+  } catch (error) {
+    if (!isStorageQuotaExceededError(error)) throw error;
+  }
+
+  try {
+    localStorage.setItem(key, JSON.stringify(stripHeavyMediaForLocalDraft(items)));
+  } catch (error) {
+    throw error;
+  }
+}
+
+export function saveHeroes(heroes) {
+  const prepared = heroes.map((hero) =>
+    normalizeHero({
+      ...hero,
+      body: cleanBodyForStorage(dedupeBodyByMediaContent(hero.body)),
+    }),
+  );
+  markLocalDraftAvailable();
+  safeLocalStorageSet(STORAGE_KEYS.heroes, prepared);
+}
+
+export function saveArticles(articles) {
   const prepared = articles.map((article) =>
     normalizeArticle({
       ...article,
@@ -1171,12 +1234,91 @@ export function saveArticles(articles: Article[]) {
     }),
   );
   markLocalDraftAvailable();
-  localStorage.setItem(STORAGE_KEYS.articles, JSON.stringify(prepared));
+  safeLocalStorageSet(STORAGE_KEYS.articles, prepared);
 }
 
-export function saveAds(ads: AdSlot[]) {
+export function saveAds(ads) {
   markLocalDraftAvailable();
-  localStorage.setItem(STORAGE_KEYS.ads, JSON.stringify(ads));
+  safeLocalStorageSet(STORAGE_KEYS.ads, ads);
+}
+const DATA_URL_PREFIX = "data:";
+const OMITTED_MEDIA_PLACEHOLDER = "";
+
+function isHeavyDataUrl(value) {
+  return typeof value === "string" && value.startsWith(DATA_URL_PREFIX);
+}
+
+// Makes a lightweight copy for the LOCAL DRAFT BACKUP ONLY — strips out
+// base64 photos/videos so the backup fits in localStorage. This never
+// touches what actually gets published to the live site.
+function stripHeavyMediaForLocalDraft(items) {
+  return items.map((item) => {
+    const stripped = { ...item };
+    if (isHeavyDataUrl(stripped.imageUrl)) stripped.imageUrl = OMITTED_MEDIA_PLACEHOLDER;
+    if (isHeavyDataUrl(stripped.videoUrl)) stripped.videoUrl = OMITTED_MEDIA_PLACEHOLDER;
+    if (isHeavyDataUrl(stripped.secondaryImageUrl)) stripped.secondaryImageUrl = OMITTED_MEDIA_PLACEHOLDER;
+    if (Array.isArray(stripped.body)) {
+      stripped.body = stripped.body.map((block) => {
+        if ((block.type === "image" || block.type === "video") && isHeavyDataUrl(block.content)) {
+          return { ...block, content: OMITTED_MEDIA_PLACEHOLDER };
+        }
+        return block;
+      });
+    }
+    if (stripped.ad) {
+      const ad = { ...stripped.ad };
+      if (isHeavyDataUrl(ad.imageUrl)) ad.imageUrl = OMITTED_MEDIA_PLACEHOLDER;
+      if (isHeavyDataUrl(ad.videoUrl)) ad.videoUrl = OMITTED_MEDIA_PLACEHOLDER;
+      stripped.ad = ad;
+    }
+    return stripped;
+  });
+}
+
+// Writes to localStorage. If the browser reports storage is full, it
+// automatically retries with photos/videos stripped from the draft copy.
+// If it's STILL too big after that (rare), it re-throws the original
+// error so the existing catch block in AdminPage's save() still works.
+function safeLocalStorageSet(key, items) {
+  try {
+    localStorage.setItem(key, JSON.stringify(items));
+    return;
+  } catch (error) {
+    if (!isStorageQuotaExceededError(error)) throw error;
+  }
+
+  try {
+    localStorage.setItem(key, JSON.stringify(stripHeavyMediaForLocalDraft(items)));
+  } catch (error) {
+    throw error;
+  }
+}
+
+export function saveHeroes(heroes) {
+  const prepared = heroes.map((hero) =>
+    normalizeHero({
+      ...hero,
+      body: cleanBodyForStorage(dedupeBodyByMediaContent(hero.body)),
+    }),
+  );
+  markLocalDraftAvailable();
+  safeLocalStorageSet(STORAGE_KEYS.heroes, prepared);
+}
+
+export function saveArticles(articles) {
+  const prepared = articles.map((article) =>
+    normalizeArticle({
+      ...article,
+      body: cleanBodyForStorage(dedupeBodyByMediaContent(article.body)),
+    }),
+  );
+  markLocalDraftAvailable();
+  safeLocalStorageSet(STORAGE_KEYS.articles, prepared);
+}
+
+export function saveAds(ads) {
+  markLocalDraftAvailable();
+  safeLocalStorageSet(STORAGE_KEYS.ads, ads);
 }
 
 export function restoreDefaultContentBackup() {

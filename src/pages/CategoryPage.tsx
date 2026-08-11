@@ -51,6 +51,34 @@ function isPlaceholderCopy(value?: string): boolean {
   return PLACEHOLDER_COPY_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+// Parses simple markdown-style bold/italic markers (**bold**, *italic*)
+// entered in the admin Title/Subtitle fields and renders them as real
+// <strong>/<em> elements instead of showing literal asterisks.
+function renderFormattedText(text?: string): React.ReactNode {
+  if (!text) return text;
+  const pattern = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    if (match[2] !== undefined) {
+      nodes.push(<strong key={key++}>{match[2]}</strong>);
+    } else if (match[3] !== undefined) {
+      nodes.push(<em key={key++}>{match[3]}</em>);
+    }
+    lastIndex = pattern.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+  return nodes;
+}
+
 function normalizeCardImageUrl(value?: string): string {
   const normalized = (value || "").trim();
   if (!normalized) return "";
@@ -335,10 +363,10 @@ export default function CategoryPage() {
                         </div>
                         <Link to={story.path} className="block">
                           <h3 className="font-editorial text-xl mt-2 group-hover:text-primary transition-colors">
-                            {story.title}
+                            {renderFormattedText(story.title)}
                           </h3>
                         </Link>
-                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{story.excerpt}</p>
+                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{renderFormattedText(story.excerpt)}</p>
                         <p className="text-xs mt-3 text-muted-foreground">
                           Written by{" "}
                           <Link to={getAuthorPath(story.author)} className="text-primary hover:underline">

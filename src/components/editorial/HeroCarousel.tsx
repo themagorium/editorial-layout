@@ -2,36 +2,57 @@ import { useState, useEffect, useCallback } from "react";
 import type { HeroItem } from "@/lib/content-store";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
-
 interface Props {
   heroes: HeroItem[];
 }
 
+// Parses simple markdown-style bold/italic markers (**bold**, *italic*)
+// entered in the admin Title/Subtitle fields and renders them as real
+// <strong>/<em> elements instead of showing literal asterisks.
+function renderFormattedText(text?: string): React.ReactNode {
+  if (!text) return text;
+  const pattern = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    if (match[2] !== undefined) {
+      nodes.push(<strong key={key++}>{match[2]}</strong>);
+    } else if (match[3] !== undefined) {
+      nodes.push(<em key={key++}>{match[3]}</em>);
+    }
+    lastIndex = pattern.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+  return nodes;
+}
+
 export default function HeroCarousel({ heroes }: Props) {
   const [current, setCurrent] = useState(0);
-
   const next = useCallback(() => setCurrent((c) => (c + 1) % heroes.length), [heroes.length]);
   const prev = useCallback(() => setCurrent((c) => (c - 1 + heroes.length) % heroes.length), [heroes.length]);
-
   // Track view when slide changes
   useEffect(() => {
     if (heroes.length > 0) {
       trackEvent(heroes[current].id, "hero", "view");
     }
   }, [current, heroes]);
-
   useEffect(() => {
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
   }, [next]);
-
   if (!heroes.length) return null;
   const hero = heroes[current];
-
   const handleClick = () => {
     trackEvent(hero.id, "hero", "click");
   };
-
   return (
     <div className="relative w-full aspect-[16/7] min-h-[400px] overflow-hidden group" onClick={handleClick}>
       <img
@@ -50,17 +71,15 @@ export default function HeroCarousel({ heroes }: Props) {
         />
       )}
       <div className="article-overlay absolute inset-0" />
-
       <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 z-10">
         <span className="category-pill mb-4">{hero.category}</span>
         <h2 className="text-xl md:text-2xl font-semibold text-foreground mt-3 max-w-3xl leading-snug font-editorial">
-          {hero.title}
+          {renderFormattedText(hero.title)}
         </h2>
         <p className="font-sans text-base md:text-lg text-muted-foreground mt-3 max-w-2xl">
-          {hero.subtitle}
+          {renderFormattedText(hero.subtitle)}
         </p>
       </div>
-
       {heroes.length > 1 && (
         <>
           <button
@@ -77,7 +96,6 @@ export default function HeroCarousel({ heroes }: Props) {
           </button>
         </>
       )}
-
       {heroes.length > 1 && (
         <div className="absolute bottom-4 right-6 md:right-12 flex gap-2 z-10">
           {heroes.map((_, i) => (

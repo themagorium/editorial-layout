@@ -21,7 +21,7 @@ export default function AdPlacement({ ad, className = "" }: Props) {
   if (!hasMedia) return null;
   const content = (
     
-      href={ad.linkUrl || "#"}
+      <a href={ad.linkUrl || "#"}
       target="_blank"
       rel="noopener noreferrer"
       className="block w-full h-full"

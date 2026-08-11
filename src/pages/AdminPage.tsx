@@ -517,8 +517,7 @@ sources?: string; onSourcesChange?: (v: string) => void;
           <div>
             <h4 className="text-sm font-semibold text-primary font-sans">Article Opening Photo</h4>
             <p className="text-[11px] text-muted-foreground font-sans mt-0.5">Appears below the headline, above the first paragraph. Leave empty to skip.</p>
-          </div>
-          {localSecondaryUrl ? (
+          </div>{localSecondaryUrl ? (
             <div className="relative">
               <img src={localSecondaryUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
               <button type="button" onClick={() => { setLocalSecondaryUrl(""); onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }} className="absolute top-2 right-2 flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-destructive text-white rounded shadow hover:bg-destructive/90 transition-colors">
@@ -852,210 +851,190 @@ function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
 }
 
 function normalizeBodyFlow(blocks: ArticleBodyBlock[], imageUrl?: string, videoUrl?: string): ArticleBodyBlock[] {
-  const source =
-{localSecondaryUrl ? (
-            <div className="relative">
-              <img src={localSecondaryUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
-              <button type="button" onClick={() => { setLocalSecondaryUrl(""); onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }} className="absolute top-2 right-2 flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-destructive text-white rounded shadow hover:bg-destructive/90 transition-colors">
-                <Trash2 className="w-3 h-3" /> Remove Photo
-              </button>
-            </div>
-          ) : (
-            <div className="w-full h-24 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No opening photo uploaded</div>
-          )}
-       <button type="button" onClick={() => secondaryImgRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Opening Photo</button>
-          <input ref={secondaryImgRef} type="file" accept="image/*" className="hidden" onChange={handleSecondaryImageUpload} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <select value={secondaryImageAlign || "center"} onChange={(e) => onSecondaryImageAlignChange(e.target.value as "left" | "center" | "right")} className="bg-secondary text-foreground px-3 py-1.5 rounded text-xs font-sans">
-              <option value="left">Align: Left</option>
-              <option value="center">Align: Center</option>
-              <option value="right">Align: Right</option>
-            </select>
-            <select value={secondaryImageWidth || "full"} onChange={(e) => onSecondaryImageWidthChange(e.target.value as "small" | "medium" | "large" | "full")} className="bg-secondary text-foreground px-3 py-1.5 rounded text-xs font-sans">
-              <option value="small">Size: Small</option>
-              <option value="medium">Size: Medium</option>
-              <option value="large">Size: Large</option>
-              <option value="full">Size: Full Width</option>
-            </select>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input value={secondaryImageCaption || ""} onChange={(e) => onSecondaryImageCaptionChange(e.target.value)} placeholder="Caption (optional)" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
-            <input value={secondaryImageCitation || ""} onChange={(e) => onSecondaryImageCitationChange(e.target.value)} placeholder="Photo credit (optional)" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
-          </div>
-        </div>
+  const source = blocks.filter(Boolean);
+  const textBlocks = source.filter((b) => b.type === "text" || b.type === "heading");
+  const mediaBlocks = source.filter((b) => b.type === "image" || b.type === "video");
+  const ordered: ArticleBodyBlock[] = [];
+  if (textBlocks.length === 0) {
+    ordered.push({ id: `auto-t-${Date.now()}`, type: "text", content: "Add body text" });
+    if (videoUrl) ordered.push({ id: `auto-v-${Date.now()}`, type: "video", content: videoUrl, caption: "Featured video" });
+    else ordered.push({ id: `auto-i-${Date.now()}`, type: "image", content: imageUrl || "", imageAlign: "center", imageWidth: "full", caption: imageUrl ? "Featured image" : "Upload photo or video" });
+    return ordered;
+  }
+  const max = Math.max(textBlocks.length, mediaBlocks.length || 1);
+  for (let i = 0; i < max; i += 1) {
+    if (textBlocks[i]) ordered.push(textBlocks[i]);
+    if (mediaBlocks[i]) ordered.push(mediaBlocks[i]);
+    else if (i < textBlocks.length) {
+      if (videoUrl) ordered.push({ id: `auto-v-${Date.now()}-${i}`, type: "video", content: videoUrl, caption: "Featured video" });
+      else ordered.push({ id: `auto-i-${Date.now()}-${i}`, type: "image", content: imageUrl || "", imageAlign: "center", imageWidth: "full", caption: imageUrl ? "Featured image" : "Upload photo or video" });
+    }
+  }
+  return ordered;
+}
 
-        <section className="rounded-lg border-2 border-primary/35 bg-primary/5 p-4 space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h4 className="text-sm font-semibold text-primary font-sans">Dedicated SEO Tag Box</h4>
-              <p className="text-[11px] text-muted-foreground font-sans mt-1">Add and manage search keywords for this story.</p>
-            </div>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans bg-background px-2 py-1 rounded border border-border">{seoTags.length}/25</span>
-          </div>
-          <div className="rounded-md border border-border bg-background/80 p-3 min-h-[44px]">
-            <div className="flex flex-wrap gap-2">
-              {seoTags.length > 0 ? seoTags.map((tag) => (
-                <button key={tag} type="button" onClick={() => onSeoTagsChange(seoTags.filter((t) => t.toLowerCase() !== tag.toLowerCase()))} className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-sans hover:bg-primary/15">#{tag}<span className="text-[10px]">x</span></button>
-              )) : <p className="text-xs text-muted-foreground font-sans">No SEO tags added yet.</p>}
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input value={seoTagDraft} onChange={(e) => setSeoTagDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSeoTagsFromDraft(); } }} placeholder="Add tag(s), comma-separated" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm" />
-            <button type="button" onClick={addSeoTagsFromDraft} className="px-3 py-2 text-xs uppercase tracking-wider border border-primary text-primary rounded hover:bg-primary/10 transition-colors">Add Tag</button>
-          </div>
-          <p className="text-[10px] text-muted-foreground font-sans">Tip: click any bubble to remove it.</p>
-        </section>
+function FormattableField({
+  value, onChange, placeholder, className, as,
+}: {
+  value: string; onChange: (v: string) => void; placeholder?: string; className?: string; as: "input" | "textarea";
+}) {
+  const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
 
-        <div className="mt-4 pt-4 border-t border-border">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Preferred flow: photo/video → text → photo/video → text</p>
-            <button type="button" onClick={onNormalizeBody} className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">Auto Arrange</button>
-          </div>
-          <ArticleBodyEditor blocks={body} heading={isArticle ? "Article Body" : "Hero Body"} onChange={onBodyChange} />
-        </div>
+  const wrapSelection = (marker: string) => {
+    const el = ref.current;
+    if (!el) return;
+    const start = el.selectionStart ?? 0;
+    const end = el.selectionEnd ?? 0;
+    const before = value.slice(0, start);
+    const selected = value.slice(start, end);
+    const after = value.slice(end);
+    const next = selected
+      ? `${before}${marker}${selected}${marker}${after}`
+      : `${before}${marker}${marker}${after}`;
+    onChange(next);
+    requestAnimationFrame(() => {
+      el.focus();
+      const cursor = selected ? start + marker.length + selected.length + marker.length : start + marker.length;
+      el.setSelectionRange(cursor, cursor);
+    });
+  };
 
-      {onSourcesChange && (
-          <div className="mt-4 pt-4 border-t border-border">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Sources & Verification</label>
-            <textarea value={sources || ""} onChange={(e) => onSourcesChange(e.target.value)} placeholder="List your sources here, e.g. The Guardian (May 2026), Reuters (Apr 15)…" rows={3} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
-            <p className="text-[10px] text-muted-foreground font-sans mt-1">Appears as footnote at the bottom of the live article. Hidden if empty.</p>
-          </div>
-        )}
+  const Tag = as as any;
 
-        <div className="mt-4 pt-4 border-t border-border">
-          <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-            <input
-              type="checkbox"
-              checked={Boolean(ad)}
-              onChange={(e) => {
-               if (e.target.checked) {
-                  onAdChange({
-                    id: `inline-ad-${Date.now()}`,
-                    label: isArticle ? "Article Ad" : "Hero Ad",
-                    position: isArticle ? "inline-article" : "inline-hero",
-                    placement: "center",
-                    width: 300,
-                    height: 250,
-                  });
-                } else {
-                  onAdChange(undefined);
-                }
-              }}
-              className="accent-primary"
-            />
-            Attach an ad to this {isArticle ? "article" : "hero"}
-          </label>
-
-          {ad && (
-            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 mt-3">
-              <MediaUpload
-                imageUrl={ad.imageUrl}
-                videoUrl={ad.videoUrl}
-                onImage={(url) => onAdChange({ ...ad, imageUrl: url })}
-                onVideo={(url) => onAdChange({ ...ad, videoUrl: url })}
-              />
-              <div className="space-y-3">
-                <span className="text-xs text-muted-foreground">
-                  W: <input type="number" value={ad.width} onChange={(e) => onAdChange({ ...ad, width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
-                  {" "}× H: <input type="number" value={ad.height} onChange={(e) => onAdChange({ ...ad, height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
-                </span>
-                <input value={ad.linkUrl || ""} onChange={(e) => onAdChange({ ...ad, linkUrl: e.target.value })} placeholder="Click-through URL" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
-              </div>
-            </div>
-          )}
-        </div>
+  return (
+    <div className="space-y-1">
+      <div className="flex gap-1">
+        <button type="button" onClick={() => wrapSelection("**")} className="px-2 py-0.5 text-xs font-bold border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">B</button>
+        <button type="button" onClick={() => wrapSelection("*")} className="px-2 py-0.5 text-xs italic border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">I</button>
       </div>
+      <Tag
+        ref={ref}
+        value={value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={className}
+        {...(as === "textarea" ? { rows: 2 } : {})}
+      />
     </div>
   );
 }
 
-function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => void }) {
-  const addAd = () => setAds([...ads, { id: `ad-${Date.now()}`, label: "New Ad Slot", position: "mid-feed", width: 728, height: 90 }]);
-  const update = (id: string, patch: Partial<AdSlot>) => setAds(ads.map((a) => (a.id === id ? { ...a, ...patch } : a)));
-  const remove = (id: string) => setAds(ads.filter((a) => a.id !== id));
+function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: { imageUrl?: string; videoUrl?: string; onImage: (url: string) => void; onVideo: (url: string) => void }) {
+  const imgRef = useRef<HTMLInputElement>(null);
+  const vidRef = useRef<HTMLInputElement>(null);
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) onImage(await fileToOptimizedDataUrl(file)); e.target.value = ""; };
+  const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) onVideo(await fileToOptimizedDataUrl(file)); e.target.value = ""; };
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground font-sans">Upload images or videos for each ad placement.</p>
-        <button onClick={addAd} className="px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors flex items-center gap-2"><Plus className="w-4 h-4" /> Add Slot</button>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
+        <span>Featured Media</span><span>Click Photo or Video to Upload</span>
       </div>
-      {ads.map((ad) => (
-        <ContentCard key={ad.id} onRemove={() => remove(ad.id)}>
-          <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
-            <MediaUpload imageUrl={ad.imageUrl} videoUrl={ad.videoUrl} onImage={(url) => update(ad.id, { imageUrl: url })} onVideo={(url) => update(ad.id, { videoUrl: url })} />
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <select value={ad.position} onChange={(e) => update(ad.id, { position: e.target.value as AdSlot["position"] })} className="category-pill bg-secondary text-foreground border-none">
-                  <option value="hero-sidebar">Hero Sidebar</option>
-                  <option value="mid-feed">Mid Feed</option>
-                  <option value="bottom-banner">Bottom Banner</option>
-                  <option value="sidebar">Sidebar</option>
-                </select>
-                <span className="text-xs text-muted-foreground">W: <input type="number" value={ad.width} onChange={(e) => update(ad.id, { width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" /> × H: <input type="number" value={ad.height} onChange={(e) => update(ad.id, { height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" /></span>
-              </div>
-              <input value={ad.label} onChange={(e) => update(ad.id, { label: e.target.value })} placeholder="Ad label (internal use)" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm" />
-              <input value={ad.linkUrl || ""} onChange={(e) => update(ad.id, { linkUrl: e.target.value })} placeholder="Click-through URL" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
-            </div>
-          </div>
-        </ContentCard>
-      ))}
+      <div className="aspect-video bg-secondary rounded overflow-hidden flex items-center justify-center">
+        {imageUrl ? <img src={imageUrl} alt="" className="w-full h-full object-cover" /> : <Image className="w-8 h-8 text-muted-foreground" />}
+      </div>
+      <div className="flex gap-2">
+        <button type="button" onClick={() => imgRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"><Upload className="w-3 h-3" /> Photo</button>
+        <button type="button" onClick={() => vidRef.current?.click()} className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors"><Video className="w-3 h-3" /> Video</button>
+      </div>
+      <p className="text-[10px] text-muted-foreground font-sans">Supported uploads: image/* and video/* files from your device.</p>
+      {videoUrl && <p className="text-[10px] text-primary truncate">Video attached ✓</p>}
+      <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
+      <input ref={vidRef} type="file" accept="video/*" className="hidden" onChange={handleVideo} />
     </div>
   );
 }
 
-function PagesManager({ pageContent, setPageContent }: { pageContent: PageContent; setPageContent: (c: PageContent) => void }) {
-  const [activePage, setActivePage] = useState<"editorsLetter" | "contributors" | "partnerships" | "masthead">("editorsLetter");
-  const logoRef = useRef<HTMLInputElement>(null);
-  const contribLogoRef = useRef<HTMLInputElement>(null);
-  const partnerLogoRef = useRef<HTMLInputElement>(null);
-  const contribImgRef = useRef<HTMLInputElement>(null);
-  const partnerImgRef = useRef<HTMLInputElement>(null);
-
-  const persist = (updated: PageContent) => {
-    setPageContent(updated);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch {}
-    toast.success("Page saved.");
-  };
-
-  const updateEL = (patch: Partial<PageContent["editorsLetter"]>) => persist({ ...pageContent, editorsLetter: { ...pageContent.editorsLetter, ...patch } });
-  const updateMasthead = (patch: Partial<PageContent["masthead"]>) => persist({ ...pageContent, masthead: { ...pageContent.masthead, ...patch } });
-  const updateContribs = (patch: Partial<PageContent["contributors"]>) => persist({ ...pageContent, contributors: { ...pageContent.contributors, ...patch } });
-  const updatePartners = (patch: Partial<PageContent["partnerships"]>) => persist({ ...pageContent, partnerships: { ...pageContent.partnerships, ...patch } });
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, onUrl: (url: string) => void) => {
-    const file = e.target.files?.[0];
-    if (file) onUrl(await fileToOptimizedDataUrl(file));
-    e.target.value = "";
-  };
-
-  const addImage = async (e: React.ChangeEvent<HTMLInputElement>, current: string[], onUpdate: (imgs: string[]) => void) => {
-    const file = e.target.files?.[0];
-    if (file) onUpdate([...current, await fileToOptimizedDataUrl(file)]);
-    e.target.value = "";
-  };
-
-  const removeImage = (index: number, current: string[], onUpdate: (imgs: string[]) => void) => onUpdate(current.filter((_, i) => i !== index));
-
-  const pages = [
-    { key: "editorsLetter" as const, label: "Editor's Letter" },
-    { key: "contributors" as const, label: "Contributors" },
-    { key: "partnerships" as const, label: "Partnerships" },
-    { key: "masthead" as const, label: "Masthead" },
-  ];
-
+function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; heroes: HeroItem[]; ads: AdSlot[] }) {
+  const [filter, setFilter] = useState<"all" | "article" | "hero" | "ad">("all");
+  const totals = getTotalStats();
+  const summary = getAnalyticsSummary(articles, heroes, ads);
+  const recent = getRecentEvents(30);
+  const locations = getLocationStats();
+  const filtered = filter === "all" ? summary : summary.filter((s) => s.contentType === filter);
+  const sorted = [...filtered].sort((a, b) => b.views - a.views);
+  const handleClear = () => { clearAnalytics(); toast.success("Analytics data cleared."); window.location.reload(); };
   return (
-    <div className="space-y-6">
-      <div className="bg-card border border-border rounded-lg p-4">
-        <p className="text-sm text-muted-foreground font-sans">Edit static pages. Changes save instantly to the live site.</p>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={<Eye className="w-5 h-5" />} label="Total Views" value={totals.totalViews} />
+        <StatCard icon={<MousePointer className="w-5 h-5" />} label="Total Clicks" value={totals.totalClicks} />
+        <StatCard icon={<TrendingUp className="w-5 h-5" />} label="Click-Through Rate" value={totals.totalViews > 0 ? `${((totals.totalClicks / totals.totalViews) * 100).toFixed(1)}%` : "—"} />
+        <StatCard icon={<Globe className="w-5 h-5" />} label="Unique Locations" value={totals.uniqueLocations} />
       </div>
-      <div className="flex gap-2 flex-wrap">
-        {pages.map(({ key, label }) => (
-          <button key={key} onClick={() => setActivePage(key)} className={`px-5 py-2.5 text-sm rounded font-sans transition-colors ${activePage === key ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:text-foreground"}`}>{label}</button>
+      <div className="flex flex-wrap items-center gap-3">
+        {(["all", "article", "hero", "ad"] as const).map((f) => (
+          <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 text-xs uppercase tracking-widest font-sans border rounded transition-colors ${filter === f ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
+            {f === "all" ? "All Content" : f === "ad" ? "Ads" : `${f}s`}
+          </button>
         ))}
+        <button onClick={handleClear} className="ml-auto px-4 py-2 text-xs uppercase tracking-widest font-sans border border-destructive/30 text-destructive rounded hover:bg-destructive/10 transition-colors">Clear Data</button>
       </div>
+      <div className="bg-card border border-border rounded overflow-hidden">
+        <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
+          <span>Content</span><span className="text-center">Type</span><span className="text-center">Views</span><span className="text-center">Clicks</span><span className="text-center">CTR</span>
+        </div>
+        {sorted.length === 0 ? (
+          <div className="px-5 py-8 text-center text-muted-foreground text-sm font-sans">No data yet.</div>
+        ) : sorted.map((item) => {
+          const ctr = item.views > 0 ? ((item.clicks / item.views) * 100).toFixed(1) : "0.0";
+          return (
+            <div key={`${item.contentType}:${item.contentId}`} className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors">
+              <span className="truncate text-foreground">{item.label || item.contentId}</span>
+              <span className="text-center"><span className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider rounded ${item.contentType === "article" ? "bg-primary/10 text-primary" : item.contentType === "hero" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground"}`}>{item.contentType}</span></span>
+              <span className="text-center text-foreground font-medium">{item.views}</span>
+              <span className="text-center text-foreground font-medium">{item.clicks}</span>
+              <span className="text-center text-primary font-medium">{ctr}%</span>
+            </div>
+          );
+        })}
+      </div>
+      <div>
+        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> Viewer Locations</h3>
+        <div className="bg-card border border-border rounded overflow-hidden">
+          <div className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
+            <span>City</span><span>Country</span><span className="text-center">Views</span><span className="text-center">Clicks</span>
+          </div>
+          {locations.length === 0 ? (
+            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No location data yet.</div>
+          ) : locations.map((loc) => (
+            <div key={`${loc.city}|${loc.country}`} className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors">
+              <span className="text-foreground flex items-center gap-2"><MapPin className="w-3 h-3 text-primary shrink-0" />{loc.city}</span>
+              <span className="text-muted-foreground flex items-center gap-1.5"><span className="text-xs">{loc.countryCode}</span>{loc.country}</span>
+              <span className="text-center text-foreground font-medium">{loc.views}</span>
+              <span className="text-center text-foreground font-medium">{loc.clicks}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground">Recent Events</h3>
+        <div className="bg-card border border-border rounded max-h-72 overflow-y-auto">
+          {recent.length === 0 ? (
+            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No events recorded yet.</div>
+          ) : recent.map((ev) => (
+            <div key={ev.id} className="flex items-center gap-3 px-4 py-2.5 text-xs font-sans border-b border-border/30">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${ev.eventType === "view" ? "bg-primary/50" : "bg-primary"}`} />
+              <span className="text-muted-foreground w-36 shrink-0">{new Date(ev.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+              <span className="text-foreground">{ev.eventType}</span>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-muted-foreground truncate">{ev.contentType} — {ev.contentId}</span>
+              {ev.location && (<><span className="text-muted-foreground">·</span><span className="text-primary/70 shrink-0 flex items-center gap-1"><MapPin className="w-3 h-3" />{ev.location.city}, {ev.location.countryCode}</span></>)}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-      {activePage === "editorsLetter" && (
-        <div className="space-y-5">
-          <div className="bg-card border border-border rounded-lg p-5">
-            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Logo / Brand Image — Admin Only</label>
-            <div className="flex items-center gap-4 flex-wrap">
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
+  return (
+    <div className="bg-card border border-border rounded p-5 flex items-center gap-4">
+      <div className="w-10 h-10 rounded flex items-center justify-center bg-primary/10 text-primary">{icon}</div>
+      <div>
+        <p className="text-2xl font-serif font-bold text-foreground">{value}</p>
+        <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{label}</p>
+      </div>
+    </div>
+  );
+}

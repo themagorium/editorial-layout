@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import type { ArticleBodyBlock } from "@/lib/content-store";
-import { Trash2, Image, Video, Type, GripVertical, Heading, Bold, Italic, BookOpen } from "lucide-react";
+import { Trash2, Image, Video, Type, GripVertical, Heading, Bold, Italic, BookOpen, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { fileToOptimizedDataUrl } from "@/lib/media-optimizer";
 
 interface Props {
@@ -207,6 +207,19 @@ export default function ArticleBodyEditor({
                   className={`px-2 py-1 rounded text-xs border transition-colors ${isStyleActive(block, "italic") ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
                   <Italic className="w-3 h-3" />
                 </button>
+                <div className="w-px bg-border mx-1" />
+                <button type="button" onClick={() => updateBlock(block.id, { textAlign: "left" })}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${(block.textAlign || "left") === "left" ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
+                  <AlignLeft className="w-3 h-3" />
+                </button>
+                <button type="button" onClick={() => updateBlock(block.id, { textAlign: "center" })}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${block.textAlign === "center" ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
+                  <AlignCenter className="w-3 h-3" />
+                </button>
+                <button type="button" onClick={() => updateBlock(block.id, { textAlign: "right" })}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${block.textAlign === "right" ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
+                  <AlignRight className="w-3 h-3" />
+                </button>
               </div>
               <textarea
                 value={block.content}
@@ -228,6 +241,19 @@ export default function ArticleBodyEditor({
                 <button type="button" onClick={() => toggleStyle(block, "italic")}
                   className={`px-2 py-1 rounded text-xs border transition-colors ${isStyleActive(block, "italic") ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
                   <Italic className="w-3 h-3" />
+                </button>
+                <div className="w-px bg-border mx-1" />
+                <button type="button" onClick={() => updateBlock(block.id, { textAlign: "left" })}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${(block.textAlign || "left") === "left" ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
+                  <AlignLeft className="w-3 h-3" />
+                </button>
+                <button type="button" onClick={() => updateBlock(block.id, { textAlign: "center" })}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${block.textAlign === "center" ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
+                  <AlignCenter className="w-3 h-3" />
+                </button>
+                <button type="button" onClick={() => updateBlock(block.id, { textAlign: "right" })}
+                  className={`px-2 py-1 rounded text-xs border transition-colors ${block.textAlign === "right" ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
+                  <AlignRight className="w-3 h-3" />
                 </button>
                 <select
                   value={block.headingVariant || "subsection"}

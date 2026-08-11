@@ -853,3 +853,209 @@ function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
 
 function normalizeBodyFlow(blocks: ArticleBodyBlock[], imageUrl?: string, videoUrl?: string): ArticleBodyBlock[] {
   const source =
+{localSecondaryUrl ? (
+            <div className="relative">
+              <img src={localSecondaryUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
+              <button type="button" onClick={() => { setLocalSecondaryUrl(""); onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }} className="absolute top-2 right-2 flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-destructive text-white rounded shadow hover:bg-destructive/90 transition-colors">
+                <Trash2 className="w-3 h-3" /> Remove Photo
+              </button>
+            </div>
+          ) : (
+            <div className="w-full h-24 rounded border-2 border-dashed border-border bg-secondary flex items-center justify-center text-xs text-muted-foreground font-sans">No opening photo uploaded</div>
+          )}
+       <button type="button" onClick={() => secondaryImgRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors"><Upload className="w-4 h-4" /> Upload Opening Photo</button>
+          <input ref={secondaryImgRef} type="file" accept="image/*" className="hidden" onChange={handleSecondaryImageUpload} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <select value={secondaryImageAlign || "center"} onChange={(e) => onSecondaryImageAlignChange(e.target.value as "left" | "center" | "right")} className="bg-secondary text-foreground px-3 py-1.5 rounded text-xs font-sans">
+              <option value="left">Align: Left</option>
+              <option value="center">Align: Center</option>
+              <option value="right">Align: Right</option>
+            </select>
+            <select value={secondaryImageWidth || "full"} onChange={(e) => onSecondaryImageWidthChange(e.target.value as "small" | "medium" | "large" | "full")} className="bg-secondary text-foreground px-3 py-1.5 rounded text-xs font-sans">
+              <option value="small">Size: Small</option>
+              <option value="medium">Size: Medium</option>
+              <option value="large">Size: Large</option>
+              <option value="full">Size: Full Width</option>
+            </select>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input value={secondaryImageCaption || ""} onChange={(e) => onSecondaryImageCaptionChange(e.target.value)} placeholder="Caption (optional)" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
+            <input value={secondaryImageCitation || ""} onChange={(e) => onSecondaryImageCitationChange(e.target.value)} placeholder="Photo credit (optional)" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
+          </div>
+        </div>
+
+        <section className="rounded-lg border-2 border-primary/35 bg-primary/5 p-4 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h4 className="text-sm font-semibold text-primary font-sans">Dedicated SEO Tag Box</h4>
+              <p className="text-[11px] text-muted-foreground font-sans mt-1">Add and manage search keywords for this story.</p>
+            </div>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans bg-background px-2 py-1 rounded border border-border">{seoTags.length}/25</span>
+          </div>
+          <div className="rounded-md border border-border bg-background/80 p-3 min-h-[44px]">
+            <div className="flex flex-wrap gap-2">
+              {seoTags.length > 0 ? seoTags.map((tag) => (
+                <button key={tag} type="button" onClick={() => onSeoTagsChange(seoTags.filter((t) => t.toLowerCase() !== tag.toLowerCase()))} className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-sans hover:bg-primary/15">#{tag}<span className="text-[10px]">x</span></button>
+              )) : <p className="text-xs text-muted-foreground font-sans">No SEO tags added yet.</p>}
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input value={seoTagDraft} onChange={(e) => setSeoTagDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSeoTagsFromDraft(); } }} placeholder="Add tag(s), comma-separated" className="flex-1 bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+            <button type="button" onClick={addSeoTagsFromDraft} className="px-3 py-2 text-xs uppercase tracking-wider border border-primary text-primary rounded hover:bg-primary/10 transition-colors">Add Tag</button>
+          </div>
+          <p className="text-[10px] text-muted-foreground font-sans">Tip: click any bubble to remove it.</p>
+        </section>
+
+        <div className="mt-4 pt-4 border-t border-border">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Preferred flow: photo/video → text → photo/video → text</p>
+            <button type="button" onClick={onNormalizeBody} className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">Auto Arrange</button>
+          </div>
+          <ArticleBodyEditor blocks={body} heading={isArticle ? "Article Body" : "Hero Body"} onChange={onBodyChange} />
+        </div>
+
+      {onSourcesChange && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Sources & Verification</label>
+            <textarea value={sources || ""} onChange={(e) => onSourcesChange(e.target.value)} placeholder="List your sources here, e.g. The Guardian (May 2026), Reuters (Apr 15)…" rows={3} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
+            <p className="text-[10px] text-muted-foreground font-sans mt-1">Appears as footnote at the bottom of the live article. Hidden if empty.</p>
+          </div>
+        )}
+
+        <div className="mt-4 pt-4 border-t border-border">
+          <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+            <input
+              type="checkbox"
+              checked={Boolean(ad)}
+              onChange={(e) => {
+               if (e.target.checked) {
+                  onAdChange({
+                    id: `inline-ad-${Date.now()}`,
+                    label: isArticle ? "Article Ad" : "Hero Ad",
+                    position: isArticle ? "inline-article" : "inline-hero",
+                    placement: "center",
+                    width: 300,
+                    height: 250,
+                  });
+                } else {
+                  onAdChange(undefined);
+                }
+              }}
+              className="accent-primary"
+            />
+            Attach an ad to this {isArticle ? "article" : "hero"}
+          </label>
+
+          {ad && (
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 mt-3">
+              <MediaUpload
+                imageUrl={ad.imageUrl}
+                videoUrl={ad.videoUrl}
+                onImage={(url) => onAdChange({ ...ad, imageUrl: url })}
+                onVideo={(url) => onAdChange({ ...ad, videoUrl: url })}
+              />
+              <div className="space-y-3">
+                <span className="text-xs text-muted-foreground">
+                  W: <input type="number" value={ad.width} onChange={(e) => onAdChange({ ...ad, width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
+                  {" "}× H: <input type="number" value={ad.height} onChange={(e) => onAdChange({ ...ad, height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
+                </span>
+                <input value={ad.linkUrl || ""} onChange={(e) => onAdChange({ ...ad, linkUrl: e.target.value })} placeholder="Click-through URL" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdsManager({ ads, setAds }: { ads: AdSlot[]; setAds: (a: AdSlot[]) => void }) {
+  const addAd = () => setAds([...ads, { id: `ad-${Date.now()}`, label: "New Ad Slot", position: "mid-feed", width: 728, height: 90 }]);
+  const update = (id: string, patch: Partial<AdSlot>) => setAds(ads.map((a) => (a.id === id ? { ...a, ...patch } : a)));
+  const remove = (id: string) => setAds(ads.filter((a) => a.id !== id));
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-muted-foreground font-sans">Upload images or videos for each ad placement.</p>
+        <button onClick={addAd} className="px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary/10 transition-colors flex items-center gap-2"><Plus className="w-4 h-4" /> Add Slot</button>
+      </div>
+      {ads.map((ad) => (
+        <ContentCard key={ad.id} onRemove={() => remove(ad.id)}>
+          <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+            <MediaUpload imageUrl={ad.imageUrl} videoUrl={ad.videoUrl} onImage={(url) => update(ad.id, { imageUrl: url })} onVideo={(url) => update(ad.id, { videoUrl: url })} />
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <select value={ad.position} onChange={(e) => update(ad.id, { position: e.target.value as AdSlot["position"] })} className="category-pill bg-secondary text-foreground border-none">
+                  <option value="hero-sidebar">Hero Sidebar</option>
+                  <option value="mid-feed">Mid Feed</option>
+                  <option value="bottom-banner">Bottom Banner</option>
+                  <option value="sidebar">Sidebar</option>
+                </select>
+                <span className="text-xs text-muted-foreground">W: <input type="number" value={ad.width} onChange={(e) => update(ad.id, { width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" /> × H: <input type="number" value={ad.height} onChange={(e) => update(ad.id, { height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" /></span>
+              </div>
+              <input value={ad.label} onChange={(e) => update(ad.id, { label: e.target.value })} placeholder="Ad label (internal use)" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm" />
+              <input value={ad.linkUrl || ""} onChange={(e) => update(ad.id, { linkUrl: e.target.value })} placeholder="Click-through URL" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
+            </div>
+          </div>
+        </ContentCard>
+      ))}
+    </div>
+  );
+}
+
+function PagesManager({ pageContent, setPageContent }: { pageContent: PageContent; setPageContent: (c: PageContent) => void }) {
+  const [activePage, setActivePage] = useState<"editorsLetter" | "contributors" | "partnerships" | "masthead">("editorsLetter");
+  const logoRef = useRef<HTMLInputElement>(null);
+  const contribLogoRef = useRef<HTMLInputElement>(null);
+  const partnerLogoRef = useRef<HTMLInputElement>(null);
+  const contribImgRef = useRef<HTMLInputElement>(null);
+  const partnerImgRef = useRef<HTMLInputElement>(null);
+
+  const persist = (updated: PageContent) => {
+    setPageContent(updated);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch {}
+    toast.success("Page saved.");
+  };
+
+  const updateEL = (patch: Partial<PageContent["editorsLetter"]>) => persist({ ...pageContent, editorsLetter: { ...pageContent.editorsLetter, ...patch } });
+  const updateMasthead = (patch: Partial<PageContent["masthead"]>) => persist({ ...pageContent, masthead: { ...pageContent.masthead, ...patch } });
+  const updateContribs = (patch: Partial<PageContent["contributors"]>) => persist({ ...pageContent, contributors: { ...pageContent.contributors, ...patch } });
+  const updatePartners = (patch: Partial<PageContent["partnerships"]>) => persist({ ...pageContent, partnerships: { ...pageContent.partnerships, ...patch } });
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, onUrl: (url: string) => void) => {
+    const file = e.target.files?.[0];
+    if (file) onUrl(await fileToOptimizedDataUrl(file));
+    e.target.value = "";
+  };
+
+  const addImage = async (e: React.ChangeEvent<HTMLInputElement>, current: string[], onUpdate: (imgs: string[]) => void) => {
+    const file = e.target.files?.[0];
+    if (file) onUpdate([...current, await fileToOptimizedDataUrl(file)]);
+    e.target.value = "";
+  };
+
+  const removeImage = (index: number, current: string[], onUpdate: (imgs: string[]) => void) => onUpdate(current.filter((_, i) => i !== index));
+
+  const pages = [
+    { key: "editorsLetter" as const, label: "Editor's Letter" },
+    { key: "contributors" as const, label: "Contributors" },
+    { key: "partnerships" as const, label: "Partnerships" },
+    { key: "masthead" as const, label: "Masthead" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-card border border-border rounded-lg p-4">
+        <p className="text-sm text-muted-foreground font-sans">Edit static pages. Changes save instantly to the live site.</p>
+      </div>
+      <div className="flex gap-2 flex-wrap">
+        {pages.map(({ key, label }) => (
+          <button key={key} onClick={() => setActivePage(key)} className={`px-5 py-2.5 text-sm rounded font-sans transition-colors ${activePage === key ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:text-foreground"}`}>{label}</button>
+        ))}
+      </div>
+
+      {activePage === "editorsLetter" && (
+        <div className="space-y-5">
+          <div className="bg-card border border-border rounded-lg p-5">
+            <label className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-3">Logo / Brand Image — Admin Only</label>
+            <div className="flex items-center gap-4 flex-wrap">

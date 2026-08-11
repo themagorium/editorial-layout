@@ -15,6 +15,34 @@ import { trackEvent } from "@/lib/analytics";
 import { applyHomeSeo, canonicalAuthorName, getAuthorPath } from "@/lib/seo";
 import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
+// Parses simple markdown-style bold/italic markers (**bold**, *italic*)
+// entered in the admin Title/Subtitle fields and renders them as real
+// <strong>/<em> elements instead of showing literal asterisks.
+function renderFormattedText(text?: string): React.ReactNode {
+  if (!text) return text;
+  const pattern = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    if (match[2] !== undefined) {
+      nodes.push(<strong key={key++}>{match[2]}</strong>);
+    } else if (match[3] !== undefined) {
+      nodes.push(<em key={key++}>{match[3]}</em>);
+    }
+    lastIndex = pattern.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+  return nodes;
+}
+
 function HeroCard({ hero, prioritizeMedia }: { hero: HeroItem; prioritizeMedia: boolean }) {
   const authorName = canonicalAuthorName(hero.author);
   return (
@@ -38,10 +66,10 @@ function HeroCard({ hero, prioritizeMedia }: { hero: HeroItem; prioritizeMedia: 
         <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8 z-10">
           <span className="category-pill">{hero.category}</span>
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground mt-2 leading-snug font-editorial">
-            {hero.title}
+            {renderFormattedText(hero.title)}
           </h2>
          <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
-  {hero.subtitle}
+  {renderFormattedText(hero.subtitle)}
 </p>
         </div>
       </Link>
@@ -77,10 +105,10 @@ function ArticleCard({ article }: { article: Article }) {
         <div className="sm:mt-3 flex flex-col justify-center">
           <span className="category-pill text-[10px]">{article.category}</span>
           <h3 className="font-editorial font-semibold mt-1 sm:mt-2 leading-snug group-hover:text-primary transition-colors text-sm sm:text-base md:text-lg">
-            {article.title}
+            {renderFormattedText(article.title)}
           </h3>
          <p className="font-sans text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
-            {article.excerpt}
+            {renderFormattedText(article.excerpt)}
           </p>
         </div>
       </Link>

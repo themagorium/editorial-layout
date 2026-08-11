@@ -487,8 +487,8 @@ sources?: string; onSourcesChange?: (v: string) => void;
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
       <MediaUpload imageUrl={imageUrl} videoUrl={videoUrl} onImage={onImageChange} onVideo={onVideoChange} />
       <div className="space-y-3">
-        <input value={title} onChange={(e) => onTitleChange(e.target.value)} placeholder={isArticle ? "Article title" : "Hero title"} className="w-full bg-secondary text-foreground px-3 py-2 rounded font-serif text-lg" />
-        <textarea value={summary} onChange={(e) => onSummaryChange(e.target.value)} placeholder={isArticle ? "Excerpt" : "Subtitle / deck"} rows={2} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" />
+        <FormattableField value={title} onChange={onTitleChange} placeholder={isArticle ? "Article title" : "Hero title"} className="w-full bg-secondary text-foreground px-3 py-2 rounded font-serif text-lg" as="input" />
+        <FormattableField value={summary} onChange={onSummaryChange} placeholder={isArticle ? "Excerpt" : "Subtitle / deck"} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" as="textarea" />
         <div className="flex flex-wrap gap-3">
           <select value={category} onChange={(e) => onCategoryChange(e.target.value as Category)} className="bg-secondary text-foreground px-3 py-2 rounded text-sm">
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -865,6 +865,52 @@ function normalizeBodyFlow(blocks: ArticleBodyBlock[], imageUrl?: string, videoU
     }
   }
   return ordered;
+}
+
+function FormattableField({
+  value, onChange, placeholder, className, as,
+}: {
+  value: string; onChange: (v: string) => void; placeholder?: string; className?: string; as: "input" | "textarea";
+}) {
+  const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
+
+  const wrapSelection = (marker: string) => {
+    const el = ref.current;
+    if (!el) return;
+    const start = el.selectionStart ?? 0;
+    const end = el.selectionEnd ?? 0;
+    const before = value.slice(0, start);
+    const selected = value.slice(start, end);
+    const after = value.slice(end);
+    const next = selected
+      ? `${before}${marker}${selected}${marker}${after}`
+      : `${before}${marker}${marker}${after}`;
+    onChange(next);
+    requestAnimationFrame(() => {
+      el.focus();
+      const cursor = selected ? start + marker.length + selected.length + marker.length : start + marker.length;
+      el.setSelectionRange(cursor, cursor);
+    });
+  };
+
+  const Tag = as as any;
+
+  return (
+    <div className="space-y-1">
+      <div className="flex gap-1">
+        <button type="button" onClick={() => wrapSelection("**")} className="px-2 py-0.5 text-xs font-bold border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">B</button>
+        <button type="button" onClick={() => wrapSelection("*")} className="px-2 py-0.5 text-xs italic border border-border rounded text-muted-foreground hover:text-primary hover:border-primary transition-colors">I</button>
+      </div>
+      <Tag
+        ref={ref}
+        value={value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={className}
+        {...(as === "textarea" ? { rows: 2 } : {})}
+      />
+    </div>
+  );
 }
 
 function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: { imageUrl?: string; videoUrl?: string; onImage: (url: string) => void; onVideo: (url: string) => void }) {

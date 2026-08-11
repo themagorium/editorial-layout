@@ -69,6 +69,7 @@ export interface ArticleBodyBlock {
   imageWidth?: "small" | "medium" | "large" | "full";
   headingVariant?: "title" | "subsection";
   textStyle?: "normal" | "bold" | "italic" | "bold-italic";
+  textAlign?: "left" | "center" | "right";
   caption?: string;
   citation?: string;
 }

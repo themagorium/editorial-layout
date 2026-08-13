@@ -15,6 +15,34 @@ import { getAdminPublishToken, isAdminAuthenticated, setAdminPublishToken, setAd
 import { fileToOptimizedDataUrl } from "@/lib/media-optimizer";
 
 const STORAGE_KEY = "magorium_page_content";
+const DRAFT_EDITIONS_KEY = "magorium_draft_editions";
+
+function getDraftEditions(): string[] {
+  try {
+    const raw = localStorage.getItem(DRAFT_EDITIONS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((v) => typeof v === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function markEditionAsDraft(edition: string) {
+  const current = new Set(getDraftEditions());
+  current.add(edition);
+  try {
+    localStorage.setItem(DRAFT_EDITIONS_KEY, JSON.stringify([...current]));
+  } catch {}
+}
+
+function markEditionAsPublished(edition: string) {
+  const current = new Set(getDraftEditions());
+  current.delete(edition);
+  try {
+    localStorage.setItem(DRAFT_EDITIONS_KEY, JSON.stringify([...current]));
+  } catch {}
+}
 
 function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[] {
   const editions = new Set<string>();
@@ -158,6 +186,7 @@ function AdminDashboard() {
   const [newEditionMonth, setNewEditionMonth] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishingEdition, setIsPublishingEdition] = useState(false);
+  const [draftEditions, setDraftEditions] = useState<string[]>(() => getDraftEditions());
   const [pageContent, setPageContent] = useState<PageContent>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -187,6 +216,7 @@ function AdminDashboard() {
 
   const save = async () => {
     if (isSaving) return;
+    if (!window.confirm("This will publish EVERYTHING currently loaded — every edition, including any unpublished drafts — straight to your live site. Continue?")) return;
     setIsSaving(true);
     try {
       const publishToken = getAdminPublishToken();
@@ -211,6 +241,8 @@ function AdminDashboard() {
         return;
       }
       clearLocalDraftStorage();
+      getEditionsFromState(heroes, articles).forEach((ed) => markEditionAsPublished(ed));
+      setDraftEditions(getDraftEditions());
       toast.success("Content published to live.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not save content");
@@ -230,6 +262,8 @@ function AdminDashboard() {
         toast.error(result.error || "Could not publish this edition to live.");
         return;
       }
+      markEditionAsPublished(currentEdition);
+      setDraftEditions(getDraftEditions());
       toast.success(`${formatEditionLabel(currentEdition)} is now live.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not publish this edition.");
@@ -314,6 +348,8 @@ function AdminDashboard() {
     } catch {
       toast.warning("New edition created, but the local safety backup couldn't save (storage full). Publish soon to be safe.");
     }
+    markEditionAsDraft(newEditionMonth);
+    setDraftEditions(getDraftEditions());
     setCurrentEdition(newEditionMonth);
     setShowNewEdition(false);
     setNewEditionMonth("");
@@ -345,8 +381,11 @@ function AdminDashboard() {
                 <Calendar className="w-5 h-5 text-primary" />
                 <span className="text-sm font-sans uppercase tracking-wider text-muted-foreground">Current Edition:</span>
                 <select value={currentEdition} onChange={(e) => setCurrentEdition(e.target.value)} className="bg-secondary text-foreground px-4 py-2 rounded font-serif text-lg border-0">
-                  {editions.map((ed) => <option key={ed} value={ed}>{formatEditionLabel(ed)}</option>)}
+                  {editions.map((ed) => <option key={ed} value={ed}>{formatEditionLabel(ed)}{draftEditions.includes(ed) ? " (Draft)" : ""}</option>)}
                 </select>
+                {currentEdition && draftEditions.includes(currentEdition) && (
+                  <span className="px-2 py-1 text-[10px] uppercase tracking-wider font-sans border border-yellow-500/50 text-yellow-500 rounded">Draft — not live</span>
+                )}
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <button onClick={deleteCurrentEdition} disabled={!currentEdition} className="flex items-center gap-2 px-4 py-2 text-sm border border-destructive text-destructive rounded hover:bg-destructive/10 transition-colors disabled:pointer-events-none disabled:opacity-50"><Trash2 className="w-4 h-4" /> Delete Edition</button>
@@ -498,8 +537,7 @@ sources?: string; onSourcesChange?: (v: string) => void;
         <FormattableField value={summary} onChange={onSummaryChange} placeholder={isArticle ? "Excerpt" : "Subtitle / deck"} className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans resize-none" as="textarea" />
         <div className="flex flex-wrap gap-3">
           <select value={category} onChange={(e) => onCategoryChange(e.target.value as Category)} className="bg-secondary text-foreground px-3 py-2 rounded text-sm">
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
+            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}</select>
           <input value={author} onChange={(e) => onAuthorChange(e.target.value)} placeholder="Writer / Journalist Name" className="bg-secondary text-foreground px-3 py-2 rounded text-sm" />
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">Published</span>
@@ -517,7 +555,8 @@ sources?: string; onSourcesChange?: (v: string) => void;
           <div>
             <h4 className="text-sm font-semibold text-primary font-sans">Article Opening Photo</h4>
             <p className="text-[11px] text-muted-foreground font-sans mt-0.5">Appears below the headline, above the first paragraph. Leave empty to skip.</p>
-          </div>{localSecondaryUrl ? (
+          </div>
+          {localSecondaryUrl ? (
             <div className="relative">
               <img src={localSecondaryUrl} alt="Opening photo preview" className="w-full max-h-48 object-cover rounded border border-border" />
               <button type="button" onClick={() => { setLocalSecondaryUrl(""); onSecondaryImageChange(""); onSecondaryImageCaptionChange(""); onSecondaryImageCitationChange(""); }} className="absolute top-2 right-2 flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-destructive text-white rounded shadow hover:bg-destructive/90 transition-colors">

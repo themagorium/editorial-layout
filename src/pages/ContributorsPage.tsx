@@ -24,7 +24,7 @@ type ContributorProfile = {
 
 const CONTRIBUTOR_PROFILE_BY_NAME: Record<string, Omit<ContributorProfile, "name" | "storyCount">> = {
   "Wilhelmina St. Germain": {
-    role: "Fashion & Couture Editor",
+    role: "Art, Fashion & Couture Editor",
     bio: "Former fashion director at Condé Nast Traveller. Wilhelmina covers haute couture, ready-to-wear, and the intersection of fashion and cultural identity from Paris, Milan, and London.",
   },
   "Marcus Demallier": {
@@ -38,7 +38,7 @@ const CONTRIBUTOR_PROFILE_BY_NAME: Record<string, Omit<ContributorProfile, "name
  
   "Millie Sealana": {
     role: "Managing Editor",
-    bio: "Millie reports on contemporary art, business, music, sports, wellness and the tech world's cultural impact. A regular contributor to ART, Equestrian sports, Fashion and Technology.",
+    bio: "Millie writes about contemporary art, business, music, sports, wellness and the tech world's cultural impact. A regular contributor to ART, Equestrian sports, Fashion and Technology.",
   },
   "The Magorium Editorial Staff": {
     role: "Editorial Desk",

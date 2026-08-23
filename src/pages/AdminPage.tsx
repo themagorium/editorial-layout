@@ -215,41 +215,44 @@ function AdminDashboard() {
   const filteredArticles = currentEdition ? articles.filter((a) => a.edition === currentEdition) : articles;
 
   const save = async () => {
-    if (isSaving) return;
-    if (!window.confirm("This will publish EVERYTHING currently loaded — every edition, including any unpublished drafts — straight to your live site. Continue?")) return;
-    setIsSaving(true);
-    try {
-      const publishToken = getAdminPublishToken();
-      if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
-     const contentToPublish: EditableContentPayload = { heroes: heroes || [], articles: articles || [], ads: ads || [] };
-      clearLocalDraftStorage();
-      const published = await publishEditorialContent(contentToPublish, publishToken);
-      if (!published.success) {
-        const fallbackMessage = published.error || "Could not publish content to live";
-        let draftStored = true;
-        try {
-          saveHeroes(contentToPublish.heroes);
-          saveArticles(contentToPublish.articles);
-          saveAds(contentToPublish.ads);
-        } catch (error) {
-          if (!isStorageQuotaExceededError(error)) throw error;
-          draftStored = false;
-          clearLocalDraftStorage();
-        }
-        if (draftStored) { toast.warning(`${fallbackMessage}. Local draft was still saved in this browser.`); return; }
-        toast.error(`${fallbackMessage}. Browser storage is full, so local draft backup could not be saved.`);
-        return;
-      }
-      clearLocalDraftStorage();
+  if (isSaving) return;
+  if (!window.confirm("This will publish EVERYTHING currently loaded — every edition, including any unpublished drafts — straight to your live site. Continue?")) return;
+  setIsSaving(true);
+  try {
+    const publishToken = getAdminPublishToken();
+    if (!publishToken) {
+      toast.error("Admin session expired. Please sign in again to publish live.");
+      return;
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+    const failedTitles: string[] = [];
+
+    for (const hero of heroes) {
+      const result = await publishStory(hero.edition, "hero", hero, publishToken);
+      if (result.success) successCount += 1;
+      else { failCount += 1; failedTitles.push(hero.title); }
+    }
+    for (const article of articles) {
+      const result = await publishStory(article.edition, "article", article, publishToken);
+      if (result.success) successCount += 1;
+      else { failCount += 1; failedTitles.push(article.title); }
+    }
+
+    if (failCount === 0) {
       getEditionsFromState(heroes, articles).forEach((ed) => markEditionAsPublished(ed));
       setDraftEditions(getDraftEditions());
-      toast.success("Content published to live.");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save content");
-    } finally {
-      setIsSaving(false);
+      toast.success(`All ${successCount} items published live.`);
+    } else {
+      toast.error(`${successCount} published, ${failCount} FAILED to publish live: ${failedTitles.join(", ")}. Nothing was silently saved to local storage — please retry the failed items.`);
     }
-  };
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : "Could not save content");
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   const publishCurrentEditionLive = async () => {
     if (!currentEdition || isPublishingEdition) return;

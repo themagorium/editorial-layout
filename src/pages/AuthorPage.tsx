@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { slugifyText } from "@/lib/content-store";
+import { slugifyText, buildContentPath } from "@/lib/content-store";
 import { Link } from "react-router-dom";
 
 export function normalizeAuthor(raw: string): string {
@@ -21,9 +21,6 @@ export function normalizeAuthor(raw: string): string {
   return raw.trim().replace(/\s+/g, " ");
 }
 
-// Parses simple markdown-style bold/italic markers (**bold**, *italic*)
-// entered in the admin Title/Subtitle fields and renders them as real
-// <strong>/<em> elements instead of showing literal asterisks.
 function renderFormattedText(text?: string): React.ReactNode {
   if (!text) return text;
   const pattern = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
@@ -31,7 +28,6 @@ function renderFormattedText(text?: string): React.ReactNode {
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   let key = 0;
-
   while ((match = pattern.exec(text)) !== null) {
     if (match.index > lastIndex) {
       nodes.push(text.slice(lastIndex, match.index));
@@ -60,26 +56,34 @@ export default function AuthorPage() {
     fetch("/api/content?view=seo", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
-      const source = data.content || data;
-const all = [...(source.articles || []), ...(source.heroes || [])];
-        setResults(
-          all.filter((a: any) => normalizeAuthor(a.author || "") === name)
-        );
+        const source = data.content || data;
+        const all = [...(source.articles || []), ...(source.heroes || [])];
+        const filtered = all.filter((a: any) => normalizeAuthor(a?.author || "") === name);
+
+        // Sort most recent first. Falls back to 0 for missing/invalid dates
+        // so a bad date can't crash the sort — it just sorts to the bottom.
+        const sorted = filtered.sort((a: any, b: any) => {
+          const dateA = a?.date ? new Date(a.date).getTime() : 0;
+          const dateB = b?.date ? new Date(b.date).getTime() : 0;
+          return dateB - dateA;
+        });
+
+        setResults(sorted);
       })
       .catch(() => setResults([]));
-  }, [slug]);
+  }, [slug, name]);
 
   return (
     <div className="container mx-auto px-4 py-16">
       <h1 className="text-5xl font-serif mb-8">{name}</h1>
-      {results.map((article: any) => (
-        <Link
-          key={article.id}
-          to={`/articles/${article.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}--${article.id}`}
-        >
-          <h2 className="text-2xl mb-4">{renderFormattedText(article.title)}</h2>
-        </Link>
-      ))}
+      {results.map((article: any) => {
+        if (!article?.id || !article?.title) return null;
+        return (
+          <Link key={article.id} to={buildContentPath(article.id, article.title)}>
+            <h2 className="text-2xl mb-4">{renderFormattedText(article.title)}</h2>
+          </Link>
+        );
+      })}
     </div>
   );
 }

@@ -20,4 +20,4 @@ Allow: /
 # Everyone Else
 User-agent: *
 Allow: /
-Sitemap: https://www.themagorium.com/sitemap.xml
+Sitemap: https://themagorium.com/sitemap.xml

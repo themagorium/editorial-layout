@@ -1,7 +1,5 @@
-import { NextResponse } from 'next/server';
+import { next, rewrite } from '@vercel/edge';
 
-// Crawlers this site explicitly invites in via robots.txt.
-// Keep this list in sync with robots.txt.
 const CRAWLER_USER_AGENTS = [
   'Googlebot',
   'Bingbot',
@@ -19,49 +17,37 @@ function isCrawler(userAgent) {
   );
 }
 
-export function middleware(request) {
+export const config = {
+  matcher: '/((?!_next/static|_next/image|favicon.ico|assets).*)',
+};
+
+export default function middleware(request) {
   const userAgent = request.headers.get('user-agent');
 
   if (!isCrawler(userAgent)) {
-    // Regular visitors: serve the normal client-side SPA, untouched.
-    return NextResponse.next();
+    return next();
   }
 
-  // Route known crawlers to the prerendered HTML snapshot routes.
-  // This replaces the old broken `x-prerender-token` gate — that check
-  // compared an incoming header against an env var that was never set
-  // (or was mismatched), so every legitimate crawler was rejected with
-  // a 503 before ever reaching these routes. There's no reason to gate
-  // content that robots.txt already publishes openly, so the token
-  // check is removed rather than repaired.
-
-  const { pathname } = request.nextUrl;
+  const url = new URL(request.url);
+  const { pathname } = url;
 
   if (pathname === '/') {
-    return NextResponse.rewrite(new URL('/api/seo-home', request.url));
+    return rewrite(new URL('/api/seo-home', request.url));
   }
 
   const articleMatch = pathname.match(/^\/articles\/([^/]+)\/?$/);
   if (articleMatch) {
-    const slug = articleMatch[1];
-    return NextResponse.rewrite(
-      new URL(`/api/seo-article?slug=${encodeURIComponent(slug)}`, request.url)
+    return rewrite(
+      new URL(`/api/seo-article?slug=${encodeURIComponent(articleMatch[1])}`, request.url)
     );
   }
 
   const authorMatch = pathname.match(/^\/authors\/([^/]+)\/?$/);
   if (authorMatch) {
-    const author = authorMatch[1];
-    return NextResponse.rewrite(
-      new URL(`/api/seo-author?author=${encodeURIComponent(author)}`, request.url)
+    return rewrite(
+      new URL(`/api/seo-author?author=${encodeURIComponent(authorMatch[1])}`, request.url)
     );
   }
 
-  return NextResponse.rewrite(
-    new URL(`/api/content?path=${encodeURIComponent(pathname)}`, request.url)
-  );
+  return rewrite(new URL(`/api/content?path=${encodeURIComponent(pathname)}`, request.url));
 }
-
-export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
-};

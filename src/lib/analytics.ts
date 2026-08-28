@@ -66,7 +66,7 @@ async function fetchGeoLocation(): Promise<GeoLocation | null> {
     }
 
     // Use free ip-api.com (no key required, 45 req/min)
-    const res = await fetch("http://ip-api.com/json/?fields=status,city,country,countryCode,regionName");
+    const res = await fetch("https://ip-api.com/json/?fields=status,city,country,countryCode,regionName");
     if (!res.ok) return null;
     const json = await res.json();
     if (json.status !== "success") return null;

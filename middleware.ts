@@ -37,10 +37,10 @@ export default function middleware(request) {
 
   const articleMatch = pathname.match(/^\/articles\/([^/]+)\/?$/);
   if (articleMatch) {
-    return Response.redirect(
-      new URL(`/api/seo-article?slug=${encodeURIComponent(articleMatch[1])}`, request.url),
-      307
-    );
+   return Response.redirect(
+  new URL(`/api/seo-article?identifier=${encodeURIComponent(articleMatch[1])}`, request.url),
+  307
+);
   }
 
   const authorMatch = pathname.match(/^\/authors\/([^/]+)\/?$/);

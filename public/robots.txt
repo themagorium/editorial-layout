@@ -1,23 +1,34 @@
-# AI Search / Answer Engines
+# AI Search & Answer Engines
 User-agent: OAI-SearchBot
 Allow: /
+
 User-agent: PerplexityBot
 Allow: /
+
 User-agent: ClaudeBot
 Allow: /
+
 User-agent: Applebot
 Allow: /
-# Search Engines
+
+# Standard Search Engines
 User-agent: Googlebot
 Allow: /
+
 User-agent: Bingbot
 Allow: /
-# AI Training / Answer Crawlers
+
+# AI Training Crawlers
 User-agent: GPTBot
 Allow: /
+
 User-agent: Google-Extended
 Allow: /
-# Everyone Else
+
+# Global Directives
 User-agent: *
 Allow: /
+
+# Sitemap Location
+Sitemap: https://www.themagorium.com/sitemap.xml
 Sitemap: https://themagorium.com/sitemap.xml

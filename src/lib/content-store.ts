@@ -846,7 +846,7 @@ function upsertCriticalHeroFallbacks(heroes: HeroItem[], options?: { forceWhenMi
     return next;
   }
   for (const id of CRITICAL_HERO_IDS) {
-    if (next.some((hero) => hero.id === id)) continue;
+   if (next.some((article) => article.id === id)) continue;
     const fallback = HERO_DEFAULT_BY_ID.get(id);
     if (!fallback) continue;
     const insertAt = next.findIndex((hero) => hero.edition === fallback.edition);

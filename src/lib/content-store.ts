@@ -671,7 +671,7 @@ const DEFAULT_ARTICLES: Article[] = [
       { id: "rc-b3", type: "text", content: "For the luxury traveler, Rio during Carnival is a different proposition: private camarotes in the Sambadrome, rooftop parties at the Fasano in Ipanema, and yacht gatherings along the Guanabara Bay. The energy is infectious, the fashion is fearless, and the music never stops." },
     ],
   },
- 
+  {
     id: "a4",
     title: "AT&T Pebble Beach Pro-Am: Where Golf Meets the Pacific",
     excerpt: "The most scenic tournament in golf returns to the Monterey Peninsula — where celebrities, pros, and the Pacific coastline create an unforgettable week.",
@@ -865,7 +865,7 @@ function upsertCriticalArticleFallbacks(articles: Article[], options?: { forceWh
     return next;
   }
   for (const id of CRITICAL_ARTICLE_IDS) {
-    if (next.some((article) => article.id === id)) continue;
+    if (next.some((article) => article.id =F[== id)) continue;
     const fallback = ARTICLE_DEFAULT_BY_ID.get(id);
     if (!fallback) continue;
     const insertAt = next.findIndex((article) => article.edition === fallback.edition);

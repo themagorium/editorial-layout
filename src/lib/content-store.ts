@@ -865,7 +865,7 @@ function upsertCriticalArticleFallbacks(articles: Article[], options?: { forceWh
     return next;
   }
   for (const id of CRITICAL_ARTICLE_IDS) {
-    if (next.some((article) => article.id =F[== id)) continue;
+    if (next.some((article) => article.id === id)) continue;
     const fallback = ARTICLE_DEFAULT_BY_ID.get(id);
     if (!fallback) continue;
     const insertAt = next.findIndex((article) => article.edition === fallback.edition);

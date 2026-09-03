@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import {
-  findContentByIdentifier,   // add this import
-  getArticles,
-  getHeroes,
-  getPublishedContentSnapshot,
-  slugifyText,
-} from "@/lib/content-store";
+const content = useMemo(() => {
+  const article = findContentByIdentifier(publishedArticles, id || "");
+  const heroAsArticle = !article ? findContentByIdentifier(publishedHeroes, id || "") : undefined;
+  if (article) return article;
+  ...
 import type { ArticleBodyBlock, AdSlot } from "@/lib/content-store";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import EditorialFooter from "@/components/editorial/EditorialFooter";

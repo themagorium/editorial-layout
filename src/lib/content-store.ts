@@ -237,6 +237,7 @@ function hasStrongTokenOverlap(title: string, candidateSlug: string): boolean {
   return overlapCount >= 2 && overlapCount / candidateTokens.length >= 0.6;
 }
 
+// Replace the existing contentIdentifierMatches with this:
 export function contentIdentifierMatches(item: { id: string; title: string; legacySlugs?: string[] }, identifier: string): boolean {
   const decoded = decodeURIComponent(identifier || "")
     .trim()
@@ -253,11 +254,58 @@ export function contentIdentifierMatches(item: { id: string; title: string; lega
   if (candidate === itemId) return true;
   if (candidate === titleSlug) return true;
   if (candidate === `${titleSlug}--${itemId}`) return true;
-  if (candidate.endsWith(`--${itemId}`)) return true;
   if (legacySlugs.includes(candidate)) return true;
-  return hasStrongTokenOverlap(item.title, candidate);
+  return false; // no more bare "endsWith id" fallback here
 }
 
+// NEW: tiered lookup — tries strict matches across the WHOLE list first,
+// only falls back to loose id-suffix / fuzzy matching if nothing strict hit.
+// This is what fixes the duplicate-id collision.
+export function findContentByIdentifier<T extends { id: string; title: string; legacySlugs?: string[]; date?: string }>(
+  items: T[],
+  identifier: string,
+): T | undefined {
+  const decoded = decodeURIComponent(identifier || "")
+    .trim()
+    .toLowerCase()
+    .split("?")[0]
+    .split("#")[0]
+    .replace(/^\/+|\/+$/g, "");
+  const candidate = decoded.split("/").pop() || decoded;
+  if (!candidate) return undefined;
+
+  // Tier 1: exact title-slug--id match (this is what buildContentPath actually generates)
+  const exact = items.find((item) => {
+    const titleSlug = slugifyText(item.title || item.id);
+    return candidate === `${titleSlug}--${item.id.toLowerCase()}`;
+  });
+  if (exact) return exact;
+
+  // Tier 2: exact id-only or title-slug-only match
+  const idOrSlug = items.find((item) => {
+    const itemId = item.id.toLowerCase();
+    const titleSlug = slugifyText(item.title || item.id);
+    return candidate === itemId || candidate === titleSlug;
+  });
+  if (idOrSlug) return idOrSlug;
+
+  // Tier 3: legacy slugs
+  const legacy = items.find((item) =>
+    (item.legacySlugs || []).map((s) => slugifyText(s)).includes(candidate),
+  );
+  if (legacy) return legacy;
+
+  // Tier 4 (last resort, loose): bare "--id" suffix match.
+  // If MULTIPLE items share that id (duplicate-id bug), prefer the most
+  // recently dated one so a broken duplicate never shadows the real story.
+  const idSuffixMatches = items.filter((item) => candidate.endsWith(`--${item.id.toLowerCase()}`));
+  if (idSuffixMatches.length > 0) {
+    return idSuffixMatches.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())[0];
+  }
+
+  // Tier 5: fuzzy token overlap, only as an absolute fallback
+  return items.find((item) => hasStrongTokenOverlap(item.title, candidate));
+}
 export function createOctoberPatternBody(baseId: string, imageUrl?: string, videoUrl?: string): ArticleBodyBlock[] {
   return [
     {

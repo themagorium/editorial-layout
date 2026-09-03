@@ -671,22 +671,7 @@ const DEFAULT_ARTICLES: Article[] = [
       { id: "rc-b3", type: "text", content: "For the luxury traveler, Rio during Carnival is a different proposition: private camarotes in the Sambadrome, rooftop parties at the Fasano in Ipanema, and yacht gatherings along the Guanabara Bay. The energy is infectious, the fashion is fearless, and the music never stops." },
     ],
   },
-  {
-    id: "a3",
-    title: "Dubai International Boat Show: The Middle East's Premier Superyacht Gathering",
-    excerpt: "Dubai Harbour transforms into the world's most glamorous marina — superyachts, private buyers, and the ultra-luxury maritime market converge under Arabian skies.",
-    category: "Yachting",
-    imageUrl: articleDubaiBoatShow,
-    author: "James Whitfield",
-    date: "2026-02-24",
-    edition: "2026-02",
-    body: [
-      { id: "db-b1", type: "text", content: "The Dubai International Boat Show returned to Dubai Harbour for its most ambitious edition yet, cementing the emirate's position as the global epicentre of superyacht culture. Over 800 exhibitors and 200 vessels — including several 60-metre-plus superyachts making their Middle Eastern debut — lined the marina against the backdrop of the Dubai skyline." },
-      { id: "db-b2", type: "text", content: "Unlike European boat shows that serve the broader maritime industry, Dubai's event is unapologetically focused on the ultra-high-net-worth buyer. Private viewing appointments, invitation-only evening galas aboard moored superyachts, and a curated programme of luxury lifestyle activations from Rolls-Royce, Bulgari, and Dom Pérignon set a tone that is more exclusive than commercial." },
-      { id: "db-b3", type: "text", content: "The show's evolution mirrors Dubai's own trajectory: from regional curiosity to global luxury capital. With the Middle East's superyacht market growing at 15% annually, Dubai Harbour — purpose-built to accommodate the world's largest vessels — is now the winter berth of choice for owners who once looked only to Monaco and Antibes." },
-    ],
-  },
-  {
+ 
     id: "a4",
     title: "AT&T Pebble Beach Pro-Am: Where Golf Meets the Pacific",
     excerpt: "The most scenic tournament in golf returns to the Monterey Peninsula — where celebrities, pros, and the Pacific coastline create an unforgettable week.",

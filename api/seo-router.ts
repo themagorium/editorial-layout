@@ -11,7 +11,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let target = "/api/seo-home";
 
   if (articleMatch) {
-    target = `/api/seo-article?slug=${encodeURIComponent(articleMatch[1])}`;
+    target = `/api/seo-article?identifier=${encodeURIComponent(articleMatch[1])}`;
   } else if (authorMatch) {
     target = `/api/seo-author?slug=${encodeURIComponent(authorMatch[1])}`;
   } else if (archiveMatch && archiveMatch[1]) {

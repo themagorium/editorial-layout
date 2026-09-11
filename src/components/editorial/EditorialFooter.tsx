@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";import { useState, useEffect } from "react";
 import { CATEGORIES, formatEditionLabel } from "@/lib/content-public";
-import { getPublishedContentSnapshot } from "@/lib/content-store";
+import { getKnownEditions } from "@/lib/content-store";
 import PrivacyPopupButton from "@/components/editorial/PrivacyPopupButton";
 import { toast } from "sonner";
 
@@ -66,13 +66,9 @@ export default function EditorialFooter() {
 
   useEffect(() => {
     let active = true;
-    getPublishedContentSnapshot().then((snapshot) => {
+    getKnownEditions().then((editions) => {
       if (!active) return;
-      const editionKeys = new Set<string>();
-      snapshot.heroes.forEach((h) => editionKeys.add(h.edition));
-      snapshot.articles.forEach((a) => editionKeys.add(a.edition));
-      const sorted = Array.from(editionKeys).sort().reverse();
-      setRecentEditions(sorted.slice(0, 3));
+      setRecentEditions(editions.slice(0, 3));
     });
     return () => {
       active = false;
@@ -132,7 +128,7 @@ export default function EditorialFooter() {
             <p className="text-sm text-muted-foreground font-sans leading-relaxed">
               For editorial features and brand placements, contact our private desk.
             </p>
-            <a
+            
               href="mailto:concierge@themagorium.com"
               className="text-sm text-foreground font-sans mt-3 inline-block underline-offset-2 hover:underline transition-colors"
             >

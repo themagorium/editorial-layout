@@ -15,7 +15,7 @@ import { canonicalAuthorName, getAuthorPath } from "@/lib/seo";
  { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 export default function EditionPage() {
-  useSyncPublishedContent();
+    useSyncPublishedContent({ enabled: false });
   const { edition = "" } = useParams<{ edition: string }>();
 
   const [heroes, setHeroes] = useState<HeroItem[]>([]);

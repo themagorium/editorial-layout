@@ -18,7 +18,8 @@ function isCrawler(userAgent) {
 }
 
 export const config = {
- matcher: '/((?!_next/static|_next/image|favicon.ico|assets|api).*)',
+  runtime: 'nodejs',
+  matcher: '/((?!_next/static|_next/image|favicon.ico|assets|api).*)',
 };
 
 export default function middleware(request) {

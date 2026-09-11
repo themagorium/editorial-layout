@@ -128,7 +128,7 @@ export default function EditorialFooter() {
             <p className="text-sm text-muted-foreground font-sans leading-relaxed">
               For editorial features and brand placements, contact our private desk.
             </p>
-            
+            <a
               href="mailto:concierge@themagorium.com"
               className="text-sm text-foreground font-sans mt-3 inline-block underline-offset-2 hover:underline transition-colors"
             >

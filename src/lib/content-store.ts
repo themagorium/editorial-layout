@@ -208,6 +208,26 @@ export async function getKnownEditions(): Promise<string[]> {
     return [];
   }
 }
+export async function getSeoContentSnapshot(): Promise<{
+  heroes: HeroItem[];
+  articles: Article[];
+  ads: AdSlot[];
+}> {
+  try {
+    const response = await fetch(`${PUBLISHED_CONTENT_ENDPOINT}?view=seo`, { cache: "no-store" });
+    if (!response.ok) return { heroes: [], articles: [], ads: [] };
+    const payload = await response.json().catch(() => null as any);
+    const raw = payload?.content;
+    if (!raw) return { heroes: [], articles: [], ads: [] };
+    return {
+      heroes: (raw.heroes || []).map(normalizeHero),
+      articles: (raw.articles || []).map(normalizeArticle),
+      ads: raw.ads || [],
+    };
+  } catch {
+    return { heroes: [], articles: [], ads: [] };
+  }
+}
 export function slugifyText(value: string): string {
   return value
     .toLowerCase()

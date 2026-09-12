@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   findContentByIdentifier,
-  getArticles,
-  getHeroes,
-  getPublishedContentSnapshot,
+  getSeoContentSnapshot,
+  getStorySnapshot,
   slugifyText,
 } from "@/lib/content-store";
 import type { ArticleBodyBlock, AdSlot } from "@/lib/content-store";
@@ -118,7 +117,7 @@ function getAdPlacementClasses(placement?: AdSlot["placement"]): string {
       return "float-left mr-6 mb-4 w-full max-w-xs clear-left";
     case "mid-right":
       return "float-right ml-6 mb-4 w-full max-w-xs clear-right";
-   case "bottom-left":
+    case "bottom-left":
       return "mr-auto";
     case "bottom-right":
       return "ml-auto";
@@ -130,108 +129,158 @@ function getAdPlacementClasses(placement?: AdSlot["placement"]): string {
   }
 }
 
+type ResolvedArticleContent = {
+  id: string;
+  title: string;
+  excerpt: string;
+  seoTags?: string[];
+  category: string;
+  imageUrl: string;
+  secondaryImageUrl?: string;
+  secondaryImageCaption?: string;
+  secondaryImageCitation?: string;
+  secondaryImageAlign?: "left" | "center" | "right";
+  secondaryImageWidth?: "small" | "medium" | "large" | "full";
+  videoUrl?: string;
+  author: string;
+  date: string;
+  body: ArticleBodyBlock[];
+  edition: string;
+  sources?: string;
+  ad?: AdSlot;
+};
+
 export default function ArticlePage() {
-  useSyncPublishedContent();
+  useSyncPublishedContent({ enabled: false });
   const { id } = useParams<{ id: string }>();
   const [contentLoaded, setContentLoaded] = useState(false);
-  const [publishedArticles, setPublishedArticles] = useState(() => getArticles());
-  const [publishedHeroes, setPublishedHeroes] = useState(() => getHeroes());
+  const [content, setContent] = useState<ResolvedArticleContent | undefined>(undefined);
 
   useEffect(() => {
     let active = true;
-    const hydratePublishedContent = async () => {
+    setContentLoaded(false);
+    setContent(undefined);
+
+    const hydrate = async () => {
       try {
-        const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: false });
+        const lightweight = await getSeoContentSnapshot();
         if (!active) return;
-        setPublishedArticles(snapshot.articles);
-        setPublishedHeroes(snapshot.heroes);
+
+        const articleMatch = findContentByIdentifier(lightweight.articles, id || "");
+        const heroMatch = !articleMatch ? findContentByIdentifier(lightweight.heroes, id || "") : undefined;
+
+        if (articleMatch) {
+          const full = await getStorySnapshot("article", articleMatch.id);
+          if (!active) return;
+          const article = (full as typeof articleMatch) || articleMatch;
+          setContent({
+            id: article.id,
+            title: article.title,
+            excerpt: article.excerpt,
+            seoTags: article.seoTags,
+            category: article.category,
+            imageUrl: article.imageUrl,
+            secondaryImageUrl: article.secondaryImageUrl,
+            secondaryImageCaption: article.secondaryImageCaption,
+            secondaryImageCitation: article.secondaryImageCitation,
+            secondaryImageAlign: article.secondaryImageAlign,
+            secondaryImageWidth: article.secondaryImageWidth,
+            videoUrl: article.videoUrl,
+            author: article.author || "The Magorium Staff",
+            date: article.date,
+            body: (article.body || []) as ArticleBodyBlock[],
+            edition: article.edition,
+            sources: article.sources,
+            ad: (article as any).ad,
+          });
+        } else if (heroMatch) {
+          const full = await getStorySnapshot("hero", heroMatch.id);
+          if (!active) return;
+          const hero = (full as typeof heroMatch) || heroMatch;
+          setContent({
+            id: hero.id,
+            title: hero.title,
+            excerpt: hero.excerpt || hero.subtitle,
+            seoTags: hero.seoTags,
+            category: hero.category,
+            imageUrl: hero.imageUrl,
+            secondaryImageUrl: hero.secondaryImageUrl,
+            secondaryImageCaption: hero.secondaryImageCaption,
+            secondaryImageCitation: hero.secondaryImageCitation,
+            secondaryImageAlign: hero.secondaryImageAlign,
+            secondaryImageWidth: hero.secondaryImageWidth,
+            videoUrl: hero.videoUrl,
+            author: hero.author || "The Magorium Staff",
+            date: hero.date,
+            body: (hero.body || []) as ArticleBodyBlock[],
+            edition: hero.edition,
+            sources: (hero as any).sources,
+            ad: (hero as any).ad,
+          });
+        } else {
+          setContent(undefined);
+        }
       } finally {
         if (active) setContentLoaded(true);
       }
     };
-    void hydratePublishedContent();
-    return () => { active = false; };
+
+    void hydrate();
+    return () => {
+      active = false;
+    };
   }, [id]);
 
-  const content = useMemo(() => {
-    const article = findContentByIdentifier(publishedArticles, id || "");
-    const heroAsArticle = !article ? findContentByIdentifier(publishedHeroes, id || "") : undefined;
-    if (article) return article;
-    if (!heroAsArticle) return undefined;
-    return {
-      id: heroAsArticle.id,
-      title: heroAsArticle.title,
-      excerpt: heroAsArticle.excerpt || heroAsArticle.subtitle,
-      seoTags: heroAsArticle.seoTags,
-      category: heroAsArticle.category,
-      imageUrl: heroAsArticle.imageUrl,
-      secondaryImageUrl: heroAsArticle.secondaryImageUrl,
-      secondaryImageCaption: heroAsArticle.secondaryImageCaption,
-      secondaryImageCitation: heroAsArticle.secondaryImageCitation,
-      secondaryImageAlign: heroAsArticle.secondaryImageAlign,
-      secondaryImageWidth: heroAsArticle.secondaryImageWidth,
-      videoUrl: heroAsArticle.videoUrl,
-      author: heroAsArticle.author || "The Magorium Staff",
-      date: heroAsArticle.date,
-      body: (heroAsArticle.body || []) as ArticleBodyBlock[],
-      edition: heroAsArticle.edition,
-      sources: heroAsArticle.sources,
-      ad: heroAsArticle.ad,
+  useEffect(() => {
+    if (!content) return;
+
+    const cleanAuthor = normalizeBylineAuthor(content.author);
+
+    applyArticleSeo({
+      ...content,
+      excerpt: isMeaningfulText(content.excerpt) ? content.excerpt : "",
+    });
+
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": content.title,
+      "description": content.excerpt || "",
+      "image": content.imageUrl,
+      "datePublished": content.date,
+      "dateModified": content.date,
+      "author": {
+        "@type": "Person",
+        "name": cleanAuthor
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "The Magorium",
+        "url": "https://www.themagorium.com"
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": window.location.href
+      }
     };
-  }, [publishedArticles, publishedHeroes, id]);
 
-useEffect(() => {
-  if (!content) return;
-
-  const cleanAuthor = normalizeBylineAuthor(content.author);
-
-  applyArticleSeo({
-    ...content,
-    excerpt: isMeaningfulText(content.excerpt)
-      ? content.excerpt
-      : "",
-  });
-
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": content.title,
-    "description": content.excerpt || "",
-    "image": content.imageUrl,
-    "datePublished": content.date,
-    "dateModified": content.date,
-    "author": {
-      "@type": "Person",
-      "name": cleanAuthor
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "The Magorium",
-      "url": "https://www.themagorium.com"
-    },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": window.location.href
-    }
-  };
-
-  let script = document.querySelector(
-    'script[data-magorium-schema="article"]'
-  );
-
-  if (!script) {
-    script = document.createElement("script");
-    script.setAttribute(
-      "data-magorium-schema",
-      "article"
+    let script = document.querySelector(
+      'script[data-magorium-schema="article"]'
     );
-    script.type = "application/ld+json";
-    document.head.appendChild(script);
-  }
 
-  script.textContent = JSON.stringify(schema);
+    if (!script) {
+      script = document.createElement("script");
+      script.setAttribute(
+        "data-magorium-schema",
+        "article"
+      );
+      script.type = "application/ld+json";
+      document.head.appendChild(script);
+    }
 
-}, [content]);
+    script.textContent = JSON.stringify(schema);
+
+  }, [content]);
 
   if (!content) {
     return (

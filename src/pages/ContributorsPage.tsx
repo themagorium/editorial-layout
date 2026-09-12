@@ -2,7 +2,7 @@ import ContentPage from "./ContentPage";
 import { applyContributorsSeo, canonicalAuthorName } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { buildContentPath, getPublishedContentSnapshot, slugifyText } from "@/lib/content-store";
+import { buildContentPath, getSeoContentSnapshot, slugifyText } from "@/lib/content-store";
 import { isPublishReadyArticle, isPublishReadyHero } from "@/lib/content-selection";
 
 const STORAGE_KEY = "magorium_page_content";

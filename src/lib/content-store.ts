@@ -228,6 +228,24 @@ export async function getSeoContentSnapshot(): Promise<{
     return { heroes: [], articles: [], ads: [] };
   }
 }
+export async function getStorySnapshot(
+  storyType: "hero" | "article",
+  id: string,
+): Promise<(HeroItem | Article) | null> {
+  try {
+    const response = await fetch(
+      `${PUBLISHED_CONTENT_ENDPOINT}?storyId=${encodeURIComponent(id)}&storyType=${storyType}`,
+      { cache: "no-store" },
+    );
+    if (!response.ok) return null;
+    const payload = await response.json().catch(() => null as any);
+    const story = payload?.content?.story;
+    if (!story) return null;
+    return storyType === "hero" ? normalizeHero(story) : normalizeArticle(story);
+  } catch {
+    return null;
+  }
+}
 export function slugifyText(value: string): string {
   return value
     .toLowerCase()

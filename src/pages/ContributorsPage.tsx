@@ -62,7 +62,7 @@ export default function ContributorsPage() {
   useEffect(() => {
     let active = true;
     const hydrate = async () => {
-      const snapshot = await getPublishedContentSnapshot();
+            const snapshot = await getSeoContentSnapshot();
       if (!active) return;
 
       const storyPathsByContributor: Record<string, string[]> = {};

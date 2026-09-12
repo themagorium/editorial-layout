@@ -1,21 +1,20 @@
- { useParams, Link } from "react-router-dom";
- { useEffect, useState } from "react";
- EditorialHeader from "@/components/editorial/EditorialHeader";
- EditorialFooter from "@/components/editorial/EditorialFooter";
- AdPlacement from "@/components/editorial/AdPlacement";
- {
- import {
+import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import EditorialHeader from "@/components/editorial/EditorialHeader";
+import EditorialFooter from "@/components/editorial/EditorialFooter";
+import AdPlacement from "@/components/editorial/AdPlacement";
+import {
   buildContentPath,
   getEditionSnapshot,
   formatEditionLabel,
 } from "@/lib/content-store";
- type { HeroItem, Article, AdSlot } from "@/lib/content-store";
+import type { HeroItem, Article, AdSlot } from "@/lib/content-store";
 import { trackEvent } from "@/lib/analytics";
 import { canonicalAuthorName, getAuthorPath } from "@/lib/seo";
- { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
+import { useSyncPublishedContent } from "@/hooks/useSyncPublishedContent";
 
 export default function EditionPage() {
-    useSyncPublishedContent({ enabled: false });
+  useSyncPublishedContent({ enabled: false });
   const { edition = "" } = useParams<{ edition: string }>();
 
   const [heroes, setHeroes] = useState<HeroItem[]>([]);

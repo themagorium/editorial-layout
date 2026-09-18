@@ -1134,11 +1134,11 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
   return (
-    <div className="bg-card border border-border rounded p-5 flex items-center gap-4">
-      <div className="w-10 h-10 rounded flex items-center justify-center bg-primary/10 text-primary">{icon}</div>
+    <div className="bg-white border border-gray-200 rounded p-5 flex items-center gap-4">
+      <div className="w-10 h-10 rounded flex items-center justify-center bg-blue-100 text-blue-700">{icon}</div>
       <div>
-        <p className="text-2xl font-serif font-bold text-foreground">{value}</p>
-        <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{label}</p>
+        <p className="text-2xl font-serif font-bold text-black">{value}</p>
+        <p className="text-xs text-blue-700 font-sans uppercase tracking-wider">{label}</p>
       </div>
     </div>
   );

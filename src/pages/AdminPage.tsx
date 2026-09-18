@@ -994,73 +994,136 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
   const locations = getLocationStats();
   const filtered = filter === "all" ? summary : summary.filter((s) => s.contentType === filter);
   const sorted = [...filtered].sort((a, b) => b.views - a.views);
-  const handleClear = () => { clearAnalytics(); toast.success("Analytics data cleared."); window.location.reload(); };
+  const handleClear = () => {
+    if (!window.confirm("Clear ALL analytics data? This cannot be undone.")) return;
+    clearAnalytics();
+    toast.success("Analytics data cleared.");
+    window.location.reload();
+  };
+  const handlePrint = () => window.print();
+  const reportDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  const scopeLabel = filter === "all" ? "All Content" : filter === "ad" ? "Ads" : `${filter}s`;
+
   return (
-    <div className="space-y-8">
+    <div id="analytics-print-area" className="space-y-8 bg-white text-black rounded-lg p-6 border border-gray-200 print:border-0 print:p-0 print:rounded-none">
+      <style>{`
+        .print-report-header { display: none; }
+        @media print {
+          body * { visibility: hidden; }
+          #analytics-print-area, #analytics-print-area * { visibility: visible; }
+          #analytics-print-area { position: absolute; left: 0; top: 0; width: 100%; }
+          .print\\:hidden { display: none !important; }
+          .print-report-header { display: block !important; margin-bottom: 24px; }
+          @page { margin: 18mm; }
+        }
+      `}</style>
+
+      <div className="print-report-header">
+        <h1 className="text-2xl font-serif font-bold text-black">The Magorium — Analytics Report</h1>
+        <p className="text-sm text-blue-700 mt-1">Scope: {scopeLabel} &nbsp;·&nbsp; Generated: {reportDate}</p>
+      </div>
+
+      <div className="flex justify-end print:hidden">
+        <button onClick={handlePrint} className="px-4 py-2 text-xs uppercase tracking-widest font-sans border border-blue-600 text-blue-700 rounded hover:bg-blue-50 transition-colors">
+          Print Report
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={<Eye className="w-5 h-5" />} label="Total Views" value={totals.totalViews} />
         <StatCard icon={<MousePointer className="w-5 h-5" />} label="Total Clicks" value={totals.totalClicks} />
         <StatCard icon={<TrendingUp className="w-5 h-5" />} label="Click-Through Rate" value={totals.totalViews > 0 ? `${((totals.totalClicks / totals.totalViews) * 100).toFixed(1)}%` : "—"} />
         <StatCard icon={<Globe className="w-5 h-5" />} label="Unique Locations" value={totals.uniqueLocations} />
       </div>
-      <div className="flex flex-wrap items-center gap-3">
+
+      <div className="flex flex-wrap items-center gap-3 print:hidden">
         {(["all", "article", "hero", "ad"] as const).map((f) => (
-          <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 text-xs uppercase tracking-widest font-sans border rounded transition-colors ${filter === f ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}>
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-4 py-2 text-xs uppercase tracking-widest font-sans border rounded transition-colors ${
+              filter === f ? "border-blue-600 text-blue-700 bg-blue-50" : "border-gray-300 text-blue-700 hover:bg-blue-50"
+            }`}
+          >
             {f === "all" ? "All Content" : f === "ad" ? "Ads" : `${f}s`}
           </button>
         ))}
-        <button onClick={handleClear} className="ml-auto px-4 py-2 text-xs uppercase tracking-widest font-sans border border-destructive/30 text-destructive rounded hover:bg-destructive/10 transition-colors">Clear Data</button>
+        <button onClick={handleClear} className="ml-auto px-4 py-2 text-xs uppercase tracking-widest font-sans border border-red-400 text-red-600 rounded hover:bg-red-50 transition-colors">
+          Clear Data
+        </button>
       </div>
-      <div className="bg-card border border-border rounded overflow-hidden">
-        <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
+
+      <div className="bg-white border border-gray-200 rounded overflow-hidden">
+        <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-blue-700 font-sans border-b border-gray-200">
           <span>Content</span><span className="text-center">Type</span><span className="text-center">Views</span><span className="text-center">Clicks</span><span className="text-center">CTR</span>
         </div>
         {sorted.length === 0 ? (
-          <div className="px-5 py-8 text-center text-muted-foreground text-sm font-sans">No data yet.</div>
+          <div className="px-5 py-8 text-center text-black text-sm font-sans">No data yet.</div>
         ) : sorted.map((item) => {
           const ctr = item.views > 0 ? ((item.clicks / item.views) * 100).toFixed(1) : "0.0";
           return (
-            <div key={`${item.contentType}:${item.contentId}`} className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors">
-              <span className="truncate text-foreground">{item.label || item.contentId}</span>
-              <span className="text-center"><span className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider rounded ${item.contentType === "article" ? "bg-primary/10 text-primary" : item.contentType === "hero" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground"}`}>{item.contentType}</span></span>
-              <span className="text-center text-foreground font-medium">{item.views}</span>
-              <span className="text-center text-foreground font-medium">{item.clicks}</span>
-              <span className="text-center text-primary font-medium">{ctr}%</span>
+            <div key={`${item.contentType}:${item.contentId}`} className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-5 py-3 text-sm font-sans border-b border-gray-100 hover:bg-blue-50/40 transition-colors">
+              <span className="truncate text-black">{item.label || item.contentId}</span>
+              <span className="text-center">
+                <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider rounded bg-blue-100 text-blue-700">
+                  {item.contentType}
+                </span>
+              </span>
+              <span className="text-center text-black font-medium">{item.views}</span>
+              <span className="text-center text-black font-medium">{item.clicks}</span>
+              <span className="text-center text-black font-medium">{ctr}%</span>
             </div>
           );
         })}
       </div>
+
       <div>
-        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> Viewer Locations</h3>
-        <div className="bg-card border border-border rounded overflow-hidden">
-          <div className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-muted-foreground font-sans border-b border-border">
+        <h3 className="font-serif text-lg font-semibold mb-3 text-blue-700 flex items-center gap-2">
+          <MapPin className="w-5 h-5 text-blue-700" /> Viewer Locations
+        </h3>
+        <div className="bg-white border border-gray-200 rounded overflow-hidden">
+          <div className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-blue-700 font-sans border-b border-gray-200">
             <span>City</span><span>Country</span><span className="text-center">Views</span><span className="text-center">Clicks</span>
           </div>
           {locations.length === 0 ? (
-            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No location data yet.</div>
+            <div className="px-5 py-6 text-center text-black text-sm font-sans">No location data yet.</div>
           ) : locations.map((loc) => (
-            <div key={`${loc.city}|${loc.country}`} className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-sm font-sans border-b border-border/50 hover:bg-secondary/30 transition-colors">
-              <span className="text-foreground flex items-center gap-2"><MapPin className="w-3 h-3 text-primary shrink-0" />{loc.city}</span>
-              <span className="text-muted-foreground flex items-center gap-1.5"><span className="text-xs">{loc.countryCode}</span>{loc.country}</span>
-              <span className="text-center text-foreground font-medium">{loc.views}</span>
-              <span className="text-center text-foreground font-medium">{loc.clicks}</span>
+            <div key={`${loc.city}|${loc.country}`} className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-sm font-sans border-b border-gray-100 hover:bg-blue-50/40 transition-colors">
+              <span className="text-black flex items-center gap-2">
+                <MapPin className="w-3 h-3 text-blue-700 shrink-0" />{loc.city}
+              </span>
+              <span className="text-black flex items-center gap-1.5">
+                <span className="text-xs">{loc.countryCode}</span>{loc.country}
+              </span>
+              <span className="text-center text-black font-medium">{loc.views}</span>
+              <span className="text-center text-black font-medium">{loc.clicks}</span>
             </div>
           ))}
         </div>
       </div>
+
       <div>
-        <h3 className="font-serif text-lg font-semibold mb-3 text-foreground">Recent Events</h3>
-        <div className="bg-card border border-border rounded max-h-72 overflow-y-auto">
+        <h3 className="font-serif text-lg font-semibold mb-3 text-blue-700">Recent Events</h3>
+        <div className="bg-white border border-gray-200 rounded max-h-72 overflow-y-auto">
           {recent.length === 0 ? (
-            <div className="px-5 py-6 text-center text-muted-foreground text-sm font-sans">No events recorded yet.</div>
+            <div className="px-5 py-6 text-center text-black text-sm font-sans">No events recorded yet.</div>
           ) : recent.map((ev) => (
-            <div key={ev.id} className="flex items-center gap-3 px-4 py-2.5 text-xs font-sans border-b border-border/30">
-              <span className={`w-2 h-2 rounded-full shrink-0 ${ev.eventType === "view" ? "bg-primary/50" : "bg-primary"}`} />
-              <span className="text-muted-foreground w-36 shrink-0">{new Date(ev.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-              <span className="text-foreground">{ev.eventType}</span>
-              <span className="text-muted-foreground">·</span>
-              <span className="text-muted-foreground truncate">{ev.contentType} — {ev.contentId}</span>
-              {ev.location && (<><span className="text-muted-foreground">·</span><span className="text-primary/70 shrink-0 flex items-center gap-1"><MapPin className="w-3 h-3" />{ev.location.city}, {ev.location.countryCode}</span></>)}
+            <div key={ev.id} className="flex items-center gap-3 px-4 py-2.5 text-xs font-sans border-b border-gray-100">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${ev.eventType === "view" ? "bg-blue-300" : "bg-blue-600"}`} />
+              <span className="text-black w-36 shrink-0">
+                {new Date(ev.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+              </span>
+              <span className="text-black">{ev.eventType}</span>
+              <span className="text-blue-700">·</span>
+              <span className="text-black truncate">{ev.contentType} — {ev.contentId}</span>
+              {ev.location && (
+                <>
+                  <span className="text-blue-700">·</span>
+                  <span className="text-black shrink-0 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-blue-700" />{ev.location.city}, {ev.location.countryCode}
+                  </span>
+                </>
+              )}
             </div>
           ))}
         </div>

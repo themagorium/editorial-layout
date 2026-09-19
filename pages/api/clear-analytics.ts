@@ -1,6 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { kv } from "@vercel/kv";
-
+import { Redis } from "@upstash/redis";
+const kv = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+});
 // PLACEHOLDER — will be corrected once you paste your admin-login file's contents.
 function isValidAdminToken(token: string | undefined): boolean {
   if (!token) return false;

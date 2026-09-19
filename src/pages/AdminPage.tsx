@@ -10,7 +10,7 @@ import {
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
 import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { getAnalyticsSummary, getTotalStats, getRecentEvents, getLocationStats, clearAnalytics } from "@/lib/analytics";
+import { fetchAnalytics, mergeContentStats, clearAnalytics, type AnalyticsPayload } from "@/lib/analytics";
 import { getAdminPublishToken, isAdminAuthenticated, setAdminPublishToken, setAdminAuthenticated, resetAdminPasswordAccess } from "@/lib/admin-auth";
 import { fileToOptimizedDataUrl } from "@/lib/media-optimizer";
 

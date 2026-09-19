@@ -988,21 +988,48 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: { imageUrl?: stri
 
 function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; heroes: HeroItem[]; ads: AdSlot[] }) {
   const [filter, setFilter] = useState<"all" | "article" | "hero" | "ad">("all");
-  const totals = getTotalStats();
-  const summary = getAnalyticsSummary(articles, heroes, ads);
-  const recent = getRecentEvents(30);
-  const locations = getLocationStats();
-  const filtered = filter === "all" ? summary : summary.filter((s) => s.contentType === filter);
-  const sorted = [...filtered].sort((a, b) => b.views - a.views);
-  const handleClear = () => {
-    if (!window.confirm("Clear ALL analytics data? This cannot be undone.")) return;
-    clearAnalytics();
-    toast.success("Analytics data cleared.");
-    window.location.reload();
+  const [data, setData] = useState<AnalyticsPayload | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadData = async () => {
+    setLoading(true);
+    const token = getAdminPublishToken();
+    if (!token) {
+      toast.error("Admin session expired. Please sign in again.");
+      setLoading(false);
+      return;
+    }
+    const result = await fetchAnalytics(token);
+    if (!result) toast.error("Could not load analytics data.");
+    setData(result);
+    setLoading(false);
   };
+
+  useEffect(() => { void loadData(); }, []);
+
+  const handleClear = async () => {
+    if (!window.confirm("Clear ALL analytics data? This cannot be undone.")) return;
+    const token = getAdminPublishToken();
+    if (!token) { toast.error("Admin session expired. Please sign in again."); return; }
+    const ok = await clearAnalytics(token);
+    if (ok) { toast.success("Analytics data cleared."); void loadData(); }
+    else toast.error("Could not clear analytics data.");
+  };
+
   const handlePrint = () => window.print();
   const reportDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
   const scopeLabel = filter === "all" ? "All Content" : filter === "ad" ? "Ads" : `${filter}s`;
+
+  if (loading) {
+    return <div className="text-center py-16 text-muted-foreground font-sans">Loading analytics…</div>;
+  }
+  if (!data) {
+    return <div className="text-center py-16 text-muted-foreground font-sans">Analytics data unavailable. Try refreshing.</div>;
+  }
+
+  const summary = mergeContentStats(data.content, articles, heroes, ads);
+  const filtered = filter === "all" ? summary : summary.filter((s) => s.contentType === filter);
+  const sorted = [...filtered].sort((a, b) => b.views - a.views);
 
   return (
     <div id="analytics-print-area" className="space-y-8 bg-white text-black rounded-lg p-6 border border-gray-200 print:border-0 print:p-0 print:rounded-none">
@@ -1023,17 +1050,20 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
         <p className="text-sm text-blue-700 mt-1">Scope: {scopeLabel} &nbsp;·&nbsp; Generated: {reportDate}</p>
       </div>
 
-      <div className="flex justify-end print:hidden">
+      <div className="flex justify-end gap-3 print:hidden">
+        <button onClick={() => void loadData()} className="px-4 py-2 text-xs uppercase tracking-widest font-sans border border-gray-300 text-blue-700 rounded hover:bg-blue-50 transition-colors">
+          Refresh
+        </button>
         <button onClick={handlePrint} className="px-4 py-2 text-xs uppercase tracking-widest font-sans border border-blue-600 text-blue-700 rounded hover:bg-blue-50 transition-colors">
           Print Report
         </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<Eye className="w-5 h-5" />} label="Total Views" value={totals.totalViews} />
-        <StatCard icon={<MousePointer className="w-5 h-5" />} label="Total Clicks" value={totals.totalClicks} />
-        <StatCard icon={<TrendingUp className="w-5 h-5" />} label="Click-Through Rate" value={totals.totalViews > 0 ? `${((totals.totalClicks / totals.totalViews) * 100).toFixed(1)}%` : "—"} />
-        <StatCard icon={<Globe className="w-5 h-5" />} label="Unique Locations" value={totals.uniqueLocations} />
+        <StatCard icon={<Eye className="w-5 h-5" />} label="Total Views" value={data.totals.totalViews} />
+        <StatCard icon={<MousePointer className="w-5 h-5" />} label="Total Clicks" value={data.totals.totalClicks} />
+        <StatCard icon={<TrendingUp className="w-5 h-5" />} label="Click-Through Rate" value={data.totals.totalViews > 0 ? `${((data.totals.totalClicks / data.totals.totalViews) * 100).toFixed(1)}%` : "—"} />
+        <StatCard icon={<Globe className="w-5 h-5" />} label="Unique Locations" value={data.totals.uniqueLocations} />
       </div>
 
       <div className="flex flex-wrap items-center gap-3 print:hidden">
@@ -1085,9 +1115,9 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
           <div className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-[10px] uppercase tracking-widest text-blue-700 font-sans border-b border-gray-200">
             <span>City</span><span>Country</span><span className="text-center">Views</span><span className="text-center">Clicks</span>
           </div>
-          {locations.length === 0 ? (
+          {data.locations.length === 0 ? (
             <div className="px-5 py-6 text-center text-black text-sm font-sans">No location data yet.</div>
-          ) : locations.map((loc) => (
+          ) : data.locations.map((loc) => (
             <div key={`${loc.city}|${loc.country}`} className="grid grid-cols-[1fr_120px_80px_80px] gap-2 px-5 py-3 text-sm font-sans border-b border-gray-100 hover:bg-blue-50/40 transition-colors">
               <span className="text-black flex items-center gap-2">
                 <MapPin className="w-3 h-3 text-blue-700 shrink-0" />{loc.city}
@@ -1105,9 +1135,9 @@ function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; he
       <div>
         <h3 className="font-serif text-lg font-semibold mb-3 text-blue-700">Recent Events</h3>
         <div className="bg-white border border-gray-200 rounded max-h-72 overflow-y-auto">
-          {recent.length === 0 ? (
+          {data.recent.length === 0 ? (
             <div className="px-5 py-6 text-center text-black text-sm font-sans">No events recorded yet.</div>
-          ) : recent.map((ev) => (
+          ) : data.recent.map((ev) => (
             <div key={ev.id} className="flex items-center gap-3 px-4 py-2.5 text-xs font-sans border-b border-gray-100">
               <span className={`w-2 h-2 rounded-full shrink-0 ${ev.eventType === "view" ? "bg-blue-300" : "bg-blue-600"}`} />
               <span className="text-black w-36 shrink-0">

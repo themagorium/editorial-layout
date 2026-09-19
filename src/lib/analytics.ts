@@ -48,19 +48,7 @@ export interface AnalyticsPayload {
   recent: AnalyticsEvent[];
 }
 
-export function trackEvent(
-  contentId: string,
-  contentType: ContentType,
-  eventType: EventType,
-  metadata?: Record<string, string>
-) {
-  fetch("/api/track-event", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contentId, contentType, eventType, metadata }),
-    keepalive: true,
-  }).catch(() => {});
-}
+
 
 export async function fetchAnalytics(publishToken: string): Promise<AnalyticsPayload | null> {
   try {
@@ -72,6 +60,19 @@ export async function fetchAnalytics(publishToken: string): Promise<AnalyticsPay
   } catch {
     return null;
   }
+}export function trackEvent(
+  contentId: string,
+  contentType: ContentType,
+  eventType: EventType,
+  metadata?: Record<string, string>
+) {
+  return; // temporarily disabled — was slowing down live page loads
+  // fetch("/api/track-event", {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify({ contentId, contentType, eventType, metadata }),
+  //   keepalive: true,
+  // }).catch(() => {});
 }
 
 export async function clearAnalytics(publishToken: string): Promise<boolean> {

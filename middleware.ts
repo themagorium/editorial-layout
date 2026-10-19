@@ -1,59 +1,16 @@
-const CRAWLER_USER_AGENTS = [
-  'Googlebot',
-  'Google-Extended',
-  'Bingbot',
-  'GPTBot',
-  'ClaudeBot',
-  'PerplexityBot',
-  'OAI-SearchBot',
-  'Applebot',
-  'Applebot-Extended',
-];
-
-function isCrawler(userAgent) {
-  if (!userAgent) return false;
-  return CRAWLER_USER_AGENTS.some((bot) =>
-    userAgent.toLowerCase().includes(bot.toLowerCase())
-  );
-}
-
+// Crawlers are handled by the user-agent rewrite in vercel.json, which serves
+// the full HTML page (via /api/seo-router) at the page's own URL.
+//
+// This middleware used to 307-redirect crawlers to /api/seo-* URLs instead,
+// and sent every other path (categories, archives, singular /author/ pages)
+// to /api/content, which returned a multi-megabyte raw JSON dump of the whole
+// site in place of the page. Redirecting only crawlers is also something
+// search engines treat with suspicion. It now lets every request through.
 export const config = {
   runtime: 'nodejs',
   matcher: '/((?!_next/static|_next/image|favicon.ico|assets|api).*)',
 };
 
-export default function middleware(request) {
-  const userAgent = request.headers.get('user-agent');
-
-  if (!isCrawler(userAgent)) {
-    return; // regular visitors: no rewrite, normal SPA loads as-is
-  }
-
-  const url = new URL(request.url);
-  const { pathname } = url;
-
-  if (pathname === '/') {
-    return Response.redirect(new URL('/api/seo-home', request.url), 307);
-  }
-
-  const articleMatch = pathname.match(/^\/articles\/([^/]+)\/?$/);
-  if (articleMatch) {
-   return Response.redirect(
-  new URL(`/api/seo-article?identifier=${encodeURIComponent(articleMatch[1])}`, request.url),
-  307
-);
-  }
-
-  const authorMatch = pathname.match(/^\/authors\/([^/]+)\/?$/);
-  if (authorMatch) {
-    return Response.redirect(
-      new URL(`/api/seo-author?author=${encodeURIComponent(authorMatch[1])}`, request.url),
-      307
-    );
-  }
-
-  return Response.redirect(
-    new URL(`/api/content?path=${encodeURIComponent(pathname)}`, request.url),
-    307
-  );
+export default function middleware() {
+  return;
 }

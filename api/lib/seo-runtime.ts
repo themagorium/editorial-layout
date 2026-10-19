@@ -185,7 +185,44 @@ type RawStory = {
   body?: RawBodyBlock[];
 };
 
-const ALL_EDITIONS = ["2025-10", "2026-01", "2026-02", "2026-04", "2026-06", "2026-07", "2026-09"];
+// Editions are discovered from the CMS at request time, so a new edition is
+// crawlable the moment it is published. The list below is only a fallback.
+const FALLBACK_EDITIONS = ["2025-10", "2026-01", "2026-02", "2026-04", "2026-06", "2026-07", "2026-09"];
+
+async function getPublishedEditionIds(): Promise<string[]> {
+  try {
+    const response = await fetch(`${SITE_URL}/api/content?list=editions`, {
+      headers: { "User-Agent": "MagoriumSeoBot/1.0" },
+    });
+    const payload = (await response.json()) as { editions?: unknown };
+    const editions = Array.isArray(payload?.editions)
+      ? (payload.editions as unknown[]).filter((e): e is string => typeof e === "string" && /^\d{4}-\d{2}$/.test(e))
+      : [];
+    return editions.length > 0 ? editions : FALLBACK_EDITIONS;
+  } catch {
+    return FALLBACK_EDITIONS;
+  }
+}
+
+function shortHash(value: string): string {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 97) hash = (hash * 31 + value.charCodeAt(index)) | 0;
+  return (hash >>> 0).toString(36) + value.length.toString(36);
+}
+
+/** A crawlable, absolute image URL for a story. Photos stored inside the
+ *  story (data: URIs) are served through /api/story-image. */
+export function publicStoryImageUrl(type: "hero" | "article", id: string, imageUrl?: string, body?: RawBodyBlock[]): string {
+  const source =
+    (imageUrl || "").trim() ||
+    ((body || []).find((block) => block.type === "image" && (block.content || "").trim())?.content || "").trim();
+  if (!source) return DEFAULT_OG_IMAGE;
+  if (source.startsWith("data:")) {
+    return `${SITE_URL}/api/story-image?type=${type}&id=${encodeURIComponent(id)}&v=${shortHash(source)}`;
+  }
+  if (source.startsWith("/")) return `${SITE_URL}${source}`;
+  return source;
+}
 
 function extractBodyContent(body: RawBodyBlock[] | undefined): {
   bodyText: string[];
@@ -212,11 +249,32 @@ function extractBodyContent(body: RawBodyBlock[] | undefined): {
 }
 
 // ── Fetch published stories from the CMS API ───────────────────────────────
+function toSeoStory(raw: RawStory, type: "hero" | "article", edition: string): SeoStory {
+  const { bodyText, bodyHeadings, bodyBlocks } = extractBodyContent(raw.body);
+  return {
+    id: raw.id,
+    title: raw.title,
+    category: raw.category,
+    author: canonicalAuthorName(raw.author),
+    date: raw.date,
+    path: buildContentPath(raw.id, raw.title),
+    imageUrl: publicStoryImageUrl(type, raw.id, raw.imageUrl, raw.body),
+    excerpt: type === "hero" ? raw.excerpt || raw.subtitle : raw.excerpt,
+    legacySlugs: raw.legacySlugs,
+    seoTags: raw.seoTags,
+    bodyText,
+    bodyHeadings,
+    bodyBlocks,
+    edition,
+  };
+}
+
 export async function getPublishedSeoStories(): Promise<SeoStory[]> {
   try {
-    // Fetch all editions in parallel so every article has full body text for SEO
+    const editions = await getPublishedEditionIds();
+    // Every edition in parallel, so every story has its full body text.
     const editionResponses = await Promise.allSettled(
-      ALL_EDITIONS.map((edition) =>
+      editions.map((edition) =>
         fetch(`${SITE_URL}/api/content?edition=${edition}`, {
           headers: { "User-Agent": "MagoriumSeoBot/1.0" },
         }).then((r) => (r.ok ? r.json() : null))
@@ -226,120 +284,25 @@ export async function getPublishedSeoStories(): Promise<SeoStory[]> {
     const stories: SeoStory[] = [];
     const seenIds = new Set<string>();
 
-    for (const result of editionResponses) {
-      if (result.status !== "fulfilled" || !result.value) continue;
-      const payload = result.value as {
-        content?: {
-          heroes?: RawStory[];
-          articles?: RawStory[];
-        };
-      };
-      const raw = payload?.content;
-      if (!raw) continue;
-
+    editionResponses.forEach((result, index) => {
+      if (result.status !== "fulfilled" || !result.value) return;
+      const raw = (result.value as { content?: { heroes?: RawStory[]; articles?: RawStory[] } })?.content;
+      if (!raw) return;
       for (const hero of raw.heroes || []) {
         if (seenIds.has(hero.id)) continue;
         if (isPlaceholderTitle(hero.title)) continue;
         if (isPlaceholderCopy(hero.subtitle) && isPlaceholderCopy(hero.excerpt)) continue;
         seenIds.add(hero.id);
-        const { bodyText, bodyHeadings, bodyBlocks } = extractBodyContent(hero.body);
-        stories.push({
-          id: hero.id,
-          title: hero.title,
-          category: hero.category,
-          author: canonicalAuthorName(hero.author),
-          date: hero.date,
-          path: buildContentPath(hero.id, hero.title),
-          imageUrl: hero.imageUrl,
-          excerpt: hero.excerpt || hero.subtitle,
-          legacySlugs: hero.legacySlugs,
-          seoTags: hero.seoTags,
-          bodyText,
-          bodyHeadings,
-          bodyBlocks,
-        });
+        stories.push(toSeoStory(hero, "hero", editions[index]));
       }
-
       for (const article of raw.articles || []) {
         if (seenIds.has(article.id)) continue;
         if (isPlaceholderTitle(article.title)) continue;
         if (isPlaceholderCopy(article.excerpt)) continue;
         seenIds.add(article.id);
-        const { bodyText, bodyHeadings, bodyBlocks } = extractBodyContent(article.body);
-        stories.push({
-          id: article.id,
-          title: article.title,
-          category: article.category,
-          author: canonicalAuthorName(article.author),
-          date: article.date,
-          path: buildContentPath(article.id, article.title),
-          imageUrl: article.imageUrl,
-          excerpt: article.excerpt,
-          legacySlugs: article.legacySlugs,
-          seoTags: article.seoTags,
-          bodyText,
-          bodyHeadings,
-          bodyBlocks,
-        });
+        stories.push(toSeoStory(article, "article", editions[index]));
       }
-    }
-
-    // Fallback: also fetch the current "latest" content for anything not in editions
-    try {
-      const latestRes = await fetch(`${SITE_URL}/api/content`, {
-        headers: { "User-Agent": "MagoriumSeoBot/1.0" },
-      });
-      if (latestRes.ok) {
-        const latestPayload = (await latestRes.json()) as {
-          content?: { heroes?: RawStory[]; articles?: RawStory[] };
-        };
-        const latestRaw = latestPayload?.content;
-        if (latestRaw) {
-          for (const hero of latestRaw.heroes || []) {
-            if (seenIds.has(hero.id)) continue;
-            if (isPlaceholderTitle(hero.title)) continue;
-            seenIds.add(hero.id);
-            const { bodyText, bodyHeadings, bodyBlocks } = extractBodyContent(hero.body);
-            stories.push({
-              id: hero.id,
-              title: hero.title,
-              category: hero.category,
-              author: canonicalAuthorName(hero.author),
-              date: hero.date,
-              path: buildContentPath(hero.id, hero.title),
-              imageUrl: hero.imageUrl,
-              excerpt: hero.excerpt || hero.subtitle,
-              legacySlugs: hero.legacySlugs,
-              seoTags: hero.seoTags,
-              bodyText,
-              bodyHeadings,
-              bodyBlocks,
-            });
-          }
-          for (const article of latestRaw.articles || []) {
-            if (seenIds.has(article.id)) continue;
-            if (isPlaceholderTitle(article.title)) continue;
-            seenIds.add(article.id);
-            const { bodyText, bodyHeadings, bodyBlocks } = extractBodyContent(article.body);
-            stories.push({
-              id: article.id,
-              title: article.title,
-              category: article.category,
-              author: canonicalAuthorName(article.author),
-              date: article.date,
-              path: buildContentPath(article.id, article.title),
-              imageUrl: article.imageUrl,
-              excerpt: article.excerpt,
-              legacySlugs: article.legacySlugs,
-              seoTags: article.seoTags,
-              bodyText,
-              bodyHeadings,
-              bodyBlocks,
-            });
-          }
-        }
-      }
-    } catch { /* ignore */ }
+    });
 
     return stories.sort((a, b) => +new Date(b.date) - +new Date(a.date));
   } catch {

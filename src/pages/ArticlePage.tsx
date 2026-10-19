@@ -166,8 +166,22 @@ export default function ArticlePage() {
         const lightweight = await getSeoContentSnapshot();
         if (!active) return;
 
-        const articleMatch = findContentByIdentifier(lightweight.articles, id || "");
-        const heroMatch = !articleMatch ? findContentByIdentifier(lightweight.heroes, id || "") : undefined;
+        // Search heroes and articles TOGETHER so an exact link match always
+        // wins over the fuzzy title fallback. Searching articles first let a
+        // hero link ("the-cost-of-intelligence--h-…") fuzzy-match an article
+        // ("the-new-intelligence-of-yachting--a3") and open the wrong story.
+        type Tagged = (typeof lightweight.articles)[number] & { __kind: "article" | "hero" };
+        const combined = [
+          ...lightweight.articles.map((item) => ({ ...item, __kind: "article" as const })),
+          ...lightweight.heroes.map((item) => ({ ...item, __kind: "hero" as const })),
+        ] as Tagged[];
+        const match = findContentByIdentifier(combined, id || "");
+        const articleMatch = match?.__kind === "article"
+          ? lightweight.articles.find((item) => item.id === match.id)
+          : undefined;
+        const heroMatch = match?.__kind === "hero"
+          ? lightweight.heroes.find((item) => item.id === match.id)
+          : undefined;
 
         if (articleMatch) {
           const full = await getStorySnapshot("article", articleMatch.id);

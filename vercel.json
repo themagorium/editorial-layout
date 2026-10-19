@@ -1,47 +1,87 @@
 {
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
       "source": "/(.*)",
       "has": [
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(Googlebot|bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|facebookexternalhit|Twitterbot|LinkedInBot|Applebot|ia_archiver).*"
+          "value": ".*(Googlebot|Google-InspectionTool|GoogleOther|Storebot-Google|bingbot|BingPreview|Slurp|DuckDuckBot|DuckAssistBot|Baiduspider|YandexBot|facebookexternalhit|meta-externalagent|Twitterbot|LinkedInBot|Applebot|ia_archiver|GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-User|Claude-SearchBot|PerplexityBot|Perplexity-User|Amazonbot|WhatsApp|Slackbot|Discordbot|TelegramBot|Pinterestbot|redditbot|SkypeUriPreview|Embedly|iframely).*"
         }
       ],
       "destination": "/api/seo-router"
     },
     {
-      "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
-    },
-    { "source": "/(.*)", "destination": "/index.html" }
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ],
   "redirects": [
-    { "source": "/magorium", "destination": "https://themagorium.com", "permanent": true },
-    { "source": "/magorium/:path*", "destination": "https://themagorium.com/:path*", "permanent": true },
-    { "source": "/Magorium", "destination": "https://themagorium.com", "permanent": true },
-    { "source": "/themagorium", "destination": "https://themagorium.com", "permanent": true },
-    { "source": "/TheMagorium", "destination": "https://themagorium.com", "permanent": true }
+    {
+      "source": "/magorium",
+      "destination": "https://themagorium.com",
+      "permanent": true
+    },
+    {
+      "source": "/magorium/:path*",
+      "destination": "https://themagorium.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/Magorium",
+      "destination": "https://themagorium.com",
+      "permanent": true
+    },
+    {
+      "source": "/themagorium",
+      "destination": "https://themagorium.com",
+      "permanent": true
+    },
+    {
+      "source": "/TheMagorium",
+      "destination": "https://themagorium.com",
+      "permanent": true
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "index, follow" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "index, follow"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
       ]
     },
     {
       "source": "/sitemap.xml",
       "headers": [
-        { "key": "Content-Type", "value": "application/xml" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=3600" }
+        {
+          "key": "Content-Type",
+          "value": "application/xml"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=600, s-maxage=600, stale-while-revalidate=3600"
+        }
       ]
     },
     {
       "source": "/robots.txt",
-      "headers": [{ "key": "Content-Type", "value": "text/plain" }]
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain"
+        }
+      ]
     }
   ]
 }

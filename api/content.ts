@@ -837,10 +837,53 @@ async function removeStory(type: StoryType, edition: string, id: string): Promis
   }
 }
 
-/** Full-archive write: diffs against what's currently stored so any
- *  hero/article/edition no longer present gets deleted, then writes every
- *  remaining hero/article to its own individual key. */
+/** Full-archive write. MERGE-ONLY: every hero/article in the payload is
+ *  written to its own key and added to its edition's index, but nothing that
+ *  is missing from the payload is ever deleted. A partial or stale payload
+ *  (one edition, hard-coded defaults, an old browser copy) used to wipe every
+ *  other edition from the live site — that can no longer happen. Deleting is
+ *  only possible through the explicit `delete-story` / `delete-edition`
+ *  phases, and those snapshot the site first. */
 async function writeContentAcrossEditions(content: PublishPayload, publishedAt: string, updatedAt: string): Promise<void> {
+  const byEdition = new Map<string, { heroes: HeroPayload[]; articles: ArticlePayload[] }>();
+  content.heroes.forEach((hero) => {
+    const key = hero.edition || "unknown";
+    const bucket = byEdition.get(key) || { heroes: [], articles: [] };
+    bucket.heroes.push(hero);
+    byEdition.set(key, bucket);
+  });
+  content.articles.forEach((article) => {
+    const key = article.edition || "unknown";
+    const bucket = byEdition.get(key) || { heroes: [], articles: [] };
+    bucket.articles.push(article);
+    byEdition.set(key, bucket);
+  });
+
+  for (const [edition, bucket] of byEdition.entries()) {
+    const previousIndex = await getEditionIndex(edition);
+    const heroIds = [...(previousIndex?.heroIds || [])];
+    const articleIds = [...(previousIndex?.articleIds || [])];
+    bucket.heroes.forEach((h) => { if (!heroIds.includes(h.id)) heroIds.push(h.id); });
+    bucket.articles.forEach((a) => { if (!articleIds.includes(a.id)) articleIds.push(a.id); });
+    await Promise.all([
+      ...bucket.heroes.map((hero) => setStory("hero", hero.id, hero)),
+      ...bucket.articles.map((article) => setStory("article", article.id, article)),
+    ]);
+    await setEditionIndex(edition, { heroIds, articleIds, updatedAt });
+  }
+
+  const previousEditions = await getEditionsIndex();
+  await setEditionsIndex([...previousEditions, ...byEdition.keys()]);
+  // Only replace ads when the payload actually carries some.
+  if (content.ads.length > 0) await setAdsContent(content.ads);
+  await setMeta({ publishedAt, updatedAt });
+  await rebuildLatestView(publishedAt, updatedAt);
+}
+
+/** The old destructive full-archive diff, kept only for restoring a snapshot
+ *  (where "make the site exactly this" is the intent). Never called from a
+ *  publish path. */
+async function replaceContentAcrossEditions(content: PublishPayload, publishedAt: string, updatedAt: string): Promise<void> {
   const byEdition = new Map<string, { heroes: HeroPayload[]; articles: ArticlePayload[] }>();
   content.heroes.forEach((hero) => {
     const key = hero.edition || "unknown";
@@ -947,6 +990,39 @@ async function getFullContent(): Promise<StoredPayload | null> {
   return { heroes, articles, ads, publishedAt: meta.publishedAt, updatedAt: meta.updatedAt };
 }
 
+// ===== Automatic site snapshots =====
+// Taken before any write that can remove content, so a mistake is always one
+// call away from being undone: POST { phase: "restore-backup", backupId }.
+const BACKUPS_INDEX_KEY = `${NS}:backups`;
+const MAX_BACKUPS = 10;
+type BackupEntry = { id: string; createdAt: string; reason: string; editions: string[]; stories: number };
+
+function backupKey(id: string): string {
+  return `${NS}:backup:${id}`;
+}
+
+async function listBackups(): Promise<BackupEntry[]> {
+  return ensureArray<BackupEntry>(await kvGet<BackupEntry[]>(BACKUPS_INDEX_KEY));
+}
+
+async function snapshotSite(reason: string): Promise<BackupEntry | null> {
+  const content = await getFullContent();
+  if (!content || (content.heroes.length === 0 && content.articles.length === 0)) return null;
+  const createdAt = new Date().toISOString();
+  const entry: BackupEntry = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    createdAt,
+    reason,
+    editions: await getEditionsIndex(),
+    stories: content.heroes.length + content.articles.length,
+  };
+  await kvSet(backupKey(entry.id), content);
+  const backups = [entry, ...(await listBackups())];
+  for (const old of backups.slice(MAX_BACKUPS)) await kvDel(backupKey(old.id));
+  await kvSet(BACKUPS_INDEX_KEY, backups.slice(0, MAX_BACKUPS));
+  return entry;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "GET") {
     try {
@@ -1046,6 +1122,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         return;
       }
+      // Admin-only list of automatic snapshots (ids for "restore-backup").
+      if (readFirstString(req.query?.list).trim().toLowerCase() === "backups") {
+        if (!(await authorized(req))) {
+          res.status(401).json({ ok: false, success: false, configured: isKvConfigured(), error: "Unauthorized." });
+          return;
+        }
+        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), backups: await listBackups() });
+        return;
+      }
+
       // Lightweight edition list — no story content, useful for an edition picker.
       if (readFirstString(req.query?.list).trim().toLowerCase() === "editions") {
         await migrateLegacyBlobIfNeeded();
@@ -1119,6 +1205,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           return;
         }
         await migrateLegacyBlobIfNeeded();
+        await snapshotSite(`before delete-story ${storyType}:${id} (${edition})`);
         await removeStory(storyType, edition, id);
         const stamp = new Date().toISOString();
         const meta = (await getMeta()) || { publishedAt: stamp };
@@ -1140,10 +1227,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const adsInput = (req.body as { ads?: unknown })?.ads;
         const stamp = new Date().toISOString();
 
+        // An empty payload used to silently delete the whole edition.
+        // Deleting an edition now needs the explicit "delete-edition" phase.
+        if (heroes.length === 0 && articles.length === 0) {
+          res.status(400).json({
+            ok: false,
+            success: false,
+            configured: isKvConfigured(),
+            error: `Refusing to save edition ${edition} with no stories. To delete an edition, use phase "delete-edition" with confirm: "${edition}".`,
+          });
+          return;
+        }
+
         await migrateLegacyBlobIfNeeded();
         const previousIndex = await getEditionIndex(edition);
         const nextHeroIds = heroes.map((h) => h.id);
         const nextArticleIds = articles.map((a) => a.id);
+        const wouldRemove = Boolean(
+          previousIndex &&
+            (previousIndex.heroIds.some((id) => !nextHeroIds.includes(id)) ||
+              previousIndex.articleIds.some((id) => !nextArticleIds.includes(id))),
+        );
+        if (previousIndex) await snapshotSite(`before edition save ${edition}${wouldRemove ? " (removes stories)" : ""}`);
 
         if (previousIndex) {
           const removedHeroIds = previousIndex.heroIds.filter((id) => !nextHeroIds.includes(id));
@@ -1176,6 +1281,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const ads = await getAdsContent();
         void submitIndexNow(collectIndexNowUrls({ heroes, articles, ads }));
         res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), publishedAt: meta.publishedAt, updatedAt: stamp });
+        return;
+      }
+
+      // ---- Delete ONE whole edition (explicit + confirmed + snapshotted) ----
+      if (phase === "delete-edition") {
+        const edition = normalizeEditionId((req.body as { edition?: unknown })?.edition);
+        const confirm = normalizeEditionId((req.body as { confirm?: unknown })?.confirm);
+        if (!edition || confirm !== edition) {
+          res.status(400).json({
+            ok: false,
+            success: false,
+            configured: isKvConfigured(),
+            error: "Deleting an edition requires { edition, confirm } with confirm equal to the edition id.",
+          });
+          return;
+        }
+        await migrateLegacyBlobIfNeeded();
+        const backup = await snapshotSite(`before delete-edition ${edition}`);
+        const index = await getEditionIndex(edition);
+        if (index) {
+          await Promise.all([
+            ...index.heroIds.map((id) => deleteStory("hero", id)),
+            ...index.articleIds.map((id) => deleteStory("article", id)),
+          ]);
+        }
+        await deleteEditionIndex(edition);
+        await setEditionsIndex((await getEditionsIndex()).filter((e) => e !== edition));
+        const stamp = new Date().toISOString();
+        const meta = (await getMeta()) || { publishedAt: stamp };
+        await setMeta({ publishedAt: meta.publishedAt, updatedAt: stamp });
+        await rebuildLatestView(meta.publishedAt, stamp);
+        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), deleted: edition, backupId: backup?.id });
+        return;
+      }
+
+      // ---- Put the whole site back exactly as an automatic snapshot had it ----
+      if (phase === "restore-backup") {
+        const backupId = readFirstString((req.body as { backupId?: unknown })?.backupId).trim();
+        const entry = (await listBackups()).find((b) => b.id === backupId);
+        const snapshot = entry ? await kvGet<StoredPayload>(backupKey(entry.id)) : null;
+        if (!entry || !snapshot) {
+          res.status(404).json({ ok: false, success: false, configured: isKvConfigured(), error: "Backup not found." });
+          return;
+        }
+        const before = await snapshotSite(`before restore of ${backupId}`);
+        const stamp = new Date().toISOString();
+        await replaceContentAcrossEditions(sanitizePayload(snapshot), snapshot.publishedAt || stamp, stamp);
+        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), restored: backupId, undoBackupId: before?.id });
         return;
       }
 
@@ -1222,15 +1375,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const parsed = JSON.parse(serialized) as unknown;
         const content = sanitizePayload(parsed);
         const publishedAt = new Date().toISOString();
+        await migrateLegacyBlobIfNeeded();
+        await snapshotSite("before full-site publish (chunked)");
         await writeContentAcrossEditions(content, publishedAt, publishedAt);
         void submitIndexNow(collectIndexNowUrls(content));
         res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), publishedAt, updatedAt: publishedAt });
         return;
       }
 
-      // ---- Legacy: whole archive in one direct POST ----
+      // ---- Legacy: whole archive in one direct POST (merge-only) ----
+      if (phase) {
+        res.status(400).json({ ok: false, success: false, configured: isKvConfigured(), error: `Unknown phase "${phase}".` });
+        return;
+      }
       const content = sanitizePayload(req.body);
+      if (content.heroes.length === 0 && content.articles.length === 0) {
+        res.status(400).json({ ok: false, success: false, configured: isKvConfigured(), error: "No stories in payload; nothing was changed." });
+        return;
+      }
       const publishedAt = new Date().toISOString();
+      await migrateLegacyBlobIfNeeded();
+      await snapshotSite("before full-site publish");
       await writeContentAcrossEditions(content, publishedAt, publishedAt);
       void submitIndexNow(collectIndexNowUrls(content));
       res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), publishedAt, updatedAt: publishedAt });

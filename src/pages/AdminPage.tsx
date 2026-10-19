@@ -3,7 +3,7 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import ArticleBodyEditor from "@/components/editorial/ArticleBodyEditor";
 import {
   getHeroes, getArticles, getAds, saveHeroes, saveArticles, saveAds,
-  publishEditorialContent, publishEdition, getPublishedContentSnapshot, DEFAULT_PUBLISHED_CONTENT,
+  publishEdition, getPublishedContentSnapshot,
   resetToDefaults, clearLocalDraftStorage, isStorageQuotaExceededError,
   CATEGORIES, formatEditionLabel, publishStory,
 } from "@/lib/content-store";
@@ -289,24 +289,38 @@ function AdminDashboard() {
     toast.success("Reset to defaults.");
   };
 
+  // Restores the most recent automatic server snapshot (taken before every
+  // edition save, deletion or full-site publish). It used to publish the
+  // hard-coded October 2025 defaults over the live site, which erased every
+  // other edition.
   const handleRestoreBackup = async () => {
     if (isSaving) return;
+    const publishToken = getAdminPublishToken();
+    if (!publishToken) { toast.error("Admin session expired. Please sign in again."); return; }
+    const authHeaders = { "Content-Type": "application/json", Authorization: `Bearer ${publishToken}`, "x-admin-password": publishToken };
     setIsSaving(true);
     try {
-      const restoredHeroes = DEFAULT_PUBLISHED_CONTENT.heroes.map((h) => ({ ...h, body: (h.body || []).map((b) => ({ ...b })), seoTags: [...(h.seoTags || [])] }));
-      const restoredArticles = DEFAULT_PUBLISHED_CONTENT.articles.map((a) => ({ ...a, body: (a.body || []).map((b) => ({ ...b })), seoTags: [...(a.seoTags || [])] }));
-      const restoredAds = DEFAULT_PUBLISHED_CONTENT.ads.map((a) => ({ ...a }));
-      setHeroes(restoredHeroes);
-      setArticles(restoredArticles);
-      setAds(restoredAds);
-      const restoredEditions = getEditionsFromState(restoredHeroes, restoredArticles);
-      if (restoredEditions.length > 0) setCurrentEdition(restoredEditions[0]);
-      const publishToken = getAdminPublishToken();
-      if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
-      const published = await publishEditorialContent({ heroes: restoredHeroes, articles: restoredArticles, ads: restoredAds }, publishToken);
-      if (!published.success) { toast.warning(`${published.error || "Could not publish restored backup to live"}. Backup loaded but publish did not complete.`); return; }
+      const listResponse = await fetch("/api/content?list=backups", { headers: authHeaders, cache: "no-store" });
+      const listPayload = (await listResponse.json().catch(() => ({}))) as {
+        backups?: { id: string; createdAt: string; reason: string; stories: number; editions: string[] }[];
+        error?: string;
+      };
+      const latest = listPayload.backups?.[0];
+      if (!listResponse.ok || !latest) { toast.error(listPayload.error || "No automatic backups exist yet."); return; }
+      const when = new Date(latest.createdAt).toLocaleString();
+      if (!window.confirm(
+        `Restore the live site to the backup from ${when}?\n\n${latest.stories} stories across ${latest.editions.length} editions\n(${latest.reason}).\n\nThe current site is backed up first, so this can be undone.`,
+      )) return;
+      const response = await fetch("/api/content", {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify({ phase: "restore-backup", backupId: latest.id }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (!response.ok || !payload.ok) { toast.error(payload.error || "Could not restore backup."); return; }
       clearLocalDraftStorage();
-      toast.success("Baseline backup restored and published.");
+      toast.success(`Live site restored to the backup from ${when}. Reloading…`);
+      window.setTimeout(() => window.location.reload(), 1200);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not restore backup");
     } finally {

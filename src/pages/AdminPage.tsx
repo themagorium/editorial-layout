@@ -145,12 +145,12 @@ export default function AdminPage() {
   };
 
   const handleResetAccess = () => {
-    if (!window.confirm("Reset admin password access? This will sign out any current admin session.")) return;
+    if (!window.confirm("Sign out of the admin panel on this device? This does not change the password.")) return;
     resetAdminPasswordAccess();
     setAuthenticated(false);
     setPasswordInput("");
     setPasswordError(false);
-    toast.success("Admin password access reset.");
+    toast.success("Signed out on this device.");
   };
 
   if (!authenticated) {
@@ -166,7 +166,7 @@ export default function AdminPage() {
             <input type="password" value={passwordInput} onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }} placeholder="Enter password" className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" autoFocus />
             {passwordError && <p className="text-sm text-destructive">Incorrect password</p>}
             <button type="submit" disabled={isLoggingIn} className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-70">{isLoggingIn ? "Signing In..." : "Sign In"}</button>
-            <button type="button" onClick={handleResetAccess} className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Reset Admin Password Access</button>
+            <button type="button" onClick={handleResetAccess} className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Sign out on this device</button>
           </div>
         </form>
       </div>

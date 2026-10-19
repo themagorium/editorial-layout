@@ -157,105 +157,189 @@ export type SeoStory = {
   path: string;
   imageUrl?: string;
   excerpt?: string;
-  legacySlugs?: string[];bodyText?: string[];
+  legacySlugs?: string[];
+  bodyText?: string[];
+  bodyHeadings?: string[];
+  bodyBlocks?: Array<{ type: string; content: string }>;
   seoTags?: string[];
-  edition?: string; 
+  edition?: string;
 };
+
+type RawBodyBlock = {
+  id?: string;
+  type: string;
+  content?: string;
+};
+
+type RawStory = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  excerpt?: string;
+  category: string;
+  author?: string;
+  date: string;
+  imageUrl?: string;
+  legacySlugs?: string[];
+  seoTags?: string[];
+  body?: RawBodyBlock[];
+};
+
+const ALL_EDITIONS = ["2025-10", "2026-01", "2026-02", "2026-04", "2026-06", "2026-07", "2026-09"];
+
+function extractBodyContent(body: RawBodyBlock[] | undefined): {
+  bodyText: string[];
+  bodyHeadings: string[];
+  bodyBlocks: Array<{ type: string; content: string }>;
+} {
+  if (!body || !Array.isArray(body)) {
+    return { bodyText: [], bodyHeadings: [], bodyBlocks: [] };
+  }
+  const bodyText: string[] = [];
+  const bodyHeadings: string[] = [];
+  const bodyBlocks: Array<{ type: string; content: string }> = [];
+  for (const block of body) {
+    if (!block.content || isPlaceholderCopy(block.content)) continue;
+    if (block.type === "text") {
+      bodyText.push(block.content);
+      bodyBlocks.push({ type: "text", content: block.content });
+    } else if (block.type === "heading") {
+      bodyHeadings.push(block.content);
+      bodyBlocks.push({ type: "heading", content: block.content });
+    }
+  }
+  return { bodyText, bodyHeadings, bodyBlocks };
+}
 
 // ── Fetch published stories from the CMS API ───────────────────────────────
 export async function getPublishedSeoStories(): Promise<SeoStory[]> {
   try {
-    const response = await fetch(`${SITE_URL}/api/content`, {
-      headers: { "User-Agent": "MagoriumSeoBot/1.0" },
-    });
-    if (!response.ok) return [];
-    const payload = (await response.json()) as {
-      ok?: boolean;
-      success?: boolean;
-      payload?: {
-        heroes?: Array<{
-          id: string;
-          title: string;
-          subtitle?: string;
-          excerpt?: string;
-          category: string;
-          author?: string;
-          date: string;
-          imageUrl?: string;
-          legacySlugs?: string[];
-        }>;
-        articles?: Array<{
-          id: string;
-          title: string;
-          excerpt?: string;
-          category: string;
-          author: string;
-          date: string;
-          imageUrl?: string;
-          legacySlugs?: string[];
-        }>;
-      };
-      content?: {
-        heroes?: Array<{
-          id: string;
-          title: string;
-          subtitle?: string;
-          excerpt?: string;
-          category: string;
-          author?: string;
-          date: string;
-          imageUrl?: string;
-          legacySlugs?: string[];
-        }>;
-        articles?: Array<{
-          id: string;
-          title: string;
-          excerpt?: string;
-          category: string;
-          author: string;
-          date: string;
-          imageUrl?: string;
-          legacySlugs?: string[];
-        }>;
-      };
-    };
-
-    const raw = payload?.payload || payload?.content;
-    if (!raw) return [];
+    // Fetch all editions in parallel so every article has full body text for SEO
+    const editionResponses = await Promise.allSettled(
+      ALL_EDITIONS.map((edition) =>
+        fetch(`${SITE_URL}/api/content?edition=${edition}`, {
+          headers: { "User-Agent": "MagoriumSeoBot/1.0" },
+        }).then((r) => (r.ok ? r.json() : null))
+      )
+    );
 
     const stories: SeoStory[] = [];
+    const seenIds = new Set<string>();
 
-    for (const hero of raw.heroes || []) {
-      if (isPlaceholderTitle(hero.title)) continue;
-      if (isPlaceholderCopy(hero.subtitle) && isPlaceholderCopy(hero.excerpt)) continue;
-      stories.push({
-        id: hero.id,
-        title: hero.title,
-        category: hero.category,
-        author: canonicalAuthorName(hero.author),
-        date: hero.date,
-        path: buildContentPath(hero.id, hero.title),
-        imageUrl: hero.imageUrl,
-        excerpt: hero.excerpt || hero.subtitle,
-        legacySlugs: hero.legacySlugs,
-      });
+    for (const result of editionResponses) {
+      if (result.status !== "fulfilled" || !result.value) continue;
+      const payload = result.value as {
+        content?: {
+          heroes?: RawStory[];
+          articles?: RawStory[];
+        };
+      };
+      const raw = payload?.content;
+      if (!raw) continue;
+
+      for (const hero of raw.heroes || []) {
+        if (seenIds.has(hero.id)) continue;
+        if (isPlaceholderTitle(hero.title)) continue;
+        if (isPlaceholderCopy(hero.subtitle) && isPlaceholderCopy(hero.excerpt)) continue;
+        seenIds.add(hero.id);
+        const { bodyText, bodyHeadings, bodyBlocks } = extractBodyContent(hero.body);
+        stories.push({
+          id: hero.id,
+          title: hero.title,
+          category: hero.category,
+          author: canonicalAuthorName(hero.author),
+          date: hero.date,
+          path: buildContentPath(hero.id, hero.title),
+          imageUrl: hero.imageUrl,
+          excerpt: hero.excerpt || hero.subtitle,
+          legacySlugs: hero.legacySlugs,
+          seoTags: hero.seoTags,
+          bodyText,
+          bodyHeadings,
+          bodyBlocks,
+        });
+      }
+
+      for (const article of raw.articles || []) {
+        if (seenIds.has(article.id)) continue;
+        if (isPlaceholderTitle(article.title)) continue;
+        if (isPlaceholderCopy(article.excerpt)) continue;
+        seenIds.add(article.id);
+        const { bodyText, bodyHeadings, bodyBlocks } = extractBodyContent(article.body);
+        stories.push({
+          id: article.id,
+          title: article.title,
+          category: article.category,
+          author: canonicalAuthorName(article.author),
+          date: article.date,
+          path: buildContentPath(article.id, article.title),
+          imageUrl: article.imageUrl,
+          excerpt: article.excerpt,
+          legacySlugs: article.legacySlugs,
+          seoTags: article.seoTags,
+          bodyText,
+          bodyHeadings,
+          bodyBlocks,
+        });
+      }
     }
 
-    for (const article of raw.articles || []) {
-      if (isPlaceholderTitle(article.title)) continue;
-      if (isPlaceholderCopy(article.excerpt)) continue;
-      stories.push({
-        id: article.id,
-        title: article.title,
-        category: article.category,
-        author: canonicalAuthorName(article.author),
-        date: article.date,
-        path: buildContentPath(article.id, article.title),
-        imageUrl: article.imageUrl,
-        excerpt: article.excerpt,
-        legacySlugs: article.legacySlugs,
+    // Fallback: also fetch the current "latest" content for anything not in editions
+    try {
+      const latestRes = await fetch(`${SITE_URL}/api/content`, {
+        headers: { "User-Agent": "MagoriumSeoBot/1.0" },
       });
-    }
+      if (latestRes.ok) {
+        const latestPayload = (await latestRes.json()) as {
+          content?: { heroes?: RawStory[]; articles?: RawStory[] };
+        };
+        const latestRaw = latestPayload?.content;
+        if (latestRaw) {
+          for (const hero of latestRaw.heroes || []) {
+            if (seenIds.has(hero.id)) continue;
+            if (isPlaceholderTitle(hero.title)) continue;
+            seenIds.add(hero.id);
+            const { bodyText, bodyHeadings, bodyBlocks } = extractBodyContent(hero.body);
+            stories.push({
+              id: hero.id,
+              title: hero.title,
+              category: hero.category,
+              author: canonicalAuthorName(hero.author),
+              date: hero.date,
+              path: buildContentPath(hero.id, hero.title),
+              imageUrl: hero.imageUrl,
+              excerpt: hero.excerpt || hero.subtitle,
+              legacySlugs: hero.legacySlugs,
+              seoTags: hero.seoTags,
+              bodyText,
+              bodyHeadings,
+              bodyBlocks,
+            });
+          }
+          for (const article of latestRaw.articles || []) {
+            if (seenIds.has(article.id)) continue;
+            if (isPlaceholderTitle(article.title)) continue;
+            seenIds.add(article.id);
+            const { bodyText, bodyHeadings, bodyBlocks } = extractBodyContent(article.body);
+            stories.push({
+              id: article.id,
+              title: article.title,
+              category: article.category,
+              author: canonicalAuthorName(article.author),
+              date: article.date,
+              path: buildContentPath(article.id, article.title),
+              imageUrl: article.imageUrl,
+              excerpt: article.excerpt,
+              legacySlugs: article.legacySlugs,
+              seoTags: article.seoTags,
+              bodyText,
+              bodyHeadings,
+              bodyBlocks,
+            });
+          }
+        }
+      }
+    } catch { /* ignore */ }
 
     return stories.sort((a, b) => +new Date(b.date) - +new Date(a.date));
   } catch {

@@ -148,10 +148,24 @@ story.category = safeCategory;
     ],
   };
 
-  const bodyParagraphs = bodyTextParagraphs.slice(0, 5);
-  const bodyMarkup = bodyParagraphs.length > 0
-    ? bodyParagraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")
-    : `<p>${escapeHtml(story.excerpt || "Read this feature on The Magorium.")}</p>`;
+  // Render full article body — ALL paragraphs and headings — so every crawler
+  // (Googlebot, Bingbot, Applebot/Safari, DuckDuckBot, Android, iPhone WebKit)
+  // indexes the complete article text, not just the excerpt.
+  const bodyBlocks = story.bodyBlocks || [];
+  let bodyMarkup: string;
+  if (bodyBlocks.length > 0) {
+    bodyMarkup = bodyBlocks.map((block) => {
+      if (block.type === "heading") {
+        return `<h2>${escapeHtml(block.content)}</h2>`;
+      }
+      return `<p>${escapeHtml(block.content)}</p>`;
+    }).join("\n");
+  } else if (bodyTextParagraphs.length > 0) {
+    // Fallback: use bodyText array if bodyBlocks not populated
+    bodyMarkup = bodyTextParagraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join("\n");
+  } else {
+    bodyMarkup = `<p>${escapeHtml(story.excerpt || "Read this feature on The Magorium.")}</p>`;
+  }
 
   const html = renderSeoDocument({
     title: `${story.author} | ${story.title} | ${BRAND_NAME}`,
@@ -165,7 +179,12 @@ story.category = safeCategory;
       <p><a href="${SITE_URL}">Home</a> / <a href="${authorUrl}">${escapeHtml(story.author)}</a> / <a href="${SITE_URL}/seo-history">SEO History</a></p>
       <h1>${escapeHtml(story.title)}</h1>
       <p class="muted"><span class="tag">${escapeHtml(story.category)}</span> &nbsp; ${escapeHtml(story.date)} &nbsp; • &nbsp; <strong>Written by:</strong> <a href="${authorUrl}">${escapeHtml(story.author)}</a></p>
-      ${bodyMarkup}
+      <article itemscope itemtype="https://schema.org/NewsArticle">
+        <meta itemprop="headline" content="${escapeHtml(story.title)}">
+        <meta itemprop="author" content="${escapeHtml(story.author)}">
+        <meta itemprop="datePublished" content="${escapeHtml(story.date)}">
+        ${bodyMarkup}
+      </article>
       <p><a href="${authorUrl}">Read all stories by ${escapeHtml(story.author)}</a> · <a href="${SITE_URL}/seo-history">View full SEO history</a></p>
     `,
   });

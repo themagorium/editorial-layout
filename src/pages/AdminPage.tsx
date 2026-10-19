@@ -5,7 +5,7 @@ import {
   getHeroes, getArticles, getAds, saveHeroes, saveArticles, saveAds,
   publishEdition, getPublishedContentSnapshot,
   resetToDefaults, clearLocalDraftStorage, isStorageQuotaExceededError,
-  CATEGORIES, formatEditionLabel, publishStory,
+  CATEGORIES, formatEditionLabel, publishStory, recordPublishedSnapshot,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
 import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, FileText } from "lucide-react";
@@ -230,15 +230,17 @@ function AdminDashboard() {
     const failedTitles: string[] = [];
 
     for (const hero of heroes) {
-      const result = await publishStory(hero.edition, "hero", hero, publishToken);
+      const result = await publishStory(hero.edition, "hero", hero, publishToken, { snapshot: false });
       if (result.success) successCount += 1;
       else { failCount += 1; failedTitles.push(hero.title); }
     }
     for (const article of articles) {
-      const result = await publishStory(article.edition, "article", article, publishToken);
+      const result = await publishStory(article.edition, "article", article, publishToken, { snapshot: false });
       if (result.success) successCount += 1;
       else { failCount += 1; failedTitles.push(article.title); }
     }
+
+    if (successCount > 0) await recordPublishedSnapshot(`Save Changes: ${successCount} stories published`, publishToken);
 
     if (failCount === 0) {
       getEditionsFromState(heroes, articles).forEach((ed) => markEditionAsPublished(ed));
@@ -302,14 +304,15 @@ function AdminDashboard() {
     try {
       const listResponse = await fetch("/api/content?list=backups", { headers: authHeaders, cache: "no-store" });
       const listPayload = (await listResponse.json().catch(() => ({}))) as {
-        backups?: { id: string; createdAt: string; reason: string; stories: number; editions: string[] }[];
+        backups?: { id: string; createdAt: string; reason: string; kind?: string; stories: number; editions: string[] }[];
         error?: string;
       };
-      const latest = listPayload.backups?.[0];
+      // Always the LAST PUBLISHED version of the site.
+      const latest = listPayload.backups?.find((b) => b.kind === "published") ?? listPayload.backups?.[0];
       if (!listResponse.ok || !latest) { toast.error(listPayload.error || "No automatic backups exist yet."); return; }
       const when = new Date(latest.createdAt).toLocaleString();
       if (!window.confirm(
-        `Restore the live site to the backup from ${when}?\n\n${latest.stories} stories across ${latest.editions.length} editions\n(${latest.reason}).\n\nThe current site is backed up first, so this can be undone.`,
+        `Restore the live site to its last published version (${when})?\n\n${latest.stories} stories across ${latest.editions.length} editions\n(${latest.reason}).\n\nThe current site is backed up first, so this can be undone.`,
       )) return;
       const response = await fetch("/api/content", {
         method: "POST",

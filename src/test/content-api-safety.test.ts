@@ -70,6 +70,26 @@ describe("content API never wipes editions by accident", () => {
     expect((await editionContent("2025-10")).heroes).toHaveLength(1);
   });
 
+  it("the newest published backup is always the site exactly as last published", async () => {
+    const r = await call("POST", {
+      body: { phase: "story", edition: "2026-02", storyType: "article", story: story("a-2026-02", "2026-02", "Latest edit") },
+    });
+    expect(r.statusCode).toBe(200);
+    const list = (await call("GET", { query: { list: "backups" } })).body.backups;
+    expect(list[0].kind).toBe("published");
+
+    // A bulk save skips per-story snapshots, then records one at the end.
+    await call("POST", {
+      body: { phase: "story", edition: "2026-02", storyType: "hero", story: story("h-2026-02", "2026-02", "Bulk edit"), snapshot: false },
+    });
+    expect((await call("GET", { query: { list: "backups" } })).body.backups[0].id).toBe(list[0].id);
+    const snap = await call("POST", { body: { phase: "snapshot", reason: "bulk save" } });
+    expect(snap.statusCode).toBe(200);
+    const newest = (await call("GET", { query: { list: "backups" } })).body.backups[0];
+    expect(newest.id).toBe(snap.body.backupId);
+    expect(newest.kind).toBe("published");
+  });
+
   it("only lists backups for an authorised admin", async () => {
     const r = await call("GET", { query: { list: "backups" } });
     expect(r.statusCode).toBe(200);

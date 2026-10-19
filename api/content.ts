@@ -991,11 +991,15 @@ async function getFullContent(): Promise<StoredPayload | null> {
 }
 
 // ===== Automatic site snapshots =====
-// Taken before any write that can remove content, so a mistake is always one
-// call away from being undone: POST { phase: "restore-backup", backupId }.
+// "published": taken AFTER every successful publish, so the newest one is
+//   always an exact copy of the last published site. This is what the admin
+//   "Restore Backup" button restores.
+// "safety": taken BEFORE a delete or restore, so even those can be undone.
+// Restore with POST { phase: "restore-backup", backupId }.
 const BACKUPS_INDEX_KEY = `${NS}:backups`;
-const MAX_BACKUPS = 10;
-type BackupEntry = { id: string; createdAt: string; reason: string; editions: string[]; stories: number };
+const MAX_BACKUPS = 12;
+type BackupKind = "published" | "safety";
+type BackupEntry = { id: string; createdAt: string; reason: string; kind?: BackupKind; editions: string[]; stories: number };
 
 function backupKey(id: string): string {
   return `${NS}:backup:${id}`;
@@ -1005,7 +1009,7 @@ async function listBackups(): Promise<BackupEntry[]> {
   return ensureArray<BackupEntry>(await kvGet<BackupEntry[]>(BACKUPS_INDEX_KEY));
 }
 
-async function snapshotSite(reason: string): Promise<BackupEntry | null> {
+async function snapshotSite(reason: string, kind: BackupKind = "safety"): Promise<BackupEntry | null> {
   const content = await getFullContent();
   if (!content || (content.heroes.length === 0 && content.articles.length === 0)) return null;
   const createdAt = new Date().toISOString();
@@ -1013,6 +1017,7 @@ async function snapshotSite(reason: string): Promise<BackupEntry | null> {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     createdAt,
     reason,
+    kind,
     editions: await getEditionsIndex(),
     stories: content.heroes.length + content.articles.length,
   };
@@ -1021,6 +1026,11 @@ async function snapshotSite(reason: string): Promise<BackupEntry | null> {
   for (const old of backups.slice(MAX_BACKUPS)) await kvDel(backupKey(old.id));
   await kvSet(BACKUPS_INDEX_KEY, backups.slice(0, MAX_BACKUPS));
   return entry;
+}
+
+/** Snapshot of the site exactly as it now stands, right after a publish. */
+async function snapshotPublished(reason: string): Promise<BackupEntry | null> {
+  return snapshotSite(reason, "published");
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -1184,6 +1194,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const meta = (await getMeta()) || { publishedAt: stamp };
         await setMeta({ publishedAt: meta.publishedAt, updatedAt: stamp });
         await rebuildLatestView(meta.publishedAt, stamp);
+        // Bulk saves send snapshot:false per story and one "snapshot" call at the end.
+        if ((req.body as { snapshot?: unknown })?.snapshot !== false) {
+          await snapshotPublished(`published ${storyType} ${sanitized.title || sanitized.id} (${edition})`);
+        }
         void submitIndexNow(
           collectIndexNowUrls(
             storyType === "hero"
@@ -1211,6 +1225,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const meta = (await getMeta()) || { publishedAt: stamp };
         await setMeta({ publishedAt: meta.publishedAt, updatedAt: stamp });
         await rebuildLatestView(meta.publishedAt, stamp);
+        await snapshotPublished(`published after deleting ${storyType}:${id} (${edition})`);
         res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), publishedAt: meta.publishedAt, updatedAt: stamp });
         return;
       }
@@ -1248,7 +1263,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             (previousIndex.heroIds.some((id) => !nextHeroIds.includes(id)) ||
               previousIndex.articleIds.some((id) => !nextArticleIds.includes(id))),
         );
-        if (previousIndex) await snapshotSite(`before edition save ${edition}${wouldRemove ? " (removes stories)" : ""}`);
+        if (wouldRemove) await snapshotSite(`before edition save ${edition} (removes stories)`);
 
         if (previousIndex) {
           const removedHeroIds = previousIndex.heroIds.filter((id) => !nextHeroIds.includes(id));
@@ -1278,6 +1293,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const meta = (await getMeta()) || { publishedAt: stamp };
         await setMeta({ publishedAt: meta.publishedAt, updatedAt: stamp });
         await rebuildLatestView(meta.publishedAt, stamp);
+        await snapshotPublished(`published edition ${edition}`);
         const ads = await getAdsContent();
         void submitIndexNow(collectIndexNowUrls({ heroes, articles, ads }));
         res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), publishedAt: meta.publishedAt, updatedAt: stamp });
@@ -1312,6 +1328,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const meta = (await getMeta()) || { publishedAt: stamp };
         await setMeta({ publishedAt: meta.publishedAt, updatedAt: stamp });
         await rebuildLatestView(meta.publishedAt, stamp);
+        await snapshotPublished(`published after deleting edition ${edition}`);
         res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), deleted: edition, backupId: backup?.id });
         return;
       }
@@ -1328,7 +1345,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const before = await snapshotSite(`before restore of ${backupId}`);
         const stamp = new Date().toISOString();
         await replaceContentAcrossEditions(sanitizePayload(snapshot), snapshot.publishedAt || stamp, stamp);
+        await snapshotPublished(`published by restoring backup from ${entry.createdAt}`);
         res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), restored: backupId, undoBackupId: before?.id });
+        return;
+      }
+
+      // ---- Record the site as it stands now as the last published version ----
+      // Called once at the end of a bulk "Save Changes" (whose per-story
+      // saves skip their own snapshots).
+      if (phase === "snapshot") {
+        await migrateLegacyBlobIfNeeded();
+        const entry = await snapshotPublished(readFirstString((req.body as { reason?: unknown })?.reason).trim() || "published (bulk save)");
+        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), backupId: entry?.id });
         return;
       }
 
@@ -1376,8 +1404,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const content = sanitizePayload(parsed);
         const publishedAt = new Date().toISOString();
         await migrateLegacyBlobIfNeeded();
-        await snapshotSite("before full-site publish (chunked)");
         await writeContentAcrossEditions(content, publishedAt, publishedAt);
+        await snapshotPublished("published full site (chunked)");
         void submitIndexNow(collectIndexNowUrls(content));
         res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), publishedAt, updatedAt: publishedAt });
         return;
@@ -1395,8 +1423,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       const publishedAt = new Date().toISOString();
       await migrateLegacyBlobIfNeeded();
-      await snapshotSite("before full-site publish");
       await writeContentAcrossEditions(content, publishedAt, publishedAt);
+      await snapshotPublished("published full site");
       void submitIndexNow(collectIndexNowUrls(content));
       res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), publishedAt, updatedAt: publishedAt });
       return;

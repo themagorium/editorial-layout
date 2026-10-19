@@ -119,6 +119,22 @@ export interface PublishedEditorialContent {
   publishedAt: string;
   updatedAt?: string;
 }
+/** Records the live site, as it now stands, as the last published backup. */
+export async function recordPublishedSnapshot(reason: string, adminPasswordOrToken?: string) {
+  const authValue = (adminPasswordOrToken || getAdminPublishCredentialFromBrowserStorage() || "").trim();
+  if (!authValue) return { success: false as const };
+  try {
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authValue}`, "x-admin-password": authValue },
+      body: JSON.stringify({ phase: "snapshot", reason }),
+    });
+    return { success: response.ok };
+  } catch {
+    return { success: false as const };
+  }
+}
+
 export async function publishEdition(
   edition: string,
   heroes: HeroItem[],
@@ -1854,6 +1870,7 @@ export async function publishStory(
   storyType: "hero" | "article",
   story: HeroItem | Article,
   adminPasswordOrToken?: string,
+  options: { snapshot?: boolean } = {},
 ) {
   try {
     const authValue = (adminPasswordOrToken || getAdminPublishCredentialFromBrowserStorage() || "").trim();
@@ -1867,7 +1884,7 @@ export async function publishStory(
         Authorization: `Bearer ${authValue}`,
         "x-admin-password": authValue,
       },
-      body: JSON.stringify({ phase: "story", edition, storyType, story }),
+      body: JSON.stringify({ phase: "story", edition, storyType, story, snapshot: options.snapshot !== false }),
     });
     const payload = (await response.json().catch(() => ({}))) as {
       ok?: boolean; success?: boolean; error?: string; publishedAt?: string; updatedAt?: string;

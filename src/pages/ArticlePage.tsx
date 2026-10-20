@@ -354,9 +354,9 @@ export default function ArticlePage() {
           <span>{new Date(content.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
         </div>
 
-    {content.ad && ["bottom-left", "bottom-center", "bottom-right"].includes(content.ad.placement || "center") && (
+    {content.ad && content.ad.placement === "top" && (
           <div className={`my-6 ${getAdPlacementClasses(content.ad.placement)}`}>
-            <AdPlacement ad={content.ad} className="w-full" />
+            <AdPlacement ad={content.ad} className="w-full" align={/left/.test(content.ad.placement || "") ? "left" : /right/.test(content.ad.placement || "") ? "right" : "center"} />
           </div>
         )}
 
@@ -393,7 +393,7 @@ export default function ArticlePage() {
               if (isMidPlacement && content.ad && index === midInsertIndex - 1) {
                 rendered.push(
                   <div key={`${content.ad.id}-inline`} className={getAdPlacementClasses(content.ad.placement)}>
-                    <AdPlacement ad={content.ad} className="w-full" />
+                    <AdPlacement ad={content.ad} className="w-full" align={/left/.test(content.ad.placement || "") ? "left" : /right/.test(content.ad.placement || "") ? "right" : "center"} />
                   </div>,
                 );
               }
@@ -402,9 +402,9 @@ export default function ArticlePage() {
           })()}
         </div>
 
-        {content.ad && ["bottom-left", "bottom-right"].includes(content.ad.placement || "center") && (
+        {content.ad && ["bottom-left", "bottom-center", "bottom-right"].includes(content.ad.placement || "center") && (
           <div className={`mt-8 ${getAdPlacementClasses(content.ad.placement)}`}>
-            <AdPlacement ad={content.ad} className="w-full" />
+            <AdPlacement ad={content.ad} className="w-full" align={/left/.test(content.ad.placement || "") ? "left" : /right/.test(content.ad.placement || "") ? "right" : "center"} />
           </div>
         )}
 

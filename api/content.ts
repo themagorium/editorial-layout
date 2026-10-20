@@ -1233,11 +1233,57 @@ async function snapshotPublished(reason: string): Promise<BackupEntry | null> {
   return snapshotSite(reason, "published");
 }
 
+// ===== Private working drafts (autosave) =====
+// Everything typed or uploaded in the admin is autosaved here, one story at a
+// time, so nothing is lost when the tab closes or the browser is cleared.
+// Drafts are admin-only: never served publicly and never part of the live site
+// until the editor presses Save / Publish.
+const DRAFT_INDEX_KEY = `${NS}:drafts`;
+type DraftRef = { edition: string; storyType: StoryType; id: string; savedAt: string };
+
+function draftKey(edition: string, storyType: StoryType, id: string): string {
+  return `${NS}:draft:${edition}:${storyType}:${id}`;
+}
+
+async function listDraftRefs(): Promise<DraftRef[]> {
+  return ensureArray<DraftRef>(await kvGet<DraftRef[]>(DRAFT_INDEX_KEY));
+}
+
+async function saveDraftStory(edition: string, storyType: StoryType, story: HeroPayload | ArticlePayload): Promise<string> {
+  const savedAt = new Date().toISOString();
+  await kvSet(draftKey(edition, storyType, story.id), { ...story, edition });
+  const refs = (await listDraftRefs()).filter((r) => !(r.edition === edition && r.storyType === storyType && r.id === story.id));
+  refs.push({ edition, storyType, id: story.id, savedAt });
+  await kvSet(DRAFT_INDEX_KEY, refs);
+  return savedAt;
+}
+
+async function deleteDrafts(match: (r: DraftRef) => boolean): Promise<number> {
+  const refs = await listDraftRefs();
+  const remove = refs.filter(match);
+  for (const r of remove) await kvDel(draftKey(r.edition, r.storyType, r.id));
+  if (remove.length) await kvSet(DRAFT_INDEX_KEY, refs.filter((r) => !match(r)));
+  return remove.length;
+}
+
+async function loadAllDrafts(): Promise<{ heroes: HeroPayload[]; articles: ArticlePayload[]; refs: DraftRef[] }> {
+  const refs = await listDraftRefs();
+  const heroes: HeroPayload[] = [];
+  const articles: ArticlePayload[] = [];
+  for (const r of refs) {
+    const story = await kvGet<HeroPayload | ArticlePayload>(draftKey(r.edition, r.storyType, r.id));
+    if (!story) continue;
+    if (r.storyType === "hero") heroes.push(story as HeroPayload);
+    else articles.push(story as ArticlePayload);
+  }
+  return { heroes, articles, refs };
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "GET") {
     try {
       // Database wiped or never filled: serve the published site from GitHub.
-      if (readFirstString(req.query?.list).trim().toLowerCase() !== "backups") {
+      if (!["backups", "drafts"].includes(readFirstString(req.query?.list).trim().toLowerCase())) {
         await migrateLegacyBlobIfNeeded();
         if ((await getEditionsIndex()).length === 0 && respondFromArchive(req, res)) return;
       }
@@ -1337,6 +1383,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         return;
       }
+      // Admin-only: every autosaved working draft, with full content.
+      if (readFirstString(req.query?.list).trim().toLowerCase() === "drafts") {
+        if (!(await authorized(req))) {
+          res.status(401).json({ ok: false, success: false, configured: isKvConfigured(), error: "Unauthorized." });
+          return;
+        }
+        res.setHeader("Cache-Control", "no-store");
+        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), drafts: await loadAllDrafts() });
+        return;
+      }
       // Admin-only list of automatic snapshots (ids for "restore-backup").
       if (readFirstString(req.query?.list).trim().toLowerCase() === "backups") {
         if (!(await authorized(req))) {
@@ -1388,6 +1444,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Remember the editor's time zone so "previous day" means their day.
       await getSiteTimeZone(req).catch(() => "UTC");
       const phase = readFirstString((req.body as { phase?: string } | undefined)?.phase).trim().toLowerCase();
+
+      // ---- Autosave ONE story as a private working draft (never public) ----
+      if (phase === "save-draft") {
+        const edition = normalizeEditionId((req.body as { edition?: unknown })?.edition);
+        const storyType = normalizeStoryType((req.body as { storyType?: unknown })?.storyType);
+        const rawStory = (req.body as { story?: unknown })?.story;
+        if (!edition || !storyType || !rawStory || typeof rawStory !== "object" || !normalizeStoryId((rawStory as { id?: unknown }).id)) {
+          res.status(400).json({ ok: false, success: false, configured: isKvConfigured(), error: "Missing edition, storyType, or story." });
+          return;
+        }
+        const sanitized = storyType === "hero" ? sanitizeHero(rawStory as HeroPayload) : sanitizeArticle(rawStory as ArticlePayload);
+        const savedAt = await saveDraftStory(edition, storyType, sanitized);
+        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), savedAt });
+        return;
+      }
+
+      // ---- Discard drafts (after publishing, or a removed story) ----
+      if (phase === "delete-draft") {
+        const edition = normalizeEditionId((req.body as { edition?: unknown })?.edition);
+        const storyType = normalizeStoryType((req.body as { storyType?: unknown })?.storyType);
+        const id = normalizeStoryId((req.body as { id?: unknown })?.id);
+        const all = (req.body as { all?: unknown })?.all === true;
+        if (!all && !edition) {
+          res.status(400).json({ ok: false, success: false, configured: isKvConfigured(), error: "Missing edition." });
+          return;
+        }
+        const removed = await deleteDrafts((r) => all || (r.edition === edition && (!storyType || r.storyType === storyType) && (!id || r.id === id)));
+        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), removed });
+        return;
+      }
 
       // ---- Save ONE story (smallest possible write) ----
       if (phase === "story") {

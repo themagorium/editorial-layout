@@ -87,6 +87,10 @@ export interface AdSlot {
   position: "hero-sidebar" | "mid-feed" | "bottom-banner" | "sidebar" | "inline-hero" | "inline-article";
   placement?: "top" | "center" | "bottom-left" | "bottom-center" | "bottom-right" | "mid-left" | "mid-right";
   imageUrl?: string;
+  /** Which media the ad shows: a photo or a video (both may be stored). */
+  mediaType?: "image" | "video";
+  /** "contain" shows the whole ad on the page backdrop; "cover" fills the box. */
+  fit?: "contain" | "cover";
   videoUrl?: string;
   linkUrl?: string;
   width: number;
@@ -1901,5 +1905,55 @@ export async function publishStory(
     return { success: true as const, configured: true, publishedAt: payload.publishedAt || payload.updatedAt };
   } catch {
     return { success: false as const, configured: false, error: "Network error while publishing content." };
+  }
+}
+
+// ===== Private working drafts (server autosave) =====
+function draftHeaders(authValue: string) {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${authValue}`,
+    "x-admin-password": authValue, "x-admin-timezone": adminTimeZone(),
+  };
+}
+
+/** Autosaves one story as a private draft. Never touches the live site. */
+export async function saveDraftStory(edition: string, storyType: "hero" | "article", story: HeroItem | Article, authValue: string) {
+  try {
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+      method: "POST",
+      headers: draftHeaders(authValue),
+      body: JSON.stringify({ phase: "save-draft", edition, storyType, story }),
+    });
+    const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; savedAt?: string; error?: string };
+    if (!response.ok || !payload.ok) {
+      return { success: false as const, error: payload.error || (response.status === 413 ? "Story too large to autosave (too many big photos)." : `Autosave failed (${response.status}).`) };
+    }
+    return { success: true as const, savedAt: payload.savedAt || new Date().toISOString() };
+  } catch (error) {
+    return { success: false as const, error: error instanceof Error ? error.message : "Autosave failed." };
+  }
+}
+
+/** Removes private drafts: one story, one edition, or all (after publishing). */
+export async function deleteDrafts(authValue: string, scope: { all?: boolean; edition?: string; storyType?: "hero" | "article"; id?: string }) {
+  try {
+    await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+      method: "POST",
+      headers: draftHeaders(authValue),
+      body: JSON.stringify({ phase: "delete-draft", ...scope }),
+    });
+  } catch { /* drafts are a safety net; a failed cleanup is harmless */ }
+}
+
+/** Loads every autosaved draft (admin only). */
+export async function loadDrafts(authValue: string): Promise<{ heroes: HeroItem[]; articles: Article[] } | null> {
+  try {
+    const response = await fetch(`${PUBLISHED_CONTENT_ENDPOINT}?list=drafts`, { headers: draftHeaders(authValue), cache: "no-store" });
+    if (!response.ok) return null;
+    const payload = (await response.json().catch(() => ({}))) as { drafts?: { heroes?: HeroItem[]; articles?: Article[] } };
+    return { heroes: payload.drafts?.heroes || [], articles: payload.drafts?.articles || [] };
+  } catch {
+    return null;
   }
 }

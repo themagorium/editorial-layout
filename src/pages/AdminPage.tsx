@@ -6,6 +6,7 @@ import {
   publishEdition, getPublishedContentSnapshot,
   resetToDefaults, clearLocalDraftStorage, isStorageQuotaExceededError,
   CATEGORIES, formatEditionLabel, publishStory, recordPublishedSnapshot, adminTimeZone,
+  saveDraftStory, deleteDrafts, loadDrafts,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
 import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, FileText } from "lucide-react";
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 import { fetchAnalytics, mergeContentStats, clearAnalytics, type AnalyticsPayload } from "@/lib/analytics";
 import { getAdminPublishToken, isAdminAuthenticated, setAdminPublishToken, setAdminAuthenticated, resetAdminPasswordAccess } from "@/lib/admin-auth";
 import { fileToOptimizedDataUrl } from "@/lib/media-optimizer";
+import AdPlacement from "@/components/editorial/AdPlacement";
 
 const STORAGE_KEY = "magorium_page_content";
 const DRAFT_EDITIONS_KEY = "magorium_draft_editions";
@@ -60,6 +62,39 @@ function createOctoberPatternBody(seed: string): ArticleBodyBlock[] {
     { id: `${seed}-t3`, type: "text", content: "Add third body paragraph" },
     { id: `${seed}-m3`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "Upload photo or video" },
   ];
+}
+
+// Every edition always offers 3 Heroes and 4 Editor Picks to work on.
+const HERO_SLOTS = 3;
+const PICK_SLOTS = 4;
+const STARTER_HERO_CATEGORIES: Category[] = ["Travel", "Fashion", "Art & Design"];
+const STARTER_PICK_CATEGORIES: Category[] = ["Yachting", "Sports", "Golf", "Tennis"];
+
+function makeStarterHero(edition: string, n: number): HeroItem {
+  const id = `h-${Date.now()}-${n}-${Math.random().toString(36).slice(2, 6)}`;
+  return { id, title: `New Hero ${n}`, subtitle: "", seoTags: [], category: STARTER_HERO_CATEGORIES[(n - 1) % 3], imageUrl: "", author: "Editor", body: createOctoberPatternBody(id), date: new Date().toISOString().split("T")[0], edition } as HeroItem;
+}
+
+function makeStarterPick(edition: string, n: number): Article {
+  const id = `a-${Date.now()}-${n}-${Math.random().toString(36).slice(2, 6)}`;
+  return { id, title: `New Article ${n}`, excerpt: "", seoTags: [], category: STARTER_PICK_CATEGORIES[(n - 1) % 4], imageUrl: "", author: "Editor", body: createOctoberPatternBody(id), date: new Date().toISOString().split("T")[0], edition };
+}
+
+/** A blank starter slot nobody has typed into yet: never published or autosaved. */
+function isUntouchedStarter(story: HeroItem | Article): boolean {
+  if (!/^New (Hero|Article)( \d+)?$/.test((story.title || "").trim())) return false;
+  const summary = ("subtitle" in story ? story.subtitle : (story as Article).excerpt) || "";
+  if (summary.trim() && !/^Add your .* (hero story|article)$/.test(summary.trim())) return false;
+  const media = story as Article;
+  if (media.imageUrl || media.videoUrl || media.secondaryImageUrl || media.ad) return false;
+  return (story.body || []).every((b) => !b.content || /^Add (first|second|third) body paragraph$/.test(b.content));
+}
+
+function mergeById<T extends { id: string }>(base: T[], overrides: T[]): T[] {
+  const byId = new Map(overrides.map((o) => [o.id, o]));
+  const merged = base.map((b) => byId.get(b.id) ?? b);
+  const seen = new Set(base.map((b) => b.id));
+  return [...merged, ...overrides.filter((o) => !seen.has(o.id))];
 }
 
 function parseSeoTagsInput(value: string): string[] {
@@ -186,6 +221,9 @@ function AdminDashboard() {
   const [newEditionMonth, setNewEditionMonth] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishingEdition, setIsPublishingEdition] = useState(false);
+  const [draftsReady, setDraftsReady] = useState(false);
+  const [autosave, setAutosave] = useState<{ state: "idle" | "saving" | "saved" | "error"; at?: string; error?: string }>({ state: "idle" });
+  const lastSavedRef = useRef<Map<string, string>>(new Map());
   const [draftEditions, setDraftEditions] = useState<string[]>(() => getDraftEditions());
   const [pageContent, setPageContent] = useState<PageContent>(() => {
     try {
@@ -200,11 +238,25 @@ function AdminDashboard() {
     const initialize = async () => {
       const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: true });
       if (!active) return;
-      setHeroes(snapshot.heroes);
-      setArticles(snapshot.articles);
+      // Bring back everything autosaved but not yet published.
+      const token = getAdminPublishToken();
+      const drafts = token ? await loadDrafts(token) : null;
+      if (!active) return;
+      const loadedHeroes = drafts ? mergeById(snapshot.heroes, drafts.heroes) : snapshot.heroes;
+      const loadedArticles = drafts ? mergeById(snapshot.articles, drafts.articles) : snapshot.articles;
+      lastSavedRef.current = new Map([
+        ...loadedHeroes.map((h) => [`hero:${h.id}`, JSON.stringify(h)] as [string, string]),
+        ...loadedArticles.map((a) => [`article:${a.id}`, JSON.stringify(a)] as [string, string]),
+      ]);
+      setHeroes(loadedHeroes);
+      setArticles(loadedArticles);
       setAds(snapshot.ads);
-      const initialEditions = getEditionsFromState(snapshot.heroes, snapshot.articles);
+      const initialEditions = getEditionsFromState(loadedHeroes, loadedArticles);
       if (initialEditions.length > 0) setCurrentEdition(initialEditions[0]);
+      if (drafts && drafts.heroes.length + drafts.articles.length > 0) {
+        toast.success(`Restored ${drafts.heroes.length + drafts.articles.length} autosaved draft stor${drafts.heroes.length + drafts.articles.length === 1 ? "y" : "ies"}.`);
+      }
+      setDraftsReady(drafts !== null);
     };
     void initialize();
     return () => { active = false; };
@@ -213,6 +265,58 @@ function AdminDashboard() {
   const editions = useMemo(() => getEditionsFromState(heroes, articles), [heroes, articles]);
   const filteredHeroes = currentEdition ? heroes.filter((h) => h.edition === currentEdition) : heroes;
   const filteredArticles = currentEdition ? articles.filter((a) => a.edition === currentEdition) : articles;
+
+  // Always 3 Hero slots and 4 Editor Pick slots in the edition being edited.
+  useEffect(() => {
+    if (!currentEdition) return;
+    const heroCount = heroes.filter((h) => h.edition === currentEdition).length;
+    const pickCount = articles.filter((a) => a.edition === currentEdition).length;
+    if (heroCount < HERO_SLOTS) setHeroes((prev) => [...prev, ...Array.from({ length: HERO_SLOTS - heroCount }, (_, i) => makeStarterHero(currentEdition, heroCount + i + 1))]);
+    if (pickCount < PICK_SLOTS) setArticles((prev) => [...prev, ...Array.from({ length: PICK_SLOTS - pickCount }, (_, i) => makeStarterPick(currentEdition, pickCount + i + 1))]);
+  }, [currentEdition, heroes, articles]);
+
+  // Autosave every change as a private server draft (photos included), so
+  // nothing typed or uploaded is lost when the tab closes.
+  useEffect(() => {
+    if (!draftsReady) return;
+    const timer = window.setTimeout(async () => {
+      const token = getAdminPublishToken();
+      if (!token) return;
+      const current: ["hero" | "article", HeroItem | Article][] = [
+        ...heroes.map((h) => ["hero", h] as ["hero", HeroItem]),
+        ...articles.map((a) => ["article", a] as ["article", Article]),
+      ];
+      const changed = current.filter(([type, story]) => !isUntouchedStarter(story) && lastSavedRef.current.get(`${type}:${story.id}`) !== JSON.stringify(story));
+      const currentKeys = new Set(current.map(([type, story]) => `${type}:${story.id}`));
+      const removed = [...lastSavedRef.current.keys()].filter((key) => !currentKeys.has(key));
+      if (changed.length === 0 && removed.length === 0) return;
+      setAutosave({ state: "saving" });
+      let error = "";
+      for (const [type, story] of changed) {
+        const json = JSON.stringify(story);
+        const result = await saveDraftStory(story.edition, type, story, token);
+        if (result.success) lastSavedRef.current.set(`${type}:${story.id}`, json);
+        else error = `${story.title || "A story"}: ${result.error}`;
+      }
+      for (const key of removed) {
+        const [type, id] = key.split(/:(.+)/) as ["hero" | "article", string];
+        const json = lastSavedRef.current.get(key);
+        const edition = json ? (JSON.parse(json) as { edition?: string }).edition : undefined;
+        if (edition) await deleteDrafts(token, { edition, storyType: type, id });
+        lastSavedRef.current.delete(key);
+      }
+      setAutosave(error ? { state: "error", error } : { state: "saved", at: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
+    }, 1500);
+    return () => window.clearTimeout(timer);
+  }, [heroes, articles, draftsReady]);
+
+  // Warn before leaving while an autosave is still running.
+  useEffect(() => {
+    if (autosave.state !== "saving") return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [autosave.state]);
 
   const save = async () => {
   if (isSaving) return;
@@ -229,12 +333,12 @@ function AdminDashboard() {
     let failCount = 0;
     const failedTitles: string[] = [];
 
-    for (const hero of heroes) {
+    for (const hero of heroes.filter((h) => !isUntouchedStarter(h))) {
       const result = await publishStory(hero.edition, "hero", hero, publishToken, { snapshot: false });
       if (result.success) successCount += 1;
       else { failCount += 1; failedTitles.push(hero.title); }
     }
-    for (const article of articles) {
+    for (const article of articles.filter((a) => !isUntouchedStarter(a))) {
       const result = await publishStory(article.edition, "article", article, publishToken, { snapshot: false });
       if (result.success) successCount += 1;
       else { failCount += 1; failedTitles.push(article.title); }
@@ -245,6 +349,7 @@ function AdminDashboard() {
     if (failCount === 0) {
       getEditionsFromState(heroes, articles).forEach((ed) => markEditionAsPublished(ed));
       setDraftEditions(getDraftEditions());
+      await deleteDrafts(publishToken, { all: true });
       toast.success(`All ${successCount} items published live.`);
     } else {
       toast.error(`${successCount} published, ${failCount} FAILED to publish live: ${failedTitles.join(", ")}. Nothing was silently saved to local storage — please retry the failed items.`);
@@ -262,13 +367,14 @@ function AdminDashboard() {
     try {
       const publishToken = getAdminPublishToken();
       if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
-      const result = await publishEdition(currentEdition, filteredHeroes, filteredArticles, ads, publishToken);
+      const result = await publishEdition(currentEdition, filteredHeroes.filter((h) => !isUntouchedStarter(h)), filteredArticles.filter((a) => !isUntouchedStarter(a)), ads, publishToken);
       if (!result.success) {
         toast.error(result.error || "Could not publish this edition to live.");
         return;
       }
       markEditionAsPublished(currentEdition);
       setDraftEditions(getDraftEditions());
+      await deleteDrafts(publishToken, { edition: currentEdition });
       toast.success(`${formatEditionLabel(currentEdition)} is now live.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not publish this edition.");
@@ -421,7 +527,13 @@ function AdminDashboard() {
                 )}
               </div>
             </div>
-            <div className="mt-3 text-xs text-muted-foreground font-sans">{filteredHeroes.length} heroes · {filteredArticles.length} articles in this edition</div>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground font-sans">
+              <span>{filteredHeroes.length} heroes · {filteredArticles.length} editor picks in this edition</span>
+              {autosave.state === "saving" && <span className="text-primary">Autosaving…</span>}
+              {autosave.state === "saved" && <span className="text-emerald-400">✓ All work autosaved as a private draft at {autosave.at} (not live until you publish)</span>}
+              {autosave.state === "error" && <span className="text-destructive">Autosave problem — {autosave.error}</span>}
+              {!draftsReady && <span className="text-yellow-500">Autosave is off: sign out and back in to turn it on.</span>}
+            </div>
           </div>
         )}
 
@@ -430,7 +542,7 @@ function AdminDashboard() {
             <button key={t} onClick={() => setTab(t)} className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
               {t === "analytics" && <BarChart3 className="w-4 h-4" />}
               {t === "pages" && <FileText className="w-4 h-4" />}
-              {t === "ads" ? "Advertising" : t === "analytics" ? "Analytics" : t === "pages" ? "Pages" : t}
+              {t === "ads" ? "Advertising" : t === "analytics" ? "Analytics" : t === "pages" ? "Pages" : t === "articles" ? "Editor Picks" : "Heroes"}
             </button>
           ))}
         </div>
@@ -452,8 +564,8 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
   return (
     <div className="space-y-6">
       <AddButton onClick={addHero} label={`Add Hero to ${currentEdition ? formatEditionLabel(currentEdition) : "Edition"}`} />
-      {filteredHeroes.map((hero) => (
-        <ContentCard key={hero.id} onRemove={() => remove(hero.id)}>
+      {filteredHeroes.map((hero, index) => (
+        <ContentCard key={hero.id} onRemove={() => remove(hero.id)} label={`Hero ${index + 1}`}>
           <EditableStoryForm
             kind="hero" title={hero.title} summary={hero.subtitle} category={hero.category} author={hero.author || ""} seoTags={hero.seoTags || []} date={hero.date} featured={hero.featured} imageUrl={hero.imageUrl} videoUrl={hero.videoUrl} secondaryImageUrl={hero.secondaryImageUrl || ""} secondaryImageCaption={hero.secondaryImageCaption || ""} secondaryImageCitation={hero.secondaryImageCitation || ""} secondaryImageAlign={hero.secondaryImageAlign || "center"} secondaryImageWidth={hero.secondaryImageWidth || "full"} body={hero.body || []}
             onTitleChange={(v) => update(hero.id, { title: v })} onSummaryChange={(v) => update(hero.id, { subtitle: v })} onCategoryChange={(v) => update(hero.id, { category: v })} onAuthorChange={(v) => update(hero.id, { author: v })} onSeoTagsChange={(v) => update(hero.id, { seoTags: v })} onDateChange={(v) => update(hero.id, { date: v })} onFeaturedChange={(v) => update(hero.id, { featured: v })} onImageChange={(v) => update(hero.id, { imageUrl: v })} onVideoChange={(v) => update(hero.id, { videoUrl: v })} onSecondaryImageChange={(v) => update(hero.id, { secondaryImageUrl: v })} onSecondaryImageCaptionChange={(v) => update(hero.id, { secondaryImageCaption: v })} onSecondaryImageCitationChange={(v) => update(hero.id, { secondaryImageCitation: v })} onSecondaryImageAlignChange={(v) => update(hero.id, { secondaryImageAlign: v })} onSecondaryImageWidthChange={(v) => update(hero.id, { secondaryImageWidth: v })} onBodyChange={(v) => update(hero.id, { body: v })} onNormalizeBody={() => update(hero.id, { body: normalizeBodyFlow(hero.body || [], hero.imageUrl, hero.videoUrl) })} sources={hero.sources || ""} onSourcesChange={(v) => update(hero.id, { sources: v })} ad={hero.ad} onAdChange={(v) => update(hero.id, { ad: v })}
@@ -471,14 +583,14 @@ function ArticlesManager({ articles, setArticles, filteredArticles, currentEditi
   const saveArticleLive = async (article: Article) => {
     if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
     const result = await publishStory(currentEdition, "article", article, publishToken);
-    if (result.success) toast.success(`"${article.title}" published.`);
+    if (result.success) { await deleteDrafts(publishToken, { edition: article.edition, storyType: "article", id: article.id }); toast.success(`"${article.title}" published.`); }
     else toast.error(result.error || "Could not publish this article.");
   };
   return (
     <div className="space-y-6">
-      <AddButton onClick={addArticle} label={`Add Article to ${currentEdition ? formatEditionLabel(currentEdition) : "Edition"}`} />
-      {filteredArticles.map((article) => (
-        <ContentCard key={article.id} onRemove={() => remove(article.id)}>
+      <AddButton onClick={addArticle} label={`Add Editor Pick to ${currentEdition ? formatEditionLabel(currentEdition) : "Edition"}`} />
+      {filteredArticles.map((article, index) => (
+        <ContentCard key={article.id} onRemove={() => remove(article.id)} label={`Editor Pick ${index + 1}`}>
           <EditableStoryForm
             kind="article" title={article.title} summary={article.excerpt} category={article.category} author={article.author} seoTags={article.seoTags || []} date={article.date} featured={article.featured} imageUrl={article.imageUrl} videoUrl={article.videoUrl} secondaryImageUrl={article.secondaryImageUrl || ""} secondaryImageCaption={article.secondaryImageCaption || ""} secondaryImageCitation={article.secondaryImageCitation || ""} secondaryImageAlign={article.secondaryImageAlign || "center"} secondaryImageWidth={article.secondaryImageWidth || "full"} body={article.body || []}
             onTitleChange={(v) => update(article.id, { title: v })} onSummaryChange={(v) => update(article.id, { excerpt: v })} onCategoryChange={(v) => update(article.id, { category: v })} onAuthorChange={(v) => update(article.id, { author: v })} onSeoTagsChange={(v) => update(article.id, { seoTags: v })} onDateChange={(v) => update(article.id, { date: v })} onFeaturedChange={(v) => update(article.id, { featured: v })} onImageChange={(v) => update(article.id, { imageUrl: v })} onVideoChange={(v) => update(article.id, { videoUrl: v })} onSecondaryImageChange={(v) => update(article.id, { secondaryImageUrl: v })} onSecondaryImageCaptionChange={(v) => update(article.id, { secondaryImageCaption: v })} onSecondaryImageCitationChange={(v) => update(article.id, { secondaryImageCitation: v })} onSecondaryImageAlignChange={(v) => update(article.id, { secondaryImageAlign: v })} onSecondaryImageWidthChange={(v) => update(article.id, { secondaryImageWidth: v })} onBodyChange={(v) => update(article.id, { body: v })} onNormalizeBody={() => update(article.id, { body: normalizeBodyFlow(article.body || [], article.imageUrl, article.videoUrl) })} sources={article.sources || ""} onSourcesChange={(v) => update(article.id, { sources: v })} ad={article.ad} onAdChange={(v) => update(article.id, { ad: v })}
@@ -646,49 +758,131 @@ sources?: string; onSourcesChange?: (v: string) => void;
           </div>
         )}
 
-        <div className="mt-4 pt-4 border-t border-border">
-          <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-            <input
-              type="checkbox"
-              checked={Boolean(ad)}
-              onChange={(e) => {
-               if (e.target.checked) {
-                  onAdChange({
-                    id: `inline-ad-${Date.now()}`,
-                    label: isArticle ? "Article Ad" : "Hero Ad",
-                    position: isArticle ? "inline-article" : "inline-hero",
-                    placement: "center",
-                    width: 300,
-                    height: 250,
-                  });
-                } else {
-                  onAdChange(undefined);
-                }
-              }}
-              className="accent-primary"
-            />
-            Attach an ad to this {isArticle ? "article" : "hero"}
-          </label>
+        <StoryAdBox ad={ad} onAdChange={onAdChange} storyLabel={isArticle ? "editor pick" : "hero"} position={isArticle ? "inline-article" : "inline-hero"} />
+      </div>
+    </div>
+  );
+}
 
-          {ad && (
-            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 mt-3">
-              <MediaUpload
-                imageUrl={ad.imageUrl}
-                videoUrl={ad.videoUrl}
-                onImage={(url) => onAdChange({ ...ad, imageUrl: url })}
-                onVideo={(url) => onAdChange({ ...ad, videoUrl: url })}
-              />
-              <div className="space-y-3">
-                <span className="text-xs text-muted-foreground">
-                  W: <input type="number" value={ad.width} onChange={(e) => onAdChange({ ...ad, width: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
-                  {" "}× H: <input type="number" value={ad.height} onChange={(e) => onAdChange({ ...ad, height: parseInt(e.target.value) || 0 })} className="w-16 bg-secondary text-foreground px-1 py-0.5 rounded" />
-                </span>
-                <input value={ad.linkUrl || ""} onChange={(e) => onAdChange({ ...ad, linkUrl: e.target.value })} placeholder="Click-through URL" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
+const AD_SIZE_PRESETS: { label: string; width: number; height: number }[] = [
+  { label: "Medium Rectangle", width: 300, height: 250 },
+  { label: "Large Rectangle", width: 336, height: 280 },
+  { label: "Half Page", width: 300, height: 600 },
+  { label: "Leaderboard", width: 728, height: 90 },
+  { label: "Billboard", width: 970, height: 250 },
+  { label: "Mobile Banner", width: 320, height: 100 },
+];
+
+const AD_PLACEMENTS: { value: NonNullable<AdSlot["placement"]>; label: string }[] = [
+  { value: "bottom-center", label: "Bottom, centred" },
+  { value: "mid-left", label: "Middle, left side" },
+  { value: "mid-right", label: "Middle, right side" },
+];
+
+const MAX_AD_VIDEO_BYTES = 3.5 * 1024 * 1024;
+
+/** The advertisement box shown on every Hero and Editor Pick. */
+function StoryAdBox({ ad, onAdChange, storyLabel, position }: { ad?: AdSlot; onAdChange: (v: AdSlot | undefined) => void; storyLabel: string; position: AdSlot["position"] }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const enabled = Boolean(ad);
+  const mediaType: "image" | "video" = ad?.mediaType ?? (ad?.videoUrl && !ad?.imageUrl ? "video" : "image");
+  const isPreset = ad ? AD_SIZE_PRESETS.some((p) => p.width === ad.width && p.height === ad.height) : true;
+  const [customSize, setCustomSize] = useState(!isPreset);
+
+  const enable = () => onAdChange({ id: `inline-ad-${Date.now()}`, label: `${storyLabel[0].toUpperCase()}${storyLabel.slice(1)} Ad`, position, placement: "bottom-center", width: 300, height: 250, mediaType: "image", fit: "contain" });
+  const patch = (p: Partial<AdSlot>) => ad && onAdChange({ ...ad, ...p });
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !ad) return;
+    if (mediaType === "video" && file.size > MAX_AD_VIDEO_BYTES) { toast.error("That video is too large. Please use a short clip under 3.5 MB (MP4 or WebM)."); return; }
+    setBusy(true);
+    try {
+      const url = await fileToOptimizedDataUrl(file);
+      patch(mediaType === "video" ? { videoUrl: url, mediaType: "video" } : { imageUrl: url, mediaType: "image" });
+    } finally { setBusy(false); }
+  };
+
+  const currentUrl = mediaType === "video" ? ad?.videoUrl : ad?.imageUrl;
+  const segment = (active: boolean) => `px-3 py-1.5 text-[11px] uppercase tracking-wider rounded border transition-colors ${active ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`;
+
+  return (
+    <div className="mt-4 pt-4 border-t border-border">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h4 className="text-sm font-semibold text-primary font-sans">Advertisement</h4>
+          <p className="text-[11px] text-muted-foreground font-sans">An ad placed inside this {storyLabel}. It sits on the page's dark blue/purple backdrop so it blends in.</p>
+        </div>
+        <button type="button" onClick={() => (enabled ? onAdChange(undefined) : enable())} className={segment(enabled)}>{enabled ? "Ad on — remove" : "+ Add an ad"}</button>
+      </div>
+
+      {ad && (
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-6 mt-4">
+          <div className="space-y-4">
+            <div>
+              <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Ad media</span>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => patch({ mediaType: "image" })} className={segment(mediaType === "image")}><Image className="w-3 h-3 inline mr-1" />Photo</button>
+                <button type="button" onClick={() => patch({ mediaType: "video" })} className={segment(mediaType === "video")}><Video className="w-3 h-3 inline mr-1" />Video</button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 mt-2">
+                <input ref={fileRef} type="file" accept={mediaType === "video" ? "video/*" : "image/*"} className="hidden" onChange={handleFile} />
+                <button type="button" onClick={() => fileRef.current?.click()} disabled={busy} className="flex items-center gap-2 px-3 py-2 text-xs border border-primary text-primary rounded hover:bg-primary/10 transition-colors disabled:opacity-60"><Upload className="w-3 h-3" />{busy ? "Uploading…" : currentUrl ? `Replace ${mediaType === "video" ? "video" : "photo"}` : `Upload ${mediaType === "video" ? "video" : "photo"}`}</button>
+                {currentUrl && <button type="button" onClick={() => patch(mediaType === "video" ? { videoUrl: undefined } : { imageUrl: undefined })} className="px-3 py-2 text-xs text-muted-foreground hover:text-destructive">Remove {mediaType === "video" ? "video" : "photo"}</button>}
+              </div>
+              {mediaType === "video" && <p className="text-[10px] text-muted-foreground mt-1">Plays silently on a loop. Short clips under 3.5 MB.</p>}
+            </div>
+
+            <div>
+              <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Size</span>
+              <div className="flex flex-wrap gap-2">
+                {AD_SIZE_PRESETS.map((p) => (
+                  <button key={p.label} type="button" onClick={() => { setCustomSize(false); patch({ width: p.width, height: p.height }); }} className={segment(!customSize && ad.width === p.width && ad.height === p.height)}>{p.label} · {p.width}×{p.height}</button>
+                ))}
+                <button type="button" onClick={() => setCustomSize(true)} className={segment(customSize)}>Custom</button>
+              </div>
+              {customSize && (
+                <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                  W <input type="number" min={50} max={1200} value={ad.width} onChange={(e) => patch({ width: Math.max(0, parseInt(e.target.value) || 0) })} className="w-20 bg-secondary text-foreground px-2 py-1 rounded" />
+                  × H <input type="number" min={50} max={1200} value={ad.height} onChange={(e) => patch({ height: Math.max(0, parseInt(e.target.value) || 0) })} className="w-20 bg-secondary text-foreground px-2 py-1 rounded" /> px
+                </div>
+              )}
+            </div>
+
+            <div>
+              <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Position — choose one (the ad appears only there)</span>
+              <div className="flex flex-wrap gap-2">
+                {AD_PLACEMENTS.map((p) => {
+                  const selected = (AD_PLACEMENTS.some((x) => x.value === ad.placement) ? ad.placement : "bottom-center") === p.value;
+                  return <button key={p.value} type="button" aria-pressed={selected} onClick={() => patch({ placement: p.value })} className={segment(selected)}>{p.label}</button>;
+                })}
               </div>
             </div>
-          )}
+
+            <div>
+              <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Fit</span>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => patch({ fit: "contain" })} className={segment((ad.fit ?? "contain") === "contain")}>Whole ad, edges blend into page</button>
+                <button type="button" onClick={() => patch({ fit: "cover" })} className={segment(ad.fit === "cover")}>Fill the box (may crop)</button>
+              </div>
+            </div>
+
+            <input value={ad.linkUrl || ""} onChange={(e) => patch({ linkUrl: e.target.value })} placeholder="Click-through URL (where the ad goes when clicked)" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
+            <input value={ad.label || ""} onChange={(e) => patch({ label: e.target.value })} placeholder="Advertiser name (internal, also used as the image description)" className="w-full bg-secondary text-foreground px-3 py-2 rounded text-sm font-sans" />
+          </div>
+
+          <div>
+            <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-sans mb-2">Preview on the page backdrop</span>
+            <div className="rounded border border-border bg-background p-4">
+              {currentUrl
+                ? <AdPlacement ad={{ ...ad, mediaType }} preview />
+                : <div className="mx-auto flex items-center justify-center rounded-sm border border-dashed border-primary/30 text-[11px] text-muted-foreground" style={{ width: ad.width, maxWidth: "100%", aspectRatio: `${ad.width || 300} / ${ad.height || 250}` }}>{ad.width}×{ad.height} — upload a {mediaType === "video" ? "video" : "photo"}</div>}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -893,9 +1087,10 @@ function PagesManager({ pageContent, setPageContent }: { pageContent: PageConten
   );
 }
 
-function ContentCard({ children, onRemove }: { children: React.ReactNode; onRemove?: () => void }) {
+function ContentCard({ children, onRemove, label }: { children: React.ReactNode; onRemove?: () => void; label?: string }) {
   return (
     <div className="bg-card border border-border rounded p-5 relative group">
+      {label && <div className="mb-3 text-[11px] uppercase tracking-[0.25em] text-primary font-sans">{label}</div>}
       {children}
       {onRemove && (
         <button onClick={onRemove} className="absolute top-3 right-3 p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4" /></button>

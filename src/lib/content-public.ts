@@ -87,7 +87,12 @@ export interface AdSlot {
   id: string;
   label: string;
 position: "hero-sidebar" | "mid-feed" | "bottom-banner" | "sidebar" | "inline-hero" | "inline-article";
+  placement?: "top" | "center" | "bottom-left" | "bottom-center" | "bottom-right" | "mid-left" | "mid-right";
   imageUrl?: string;
+  /** Which media the ad shows: a photo or a video (both may be stored). */
+  mediaType?: "image" | "video";
+  /** "contain" shows the whole ad on the page backdrop; "cover" fills the box. */
+  fit?: "contain" | "cover";
   videoUrl?: string;
   linkUrl?: string;
   width: number;

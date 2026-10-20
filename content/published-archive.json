@@ -1,5 +1,5 @@
 {
- "exportedAt": "2026-10-20T03:14:13.734Z",
+ "exportedAt": "2026-10-20T03:56:47.522Z",
  "source": "https://www.themagorium.com/api/content",
  "ads": [
   {
@@ -5023,7 +5023,7 @@
     {
      "id": "v1-kusama",
      "title": "Kusama Before the Crowds",
-     "excerpt": "Pumpkins, infinity, and luminous polka worlds — Kusama's language of repetition and wonder arrives at Fondation Beyeler in Basel.",
+     "excerpt": "Art & Design · Fondation Beyeler, Riehen/Basel · 12 October 2025 – 25 January 2026 · Switzerland's first major Yayoi Kusama retrospective, seven decades in more than 300 works",
      "category": "Art & Design",
      "imageUrl": "/assets/article-kusama-Kj0OfmAv.webp",
      "author": "Charlotte Thames",
@@ -5031,26 +5031,139 @@
      "edition": "2025-10",
      "body": [
       {
-       "id": "v1-kusama-auto-t-0",
+       "id": "v1-kusama-t-1",
        "type": "text",
-       "content": "Pumpkins, infinity, and luminous polka worlds — Kusama's language of repetition and wonder arrives at Fondation Beyeler in Riehen, near Basel. The exhibition explores the artist's enduring fascination with the infinite, transforming the galleries into immersive environments that blur the line between viewer and artwork."
+       "content": "Go early.\n\nBy mid-morning the timed tickets are gone and the queue for the mirror rooms has begun. But at nine o'clock, when the Fondation Beyeler opens its doors at the edge of the fields of Riehen and the light pours through Renzo Piano's glass, there are a few minutes when you can have Yayoi Kusama almost to yourself.\n\nThe exhibition that opened on 12 October 2025 is the first major retrospective of Kusama ever held in Switzerland, and the largest exhibition in the Beyeler's history. It took more than four years to prepare. More than 300 works fill ten galleries and spill into the park, borrowed from Japan, Singapore, the Netherlands, Germany, Austria, Sweden, France and Switzerland. More than 130 of them have never been shown in Europe.\n\nSeventy years of work. One artist. Ninety-six years old, and still painting."
       },
       {
-       "id": "v1-kusama-auto-m-0",
+       "id": "v1-kusama-m-1",
        "type": "image",
        "content": "/assets/article-kusama-Kj0OfmAv.webp",
+       "caption": "",
+       "citation": "",
        "imageAlign": "center",
-       "imageWidth": "full",
-       "caption": "Featured image",
-       "citation": ""
+       "imageWidth": "large"
       },
       {
-       "id": "v1-kusama-auto-t-1",
+       "id": "v1-kusama-t-2",
        "type": "text",
-       "content": "Fondation Beyeler's setting — Renzo Piano's glass pavilion surrounded by fields and old trees — provides a contemplative counterpoint to Kusama's maximalism. The infinity rooms, the pumpkin installations, and the polka-dot trees that spill into the garden create a journey that oscillates between intimacy and overwhelm."
+       "content": "A GIRL IN MATSUMOTO\n\nKusama was born in 1929 in Matsumoto, in the mountains of central Japan, into a family of plant nursery and seed growers. She studied traditional Japanese painting in Kyoto, then taught herself oil painting. In 1952 she held her first solo show in Matsumoto, more than 200 works at once.\n\nThe exhibition reaches back to those years, and the early work is a revelation. Screaming Girl, from 1952, is small and raw. Atomic Bomb, from 1954, was painted less than a decade after Hiroshima and Nagasaki. The dots are already there, but they look like cells, seeds and wounds rather than decoration.\n\nIn 1955 she wrote to Georgia O'Keeffe for advice, and the two corresponded for years. In 1957 she destroyed many of her paintings, left Japan for Seattle, and a year later arrived in New York."
+      },
+      {
+       "id": "v1-kusama-m-2",
+       "type": "image",
+       "content": "",
+       "caption": "",
+       "citation": "",
+       "imageAlign": "center",
+       "imageWidth": "large"
+      },
+      {
+       "id": "v1-kusama-t-3",
+       "type": "text",
+       "content": "NEW YORK AND THE NET\n\nShe rented a studio in the East Village and began to paint without stopping. The result was the Infinity Nets: vast canvases covered edge to edge in thousands of small painted arcs, the same gesture repeated until the surface seems to breathe. No. N2, from 1961, is one of them, on loan from the Yayoi Kusama Museum in Tokyo.\n\n\"Painting was a fever born of desperation,\" she wrote later, \"the only way for me to go on living in this world.\"\n\nFrom the nets came the Accumulations. Furniture, boats and clothes disappeared under hundreds of stuffed fabric protrusions. Untitled (Chair), from 1963, is here, a domestic object turned into something soft, strange and unsettling. The same year, her Aggregation: One Thousand Boats Show filled the Gertrude Stein Gallery in New York. In 1965 came the first mirror room, Infinity Mirror Room – Phalli's Field, at the Richard Castellane Gallery.\n\nShe was everywhere: happenings, body-paint performances, films, a fashion boutique in 1969. The Beyeler gives that restless decade its full width, from paintings to collage, fashion and performance."
+      },
+      {
+       "id": "v1-kusama-m-3",
+       "type": "image",
+       "content": "",
+       "caption": "",
+       "citation": "",
+       "imageAlign": "center",
+       "imageWidth": "large"
+      },
+      {
+       "id": "v1-kusama-t-4",
+       "type": "text",
+       "content": "NARCISSUS GARDEN\n\nIn 1966, Kusama went to the 33rd Venice Biennale without an invitation. With the support of Lucio Fontana, she laid hundreds of mirrored spheres on the lawn outside the Italian Pavilion and offered them to passers-by for two dollars each. She called it Narcissus Garden. The authorities made her stop selling them.\n\nNearly sixty years later, the spheres are back, at the Beyeler, in a version dated 1966/2025. Each one reflects whatever surrounds it: the light, the room, the visitors bending over them and each other. A field of small silver worlds that only exist when someone looks."
+      },
+      {
+       "id": "v1-kusama-m-4",
+       "type": "image",
+       "content": "",
+       "caption": "",
+       "citation": "",
+       "imageAlign": "center",
+       "imageWidth": "large"
+      },
+      {
+       "id": "v1-kusama-t-5",
+       "type": "text",
+       "content": "THE RETURN TO TOKYO\n\nIn 1973 Kusama returned to Japan for good. In 1977 she moved into a hospital in Tokyo, where she still lives, and set up her studio across the street. She has worked there ever since.\n\nThe museum's director, Sam Keller, has been clear about how he sees her: not as a mad genius, but as a highly gifted woman who sees the world through different eyes. He has pointed out, too, that she spends her fortune on none of the usual things, no yachts, no cars, no planes, no houses. She created a foundation, and a museum in Tokyo that opened in 2017, so that her work can live on.\n\nThe exhibition follows the decades after: her first novel, Manhattan Suicide Addict, in 1978; her first international retrospective in New York in 1989; and 1993, when she represented Japan at the 45th Venice Biennale, the same city that had once moved her off the lawn."
+      },
+      {
+       "id": "v1-kusama-m-5",
+       "type": "image",
+       "content": "",
+       "caption": "",
+       "citation": "",
+       "imageAlign": "center",
+       "imageWidth": "large"
+      },
+      {
+       "id": "v1-kusama-t-6",
+       "type": "text",
+       "content": "PUMPKINS AND POLKA DOTS\n\nThen the pumpkin. Kusama grew up among her family's fields, and she has always described pumpkins as friendly creatures with a personality of their own, loved the way other people love their pets. Pumpkin, from 1991, is here, covered in her black dots on yellow, humble and monumental at once.\n\nThe colour floods in from there. Rain of City, from 1987. Self-Portrait, from 1972. And the late paintings of My Eternal Soul, the vast series she painted between 2009 and 2021, among them Everything about My Love (2013) and Death of My Sorrowful Youth Comes Walking with Resounding Steps (2017). Faces, eyes, dots and nets crowd the canvases in electric reds, blues and yellows. They do not look like the work of an artist in her eighties.\n\nThe newest paintings, from her series Every Day I Pray for Love, include canvases shown here for the very first time."
+      },
+      {
+       "id": "v1-kusama-m-6",
+       "type": "image",
+       "content": "",
+       "caption": "",
+       "citation": "",
+       "imageAlign": "center",
+       "imageWidth": "large"
+      },
+      {
+       "id": "v1-kusama-t-7",
+       "type": "text",
+       "content": "INFINITY\n\nAnd then the mirrors.\n\nInfinity Mirrored Room – Illusion Inside the Heart was made in 2025, a cube of stainless steel, mirror glass and coloured acrylic, three metres on each side. Step inside and the walls vanish. Light repeats into the distance, colour shifts with the daylight, and your own reflection multiplies until you are just one point among thousands.\n\nElsewhere, The Hope of the Polka Dots Buried in Infinity Will Eternally Cover the Universe fills a gallery with giant inflated, spotted forms, the kind of room children run into and adults walk through very slowly. A new immersive environment, made especially for Riehen, completes the experience.\n\n\"I shall never stop striving to create works that will shine on after my death,\" Kusama has written."
+      },
+      {
+       "id": "v1-kusama-m-7",
+       "type": "image",
+       "content": "",
+       "caption": "",
+       "citation": "",
+       "imageAlign": "center",
+       "imageWidth": "large"
+      },
+      {
+       "id": "v1-kusama-t-8",
+       "type": "text",
+       "content": "THE HOUSE AND THE PARK\n\nFew museums suit her better. Piano's building, opened in 1997, is long, low and full of daylight, with glass walls that open onto meadows, ponds and old trees. Kusama's work is about the infinite and the self dissolving into it. Here it sits next to fields and sky.\n\nThe curators, Mouna Mekouar and Charlotte Sarrazin, let the installations reach beyond the walls into the park, so a visit moves between the obsessive interior world of the paintings and the open landscape outside."
+      },
+      {
+       "id": "v1-kusama-m-8",
+       "type": "image",
+       "content": "",
+       "caption": "",
+       "citation": "",
+       "imageAlign": "center",
+       "imageWidth": "large"
+      },
+      {
+       "id": "v1-kusama-t-9",
+       "type": "text",
+       "content": "PRACTICAL NOTES\n\nThe exhibition runs until 25 January 2026. Timed tickets must be booked online, and many dates sell out weeks ahead. Kusama Mornings, on Thursdays from 9:00 to 9:45, offer a quieter visit before the general opening. On Wednesdays the museum stays open until 20:00, with Kusama Evenings of jazz, sake and film.\n\nThe catalogue, published by Hatje Cantz, runs to 268 pages with 280 illustrations.\n\nAfter Basel, the retrospective travels to the Museum Ludwig in Cologne, from 14 March to 2 August 2026, and then to the Stedelijk Museum in Amsterdam, from 11 September 2026 to 17 January 2027."
+      },
+      {
+       "id": "v1-kusama-m-9",
+       "type": "image",
+       "content": "",
+       "caption": "",
+       "citation": "",
+       "imageAlign": "center",
+       "imageWidth": "large"
+      },
+      {
+       "id": "v1-kusama-t-10",
+       "type": "text",
+       "content": "SEVEN DECADES, ONE OBSESSION\n\nThe Beyeler welcomed 508,870 visitors in 2025, the most in its history, and the museum credits Kusama with much of the record.\n\nThe crowds will keep coming. But go early, stand in front of an Infinity Net from 1961 before anyone else arrives, and you can see what she saw seventy years ago: a single mark, repeated without end, until it becomes a world.\n\nKusama before the crowds.\n\nIt is worth the early start."
       }
      ],
-     "seoTags": []
+     "seoTags": [],
+     "sources": "Fondation Beyeler — Yayoi Kusama press kit (10 October 2025), via Saint-Louis Tourisme: https://www.saintlouis-tourisme.fr/app/uploads/2025/10/fr-dossier-de-presse-kusama.pdf\nDavid Zwirner — Yayoi Kusama travelling retrospective announced: https://davidzwirner.com/news/2024/yayoi-kusama-travelling-retrospective-announced\nDomus — Yayoi Kusama exhibition at Renzo Piano's museum in Basel (22 September 2025): https://www.domusweb.it/en/news/2025/09/22/yayoi-kusama-exhibition-renzo-piano-museum-beyeler-foundation.html\nOta Fine Arts — Major retrospective to open at the Fondation Beyeler: https://www.otafinearts.com/news/567-yayoi-kusama-major-retrospective-to-open-at-the-fondation-beyeler/\nBlick — Yayoi Kusama in Basel: https://www.blick.ch/gesellschaft/yayoi-kusama-in-basel-millionen-fuer-einen-kuerbis-id21314564.html\nBluewin — Fondation Beyeler sets new visitor record with Matisse and Kusama (8 January 2026): https://www.bluewin.ch/en/entertainment/fondation-beyeler-sets-new-visitor-record-with-matisse-and-kusama-3041260.html"
     },
     {
      "id": "v1-engadin",

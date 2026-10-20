@@ -5,7 +5,7 @@ import {
   getHeroes, getArticles, getAds, saveHeroes, saveArticles, saveAds,
   publishEdition, getPublishedContentSnapshot,
   resetToDefaults, clearLocalDraftStorage, isStorageQuotaExceededError,
-  CATEGORIES, formatEditionLabel, publishStory, recordPublishedSnapshot,
+  CATEGORIES, formatEditionLabel, publishStory, recordPublishedSnapshot, adminTimeZone,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
 import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, FileText } from "lucide-react";
@@ -291,28 +291,29 @@ function AdminDashboard() {
     toast.success("Reset to defaults.");
   };
 
-  // Restores the most recent automatic server snapshot (taken before every
-  // edition save, deletion or full-site publish). It used to publish the
-  // hard-coded October 2025 defaults over the live site, which erased every
-  // other edition.
+  // Restores the last published version of the PREVIOUS day (the editor's
+  // local calendar day). Never the hard-coded defaults, and never a version
+  // published earlier today.
   const handleRestoreBackup = async () => {
     if (isSaving) return;
     const publishToken = getAdminPublishToken();
     if (!publishToken) { toast.error("Admin session expired. Please sign in again."); return; }
-    const authHeaders = { "Content-Type": "application/json", Authorization: `Bearer ${publishToken}`, "x-admin-password": publishToken };
+    const authHeaders = { "Content-Type": "application/json", Authorization: `Bearer ${publishToken}`, "x-admin-password": publishToken, "x-admin-timezone": adminTimeZone() };
     setIsSaving(true);
     try {
       const listResponse = await fetch("/api/content?list=backups", { headers: authHeaders, cache: "no-store" });
       const listPayload = (await listResponse.json().catch(() => ({}))) as {
         backups?: { id: string; createdAt: string; reason: string; kind?: string; stories: number; editions: string[] }[];
+        previousDay?: { id: string; createdAt: string; reason: string; kind?: string; stories: number; editions: string[] } | null;
         error?: string;
       };
-      // Always the LAST PUBLISHED version of the site.
-      const latest = listPayload.backups?.find((b) => b.kind === "published") ?? listPayload.backups?.[0];
-      if (!listResponse.ok || !latest) { toast.error(listPayload.error || "No automatic backups exist yet."); return; }
+      // ALWAYS the last published version of the PREVIOUS day (your local
+      // calendar day). Chosen by the server, which protects it from pruning.
+      const latest = listPayload.previousDay;
+      if (!listResponse.ok || !latest) { toast.error(listPayload.error || "No published version from a previous day is stored yet."); return; }
       const when = new Date(latest.createdAt).toLocaleString();
       if (!window.confirm(
-        `Restore the live site to its last published version (${when})?\n\n${latest.stories} stories across ${latest.editions.length} editions\n(${latest.reason}).\n\nThe current site is backed up first, so this can be undone.`,
+        `Restore the live site to the last published version from the previous day (${when})?\n\n${latest.stories} stories across ${latest.editions.length} editions\n(${latest.reason}).\n\nThe current site is backed up first, so this can be undone.`,
       )) return;
       const response = await fetch("/api/content", {
         method: "POST",

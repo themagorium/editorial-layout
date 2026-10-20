@@ -29,6 +29,11 @@ import articleCambiasoPhoto2 from "@/assets/article-cambiaso-photo2.webp";
 import articlePfw from "@/assets/article-pfw.webp";
 
 // ===== Types =====
+/** The admin browser's IANA time zone, sent so "previous day" restores use the editor's own calendar day. */
+export function adminTimeZone(): string {
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch { return "UTC"; }
+}
+
 export type Category = 
   | "Travel" | "Yachting" | "Art & Design" | "Fashion" 
   | "Tech & AI" | "Motorsport" | "Film & Festivals" 
@@ -126,7 +131,7 @@ export async function recordPublishedSnapshot(reason: string, adminPasswordOrTok
   try {
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authValue}`, "x-admin-password": authValue },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authValue}`, "x-admin-password": authValue, "x-admin-timezone": adminTimeZone() },
       body: JSON.stringify({ phase: "snapshot", reason }),
     });
     return { success: response.ok };
@@ -157,7 +162,7 @@ export async function publishEdition(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authValue}`,
-        "x-admin-password": authValue,
+        "x-admin-password": authValue, "x-admin-timezone": adminTimeZone(),
       },
       body: JSON.stringify({ phase: "edition", edition, heroes, articles, ads }),
     });
@@ -1277,7 +1282,7 @@ export async function publishContentSnapshot(heroes: HeroItem[], articles: Artic
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${credential}`,
-      "x-admin-password": credential,
+      "x-admin-password": credential, "x-admin-timezone": adminTimeZone(),
     },
     body: JSON.stringify({ heroes, articles, ads }),
   });
@@ -1653,7 +1658,7 @@ export async function publishEditorialContent(
     const headers = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${authValue}`,
-      "x-admin-password": authValue,
+      "x-admin-password": authValue, "x-admin-timezone": adminTimeZone(),
     };
 
     for (let index = 0; index < totalChunks; index += 1) {
@@ -1727,7 +1732,7 @@ export async function publishEditorialContent(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authValue}`,
-        "x-admin-password": authValue,
+        "x-admin-password": authValue, "x-admin-timezone": adminTimeZone(),
       },
       body: JSON.stringify(content),
     });
@@ -1882,7 +1887,7 @@ export async function publishStory(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authValue}`,
-        "x-admin-password": authValue,
+        "x-admin-password": authValue, "x-admin-timezone": adminTimeZone(),
       },
       body: JSON.stringify({ phase: "story", edition, storyType, story, snapshot: options.snapshot !== false }),
     });

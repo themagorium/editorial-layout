@@ -1158,9 +1158,74 @@ async function snapshotSite(reason: string, kind: BackupKind = "safety"): Promis
   };
   await kvSet(backupKey(entry.id), content);
   const backups = [entry, ...(await listBackups())];
-  for (const old of backups.slice(MAX_BACKUPS)) await kvDel(backupKey(old.id));
-  await kvSet(BACKUPS_INDEX_KEY, backups.slice(0, MAX_BACKUPS));
+  const kept = await selectBackupsToKeep(backups);
+  const keptIds = new Set(kept.map((b) => b.id));
+  for (const old of backups) if (!keptIds.has(old.id)) await kvDel(backupKey(old.id));
+  await kvSet(BACKUPS_INDEX_KEY, kept);
   return entry;
+}
+
+// ===== Previous-day restore =====
+// "Restore Backup" must ALWAYS go to the last published version of the
+// PREVIOUS day (the editor's own calendar day, from the admin browser's time
+// zone). The 12-backup cap alone could push yesterday's version out after a
+// busy day of publishing, so the last published backup of each of the most
+// recent PROTECTED_DAYS days is never pruned.
+const SITE_TIMEZONE_KEY = `${NS}:site-timezone`;
+const PROTECTED_DAYS = 3;
+
+function isValidTimeZone(tz: string): boolean {
+  if (!tz || tz.length > 64) return false;
+  try { new Intl.DateTimeFormat("en-CA", { timeZone: tz }); return true; } catch { return false; }
+}
+
+/** YYYY-MM-DD of an instant in the given time zone. */
+export function dayInTimeZone(iso: string | Date, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(iso));
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+async function getSiteTimeZone(req?: VercelRequest): Promise<string> {
+  const header = req ? readFirstString(req.headers["x-admin-timezone"]).trim() : "";
+  if (header && isValidTimeZone(header)) {
+    const stored = await kvGet<string>(SITE_TIMEZONE_KEY);
+    if (stored !== header) await kvSet(SITE_TIMEZONE_KEY, header);
+    return header;
+  }
+  const stored = await kvGet<string>(SITE_TIMEZONE_KEY);
+  return typeof stored === "string" && isValidTimeZone(stored) ? stored : "UTC";
+}
+
+/** Newest "published" backup per calendar day, newest day first. */
+export function lastPublishedPerDay(backups: BackupEntry[], timeZone: string): BackupEntry[] {
+  const byDay = new Map<string, BackupEntry>();
+  for (const b of backups) {
+    if (b.kind !== "published") continue;
+    const day = dayInTimeZone(b.createdAt, timeZone);
+    const current = byDay.get(day);
+    if (!current || b.createdAt > current.createdAt) byDay.set(day, b);
+  }
+  return [...byDay.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1)).map(([, b]) => b);
+}
+
+/** The last published backup from before today (in the given time zone). */
+export function previousDayBackup(backups: BackupEntry[], timeZone: string, now: Date = new Date()): BackupEntry | null {
+  const today = dayInTimeZone(now, timeZone);
+  return lastPublishedPerDay(backups, timeZone).find((b) => dayInTimeZone(b.createdAt, timeZone) < today) ?? null;
+}
+
+async function selectBackupsToKeep(backups: BackupEntry[]): Promise<BackupEntry[]> {
+  const timeZone = await getSiteTimeZone();
+  const sorted = [...backups].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  const protectedIds = new Set(lastPublishedPerDay(sorted, timeZone).slice(0, PROTECTED_DAYS + 1).map((b) => b.id));
+  const kept: BackupEntry[] = [];
+  let unprotected = 0;
+  for (const b of sorted) {
+    if (protectedIds.has(b.id)) { kept.push(b); continue; }
+    if (unprotected < MAX_BACKUPS) { kept.push(b); unprotected += 1; }
+  }
+  return kept;
 }
 
 /** Snapshot of the site exactly as it now stands, right after a publish. */
@@ -1278,7 +1343,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           res.status(401).json({ ok: false, success: false, configured: isKvConfigured(), error: "Unauthorized." });
           return;
         }
-        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), backups: await listBackups() });
+        const backups = await listBackups();
+        const timeZone = await getSiteTimeZone(req);
+        res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), timeZone, backups, previousDay: previousDayBackup(backups, timeZone) });
         return;
       }
 
@@ -1318,6 +1385,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
+      // Remember the editor's time zone so "previous day" means their day.
+      await getSiteTimeZone(req).catch(() => "UTC");
       const phase = readFirstString((req.body as { phase?: string } | undefined)?.phase).trim().toLowerCase();
 
       // ---- Save ONE story (smallest possible write) ----

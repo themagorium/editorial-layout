@@ -1,0 +1,19 @@
+<svg width="100%" viewBox="0 0 680 520" role="img" xmlns="http://www.w3.org/2000/svg">
+<rect width="680" height="520" fill="#0A0A14"/>
+<line x1="0" y1="260" x2="680" y2="260" stroke="#B8860B" stroke-width="0.8" opacity="0.9"/>
+<line x1="340" y1="260" x2="40" y2="60" stroke="#B8860B" stroke-width="0.4" opacity="0.25"/>
+<line x1="340" y1="260" x2="140" y2="40" stroke="#B8860B" stroke-width="0.4" opacity="0.2"/>
+<line x1="340" y1="260" x2="240" y2="30" stroke="#B8860B" stroke-width="0.4" opacity="0.15"/>
+<line x1="340" y1="260" x2="340" y2="20" stroke="#B8860B" stroke-width="0.4" opacity="0.12"/>
+<line x1="340" y1="260" x2="440" y2="30" stroke="#B8860B" stroke-width="0.4" opacity="0.15"/>
+<line x1="340" y1="260" x2="540" y2="40" stroke="#B8860B" stroke-width="0.4" opacity="0.2"/>
+<line x1="340" y1="260" x2="640" y2="60" stroke="#B8860B" stroke-width="0.4" opacity="0.25"/>
+<line x1="340" y1="260" x2="40" y2="460" stroke="#B8860B" stroke-width="0.4" opacity="0.15"/>
+<line x1="340" y1="260" x2="640" y2="460" stroke="#B8860B" stroke-width="0.4" opacity="0.15"/>
+<circle cx="340" cy="260" r="3" fill="#B8860B" opacity="0.9"/>
+<circle cx="340" cy="260" r="12" fill="none" stroke="#B8860B" stroke-width="0.5" opacity="0.3"/>
+<circle cx="340" cy="260" r="28" fill="none" stroke="#B8860B" stroke-width="0.4" opacity="0.15"/>
+<text x="340" y="140" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="400" fill="#F0EDE4" letter-spacing="0.01em">From AI Models</text>
+<text x="340" y="210" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="400" fill="#F0EDE4" letter-spacing="0.01em">to Infrastructure</text>
+<text x="340" y="338" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="400" fill="#B8860B" letter-spacing="0.04em" font-style="italic">Stacks.</text>
+</svg>

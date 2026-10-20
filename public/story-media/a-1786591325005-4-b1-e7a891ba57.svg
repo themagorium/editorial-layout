@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="356" viewBox="0 0 680 356" role="img"><title>Life expectancy at birth by country, 2024</title><desc>A range plot: Switzerland 84.4, Japan 84.0, Spain 84.0, Italy 83.7, South Korea 83.6, Canada 81.6, United States 79.0 years.</desc>
+
+<line x1="170" y1="58" x2="170" y2="322" stroke="#453F70" stroke-width="0.5" opacity="0.5"/>
+<line x1="301" y1="58" x2="301" y2="322" stroke="#453F70" stroke-width="0.5" opacity="0.5"/>
+<line x1="433" y1="58" x2="433" y2="322" stroke="#453F70" stroke-width="0.5" opacity="0.5"/>
+<line x1="564" y1="58" x2="564" y2="322" stroke="#453F70" stroke-width="0.5" opacity="0.5"/>
+
+<g style="font-family:Georgia,'Times New Roman',serif">
+<text x="170" y="342" text-anchor="middle" style="fill:#7E78A8;font-size:12px">78</text>
+<text x="301" y="342" text-anchor="middle" style="fill:#7E78A8;font-size:12px">80</text>
+<text x="433" y="342" text-anchor="middle" style="fill:#7E78A8;font-size:12px">82</text>
+<text x="564" y="342" text-anchor="middle" style="fill:#7E78A8;font-size:12px">84</text>
+
+<text x="150" y="80" text-anchor="end" dominant-baseline="central" style="fill:#B8B2DE;font-size:14px">Switzerland</text>
+<text x="150" y="118" text-anchor="end" dominant-baseline="central" style="fill:#B8B2DE;font-size:14px">Japan</text>
+<text x="150" y="156" text-anchor="end" dominant-baseline="central" style="fill:#B8B2DE;font-size:14px">Spain</text>
+<text x="150" y="194" text-anchor="end" dominant-baseline="central" style="fill:#B8B2DE;font-size:14px">Italy</text>
+<text x="150" y="232" text-anchor="end" dominant-baseline="central" style="fill:#B8B2DE;font-size:14px">South Korea</text>
+<text x="150" y="270" text-anchor="end" dominant-baseline="central" style="fill:#B8B2DE;font-size:14px">Canada</text>
+<text x="150" y="308" text-anchor="end" dominant-baseline="central" style="fill:#B8B2DE;font-size:14px">United States</text>
+
+<text x="606" y="80" dominant-baseline="central" style="fill:#E6D6A6;font-size:14px;font-weight:500">84.4</text>
+<text x="580" y="118" dominant-baseline="central" style="fill:#E6D6A6;font-size:14px;font-weight:500">84.0</text>
+<text x="580" y="156" dominant-baseline="central" style="fill:#E6D6A6;font-size:14px;font-weight:500">84.0</text>
+<text x="561" y="194" dominant-baseline="central" style="fill:#E6D6A6;font-size:14px;font-weight:500">83.7</text>
+<text x="554" y="232" dominant-baseline="central" style="fill:#E6D6A6;font-size:14px;font-weight:500">83.6</text>
+<text x="423" y="270" dominant-baseline="central" style="fill:#E6D6A6;font-size:14px;font-weight:500">81.6</text>
+<text x="252" y="308" dominant-baseline="central" style="fill:#E6D6A6;font-size:14px;font-weight:500">79.0</text>
+</g>
+
+<g stroke="#C9A24B" stroke-width="1.5" opacity="0.55">
+<line x1="170" y1="80" x2="590" y2="80"/>
+<line x1="170" y1="118" x2="564" y2="118"/>
+<line x1="170" y1="156" x2="564" y2="156"/>
+<line x1="170" y1="194" x2="545" y2="194"/>
+<line x1="170" y1="232" x2="538" y2="232"/>
+<line x1="170" y1="270" x2="407" y2="270"/>
+<line x1="170" y1="308" x2="236" y2="308"/>
+</g>
+
+<circle cx="590" cy="80" r="10" fill="#C9A24B" opacity="0.14"/><circle cx="590" cy="80" r="5.5" fill="#D9BE73"/>
+<circle cx="564" cy="118" r="10" fill="#C9A24B" opacity="0.14"/><circle cx="564" cy="118" r="5.5" fill="#D9BE73"/>
+<circle cx="564" cy="156" r="10" fill="#C9A24B" opacity="0.14"/><circle cx="564" cy="156" r="5.5" fill="#D9BE73"/>
+<circle cx="545" cy="194" r="10" fill="#C9A24B" opacity="0.14"/><circle cx="545" cy="194" r="5.5" fill="#D9BE73"/>
+<circle cx="538" cy="232" r="10" fill="#C9A24B" opacity="0.14"/><circle cx="538" cy="232" r="5.5" fill="#D9BE73"/>
+<circle cx="407" cy="270" r="10" fill="#C9A24B" opacity="0.14"/><circle cx="407" cy="270" r="5.5" fill="#D9BE73"/>
+<circle cx="236" cy="308" r="10" fill="#C9A24B" opacity="0.14"/><circle cx="236" cy="308" r="5.5" fill="#D9BE73"/>
+</svg>

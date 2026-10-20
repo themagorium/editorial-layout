@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="400" viewBox="0 0 680 400" role="img"><title>Ethereal constellation of connected nodes</title><desc>Luminous points of light linked by faint filaments, with three gold junctions.</desc>
+<ellipse cx="340" cy="220" rx="300" ry="150" fill="#AEC8E6" opacity="0.05"/>
+
+<g stroke="#8CA6C0" stroke-width="0.8" opacity="0.28">
+<line x1="110" y1="120" x2="180" y2="220"/><line x1="110" y1="120" x2="250" y2="150"/><line x1="180" y1="220" x2="90" y2="290"/><line x1="180" y1="220" x2="250" y2="150"/><line x1="180" y1="220" x2="320" y2="260"/><line x1="250" y1="150" x2="320" y2="260"/><line x1="320" y1="260" x2="260" y2="320"/><line x1="320" y1="260" x2="430" y2="230"/><line x1="260" y1="320" x2="360" y2="330"/><line x1="390" y1="110" x2="430" y2="230"/><line x1="430" y1="230" x2="360" y2="330"/><line x1="430" y1="230" x2="500" y2="160"/><line x1="500" y1="160" x2="540" y2="290"/><line x1="540" y1="290" x2="470" y2="320"/><line x1="540" y1="290" x2="620" y2="240"/><line x1="600" y1="120" x2="620" y2="240"/><line x1="620" y1="240" x2="580" y2="340"/><line x1="470" y1="320" x2="580" y2="340"/><line x1="360" y1="330" x2="470" y2="320"/><line x1="390" y1="110" x2="500" y2="160"/><line x1="250" y1="150" x2="390" y2="110"/>
+</g>
+<g stroke="#E4C878" stroke-width="1" opacity="0.4">
+<line x1="250" y1="150" x2="430" y2="230"/><line x1="430" y1="230" x2="600" y2="120"/>
+</g>
+
+<g fill="#EAF2FB">
+<circle cx="110" cy="120" r="7" opacity="0.12"/><circle cx="110" cy="120" r="3.2" opacity="0.9"/>
+<circle cx="180" cy="220" r="7" opacity="0.12"/><circle cx="180" cy="220" r="3.6" opacity="0.9"/>
+<circle cx="90" cy="290" r="6" opacity="0.1"/><circle cx="90" cy="290" r="2.8" opacity="0.85"/>
+<circle cx="320" cy="260" r="7" opacity="0.12"/><circle cx="320" cy="260" r="3.4" opacity="0.9"/>
+<circle cx="260" cy="320" r="6" opacity="0.1"/><circle cx="260" cy="320" r="2.8" opacity="0.85"/>
+<circle cx="390" cy="110" r="7" opacity="0.12"/><circle cx="390" cy="110" r="3.2" opacity="0.9"/>
+<circle cx="360" cy="330" r="6" opacity="0.1"/><circle cx="360" cy="330" r="2.8" opacity="0.85"/>
+<circle cx="500" cy="160" r="7" opacity="0.12"/><circle cx="500" cy="160" r="3.4" opacity="0.9"/>
+<circle cx="540" cy="290" r="7" opacity="0.12"/><circle cx="540" cy="290" r="3.2" opacity="0.9"/>
+<circle cx="470" cy="320" r="6" opacity="0.1"/><circle cx="470" cy="320" r="2.8" opacity="0.85"/>
+<circle cx="620" cy="240" r="7" opacity="0.12"/><circle cx="620" cy="240" r="3.4" opacity="0.9"/>
+<circle cx="580" cy="340" r="6" opacity="0.1"/><circle cx="580" cy="340" r="2.6" opacity="0.8"/>
+</g>
+
+<circle cx="250" cy="150" r="16" fill="#E4C878" opacity="0.08"/><circle cx="250" cy="150" r="10" fill="#E4C878" opacity="0.16"/><circle cx="250" cy="150" r="5" fill="#E4C878" opacity="0.4"/><circle cx="250" cy="150" r="2.6" fill="#F2E0AC" opacity="0.95"/>
+<circle cx="430" cy="230" r="18" fill="#E4C878" opacity="0.08"/><circle cx="430" cy="230" r="11" fill="#E4C878" opacity="0.16"/><circle cx="430" cy="230" r="6" fill="#E4C878" opacity="0.4"/><circle cx="430" cy="230" r="3" fill="#F2E0AC" opacity="0.95"/>
+<circle cx="600" cy="120" r="16" fill="#E4C878" opacity="0.08"/><circle cx="600" cy="120" r="10" fill="#E4C878" opacity="0.16"/><circle cx="600" cy="120" r="5" fill="#E4C878" opacity="0.4"/><circle cx="600" cy="120" r="2.6" fill="#F2E0AC" opacity="0.95"/>
+</svg>

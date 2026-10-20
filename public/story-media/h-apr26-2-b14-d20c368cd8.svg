@@ -1,0 +1,36 @@
+<svg width="100%" viewBox="0 0 680 520" role="img" xmlns="http://www.w3.org/2000/svg">
+<rect width="680" height="520" fill="#06070E"/>
+<circle cx="340" cy="255" r="185" fill="none" stroke="#B8860B" stroke-width="0.6" opacity="0.3"/>
+<circle cx="340" cy="255" r="155" fill="none" stroke="#B8860B" stroke-width="0.4" opacity="0.2"/>
+<circle cx="340" cy="255" r="55" fill="#0E1020" stroke="#B8860B" stroke-width="1" opacity="0.8"/>
+<text x="340" y="248" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#B8860B" letter-spacing="0.08em">UNCTAD</text>
+<text x="340" y="264" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#D4A030" letter-spacing="0.06em">SECRETARIAT</text>
+<circle cx="340" cy="100" r="14" fill="#1A1008" stroke="#D4A030" stroke-width="1.2" opacity="0.95"/>
+<text x="340" y="97" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#D4A030">EGYPT</text>
+<text x="340" y="107" text-anchor="middle" font-family="Georgia, serif" font-size="6" fill="#B8860B">CHAIR</text>
+<circle cx="432" cy="122" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="432" y="126" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">COLOMBIA</text>
+<circle cx="503" cy="183" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="503" y="187" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">HONDURAS</text>
+<circle cx="527" cy="262" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="527" y="266" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">NEPAL</text>
+<circle cx="498" cy="338" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="498" y="342" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">MALDIVES</text>
+<circle cx="432" cy="395" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="432" y="399" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">SUDAN</text>
+<circle cx="340" cy="415" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="340" y="419" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">ZAMBIA</text>
+<circle cx="248" cy="395" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="248" y="399" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">C.A.R.</text>
+<circle cx="182" cy="338" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="182" y="342" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">PAKISTAN</text>
+<circle cx="153" cy="262" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="153" y="266" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">BARBADOS</text>
+<circle cx="177" cy="183" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="177" y="187" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">ST VINCENT</text>
+<circle cx="248" cy="122" r="11" fill="#0E0F1A" stroke="#B8860B" stroke-width="0.8" opacity="0.85"/>
+<text x="248" y="126" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#B8860B">+ MORE</text>
+<text x="340" y="30" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#F0EDE4" letter-spacing="0.04em">The Borrowers Platform</text>
+<text x="340" y="52" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#B8860B" letter-spacing="0.08em" font-style="italic">April 15, 2026 · Washington D.C.</text>
+<text x="340" y="490" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#5A5A7A" letter-spacing="0.08em">30 NATIONS · FIRST DEDICATED DEBT FORUM FOR DEVELOPING NATIONS IN HISTORY</text>
+</svg>

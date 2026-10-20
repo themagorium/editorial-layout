@@ -1,4 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import fs from "fs";
+import path from "path";
 
 type BodyBlock = {
   id: string;
@@ -971,6 +973,139 @@ async function migrateLegacyBlobIfNeeded(): Promise<void> {
   await writeContentAcrossEditions(sanitizePayload(legacy), legacy.publishedAt, legacy.updatedAt || legacy.publishedAt);
 }
 
+// ===== GitHub archive fallback =====
+// content/published-archive.json is a full copy of the published site (text,
+// photo-slot layout and media paths under /story-media) committed to GitHub.
+// It is served ONLY when the database is empty (wiped) or unreachable. It never
+// overrides or resurrects content: stories and editions deleted in the admin
+// stay deleted while the database holds anything at all.
+type ArchiveFile = {
+  exportedAt?: string;
+  ads?: AdPayload[];
+  editions: Record<string, { heroes: HeroPayload[]; articles: ArticlePayload[] }>;
+};
+let cachedArchive: ArchiveFile | null | undefined;
+
+function loadArchive(): ArchiveFile | null {
+  if (cachedArchive !== undefined) return cachedArchive;
+  try {
+    const file = path.join(process.cwd(), "content", "published-archive.json");
+    const parsed = JSON.parse(fs.readFileSync(file, "utf-8")) as ArchiveFile;
+    cachedArchive = parsed && parsed.editions && typeof parsed.editions === "object" ? parsed : null;
+  } catch {
+    cachedArchive = null;
+  }
+  return cachedArchive;
+}
+
+function archiveEditionIds(): string[] {
+  const archive = loadArchive();
+  return archive ? Object.keys(archive.editions).sort(compareEditionDesc) : [];
+}
+
+function archiveEdition(edition: string): { heroes: HeroPayload[]; articles: ArticlePayload[] } | null {
+  const record = loadArchive()?.editions[edition];
+  if (!record) return null;
+  return { heroes: ensureArray<HeroPayload>(record.heroes), articles: ensureArray<ArticlePayload>(record.articles) };
+}
+
+function archiveAds(): AdPayload[] {
+  return ensureArray<AdPayload>(loadArchive()?.ads);
+}
+
+function archiveAll(): { heroes: HeroPayload[]; articles: ArticlePayload[] } {
+  const heroes: HeroPayload[] = [];
+  const articles: ArticlePayload[] = [];
+  for (const edition of archiveEditionIds()) {
+    const record = archiveEdition(edition);
+    if (!record) continue;
+    heroes.push(...record.heroes);
+    articles.push(...record.articles);
+  }
+  return { heroes, articles };
+}
+
+function archiveStory(type: StoryType, id: string): HeroPayload | ArticlePayload | null {
+  for (const edition of archiveEditionIds()) {
+    const record = archiveEdition(edition);
+    const list: Array<HeroPayload | ArticlePayload> = type === "hero" ? record?.heroes || [] : record?.articles || [];
+    const found = list.find((story) => story.id === id);
+    if (found) return found;
+  }
+  return null;
+}
+
+function archiveLatestView(): LatestViewPayload | null {
+  for (const edition of archiveEditionIds()) {
+    const record = archiveEdition(edition);
+    if (!record) continue;
+    const heroes = record.heroes.filter(isPublishReadyHero).filter(hasLatestDisplayMedia);
+    const articles = record.articles.filter(isPublishReadyArticle).filter(hasLatestDisplayMedia);
+    if (heroes.length === 0 && articles.length === 0) continue;
+    const stamp = loadArchive()?.exportedAt || new Date(0).toISOString();
+    return {
+      heroes: heroes.map(toLatestHeroSummary),
+      articles: articles.map(toLatestArticleSummary),
+      ads: archiveAds().map(toLatestAdSummary),
+      publishedAt: stamp,
+      updatedAt: stamp,
+      latestEdition: edition,
+    };
+  }
+  return null;
+}
+
+/** Answers any public GET purely from the GitHub archive (database down or empty). */
+function respondFromArchive(req: VercelRequest, res: VercelResponse): boolean {
+  if (!loadArchive()) return false;
+  const queryView = readFirstString(req.query?.view).trim().toLowerCase();
+  const queryEdition = normalizeEditionId(req.query?.edition);
+  const queryStoryId = normalizeStoryId(req.query?.storyId);
+  const queryStoryType = normalizeStoryType(req.query?.storyType);
+  const list = readFirstString(req.query?.list).trim().toLowerCase();
+  const base = { ok: true, success: true, configured: isKvConfigured(), source: "github-archive" };
+  res.setHeader("X-Content-Source", "github-archive");
+  if (list === "backups") return false;
+  if (queryStoryId && queryStoryType) {
+    res.status(200).json({ ...base, content: { story: archiveStory(queryStoryType, queryStoryId) } });
+    return true;
+  }
+  if (queryEdition) {
+    const record = archiveEdition(queryEdition);
+    res.status(200).json({ ...base, content: { heroes: record?.heroes || [], articles: record?.articles || [], ads: archiveAds(), edition: queryEdition } });
+    return true;
+  }
+  if (queryView === "latest") {
+    const heroLimit = parsePositiveInt(readFirstString(req.query?.heroLimit), 3);
+    const articleLimit = parsePositiveInt(readFirstString(req.query?.articleLimit), 4);
+    const latest = archiveLatestView();
+    const limited = latest ? applyLatestLimits(latest, heroLimit, articleLimit) : null;
+    res.status(200).json({ ...base, content: limited, payload: limited });
+    return true;
+  }
+  if (queryView === "seo" || (queryStoryType && !queryStoryId)) {
+    const all = archiveAll();
+    res.status(200).json({
+      ...base,
+      content: {
+        heroes: queryView === "seo" || queryStoryType === "hero" ? all.heroes.map(toLatestHeroSummary) : [],
+        articles: queryView === "seo" || queryStoryType === "article" ? all.articles.map(toLatestArticleSummary) : [],
+        ads: archiveAds().map(toLatestAdSummary),
+      },
+    });
+    return true;
+  }
+  if (list === "editions") {
+    res.status(200).json({ ...base, editions: archiveEditionIds() });
+    return true;
+  }
+  const all = archiveAll();
+  const stamp = loadArchive()?.exportedAt || new Date(0).toISOString();
+  const content = { ...all, ads: archiveAds(), publishedAt: stamp, updatedAt: stamp };
+  res.status(200).json({ ...base, content, payload: content });
+  return true;
+}
+
 /** Reassembles the full archive — used only by the legacy unscoped GET.
  *  Prefer `?edition=`, `?storyId=`, or `?view=latest` wherever possible. */
 async function getFullContent(): Promise<StoredPayload | null> {
@@ -1036,6 +1171,11 @@ async function snapshotPublished(reason: string): Promise<BackupEntry | null> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "GET") {
     try {
+      // Database wiped or never filled: serve the published site from GitHub.
+      if (readFirstString(req.query?.list).trim().toLowerCase() !== "backups") {
+        await migrateLegacyBlobIfNeeded();
+        if ((await getEditionsIndex()).length === 0 && respondFromArchive(req, res)) return;
+      }
       const queryView = readFirstString(req.query?.view).trim().toLowerCase();
       const queryEdition = normalizeEditionId(req.query?.edition);
       const queryStoryId = normalizeStoryId(req.query?.storyId);
@@ -1155,6 +1295,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), content, payload: content });
       return;
     } catch (error) {
+      // Database unreachable: keep the site readable from the GitHub archive.
+      if (!res.headersSent && respondFromArchive(req, res)) return;
       res.status(500).json({
         ok: false,
         success: false,

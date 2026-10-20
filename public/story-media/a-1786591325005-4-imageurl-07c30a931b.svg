@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="420" viewBox="0 0 680 420" role="img"><title>Ethereal double helix dissolving into drifting particles</title><desc>A luminous DNA-like strand, structured at left and dissolving into scattered points of light at right, with gold accent nodes.</desc>
+<ellipse cx="300" cy="210" rx="270" ry="140" fill="#AEC8E6" opacity="0.06"/>
+<ellipse cx="560" cy="210" rx="150" ry="120" fill="#E4C878" opacity="0.04"/>
+
+<polyline points="60,210 80,261 100,280 120,254 140,200 160,153 180,142 200,174 220,229 240,272 260,276 280,237 300,182 320,144 340,148 360,192 380,247 400,279 420,267 440,219 460,165 480,140 500,161 520,211" fill="none" stroke="#D2E3F2" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+<polyline points="60,210 80,159 100,140 120,166 140,220 160,267 180,278 200,246 220,191 240,148 260,144 280,183 300,238 320,276 340,272 360,228 380,173 400,141 420,153 440,201 460,255 480,280 500,259 520,209" fill="none" stroke="#A9C6E0" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+
+<line x1="80" y1="261" x2="80" y2="159" stroke="#8CA6C0" stroke-width="1" opacity="0.35"/>
+<line x1="120" y1="254" x2="120" y2="166" stroke="#8CA6C0" stroke-width="1" opacity="0.35"/>
+<line x1="160" y1="153" x2="160" y2="267" stroke="#E4C878" stroke-width="1.3" opacity="0.7"/>
+<line x1="200" y1="174" x2="200" y2="246" stroke="#8CA6C0" stroke-width="1" opacity="0.35"/>
+<line x1="240" y1="272" x2="240" y2="148" stroke="#8CA6C0" stroke-width="1" opacity="0.35"/>
+<line x1="280" y1="237" x2="280" y2="183" stroke="#8CA6C0" stroke-width="1" opacity="0.35"/>
+<line x1="320" y1="144" x2="320" y2="276" stroke="#E4C878" stroke-width="1.3" opacity="0.7"/>
+<line x1="360" y1="192" x2="360" y2="228" stroke="#8CA6C0" stroke-width="1" opacity="0.3"/>
+<line x1="400" y1="279" x2="400" y2="141" stroke="#8CA6C0" stroke-width="1" opacity="0.35"/>
+<line x1="440" y1="219" x2="440" y2="201" stroke="#8CA6C0" stroke-width="1" opacity="0.3"/>
+<line x1="480" y1="140" x2="480" y2="280" stroke="#E4C878" stroke-width="1.3" opacity="0.65"/>
+
+<circle cx="60" cy="210" r="7" fill="#EAF2FB" opacity="0.12"/><circle cx="60" cy="210" r="3.5" fill="#EAF2FB" opacity="0.9"/>
+<circle cx="137" cy="210" r="7" fill="#EAF2FB" opacity="0.12"/><circle cx="137" cy="210" r="3.5" fill="#EAF2FB" opacity="0.9"/>
+<circle cx="213" cy="210" r="16" fill="#E4C878" opacity="0.08"/><circle cx="213" cy="210" r="10" fill="#E4C878" opacity="0.16"/><circle cx="213" cy="210" r="5" fill="#E4C878" opacity="0.4"/><circle cx="213" cy="210" r="2.6" fill="#F2E0AC" opacity="0.95"/>
+<circle cx="290" cy="210" r="7" fill="#EAF2FB" opacity="0.12"/><circle cx="290" cy="210" r="3.5" fill="#EAF2FB" opacity="0.9"/>
+<circle cx="366" cy="210" r="16" fill="#E4C878" opacity="0.08"/><circle cx="366" cy="210" r="10" fill="#E4C878" opacity="0.16"/><circle cx="366" cy="210" r="5" fill="#E4C878" opacity="0.4"/><circle cx="366" cy="210" r="2.6" fill="#F2E0AC" opacity="0.95"/>
+<circle cx="443" cy="210" r="7" fill="#EAF2FB" opacity="0.12"/><circle cx="443" cy="210" r="3.5" fill="#EAF2FB" opacity="0.9"/>
+
+<circle cx="515" cy="190" r="2.4" fill="#D2E3F2" opacity="0.7"/><circle cx="532" cy="242" r="1.6" fill="#CFE0F0" opacity="0.5"/><circle cx="547" cy="172" r="2" fill="#E4C878" opacity="0.7"/><circle cx="560" cy="212" r="1.4" fill="#CFE0F0" opacity="0.45"/><circle cx="575" cy="150" r="2.6" fill="#EAF2FB" opacity="0.75"/><circle cx="580" cy="266" r="1.8" fill="#A9C6E0" opacity="0.5"/><circle cx="596" cy="196" r="1.5" fill="#CFE0F0" opacity="0.55"/><circle cx="606" cy="236" r="2.2" fill="#E4C878" opacity="0.6"/><circle cx="616" cy="166" r="1.4" fill="#CFE0F0" opacity="0.5"/><circle cx="626" cy="206" r="1.8" fill="#EAF2FB" opacity="0.6"/><circle cx="636" cy="250" r="1.3" fill="#CFE0F0" opacity="0.4"/><circle cx="641" cy="180" r="2" fill="#D2E3F2" opacity="0.65"/><circle cx="651" cy="222" r="1.5" fill="#E4C878" opacity="0.55"/><circle cx="656" cy="158" r="1.2" fill="#CFE0F0" opacity="0.4"/><circle cx="661" cy="238" r="1.6" fill="#EAF2FB" opacity="0.5"/><circle cx="590" cy="130" r="1.6" fill="#CFE0F0" opacity="0.45"/><circle cx="601" cy="284" r="1.4" fill="#A9C6E0" opacity="0.4"/><circle cx="620" cy="140" r="2" fill="#E4C878" opacity="0.5"/><circle cx="632" cy="276" r="1.3" fill="#CFE0F0" opacity="0.4"/><circle cx="645" cy="122" r="1.5" fill="#EAF2FB" opacity="0.5"/><circle cx="648" cy="300" r="1.2" fill="#CFE0F0" opacity="0.35"/><circle cx="663" cy="200" r="1.8" fill="#D2E3F2" opacity="0.55"/>
+</svg>

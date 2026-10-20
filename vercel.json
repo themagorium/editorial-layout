@@ -83,5 +83,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/content.ts": {
+      "includeFiles": "content/**"
+    }
+  }
 }

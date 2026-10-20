@@ -1,0 +1,38 @@
+<svg width="100%" viewBox="0 0 680 480" role="img" xmlns="http://www.w3.org/2000/svg">
+<rect width="680" height="480" fill="#04060F"/>
+<ellipse cx="340" cy="240" rx="310" ry="200" fill="#070C1E" stroke="#1A2540" stroke-width="0.5"/>
+<ellipse cx="150" cy="170" rx="55" ry="35" fill="#0D1528" opacity="0.9"/>
+<ellipse cx="130" cy="195" rx="40" ry="25" fill="#0D1528" opacity="0.9"/>
+<ellipse cx="270" cy="155" rx="70" ry="40" fill="#0D1528" opacity="0.9"/>
+<ellipse cx="300" cy="175" rx="55" ry="30" fill="#0D1528" opacity="0.9"/>
+<ellipse cx="380" cy="165" rx="65" ry="35" fill="#0D1528" opacity="0.9"/>
+<ellipse cx="420" cy="200" rx="45" ry="25" fill="#0D1528" opacity="0.9"/>
+<ellipse cx="460" cy="175" rx="40" ry="22" fill="#0D1528" opacity="0.9"/>
+<ellipse cx="500" cy="185" rx="35" ry="20" fill="#0D1528" opacity="0.9"/>
+<ellipse cx="330" cy="240" rx="40" ry="50" fill="#0D1528" opacity="0.9"/>
+<ellipse cx="520" cy="220" rx="30" ry="40" fill="#0D1528" opacity="0.9"/>
+<ellipse cx="200" cy="300" rx="45" ry="30" fill="#0D1528" opacity="0.9"/>
+<circle cx="274" cy="162" r="1.2" fill="#B8860B" opacity="0.9"/>
+<circle cx="296" cy="168" r="1.1" fill="#D4A00B" opacity="0.9"/>
+<circle cx="305" cy="175" r="1.3" fill="#C8960B" opacity="0.85"/>
+<circle cx="400" cy="172" r="1.4" fill="#D4A00B" opacity="0.9"/>
+<circle cx="425" cy="185" r="1.0" fill="#C8960B" opacity="0.8"/>
+<circle cx="458" cy="182" r="1.2" fill="#C8960B" opacity="0.9"/>
+<circle cx="152" cy="172" r="1.0" fill="#D4A00B" opacity="0.85"/>
+<circle cx="168" cy="192" r="1.2" fill="#C8960B" opacity="0.85"/>
+<circle cx="210" cy="308" r="1.8" fill="#E8B820" opacity="0.95"/>
+<circle cx="228" cy="312" r="2.0" fill="#E8B820" opacity="0.95"/>
+<circle cx="215" cy="320" r="1.6" fill="#F0C830" opacity="0.9"/>
+<circle cx="242" cy="318" r="1.8" fill="#E8B820" opacity="0.9"/>
+<circle cx="255" cy="310" r="1.6" fill="#E8B820" opacity="0.9"/>
+<circle cx="238" cy="335" r="1.4" fill="#D4A00B" opacity="0.85"/>
+<circle cx="245" cy="348" r="1.6" fill="#E8B820" opacity="0.85"/>
+<circle cx="258" cy="340" r="1.4" fill="#F0C830" opacity="0.85"/>
+<circle cx="345" cy="258" r="2.0" fill="#E8B820" opacity="0.95"/>
+<circle cx="362" cy="260" r="1.4" fill="#E8B820" opacity="0.85"/>
+<circle cx="350" cy="275" r="1.5" fill="#D4A00B" opacity="0.85"/>
+<circle cx="535" cy="240" r="1.8" fill="#E8B820" opacity="0.9"/>
+<circle cx="542" cy="262" r="1.2" fill="#E8B820" opacity="0.8"/>
+<defs><radialGradient id="v" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="#04060F" stop-opacity="0"/><stop offset="100%" stop-color="#04060F" stop-opacity="0.8"/></radialGradient></defs>
+<rect x="0" y="0" width="680" height="480" fill="url(#v)" opacity="0.6"/>
+</svg>

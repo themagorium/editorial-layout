@@ -41,7 +41,8 @@ const BLOCKED_IMAGE_PATTERNS = [
   /\/favicon\.png/i,
   /\/og-image\.jpg/i,
   /^blob:/i,
-  /^data:image\/svg/i,
+  // SVG charts and diagrams are allowed: an SVG shown through <img> cannot
+  // run scripts. Blocking them hid the figures in the April 2026 stories.
 ];
 
 function isUsableImageUrl(url?: string): boolean {

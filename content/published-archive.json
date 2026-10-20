@@ -1,6 +1,29 @@
 {
- "exportedAt": "2026-10-20T02:44:25.945367+00:00",
+ "exportedAt": "2026-10-20T02:57:38.286Z",
  "source": "https://www.themagorium.com/api/content",
+ "ads": [
+  {
+   "id": "ad2",
+   "label": "Mid-Feed Banner",
+   "position": "mid-feed",
+   "width": 728,
+   "height": 90
+  },
+  {
+   "id": "ad3",
+   "label": "Bottom Banner",
+   "position": "bottom-banner",
+   "width": 970,
+   "height": 250
+  },
+  {
+   "id": "ad4",
+   "label": "Sidebar Ad",
+   "position": "sidebar",
+   "width": 300,
+   "height": 600
+  }
+ ],
  "editions": {
   "2026-09": {
    "heroes": [
@@ -1997,7 +2020,7 @@
       {
        "id": "h-apr26-2-t-2",
        "type": "text",
-       "content": "THE FORECAST\n\nThe IMF's April World Economic Outlook carried a title that said everything: Global Economy in the Shadow of War.\n\nIts reference forecast put global growth at 3.1% in 2026 and 3.2% in 2027, a downgrade from January. That forecast rested on an assumption the Fund was careful to spell out: a conflict of limited duration, intensity and scope, with disruption fading by the middle of the year, and energy prices around 19% higher in 2026.\n\nThe Fund also set out what happens without that assumption. In an adverse scenario, with energy prices staying higher for longer, global growth slows to 2.5% this year. In a severe scenario, with deeper damage to energy infrastructure in the region, it falls to about 2% in both 2026 and 2027.\n\nThe IMF compared the oil shortfall, even if the fighting had stopped in April, to the 1974 oil shock on an annual average basis."
+       "content": "THE FORECAST\n\nThe IMF's April World Economic Outlook carried its own headline: Global Economy in the Shadow of War.\n\nIts reference forecast put global growth at 3.1% in 2026 and 3.2% in 2027, a downgrade from January. That forecast rested on an assumption the Fund was careful to spell out: a conflict of limited duration, intensity and scope, with disruption fading by the middle of the year, and energy prices around 19% higher in 2026.\n\nThe Fund also set out what happens without that assumption. In an adverse scenario, with energy prices staying higher for longer, global growth slows to 2.5% this year. In a severe scenario, with deeper damage to energy infrastructure in the region, it falls to about 2% in both 2026 and 2027.\n\nThe IMF compared the oil shortfall, even if the fighting had stopped in April, to the 1974 oil shock on an annual average basis."
       },
       {
        "id": "h-apr26-2-m-2",
@@ -2011,7 +2034,7 @@
       {
        "id": "h-apr26-2-t-3",
        "type": "text",
-       "content": "ENERGY RETURNS TO THE CENTRE OF ECONOMIC RISK\n\nEnergy prices reach an economy through every door. Higher oil and gas costs raise the price of transport and production, eat into household budgets and feed through to food. For importing countries, they weaken the balance of payments and put pressure on currencies.\n\nThe IMF's reference forecast has global headline inflation at 4.4% in 2026, easing to 3.7% in 2027. In the adverse case it rises to 5.4%. In the severe case, the Fund's illustrative figures reach 5.8% this year and around 6% next.\n\nThe pain is not shared evenly. Energy exporters collect higher revenues while living with the volatility and the wider consequences of war. Importers face the bill directly. Lower-income countries, where food and fuel take a large share of household spending and governments have little room to cushion the blow, are the most exposed of all."
+       "content": "ENERGY, BACK AT THE CENTRE\n\nAn oil shock comes in through every door. Transport costs more, factories pay more, households have less, and food prices follow. Importing countries watch their currencies weaken.\n\nThe IMF's reference forecast has global headline inflation at 4.4% in 2026, easing to 3.7% in 2027. In the adverse case it rises to 5.4%. In the severe case, the Fund's illustrative figures reach 5.8% this year and around 6% next.\n\nExporters collect more for their oil and live with the war on their doorstep. Importers pay. The poorest countries, where food and fuel eat most of a family's budget and governments have little to cushion the blow, are hit hardest."
       },
       {
        "id": "h-apr26-2-m-3",
@@ -2039,7 +2062,7 @@
       {
        "id": "h-apr26-2-t-5",
        "type": "text",
-       "content": "GROWTH BEYOND THE WEST\n\nThe Fund's figures for China told their own story: growth of 5% in 2025, 4.4% projected for 2026, and 4% for 2027. The world's second-largest economy is slowing as it rebalances, and the energy shock arrived on top of a property downturn and weak domestic demand.\n\nEmerging markets have shown real resilience to the shocks of recent years. The IMF's warning was that elevated debt and limited fiscal space mean that any support governments offer now has to be narrowly targeted."
+       "content": "CHINA AND THE EMERGING WORLD\n\nThe Fund's numbers for China: growth of 5% in 2025, 4.4% this year, 4% in 2027. The second-largest economy is slowing, and the energy shock landed on top of it.\n\nEmerging markets have absorbed shock after shock in recent years. The IMF's warning was blunt. Debts are high and budgets are thin, so whatever help governments offer now has to be aimed precisely."
       },
       {
        "id": "h-apr26-2-m-5",
@@ -2053,7 +2076,7 @@
       {
        "id": "h-apr26-2-t-6",
        "type": "text",
-       "content": "TECHNOLOGY INVESTMENT AND THE PRODUCTIVITY QUESTION\n\nBefore the war, technology investment had been one of the main forces holding the global economy up. Artificial intelligence drove demand for chips, computing capacity and data centres, and companies poured money into software meant to make them more productive.\n\nThe IMF named a reassessment of AI as one of the main risks to its outlook: a fall in the profits investors expect from the technology, or in the margins companies can charge for it, even if productivity gains arrive. Such a reassessment, the Fund warned, could cut investment and trigger an abrupt correction in financial markets.\n\nThe optimistic case remains powerful. Stronger productivity could lift growth for years and help ageing economies carry their demographic weight. The cautious case is that the costs arrive now and the gains arrive later, unevenly, and perhaps smaller than hoped."
+       "content": "THE AI QUESTION\n\nBefore the war, technology spending was one of the main things holding the world economy up. Artificial intelligence pulled in money for chips, data centres and software.\n\nThe IMF listed a reassessment of AI among the biggest risks to its forecast: investors deciding the profits will be smaller, or the margins thinner, even if the productivity gains arrive. That, the Fund warned, could cut investment and trigger an abrupt fall in financial markets.\n\nThe hopeful version is real. Faster productivity could lift growth for years and help ageing countries carry their populations. The cautious version is that the costs come now and the gains come later, unevenly, and perhaps smaller."
       },
       {
        "id": "h-apr26-2-m-6",
@@ -2067,7 +2090,7 @@
       {
        "id": "h-apr26-2-t-7",
        "type": "text",
-       "content": "TRADE, DEBT AND THE COST OF FRAGMENTATION\n\nTrade barriers and geopolitical tension were already weighing on business decisions before the first missile flew. Companies have been moving suppliers, rethinking factory locations and hedging against sudden changes in policy. Governments are reaching for tariffs, subsidies, export controls and industrial strategy.\n\nFragmentation has a price. Duplicating supply chains can reduce dependence on a single country, and it also takes more capital and raises costs. Resilience has a cost.\n\nPublic debt narrows the options further. Governments may need to support households, businesses or strategic industries, while high borrowing costs and heavy existing debts limit how much they can do. Fiscal credibility matters because investors are judging whether governments can finance themselves without stoking inflation or choking growth.\n\nDefence spending was the other new line in the ledger. The IMF noted that higher military budgets can lift activity in the short term, while adding to inflation, straining public finances and crowding out social spending."
+       "content": "TRADE, DEBT AND DEFENCE\n\nTariffs, subsidies and export controls were already reshaping trade before the first missile flew. Companies have been moving suppliers and factories to hedge against politics. Every duplicated supply chain buys safety and costs money.\n\nPublic debt narrows the room further. Governments want to protect households and industries, while high borrowing costs and heavy existing debts limit what they can do, and bond markets are watching.\n\nDefence was the new line in the ledger. Higher military budgets can lift activity in the short term, the IMF said, while adding to inflation, straining public finances and squeezing social spending."
       },
       {
        "id": "h-apr26-2-m-7",
@@ -2081,7 +2104,7 @@
       {
        "id": "h-apr26-2-t-8",
        "type": "text",
-       "content": "THE BORROWERS' PLATFORM\n\nThe most concrete step of the week came from the countries that owe the money.\n\nOn 15 April, on the margins of the meetings, developing countries launched the Borrowers' Platform, a forum run by and for debtor nations, with Egypt as chair, Pakistan as vice-chair and UNCTAD as its secretariat. Representatives of 30 countries attended, including 16 finance ministers and central bank governors. António Guterres, the UN Secretary-General, called it a breakthrough, and Barbados's prime minister, Mia Mottley, spoke at the opening.\n\nThe numbers behind it are stark. Developing countries spend close to 10% of government revenue on interest to external creditors, and the least developed nearly a quarter. Fifty-four countries, home to 3.4 billion people, spend more on servicing debt than on health or education. Since 2020, many have borrowed at two to four times the cost faced by the United States.\n\nThe platform will not restructure anyone's debt. Its purpose is to share experience, build expertise and give borrowers a collective voice in a system long organised around creditors."
+       "content": "THE BORROWERS' PLATFORM\n\nThe most concrete step of the week came from the countries that owe the money.\n\nOn 15 April, on the margins of the meetings, developing countries launched the Borrowers' Platform, a forum run by and for debtor nations, with Egypt as chair, Pakistan as vice-chair and UNCTAD as secretariat. Thirty countries attended, sixteen of them represented by finance ministers or central bank governors. António Guterres, the UN Secretary-General, called it a breakthrough. Barbados's prime minister, Mia Mottley, spoke at the opening.\n\nThe numbers behind it are stark. Developing countries spend close to 10% of government revenue on interest to foreign creditors, and the poorest nearly a quarter. Fifty-four countries, home to 3.4 billion people, spend more on debt than on health or education. Since 2020, many have borrowed at two to four times the rate the United States pays.\n\nThe platform will not restructure anyone's debt. It is there to share experience, build expertise and give borrowers one voice in a system long built around creditors."
       },
       {
        "id": "h-apr26-2-m-8",
@@ -2095,21 +2118,7 @@
       {
        "id": "h-apr26-2-t-9",
        "type": "text",
-       "content": "A NARROWER MARGIN FOR ERROR\n\nCentral banks face an unforgiving choice. Tighten too hard and they deepen the slowdown. Move too slowly and inflation expectations settle at a higher level, making the eventual cure more painful. Finance ministers must protect the most vulnerable households while keeping enough fiscal room for the next shock.\n\nNo country can manage this alone. Energy supply, trade routes, financial markets and the effects of war are tied together, and a policy decision in one capital ripples outward, hardest of all into economies with the least capacity to absorb it.\n\nThe IMF's message was adaptability with credibility: respond to new information without abandoning the frameworks that anchor expectations, and target support at those who need it most."
-      },
-      {
-       "id": "h-apr26-2-m-9",
-       "type": "image",
-       "content": "",
-       "caption": "",
-       "citation": "",
-       "imageAlign": "center",
-       "imageWidth": "large"
-      },
-      {
-       "id": "h-apr26-2-t-10",
-       "type": "text",
-       "content": "THE OUTLOOK\n\nThe April 2026 forecast did not describe a world economy in collapse. It described one still growing, with resilience that had become thinner, more uneven and more dependent on a ceasefire, an insurance market and the returns on a technology boom.\n\nA single headline number hides the differences. The same shock lands very differently on an oil exporter, an industrial importer and a low-income country already spending more on interest than on schools.\n\nThe world economy kept moving in April 2026.\n\nThe margin for error had simply grown narrower."
+       "content": "A NARROWER MARGIN\n\nCentral banks face an unforgiving choice. Raise rates too far and the slowdown deepens. Wait too long and inflation settles in. Finance ministers have to shield the most vulnerable without spending the room they will need for the next shock.\n\nThe IMF's advice: stay flexible, stay credible, and target help at those who need it most.\n\nThe April forecast did not describe a world economy in collapse. It described one still growing, on resilience that had grown thinner and now depended on a ceasefire, an insurance market and the returns on a technology boom.\n\nThe same shock lands very differently on an oil exporter, an industrial importer and a poor country already spending more on interest than on schools.\n\nThe world economy kept moving in April 2026.\n\nThe margin for error had simply grown narrower."
       }
      ]
     },
@@ -2155,7 +2164,7 @@
       {
        "id": "h-apr26-3-t-1",
        "type": "text",
-       "content": "Artificial intelligence feels weightless. A question typed into a window, an answer a second later.\n\nThe weight is somewhere else. It sits in the plains of west Texas, in the desert outside Abu Dhabi, beside a fjord in Arctic Norway and in the palm-oil country of southern Malaysia. It is measured in chips, transformers, cooling towers and power lines, and in a number that only a few years ago belonged to national energy plans: the gigawatt.\n\nIn 2026, the world's largest technology companies will spend more on that physical machinery than the entire world invests in producing oil and gas. The question every investor, utility and government is now asking is simple.\n\nWhat does it really cost?"
+       "content": "Artificial intelligence feels weightless. A question typed into a window, an answer a second later.\n\nThe weight is somewhere else. It sits on the plains of west Texas, in the desert outside Abu Dhabi, beside a fjord in Arctic Norway and in the palm-oil country of southern Malaysia. It is measured in chips, transformers, cooling towers and power lines, and in a unit that used to belong to national energy plans: the gigawatt.\n\nIn 2026, the largest technology companies will spend more on that machinery than the whole world invests in producing oil and gas.\n\nSo what does it really cost?"
       },
       {
        "id": "h-apr26-3-m-1",
@@ -2169,7 +2178,7 @@
       {
        "id": "h-apr26-3-t-2",
        "type": "text",
-       "content": "APRIL'S NUMBERS\n\nApril 2026 made the scale impossible to ignore.\n\nOn 7 April, Anthropic's annualised revenue was reported to have passed $30 billion, up from about $9 billion at the end of 2025. OpenAI had passed $25 billion in annualised revenue in February. Two companies that barely existed as businesses five years ago were now earning at the pace of large industrial groups.\n\nA fortnight later, at Google Cloud Next in Las Vegas, Google split its eighth-generation TPU into two chips for the first time. The TPU 8t, built for training, scales to 9,600 chips in a single superpod, with two petabytes of shared memory and 121 ExaFlops of compute, almost three times its predecessor. The TPU 8i, built for inference, carries three times the on-chip memory of the previous generation and is designed for the low-latency demands of AI agents.\n\nEvery one of those advances needs a building, a grid connection and a power contract. The revenue is real. So is the bill."
+       "content": "APRIL'S NUMBERS\n\nOn 7 April, Anthropic's annualised revenue was reported to have passed $30 billion, up from about $9 billion at the end of 2025. OpenAI had crossed $25 billion in February. Two companies that barely existed as businesses five years ago were earning at the pace of industrial groups.\n\nA fortnight later, at Google Cloud Next in Las Vegas, Google split its eighth-generation TPU into two chips. The TPU 8t, for training, links 9,600 chips in one superpod with two petabytes of shared memory and 121 ExaFlops of compute, almost three times its predecessor. The TPU 8i, for inference, triples the on-chip memory and is built for AI agents that cannot wait.\n\nEvery one of those advances needs a building, a grid connection and a power contract.\n\nThe revenue is real. So is the bill."
       },
       {
        "id": "h-apr26-3-m-2",
@@ -2183,7 +2192,7 @@
       {
        "id": "h-apr26-3-t-3",
        "type": "text",
-       "content": "COMPUTE IS A CAPITAL BUSINESS\n\nTraining a frontier model takes vast clusters of specialised chips wired together for weeks or months. Inference, the work of answering each request once a model is trained, is a different kind of cost. It never stops. A product with millions of users has to respond quickly, reliably and around the clock.\n\nThat makes efficiency a competitive weapon. Model design, chip utilisation, memory bandwidth, network layout and the scheduling of workloads all change how much useful work a system delivers for each dollar of hardware and each kilowatt-hour of power. A system can be brilliant and still too expensive to serve at scale.\n\nThe supply chain is narrow. Advanced chips depend on a handful of designers, foundries, packaging plants and equipment makers. Data centre developers need land, grid connections, cooling and reliable electricity. A delay at any one link slows everything behind it."
+       "content": "TRAINING, THEN SERVING\n\nTraining a frontier model ties up vast clusters of chips for weeks or months. Then the second bill arrives. Every answer a model gives, to every user, around the clock, runs on hardware too. Training is a project. Serving is forever.\n\nThat is why efficiency has become a weapon. Chip utilisation, memory bandwidth, network layout and the way workloads are scheduled decide how much each dollar of hardware and each kilowatt-hour actually delivers. A brilliant model that is too expensive to serve is a research paper, not a business.\n\nAnd the supply chain is narrow. A handful of chip designers, one dominant foundry, a few packaging plants. Land, grid connections and transformers. One delay anywhere slows everything behind it."
       },
       {
        "id": "h-apr26-3-m-3",
@@ -2197,7 +2206,7 @@
       {
        "id": "h-apr26-3-t-4",
        "type": "text",
-       "content": "THE CAPITAL BILL\n\nThe four largest American cloud and platform companies have set out the biggest capital programme in corporate history.\n\nAmazon told investors in February that it expects to invest about $200 billion across the company in 2026, up from around $125 billion in 2025. Microsoft guided to about $190 billion for its 2026 fiscal year. Alphabet raised its 2026 range to $180–190 billion and warned that 2027 would be significantly higher. Meta raised its range to $125–145 billion, citing higher component prices and data centre costs.\n\nTogether, the four are heading for roughly $630–650 billion in 2026. The International Energy Agency puts the capital spending of the largest technology companies above $400 billion in 2025, rising by a further 75% in 2026 — more, it notes, than the world invests in oil and gas production."
+       "content": "THE CAPITAL BILL\n\nAmazon told investors in February that it would invest about $200 billion in 2026, up from around $125 billion in 2025. Microsoft guided to about $190 billion for its fiscal year. Alphabet raised its range to $180–190 billion and warned that 2027 would be significantly higher. Meta lifted its range to $125–145 billion, blaming the rising price of components and data centres.\n\nTogether, roughly $630–650 billion in a single year.\n\nThe International Energy Agency puts the capital spending of the biggest technology companies above $400 billion in 2025, rising by a further 75% in 2026."
       },
       {
        "id": "h-apr26-3-m-4",
@@ -2211,7 +2220,7 @@
       {
        "id": "h-apr26-3-t-5",
        "type": "text",
-       "content": "WHAT A GIGAWATT COSTS\n\nThe industry now prices AI capacity by the gigawatt, roughly the output of a large nuclear reactor.\n\nNvidia's chief executive, Jensen Huang, has put the cost of a one-gigawatt AI facility at $50 billion to $60 billion, with much of that going on chips, networking and computing systems before a single wall is built. Meta's Hyperion campus in Richland Parish, Louisiana, shows the shape of the bill. Meta confirmed in July 2026 that the site will grow to more than five gigawatts, with a footprint Mark Zuckerberg has described as nearly the size of Manhattan. Construction alone is put at about $50 billion. With chips, Bloomberg has estimated the total could approach $250 billion.\n\nThe shell and its power and cooling systems vary sharply by city. One 2026 industry benchmark put construction at about $8.2 million per megawatt in northern Virginia and $9.1 million in Texas, against $9.7 million in Stockholm, $10.3 million in Dublin, $11.8 million in Frankfurt, $12.4 million in Singapore, $14.2 million in Tokyo and $15.7 million in central London. Land, labour and, above all, the price of power decide where the money goes."
+       "content": "WHAT A GIGAWATT COSTS\n\nThe industry now prices AI capacity by the gigawatt, roughly the output of a large nuclear reactor.\n\nJensen Huang of Nvidia puts the cost of a one-gigawatt AI facility at $50 billion to $60 billion, most of it in chips, networking and computers rather than concrete. Meta's Hyperion campus in Richland Parish, Louisiana, shows the scale. In July 2026 Meta confirmed it will grow beyond five gigawatts, on a footprint Mark Zuckerberg has compared to Manhattan. Construction alone is put at about $50 billion. With the chips, Bloomberg estimates the bill could approach $250 billion.\n\nThe building itself costs very different amounts depending on the city. One 2026 industry benchmark put construction at about $8.2 million per megawatt in northern Virginia, $9.1 million in Texas, $9.7 million in Stockholm, $10.3 million in Dublin, $11.8 million in Frankfurt, $12.4 million in Singapore, $14.2 million in Tokyo and $15.7 million in central London.\n\nLand and labour matter. Power matters most."
       },
       {
        "id": "h-apr26-3-m-5",
@@ -2225,7 +2234,7 @@
       {
        "id": "h-apr26-3-t-6",
        "type": "text",
-       "content": "THE UNITED STATES: STARGATE AND THE RACE FOR POWER\n\nAmerica remains the centre of gravity. The IEA estimates that the United States accounts for the largest share of global data centre electricity use, and the country is where the biggest single projects are rising.\n\nStargate, the $500 billion venture led by OpenAI with Oracle and SoftBank, is the emblem. Its first campus, at Abilene in Texas, is planned at 1.2 gigawatts. By late April 2026 about 200 megawatts were running, with completion expected in the fourth quarter of the year. Six further sites — two more in Texas, and others in New Mexico, Wisconsin, Michigan and Ohio — bring planned capacity above nine gigawatts by 2029, most of it due in 2028.\n\nPlans are not buildings. OpenAI has already dropped an expansion of Abilene to 2.1 gigawatts, and Lordstown in Ohio has moved to ban future data centres. Local opposition, grid queues and equipment shortages are now as much a part of the American story as capital."
+       "content": "AMERICA: STARGATE AND THE RACE FOR POWER\n\nThe United States uses more data centre electricity than any other country, and it is where the largest single projects are rising.\n\nStargate, the $500 billion venture led by OpenAI with Oracle and SoftBank, is the emblem. Its first campus, at Abilene in Texas, is planned at 1.2 gigawatts. By late April about 200 megawatts were running, with completion due in the fourth quarter. Six more sites, in Texas, New Mexico, Wisconsin, Michigan and Ohio, take planned capacity above nine gigawatts by 2029.\n\nPlans are not buildings. OpenAI has already dropped a larger expansion at Abilene, and Lordstown in Ohio has moved to ban new data centres. Local opposition, grid queues and equipment shortages are now part of the American story."
       },
       {
        "id": "h-apr26-3-m-6",
@@ -2239,7 +2248,7 @@
       {
        "id": "h-apr26-3-t-7",
        "type": "text",
-       "content": "ENERGY IS NO LONGER A FOOTNOTE\n\nData centres used about 485 terawatt-hours of electricity in 2025, according to the IEA, up 17% in a single year while global electricity demand grew 3%. Consumption by AI-focused data centres rose by around 50%. By 2030 the agency expects total data centre demand to reach about 950 terawatt-hours — roughly 3% of the world's electricity — with AI-focused facilities tripling their use.\n\nThe grid cannot always keep up. Gas turbine orders rose 70% in 2025, and the IEA expects 15 to 27 gigawatts of on-site gas generation to power data centres by 2030, most of it in the United States. Supply chains for turbines, transformers and memory have tightened, and the agency expects the shortage of high-bandwidth memory to last until the end of 2027.\n\nThe racks themselves are changing. AI server power density rose elevenfold between 2020 and 2025 and is set to rise another fourfold by 2027, when a single rack could draw as much power at its peak as 65 homes."
+       "content": "ENERGY IS NO LONGER A FOOTNOTE\n\nData centres used about 485 terawatt-hours of electricity in 2025, according to the IEA, up 17% in a year when global demand grew 3%. AI-focused data centres used half as much again as the year before. By 2030 the agency expects around 950 terawatt-hours, close to 3% of the world's electricity.\n\nThe grid is struggling to keep pace. Gas turbine orders rose 70% in 2025, and the IEA expects 15 to 27 gigawatts of gas generation to be built on site at data centres by 2030, most of it in the United States. High-bandwidth memory is expected to stay short until the end of 2027.\n\nInside the halls, AI server power density rose elevenfold between 2020 and 2025. By 2027 a single rack could draw as much power at its peak as 65 homes."
       },
       {
        "id": "h-apr26-3-m-7",
@@ -2253,7 +2262,7 @@
       {
        "id": "h-apr26-3-t-8",
        "type": "text",
-       "content": "WATER AND HEAT\n\nAll that power becomes heat, and heat must go somewhere.\n\nAmerica's Lawrence Berkeley National Laboratory found that US data centres directly consumed about 17 billion gallons of water for cooling in 2023, around 64 billion litres, and that the electricity they used accounted for roughly twelve times as much again. Google's single largest site, at Council Bluffs in Iowa, used about a billion gallons in 2024. Its air-cooled facility at Pflugerville in Texas used ten thousand.\n\nLiquid cooling, heat reuse and siting in cooler climates now shape where the next generation of campuses is built. In dry regions, water has become as political as power."
+       "content": "WATER AND HEAT\n\nAll that power becomes heat, and heat has to go somewhere.\n\nThe Lawrence Berkeley National Laboratory found that US data centres consumed about 17 billion gallons of water directly for cooling in 2023, around 64 billion litres, and roughly twelve times as much again through the power stations that supplied them. Google's thirstiest site, at Council Bluffs in Iowa, used about a billion gallons in 2024. Its air-cooled site at Pflugerville in Texas used ten thousand.\n\nIn dry regions, water has become as political as power."
       },
       {
        "id": "h-apr26-3-m-8",
@@ -2267,7 +2276,7 @@
       {
        "id": "h-apr26-3-t-9",
        "type": "text",
-       "content": "EUROPE: AMBITION MEETS THE PRICE OF POWER\n\nEurope wants sovereign computing. Its energy bill keeps getting in the way.\n\nBrussels has set aside €20 billion for a network of AI gigafactories, each planned around more than 100,000 advanced processors, financed through the European Investment Bank to attract private money. Ireland shows what happens when a small grid hosts a large industry: data centres used 23% of all the country's electricity in 2025, up from 22% the year before, and more than all the urban homes in Ireland combined.\n\nThe economics are unforgiving. In April 2026, OpenAI put Stargate UK on hold indefinitely, citing the cost of energy and the regulatory environment. Days later, the campus at Narvik in Arctic Norway — 230 megawatts, run by Nscale with the Norwegian investor Aker, and once marketed as Europe's first Stargate — signed Microsoft instead, which will lease 30,000 Nvidia Vera Rubin GPUs there on top of a $6.2 billion commitment made in 2025. Cheap hydropower and cold air still win."
+       "content": "EUROPE: AMBITION MEETS THE PRICE OF POWER\n\nEurope wants computing of its own. Its energy bill keeps getting in the way.\n\nBrussels has set aside €20 billion for AI gigafactories, each built around more than 100,000 advanced processors, with the European Investment Bank drawing in private money. Ireland shows what happens when a small grid hosts a large industry: data centres used 23% of the country's electricity in 2025, more than every urban home in Ireland combined.\n\nIn April 2026, OpenAI put Stargate UK on hold indefinitely, citing the cost of energy and regulation. Days later, Narvik in Arctic Norway, a 230-megawatt campus run by Nscale with the Norwegian investor Aker and once billed as Europe's first Stargate, signed Microsoft instead. Microsoft will lease 30,000 Nvidia Vera Rubin GPUs there, on top of a $6.2 billion commitment made in 2025.\n\nCheap hydropower and cold air still win."
       },
       {
        "id": "h-apr26-3-m-9",
@@ -2281,7 +2290,7 @@
       {
        "id": "h-apr26-3-t-10",
        "type": "text",
-       "content": "THE MIDDLE EAST: SOVEREIGN WEALTH AND A NEW KIND OF RISK\n\nThe Gulf has the capital, the land and the energy, and it is spending all three.\n\nStargate UAE, a one-gigawatt cluster built by G42 with OpenAI, Oracle, Nvidia, Cisco and SoftBank, sits within a planned five-gigawatt UAE–US AI campus in Abu Dhabi. Its first 200 megawatts are due in 2026. In Saudi Arabia, the Public Investment Fund's AI company, Humain, is reported to be targeting around 6.6 gigawatts over the next decade, in a country whose total data centre load stood at about 410 megawatts across some 40 facilities in mid-2026. AWS has committed $5.3 billion to a new Saudi region.\n\nThen came the war. In early March 2026, Iranian drones and missiles struck three Amazon Web Services data centres, two in the UAE and one in Bahrain, knocking them offline and disrupting banking, payments and delivery apps across the region. Analysts believe it was the first deliberate air strike on data centres in a conflict. A former US National Security Council official suggested Gulf facilities might now need missile defence. Physical security has joined power and chips as a line in the cost of AI."
+       "content": "THE MIDDLE EAST: SOVEREIGN WEALTH AND A NEW KIND OF RISK\n\nThe Gulf has the capital, the land and the energy, and it is spending all three.\n\nStargate UAE, a one-gigawatt cluster built by G42 with OpenAI, Oracle, Nvidia, Cisco and SoftBank, sits inside a planned five-gigawatt UAE–US AI campus in Abu Dhabi. Its first 200 megawatts are due in 2026. In Saudi Arabia, Humain, the Public Investment Fund's AI company, is reported to be targeting around 6.6 gigawatts over the next decade, in a country whose entire data centre load was about 410 megawatts in mid-2026. AWS has committed $5.3 billion to a new Saudi region.\n\nThen came the war. In early March 2026, Iranian drones and missiles struck three Amazon data centres, two in the UAE and one in Bahrain, knocking them offline and disrupting banking, payments and delivery apps across the region. Analysts believe it was the first deliberate air strike on data centres in any conflict. A former US National Security Council official suggested Gulf facilities may now need missile defence.\n\nSecurity has joined power and chips on the bill."
       },
       {
        "id": "h-apr26-3-m-10",
@@ -2295,7 +2304,7 @@
       {
        "id": "h-apr26-3-t-11",
        "type": "text",
-       "content": "ASIA: SCALE, SOVEREIGNTY AND THE JOHOR SQUEEZE\n\nAsia's build-out is driven by two forces: scale in China and India, and sovereignty everywhere else.\n\nIn China, Alibaba pledged RMB 380 billion, about $52 billion, over the three years to 2028 for cloud and AI infrastructure, and its chief executive has told analysts the company is likely to overshoot. Domestic chips from Huawei and Alibaba's own designs are carrying more of the load as US export controls bite.\n\nIndia has become the new battleground for American capital. In December 2025, Amazon committed more than $35 billion by 2030, Microsoft $17.5 billion between 2026 and 2029, and Google $15 billion for an AI hub at Visakhapatnam with AdaniConneX and Airtel — together $67.5 billion. South Korea secured more than 260,000 Nvidia GPUs at the APEC summit in Gyeongju, shared among the government, Samsung, SK, Hyundai and Naver.\n\nMalaysia shows the limits. Johor, across the causeway from Singapore, now has about 1,110 megawatts of live capacity, third in Asia-Pacific after Tokyo and Singapore, with more than 8.5 gigawatts in the pipeline. Vacancy is under 1%. Rising power and water tariffs mean a 50-megawatt facility could face up to RM120 million a year in electricity costs alone."
+       "content": "ASIA: SCALE, SOVEREIGNTY AND THE JOHOR SQUEEZE\n\nIn China, Alibaba pledged RMB 380 billion, about $52 billion, over three years to 2028, and its chief executive has told analysts it will probably spend more. Chips from Huawei and Alibaba's own designers are carrying more of the load as US export controls keep Nvidia's best hardware out.\n\nIndia has become a battleground for American capital. In December 2025 Amazon committed more than $35 billion by 2030, Microsoft $17.5 billion from 2026 to 2029, and Google $15 billion for an AI hub at Visakhapatnam with AdaniConneX and Airtel. South Korea secured more than 260,000 Nvidia GPUs at the APEC summit in Gyeongju, shared between the government, Samsung, SK, Hyundai and Naver.\n\nMalaysia shows the limits. Johor, across the causeway from Singapore, has about 1,110 megawatts of live capacity, third in Asia-Pacific after Tokyo and Singapore, and more than 8.5 gigawatts in the pipeline. Vacancy is under 1%. With power and water tariffs rising, a 50-megawatt facility could pay up to RM120 million a year for electricity alone."
       },
       {
        "id": "h-apr26-3-m-11",
@@ -2309,7 +2318,7 @@
       {
        "id": "h-apr26-3-t-12",
        "type": "text",
-       "content": "WHO PAYS, AND WHO CAPTURES THE VALUE\n\nThe money flows in layers. Chipmakers sell the accelerators. Cloud providers and data centre developers build the halls. Utilities and gas producers supply the power. Model developers rent the capacity to train and serve their systems, and businesses decide whether the tools are worth the subscription.\n\nEach layer carries a different risk. Chipmakers ride the capital cycle. Cloud providers take on huge upfront costs and the danger of empty halls. Model companies have to make every answer cheaper to serve than it is to sell. The IEA notes that the energy used per AI task is falling by at least tenfold a year — but demand is growing faster still.\n\nThe test is output. Spending on this scale is justified only by productivity that shows up in real businesses, in faster research and in new services people pay for. Capacity built against optimistic forecasts becomes a burden when demand or pricing falls short."
+       "content": "WHO PAYS\n\nThe money moves in layers. Chipmakers sell the accelerators. Cloud companies and developers build the halls. Utilities and gas producers supply the power. Model companies rent the capacity, and businesses decide whether the tools are worth the subscription.\n\nEach layer carries its own risk. Chipmakers ride the spending cycle. Cloud companies carry the cost of halls that might sit half empty. Model companies have to serve every answer for less than they charge for it. The energy needed for each AI task is falling at least tenfold a year, according to the IEA. Consumption by AI data centres still rose by half in 2025.\n\nGovernments have joined in. Seoul, Riyadh, Abu Dhabi and Brussels are all paying for capacity they control.\n\nNot every job needs the biggest model. Smaller, specialised systems running close to the work will win plenty of business."
       },
       {
        "id": "h-apr26-3-m-12",
@@ -2323,21 +2332,7 @@
       {
        "id": "h-apr26-3-t-13",
        "type": "text",
-       "content": "THE NEXT PHASE OF COMPETITION\n\nAI is becoming a contest in systems engineering as much as in model building. The companies that run compute, power, cooling and deployment most efficiently may win even when rivals have comparable models. For governments, the same infrastructure is a strategic asset, which is why Seoul, Riyadh, Abu Dhabi, Brussels and New Delhi are all paying for capacity of their own.\n\nNot every task needs the largest model. Smaller, specialised systems, efficient inference and careful choices about where workloads run can be the better business where they do the job. The market that emerges is likely to hold many architectures, not one."
-      },
-      {
-       "id": "h-apr26-3-m-13",
-       "type": "image",
-       "content": "",
-       "caption": "",
-       "citation": "",
-       "imageAlign": "center",
-       "imageWidth": "large"
-      },
-      {
-       "id": "h-apr26-3-t-14",
-       "type": "text",
-       "content": "THE CAPITAL DISCIPLINE TEST\n\nThe real cost of AI is no longer hidden in a software budget. It is written into national grids, Gulf security plans, European energy policy and the balance sheets of the world's largest companies.\n\nSome of the capacity being built today will look visionary. Some of it will look like the fibre-optic glut of 2001. The difference will come down to discipline: where it is built, how it is powered, how efficiently it runs and whether the services on top of it earn their keep.\n\nThe race is no longer about the model.\n\nIt is about the stack beneath it, and the bill that comes with it."
+       "content": "THE DISCIPLINE TEST\n\nThe cost of AI is no longer hidden in a software budget. It is written into national grids, Gulf security plans, European energy policy and the balance sheets of the largest companies on earth.\n\nSome of what is being built today will look visionary. Some will look like the fibre-optic glut of 2001. The difference will come down to discipline: where it is built, how it is powered, how efficiently it runs, and whether the services on top of it earn their keep.\n\nThe race is no longer about the model.\n\nIt is about everything underneath it, and who pays the bill."
       }
      ]
     }
@@ -2964,7 +2959,7 @@
       {
        "id": "h3-t-2",
        "type": "text",
-       "content": "A WEEK AT THE BREUER\n\nThe week opened on 8 December with a single-owner collection, \"A Legacy of Elegance.\" Its 56 lots made nearly $14 million. The top lot was a Boucheron laurel wreath necklace from around 1888, which sold for $1.3 million.\n\nThe surprise was the twentieth century. Two bib necklaces by Suzanne Belperron, from 1954 and 1966, sold for $635,000 and $825,500, each more than double its high estimate. Pieces by JAR — Joel Arthur Rosenthal, whose work rarely appears in public — followed the same pattern: a rock crystal and sapphire butterfly brooch at $698,500, a wild rose brooch at $609,600, quatrefoil earrings at $698,500.\n\nThe next evening came the main event, now presented as High Jewelry. It made $30.1 million, with 94% of the lots sold."
+       "content": "A WEEK AT THE BREUER\n\nThe week opened on 8 December with a single-owner collection, \"A Legacy of Elegance.\" Its 56 lots made nearly $14 million. The top lot was a Boucheron laurel wreath necklace from around 1888, which sold for $1.3 million.\n\nThe surprise was the twentieth century. Two bib necklaces by Suzanne Belperron, from 1954 and 1966, sold for $635,000 and $825,500, each more than double its high estimate. Pieces by JAR — Joel Arthur Rosenthal, whose work rarely appears in public — followed the same pattern: a rock crystal and sapphire butterfly brooch at $698,500, a wild rose brooch at $609,600, quatrefoil earrings at $698,500. A Cartier ruby and diamond bracelet from the 1930s made $558,800, and a pair of pear-shaped diamond earrings of 12.24 and 11.68 carats sold for $889,000.\n\nThe next evening came the main event, now presented as High Jewelry. It made $30.1 million, with 94% of the lots sold."
       },
       {
        "id": "h3-m-2",
@@ -2992,7 +2987,7 @@
       {
        "id": "h3-t-4",
        "type": "text",
-       "content": "WHEN RARITY DOES NOT SELL\n\nTwo days later, the week's quieter sale told the other half of the story.\n\nThe Fine Jewelry auction on 11 December made $11.8 million. Its lead lot, an unmounted 3.63-carat fancy vivid purple-pink diamond estimated at up to $1.5 million, failed to sell. Rare colour is the most prized quality in diamonds, and still a buyer will not pay any price for it. Clarity, proportion and the estimate itself all count.\n\nAcross the three sales, the week brought in about $56 million."
+       "content": "WHEN RARITY DOES NOT SELL\n\nTwo days later, the week's quieter sale told the other half of the story.\n\nThe Fine Jewelry auction on 11 December made $11.8 million. Its lead lot, an unmounted 3.63-carat fancy vivid purple-pink diamond estimated at up to $1.5 million, failed to sell. Rare colour is the most prized quality in diamonds, and still a buyer will not pay any price for it. Clarity, proportion and the estimate itself all count. This one was graded I2.\n\nThe bidding went elsewhere. A Colombian emerald ring estimated at $50,000 to $70,000 made $279,400, the top price of the sale, and a necklace of 67 graduated emerald-cut diamonds, 77.80 carats in all and offered without reserve, sold for $203,200.\n\nAcross the three sales, the week brought in about $56 million."
       },
       {
        "id": "h3-m-4",
@@ -3006,7 +3001,7 @@
       {
        "id": "h3-t-5",
        "type": "text",
-       "content": "THE IMPORTANCE OF PROVENANCE\n\nProvenance can change the meaning of a jewel as much as its price.\n\nA stone with a documented history, a piece from a great house, or jewellery from a celebrated collection can draw bidders far beyond its material value. In December 2023, also in New York, Sotheby's sold five jewels from the collection of the comedian Red Skelton for $3.7 million against a high estimate of $2.2 million. His Burmese pink sapphire ring made $1.1 million, around seven times its estimate. The jewels of Mary Tyler Moore sold in the same week, every lot finding a buyer.\n\nThat history must be proved, not assumed. Catalogues separate confirmed fact from attribution, and serious bidders read the condition reports, gemmological certificates and terms of sale before they raise a paddle. At this level of the market, transparency is part of the product."
+       "content": "PROVENANCE\n\nA name can change the price of a jewel as much as its stones.\n\nIn December 2023, also in New York, Sotheby's sold five jewels from the collection of the comedian Red Skelton for $3.7 million, against a high estimate of $2.2 million. His Burmese pink sapphire ring made $1.1 million, around seven times its estimate. Mary Tyler Moore's jewels sold the same week, every lot finding a buyer.\n\nThe history has to be proved. Catalogues separate fact from attribution, and serious bidders read the condition reports, gem certificates and terms of sale before they raise a paddle. At this level, the paperwork is part of the jewel."
       },
       {
        "id": "h3-m-5",
@@ -3020,7 +3015,7 @@
       {
        "id": "h3-t-6",
        "type": "text",
-       "content": "THE RECORDS\n\nNew York has set some of the great prices in jewellery.\n\nIn June 2023, Sotheby's sold the Estrela de Fura, a 55.22-carat ruby mined in Mozambique, for $34.8 million, the most ever paid for a ruby at auction. It beat the record of the Sunrise Ruby, which made $30.3 million in Geneva in 2015. In December the same year, a 133.03-carat fancy vivid yellow diamond sold for $5.5 million, the largest of its kind ever sold at auction.\n\nRecords like these set the benchmark. They also remind buyers that the very best stones are not interchangeable. There is only one of each."
+       "content": "THE RECORDS\n\nNew York has set some of the great prices in jewellery.\n\nIn June 2023, Sotheby's sold the Estrela de Fura, a 55.22-carat ruby mined in Mozambique, for $34.8 million, the most ever paid for a ruby at auction. It beat the Sunrise Ruby, which made $30.3 million in Geneva in 2015. That December, a 133.03-carat fancy vivid yellow diamond sold for $5.5 million, the largest of its kind ever sold at auction.\n\nThere is only one of each."
       },
       {
        "id": "h3-m-6",
@@ -3034,7 +3029,7 @@
       {
        "id": "h3-t-7",
        "type": "text",
-       "content": "A MARKET FOR EXCEPTIONAL OBJECTS\n\nThe phrase Magnificent Jewels covers a wide world: historic signed pieces, contemporary creations and important single stones. Natural coloured diamonds, exceptional white diamonds, sapphires, rubies and emeralds each have their own collectors and their own logic.\n\nColour, clarity, size and origin all shape the price. A Kashmir sapphire or a Burmese ruby carries a premium that a stone of equal size from elsewhere does not. Treatment matters too: an unheated stone is worth far more than a heated one. Signed jewels from Cartier, Van Cleef & Arpels, Bulgari, Tiffany & Co. or Harry Winston add the value of design history, craftsmanship and the name on the box.\n\nThe auction puts all of that under pressure. Estimates set expectations, and bidding reveals what someone will actually pay on the night. Two collectors who want the same piece for different reasons can send it far above its estimate, as the David Webb did. A technically superb stone can be left without a buyer, as the pink diamond was.\n\nAuction houses also stand between private collections and public attention. Pre-sale exhibitions let buyers examine the jewels in person. Catalogues supply the photographs, descriptions and documents. Online bidding has widened the room to the whole world, and with it the responsibility to get every detail of the information right."
+       "content": "WHAT SETS THE PRICE\n\nColour, clarity, size and origin all count. A Kashmir sapphire or a Burmese ruby carries a premium that a stone of the same size from elsewhere does not. An unheated stone is worth far more than a heated one. A signature from Cartier, Van Cleef & Arpels, Bulgari, Tiffany & Co. or Harry Winston adds design history, craftsmanship and the name on the box.\n\nThe estimate is a guess. The room gives the answer. Two collectors who want the same piece for different reasons can send it far past its estimate, as the David Webb did. A technically superb stone can go home unsold, as the pink diamond did.\n\nBefore any of that, the jewels go on view. Buyers inspect them in person, the catalogue supplies the photographs and documents, and online bidding brings in collectors from every time zone."
       },
       {
        "id": "h3-m-7",
@@ -3048,7 +3043,7 @@
       {
        "id": "h3-t-8",
        "type": "text",
-       "content": "CRAFT AND COLLECTING\n\nA jewel is both a technical object and a personal one.\n\nA diamond's brilliance depends on the relationship between cut, light and proportion. A setting must hold the stone securely while letting it be seen. Metalwork, engraving and the arrangement of stones turn a valuable material into a design you can recognise across a room.\n\nSome collectors want the great names. Others want the great stones, whoever set them. A Belperron necklace and an unmounted blue diamond are both rare, for completely different reasons."
+       "content": "CRAFT AND COLLECTING\n\nA diamond's fire depends on cut, light and proportion. A setting has to hold a stone securely and still let it be seen. Metalwork and the arrangement of stones turn a precious material into a design you can recognise across a room.\n\nSome collectors want the great names. Others want the great stones, whoever set them. A Belperron necklace and an unmounted blue diamond are both rare, for completely different reasons."
       },
       {
        "id": "h3-m-8",
@@ -3062,7 +3057,7 @@
       {
        "id": "h3-t-9",
        "type": "text",
-       "content": "THE SEASON AHEAD\n\nSotheby's returns to New York with its spring High Jewelry sale in June 2026, 119 lots led by white diamonds of more than 15 and 23 carats.\n\nThe stones are small enough to sit in the palm of a hand. The evidence behind them — origin, maker, ownership and condition — weighs as much as their beauty.\n\nIn New York, that is what sets the price."
+       "content": "THE SEASON AHEAD\n\nSotheby's returns to New York with its High Jewelry sale in June 2026, 119 lots led by white diamonds of more than 15 and 23 carats.\n\nThe stones are small enough to sit in the palm of a hand. The evidence behind them, origin, maker, ownership and condition, weighs as much as their beauty.\n\nIn New York, that is what sets the price."
       }
      ],
      "excerpt": "A 28-carat Kashmir sapphire leads a $120 million catalogue — the auction house's most ambitious jewellery sale in a decade",
@@ -3391,7 +3386,7 @@
       {
        "id": "a1-t-1",
        "type": "text",
-       "content": "You hear the Sapucaí before you see it.\n\nLong before a samba school turns the corner into the Sambadrome, the bateria announces it: hundreds of drummers, surdos pounding like a heartbeat, tamborins cracking over the top, the whole avenue shaking with it. In Rio de Janeiro, Carnival is a competition decided by judges with scorecards. But it begins, and ends, with the drums.\n\nIn 2026, the drums won.\n\nUnidos do Viradouro was crowned champion of Rio's Grupo Especial with a parade dedicated to its own mestre de bateria, Moacyr da Silva Pinto, known to the whole samba world as Mestre Ciça. The school scored a perfect 270 points, a ten from every judge in every category."
+       "content": "You hear the Sapucaí before you see it.\n\nLong before a samba school turns into the Sambadrome, the bateria announces it: hundreds of drummers, the surdos pounding like a heartbeat, tamborins cracking over the top, the whole avenue shaking. Rio's Carnival is decided by judges with scorecards. It begins and ends with the drums.\n\nIn 2026, the drums won.\n\nUnidos do Viradouro was crowned champion of the Grupo Especial with a parade dedicated to its own mestre de bateria, Moacyr da Silva Pinto, known across the samba world as Mestre Ciça. The school scored a perfect 270 points, full marks in all nine categories."
       },
       {
        "id": "a1-m-1",
@@ -3405,7 +3400,7 @@
       {
        "id": "a1-t-2",
        "type": "text",
-       "content": "THREE NIGHTS ON THE SAPUCAÍ\n\nTwelve schools competed for the 2026 title. The parades began on the night of Sunday 15 February and ran across three nights, each school given 80 minutes to cross the Sambadrome with its floats, its costumed wings, its samba and its drums.\n\nThe Sambadrome itself is part of the spectacle: Oscar Niemeyer's long concrete avenue, flanked by stands and boxes, built in 1984 to give Carnival a permanent stage. For three nights it holds the most concentrated display of music, design and choreography anywhere on earth, and the city watches every minute.\n\nFour schools paraded each night. Viradouro went third on the second night. The final night, Tuesday 17 February, brought Paraíso do Tuiuti, Unidos de Vila Isabel, Acadêmicos do Grande Rio and Acadêmicos do Salgueiro."
+       "content": "THREE NIGHTS ON THE SAPUCAÍ\n\nTwelve schools competed, four a night, from Sunday 15 to Tuesday 17 February. Each had 80 minutes to cross Oscar Niemeyer's concrete avenue, built in 1984 to give Carnival a permanent stage, with its floats, its costumed wings, its samba and its drums.\n\nA parade is not a concert. It is thousands of performers moving as one. The samba-enredo, the song written for the year's theme, is the musical centre. The bateria drives it. The dancers, the flag-bearing couple, the wings and the floats turn the theme into a story that has to cross the avenue on time without coming apart.\n\nThe work starts months earlier. Costumes are sewn and floats welded in the schools' workshops, many of them at the Cidade do Samba in the port district. The music is rehearsed week after week in each school's quadra. A parade can dazzle and still lose the title if a wing drifts out of step or a float stalls."
       },
       {
        "id": "a1-m-2",
@@ -3419,7 +3414,7 @@
       {
        "id": "a1-t-3",
        "type": "text",
-       "content": "THE STORIES ON THE AVENUE\n\nEvery samba school arrives with an enredo, a theme it spends a year turning into music, costume and floats. In 2026, the themes ranged from a president to a forest healer.\n\nThe opening night set the tone. Acadêmicos de Niterói, newly promoted as champion of the Série Ouro, paraded first with a tribute to President Luiz Inácio Lula da Silva, tracing his life from Garanhuns in Pernambuco to the presidency. Lula was on the avenue to see it.\n\nImperatriz Leopoldinense followed with \"Camaleônico,\" a tribute to the singer Ney Matogrosso and half a century of reinvention. Portela told \"O Mistério do Príncipe do Bará,\" a story of Afro-gaúcho faith and culture from Rio Grande do Sul, the state with Brazil's largest share of umbanda and candomblé followers.\n\nThose themes showed how much a parade can hold. A singer's career, a spiritual tradition, a forgotten healer or a sitting president can all become a story told by thousands of people in motion.\n\nMangueira closed the night with Mestre Sacaca, the healer from Amapá known as the \"Doutor da Floresta,\" a keeper of Afro-Indigenous knowledge in the Amazon. A parade, in the end, is a public argument about who deserves to be remembered."
+       "content": "THE STORIES ON THE AVENUE\n\nEvery school arrives with an enredo, a theme it spends a year turning into music, costume and spectacle. In 2026, the themes ran from a president to a forest healer.\n\nAcadêmicos de Niterói, promoted as champion of the Série Ouro, opened the first night with a tribute to President Luiz Inácio Lula da Silva, tracing his life from Garanhuns in Pernambuco to the presidency. Lula was on the avenue to see it.\n\nImperatriz Leopoldinense followed with \"Camaleônico,\" honouring the singer Ney Matogrosso and half a century of reinvention. Portela told \"O Mistério do Príncipe do Bará,\" a story of Afro-gaúcho faith from Rio Grande do Sul, the state with Brazil's largest share of umbanda and candomblé followers. Mangueira closed the night with Mestre Sacaca, the healer from Amapá known as the \"Doutor da Floresta,\" a keeper of Afro-Indigenous knowledge in the Amazon.\n\nA parade is a public argument about who deserves to be remembered."
       },
       {
        "id": "a1-m-3",
@@ -3433,7 +3428,7 @@
       {
        "id": "a1-t-4",
        "type": "text",
-       "content": "PRA CIMA, CIÇA\n\nThe title of Viradouro's samba-enredo said everything: \"Pra Cima, Ciça!\" — up with Ciça.\n\nHis story runs through half a century of samba. He began as a passista, a samba dancer, in 1971, and was also a mestre-sala before finding his place with the drums. He passed through Unidos da Tijuca and São Carlos, the school now known as Estácio de Sá, before joining Viradouro in 1999.\n\nHe left in 2009 and returned around ten years later. Since then, the school has been transformed. Viradouro won the title in 2020 and again in 2024, and Ciça's bateria, the Furacão Vermelho e Branco — the Red and White Hurricane — was at the heart of both.\n\nIn 2026 the school turned the parade around him. Ciça rode on a float with his drummers, playing as they crossed the avenue, a tribute not only to one man but to every ritmista who has ever carried a drum down the Sapucaí."
+       "content": "PRA CIMA, CIÇA\n\nViradouro's samba said it in its title: \"Pra Cima, Ciça!\" Up with Ciça.\n\nHis story runs through half a century of samba. He started as a passista, a samba dancer, in 1971, and was a mestre-sala before he found his place with the drums. He passed through Unidos da Tijuca and São Carlos, the school now called Estácio de Sá, before joining Viradouro in 1999.\n\nHe left in 2009 and came back around ten years later. Viradouro won in 2020 and again in 2024, and Ciça's bateria, the Furacão Vermelho e Branco, the Red and White Hurricane, was at the heart of both.\n\nIn 2026 the school built its parade around him. Viradouro went third on the second night, and Ciça climbed onto a float with his drummers and kept playing as it crossed the avenue. It was a salute to one man, and to every ritmista who has ever carried a drum down the Sapucaí."
       },
       {
        "id": "a1-m-4",
@@ -3447,7 +3442,7 @@
       {
        "id": "a1-t-5",
        "type": "text",
-       "content": "ASH WEDNESDAY\n\nThe results are read out on Ash Wednesday at the Cidade do Samba, category by category, judge by judge, while thousands of supporters hang on every number. On 18 February 2026, it came down to tenths.\n\nViradouro finished with 270 points, a perfect score. Beija-Flor de Nilópolis, with its samba \"Bembé,\" and Unidos de Vila Isabel both finished one tenth behind on 269.9. Beija-Flor took second place on the tiebreaker, Harmonia, leaving Vila Isabel third. Acadêmicos do Salgueiro was fourth with 269.7.\n\nViradouro also won the Estandarte de Ouro, the prize awarded by the newspaper O Globo to the best school of the Grupo Especial. It was the school's fourth championship, after 1997, 2020 and 2024.\n\nAt the bottom of the table, the margins were just as cruel. Acadêmicos de Niterói finished twelfth with 264.6 and was relegated to the Série Ouro for 2027."
+       "content": "ASH WEDNESDAY\n\nThe results are read on Ash Wednesday, category by category, judge by judge. In each of the nine categories, from the comissão de frente that opens the parade to the samba itself, the lowest mark is thrown out. A perfect parade scores 270.\n\nOn 18 February 2026, it came down to tenths.\n\nViradouro had 270. Beija-Flor de Nilópolis, with its samba \"Bembé,\" and Unidos de Vila Isabel both had 269.9. Beija-Flor took second on the tiebreaker, Harmonia, and Vila Isabel was third. Acadêmicos do Salgueiro was fourth on 269.7.\n\nViradouro also won the Estandarte de Ouro, O Globo's prize for the best school of the Grupo Especial. It was the school's fourth title, after 1997, 2020 and 2024.\n\nAt the other end, Acadêmicos de Niterói finished twelfth on 264.6 and drops to the Série Ouro for 2027."
       },
       {
        "id": "a1-m-5",
@@ -3461,7 +3456,7 @@
       {
        "id": "a1-t-6",
        "type": "text",
-       "content": "THE FINAL STANDINGS\n\n1 — Unidos do Viradouro, 270.0\n2 — Beija-Flor de Nilópolis, 269.9\n3 — Unidos de Vila Isabel, 269.9\n4 — Acadêmicos do Salgueiro, 269.7\n5 — Imperatriz Leopoldinense, 269.4\n6 — Estação Primeira de Mangueira, 269.2\n7 — Unidos da Tijuca, 268.7\n8 — Acadêmicos do Grande Rio, 268.7\n9 — Paraíso do Tuiuti, 268.5\n10 — Portela, 267.9\n11 — Mocidade Independente de Padre Miguel, 267.4\n12 — Acadêmicos de Niterói, 264.6 (relegated)\n\nJust six tenths separated first from sixth. Portela, the most decorated school in Carnival history, finished tenth.\n\nThe top six returned to the Sambadrome for the Champions' Parade on Saturday 21 February, Viradouro closing the night as champion."
+       "content": "THE FINAL STANDINGS\n\n1 — Unidos do Viradouro, 270.0\n2 — Beija-Flor de Nilópolis, 269.9\n3 — Unidos de Vila Isabel, 269.9\n4 — Acadêmicos do Salgueiro, 269.7\n5 — Imperatriz Leopoldinense, 269.4\n6 — Estação Primeira de Mangueira, 269.2\n7 — Unidos da Tijuca, 268.7\n8 — Acadêmicos do Grande Rio, 268.7\n9 — Paraíso do Tuiuti, 268.5\n10 — Portela, 267.9\n11 — Mocidade Independente de Padre Miguel, 267.4\n12 — Acadêmicos de Niterói, 264.6 (relegated)\n\nEight tenths separated first from sixth. Portela, the most decorated school in Carnival history, finished tenth.\n\nThe top six came back for the Champions' Parade on Saturday 21 February, with Viradouro closing the night."
       },
       {
        "id": "a1-m-6",
@@ -3475,7 +3470,7 @@
       {
        "id": "a1-t-7",
        "type": "text",
-       "content": "THE CITY AS A STAGE\n\nThe Sambadrome is only part of Rio's Carnival. Across the city, the blocos — the street parties — fill neighbourhoods from morning until long after dark, some with a few hundred revellers, some with crowds that stretch for blocks. On the final day of the Grupo Especial parades alone, the city counted more than fifty official street parties, with dozens more still to come before the season closed on Sunday 22 February.\n\nThe scale of the operation is extraordinary. Nearly 2,000 municipal guards were deployed across the city, 950 of them around the Sambadrome. More than 5,500 cameras fed the city's operations centre. Medical posts at the Sambadrome treated 2,843 people over the parades, and Rio's cleaning crews removed more than 1,400 tonnes of waste over the pre-Carnival and Carnival period. The city remained on its heat protocol, Calor 3, through the final night.\n\nThere was protest too. More than 700 women marched on the Sapucaí against femicide, using Carnival's biggest stage to demand attention for violence against women."
+       "content": "THE CITY AS A STAGE\n\nThe Sambadrome is only one part of it. Across Rio, the blocos, the street parties, fill neighbourhoods from morning until long after dark. On the last night of the Grupo Especial alone, the city counted more than fifty official street parties, with dozens more to come before the season closed on Sunday 22 February.\n\nNearly 2,000 municipal guards were on duty, 950 of them around the Sambadrome. More than 5,500 cameras fed the city's operations centre. Medical posts at the Sambadrome treated 2,843 people, and cleaning crews cleared more than 1,400 tonnes of rubbish over the Carnival period. The city stayed on its Calor 3 heat protocol to the end.\n\nThere was protest too. More than 700 women marched on the Sapucaí against femicide, on the biggest stage Brazil has."
       },
       {
        "id": "a1-m-7",
@@ -3489,35 +3484,7 @@
       {
        "id": "a1-t-8",
        "type": "text",
-       "content": "THE WORK BEHIND THE SPECTACLE\n\nA samba-school parade is not a concert. It is a production of thousands of performers that has to move as one. The samba-enredo, the song written for the year's theme, is its musical centre. The bateria drives it. Dancers, the flag-bearing couple, the costumed wings and the floats turn the theme into a moving story that must cross the avenue in a fixed time without breaking apart.\n\nThe work starts long before February. Costumes are sewn and floats built over months in the schools' workshops, many of them at the Cidade do Samba in the port district. The music is rehearsed week after week in each school's quadra. A parade can be spectacular and still lose the title if a wing falls out of step, a float stalls or the singing loses the rhythm.\n\nIt is also an economy. Carnival fills hotels, employs costume makers, carpenters, welders and musicians, and keeps a musical tradition alive whose influence reaches far beyond Rio. Yet for the people who parade, the school is something else: a neighbourhood, a family tradition and a form of memory. At the Sambadrome, Carnival is less a single party than a festival of competing artistic institutions, each carrying its own history onto the avenue."
-      },
-      {
-       "id": "a1-m-8",
-       "type": "image",
-       "content": "",
-       "caption": "",
-       "citation": "",
-       "imageAlign": "center",
-       "imageWidth": "large"
-      },
-      {
-       "id": "a1-t-9",
-       "type": "text",
-       "content": "WHY THE DRUMS MATTER\n\nEvery samba school is judged across nine criteria: the commissão de frente that opens the parade, the bateria, the mestre-sala and porta-bandeira couple, floats, harmony, costumes, enredo, evolution and the samba itself. In each criterion the lowest mark is discarded, and a perfect parade scores 270. A single tenth can decide a title, as Vila Isabel discovered.\n\nBut the bateria is the engine. It holds the tempo for thousands of performers over 80 minutes, and if it falters, the whole parade falters with it.\n\nThat is why Viradouro's theme resonated so deeply. A school that won its title by honouring its drum master was also honouring the thing that makes Carnival work: rhythm, discipline and the hours of rehearsal in the quadra that the audience never sees."
-      },
-      {
-       "id": "a1-m-9",
-       "type": "image",
-       "content": "",
-       "caption": "",
-       "citation": "",
-       "imageAlign": "center",
-       "imageWidth": "large"
-      },
-      {
-       "id": "a1-t-10",
-       "type": "text",
-       "content": "A NIGHT FOR CIÇA\n\nRio's Carnival is often described in superlatives, and most of them are deserved. But its heart is local: neighbourhood schools, built over decades, competing for pride as much as for a trophy.\n\nIn 2026 that heart belonged to one man and his drummers.\n\nPra cima, Ciça."
+       "content": "THE ENGINE\n\nThe bateria holds the tempo for thousands of performers for 80 minutes. If it falters, everything falters with it.\n\nThat is why Viradouro's theme landed. By honouring its drum master, the school honoured what makes Carnival work: rhythm, discipline and the nights of rehearsal in the quadra that no one in the stands ever sees.\n\nFor the people who parade, a school is a neighbourhood, a family and a memory, built over decades and defended every February.\n\nIn 2026, it belonged to one man and his drummers.\n\nPra cima, Ciça."
       }
      ],
      "seoTags": [
@@ -3571,7 +3538,7 @@
       {
        "id": "a3-t-2",
        "type": "text",
-       "content": "A NEW MAP OF THE SHOW\n\nThe 2026 show was organised around three destinations, linked by free shuttles, golf carts and rideshare.\n\nThe Miami Beach Convention Center and Pride Park were the hub: boats up to 49 feet, engines, electronics, marine accessories and retail, with the Progressive Experience offering hands-on activities and boater education. The Miami Beach Yacht Collection on Collins Avenue held the in-water displays, from 30-foot powerboats to 125-foot motor yachts.\n\nAcross Biscayne Bay at IGY Yacht Haven Grande Miami, SuperYacht Miami showed the largest vessels and the brokerage fleet, alongside a new destination for sailors. Sailor's Cove brought sailboats, catamarans and sailing equipment together for the first time, with on-site training from the Annapolis School of Seamanship.\n\n\"This year, we're unveiling a brand new show layout that makes it easier than ever before to explore all three locations,\" said Andrew Doole, president of US Boat Shows at Informa Markets."
+       "content": "A NEW MAP OF THE SHOW\n\nThe 2026 show was organised around three destinations, linked by free shuttles, golf carts and rideshare.\n\nThe Miami Beach Convention Center and Pride Park were the hub: boats up to 49 feet, engines, electronics, marine accessories and retail, with the Progressive Experience offering hands-on activities and boater education. The Miami Beach Yacht Collection on Collins Avenue held the in-water displays, from 30-foot powerboats to 125-foot motor yachts.\n\nAcross Biscayne Bay at IGY Yacht Haven Grande Miami, SuperYacht Miami showed the largest vessels and the brokerage fleet, alongside a new destination for sailors. Sailor's Cove brought sailboats, catamarans and sailing equipment together for the first time, with on-site training from the Annapolis School of Seamanship and a park-and-ride lot of its own. Sailors have long had to hunt for their corner of the Miami show. This year they had one.\n\n\"This year, we're unveiling a brand new show layout that makes it easier than ever before to explore all three locations,\" said Andrew Doole, president of US Boat Shows at Informa Markets.\n\nMiami Beach was glad to have the yachts home. \"Bringing the world's most impressive vessels back to Collins Avenue reaffirms Miami Beach's standing,\" said the mayor, Steven Meiner. The show also gives the city $250,000 a year for public benefits and community projects.\n\nOne ticket, $45 for a day, covered every site. At Pride Park, the Nautical Ventures AquaZone filled a 40,000-gallon freshwater pool for visitors to try the latest water toys, and fly-boarders put on a show overhead."
       },
       {
        "id": "a3-m-2",
@@ -3585,7 +3552,7 @@
       {
        "id": "a3-t-3",
        "type": "text",
-       "content": "THE YACHTS\n\nAmong the larger vessels were Miss Michelle, at 122 feet, making her show debut after her launch in 2025, along with the 111-foot Anmax and the 98-foot Gatsby. Around 20 superyachts were making their first appearance at the show, and the fleet was notably young, with an average age of just over three years, against more than nine the year before.\n\nBuilders on show ranged across the industry: Azimut, Ferretti, Sanlorenzo, Princess, Sunseeker, Riviera, Prestige, Absolute, Pardo, Mangusta, Viking, Tiara, Vanquish and Sunreef among them.\n\nSailors had their own premieres. Aquila Catamarans brought eight yachts, including two world debuts, the 50 Sail and the 45 Sport. Balance Catamarans unveiled the Balance 502."
+       "content": "THE YACHTS\n\nAmong the larger vessels were Miss Michelle, at 122 feet, making her show debut after her launch in 2025, along with the 111-foot Anmax and the 98-foot Gatsby. Around 20 superyachts were making their first appearance at the show. There were fewer superyachts than in 2025, and they were far younger: an average age of just over three years, against more than nine the year before.\n\nBuilders on show ranged across the industry: Azimut, Ferretti, Sanlorenzo, Princess, Sunseeker, Riviera, Prestige, Absolute, Pardo, Mangusta, Viking, Tiara, Vanquish and Sunreef among them.\n\nSailors had their own premieres. Aquila Catamarans brought eight yachts, including two world debuts, the 50 Sail and the 45 Sport. Balance Catamarans unveiled the Balance 502."
       },
       {
        "id": "a3-m-3",
@@ -3599,7 +3566,7 @@
       {
        "id": "a3-t-4",
        "type": "text",
-       "content": "THE YACHT AS AN INTEGRATED SYSTEM\n\nFor buyers, the hull is only the beginning. A modern yacht is a floating operating system: propulsion, navigation, communications, safety equipment, energy management, air conditioning, water treatment and the hotel services guests take for granted.\n\nThose systems now talk to each other. Navigation displays, engine monitoring, onboard networks and remote diagnostics increasingly work as one, letting crews watch performance, plan maintenance and catch a small fault before it becomes a lost day at sea. On a larger yacht, generators, stabilisers and entertainment systems all compete for the same space and power. The owner notices a quieter cabin and a smoother passage. The engineer manages everything underneath."
+       "content": "THE YACHT AS A SYSTEM\n\nA modern yacht is a floating operating system: propulsion, navigation, communications, safety, power, air conditioning, water and all the hotel services guests take for granted.\n\nMore and more, those systems talk to each other. Engine monitoring, navigation, onboard networks and remote diagnostics work as one, so a crew can catch a small fault before it costs a day at sea. The owner notices a quieter cabin and a smoother passage. The engineer manages everything underneath."
       },
       {
        "id": "a3-m-4",
@@ -3613,7 +3580,7 @@
       {
        "id": "a3-t-5",
        "type": "text",
-       "content": "THE INNOVATION AWARDS\n\nThe Miami Innovation Awards, judged by the NMMA and Boating Writers International, showed where the technology is heading.\n\nThe Alternative Propulsion award went to ePropulsion's Spirit 2, a portable electric outboard. In propulsion equipment, the judges named two winners: Dockmate's Dockmate Pro, a wireless remote that lets a skipper control engines and thrusters from anywhere on deck, and Avikus Control from Avikus, HD Hyundai's autonomous navigation company. Lowrance won the electronics category for ActiveTarget live sonar, and Mercury Marine took the outboard engine award for Boost, with an honourable mention for its Mercury Keyless System.\n\nAmong the boats, Azimut's Seadeck 7 and Hurricane's SunDeck 3200 shared the cruiser and motor yacht award. Regulator's 35 won among centre consoles, Chris-Craft's Launch 27 among bowriders, and Yamaha's CrossWave among personal watercraft.\n\nThe common thread was simple. Technology that makes boating easier, safer and less intimidating — docking, navigating, finding fish — is what the industry is betting on."
+       "content": "THE INNOVATION AWARDS\n\nThe Miami Innovation Awards, judged by the NMMA and Boating Writers International, showed where the technology is heading.\n\nThe Alternative Propulsion award went to ePropulsion's Spirit 2, a portable electric outboard. In propulsion equipment there were two winners: the Dockmate Pro, a wireless remote that lets a skipper handle engines and thrusters from anywhere on deck, and Avikus Control from Avikus, HD Hyundai's autonomous navigation company. Lowrance won in electronics for its ActiveTarget live sonar, and Mercury Marine took the outboard award for Boost, with an honourable mention for its Mercury Keyless System.\n\nAmong the boats, Azimut's Seadeck 7 and Hurricane's SunDeck 3200 shared the cruiser and motor yacht award. The Regulator 35 won among centre consoles, Chris-Craft's Launch 27 among bowriders, and Yamaha's CrossWave among personal watercraft.\n\nThe common thread: docking, navigating and finding fish are getting easier."
       },
       {
        "id": "a3-m-5",
@@ -3627,7 +3594,7 @@
       {
        "id": "a3-t-6",
        "type": "text",
-       "content": "THE COMMERCIAL VALUE OF EFFICIENCY\n\nOwning a yacht means managing fuel, maintenance, crew, insurance, marina fees and refits. Technology can make those costs clearer. It cannot make them disappear.\n\nEfficient design starts with the hull, the weight and the way a boat will be used, then extends to everything installed on board. Hybrid and electric propulsion offer quiet manoeuvring and lower local emissions, and suit some boats and some owners well. On many larger yachts, diesel still delivers the range and sustained power that long passages demand. The best engineering matches the system to the owner's real cruising pattern rather than to a label.\n\nThe show's mix of boats and equipment makes those comparisons possible in one place. Visitors can weigh propulsion concepts, navigation systems, tenders and sailing gear side by side, along with the practical details that decide whether a boat suits coastal days, offshore passages or long stretches aboard.\n\nThe same applies to sustainability claims. A yacht's footprint depends on its materials, its speed, its energy use, its maintenance and its lifetime. Buyers are hearing more claims than ever, which makes independently verified data more valuable than ever."
+       "content": "THE COST OF OWNING\n\nA yacht means fuel, maintenance, crew, insurance, marina fees and refits. Technology makes those costs clearer. It does not make them go away.\n\nEfficiency starts with the hull, the weight and the way a boat will be used. Hybrid and electric drives give silent manoeuvring and cleaner marinas, and suit some boats and some owners well. On larger yachts making long passages, diesel still gives the range and power they need. The best engineering is matched to how an owner actually cruises.\n\nThe same goes for green claims. A yacht's footprint depends on its materials, its speed, its energy use, its upkeep and its lifespan. Buyers are hearing more claims than ever. Verified numbers are worth more than ever."
       },
       {
        "id": "a3-m-6",
@@ -3641,7 +3608,7 @@
       {
        "id": "a3-t-7",
        "type": "text",
-       "content": "MIAMI'S ROLE IN THE GLOBAL MARKET\n\nMiami sits at the crossroads of the American boating market and the Caribbean, with Latin America a short flight away. That position makes its show a meeting point for every kind of buyer.\n\nSome arrive looking for a first day boat for the family. Others are weighing a 100-foot yacht, a refit or a charter arrangement. A strong marketplace has to serve both without confusing the product or the level of support each requires. The new layout, with smaller boats in the convention centre, yachts on Collins Avenue and superyachts and sailing at Yacht Haven Grande, was designed to do exactly that."
+       "content": "MIAMI'S PLACE IN THE MARKET\n\nMiami sits between the American market and the Caribbean, with Latin America a short flight away. Its show draws every kind of buyer: a family looking for a first day boat, an owner weighing a 100-foot yacht, a refit or a charter.\n\nThe new layout was built for that range. Smaller boats in the convention centre. Yachts on Collins Avenue. Superyachts and sailing at Yacht Haven Grande."
       },
       {
        "id": "a3-m-7",
@@ -3655,7 +3622,7 @@
       {
        "id": "a3-t-8",
        "type": "text",
-       "content": "PERFORMING AS PROMISED\n\nThe 85th Miami show demonstrated the scale of the industry. The bigger question is how the market will meet rising expectations around technology, operating costs and environmental performance.\n\nIntegration and smarter propulsion make yachts easier to run. They also make service networks, cybersecurity and reliable support far from shore more important than ever.\n\nFor an owner, the most valuable technology is the technology that works when it is needed.\n\nMiami showed what is available. The real work begins when a buyer matches it to the boat, the itinerary and life on the water."
+       "content": "WHEN IT COUNTS\n\nSmarter systems make yachts easier to run. They also make good service, cybersecurity and support far from shore more important than ever.\n\nFor an owner, the best technology is the one that works when it is needed.\n\nMiami showed what is out there. The real work starts when a buyer matches it to the boat, the itinerary and life on the water."
       }
      ],
      "seoTags": [
@@ -4027,7 +3994,7 @@
       {
        "id": "v2-oscars-t-1",
        "type": "text",
-       "content": "Paul Thomas Anderson had waited a long time for this.\n\nEleven nominations across nearly three decades, from Boogie Nights to Phantom Thread, and not a single win. On 15 March 2026, at the Dolby Theatre in Hollywood, the wait ended three times in one night. Anderson won Best Director, Best Adapted Screenplay and, with his producers, Best Picture for One Battle After Another.\n\nIt was the film of the night, with six Oscars. But it was not the only story. Ryan Coogler's Sinners arrived with a record 16 nominations and left with four, including Best Actor for Michael B. Jordan. Norway, K-pop and a school in the Russian Urals all found their way to the stage.\n\nConan O'Brien hosted for the second year running."
+       "content": "Paul Thomas Anderson had waited a long time for this.\n\nEleven nominations across nearly three decades, from Boogie Nights to Phantom Thread, and not a single win. On 15 March 2026, at the Dolby Theatre in Hollywood, the wait ended three times in one night. Anderson won Best Director, Best Adapted Screenplay and, with his producers, Best Picture for One Battle After Another.\n\nIt was the film of the night, with six Oscars. It was not the only story. Ryan Coogler's Sinners arrived with a record 16 nominations and left with four, including Best Actor for Michael B. Jordan. Norway, K-pop and a school in the Russian Urals all found their way to the stage.\n\nConan O'Brien hosted for the second year running."
       },
       {
        "id": "v2-oscars-m-1",
@@ -4041,7 +4008,7 @@
       {
        "id": "v2-oscars-t-2",
        "type": "text",
-       "content": "THE FILM THAT WON THE NIGHT\n\nOne Battle After Another took six of the evening's awards: Best Picture, Director, Adapted Screenplay, Supporting Actor for Sean Penn, Film Editing for Andy Jurgensen, and Casting for Cassandra Kulukundis.\n\nThat last one was history. Casting was presented as a competitive Oscar for the first time in 2026, almost a century after the Academy began, and Kulukundis became its first winner. Casting directors have long argued that an ensemble is built, not found. The Academy finally agreed.\n\nEditing mattered just as much. Anderson's film moves across years and points of view, and its rhythm depends on how scenes and performances are cut together. Jurgensen, who has worked with Anderson since Licorice Pizza, gave the film its pulse.\n\nPenn's award was his third, after Mystic River and Milk. Few actors have won more.\n\nThe spread of the wins told its own story. One Battle After Another was honoured for direction and scale, and also for the quieter work that holds a complex production together: the script, the cut, the ensemble. It won across the whole process of making a film."
+       "content": "THE FILM THAT WON THE NIGHT\n\nOne Battle After Another took six awards: Best Picture, Director, Adapted Screenplay, Supporting Actor for Sean Penn, Film Editing for Andy Jurgensen, and Casting for Cassandra Kulukundis.\n\nThe last was history. Casting was a competitive Oscar for the first time in 2026, nearly a century after the first ceremony, and Kulukundis was its first winner. Casting directors have long said an ensemble is built, not found. The Academy finally agreed.\n\nJurgensen, who has cut Anderson's films since Licorice Pizza, gave a story that jumps across years and points of view its pulse. The film won for its scale, and for the quiet work that holds a big production together: the script, the cut, the ensemble.\n\nPenn's award was his third, after Mystic River and Milk. He became only the fourth man to win three acting Oscars, after Walter Brennan, Jack Nicholson and Daniel Day-Lewis."
       },
       {
        "id": "v2-oscars-m-2",
@@ -4055,7 +4022,7 @@
       {
        "id": "v2-oscars-t-3",
        "type": "text",
-       "content": "SINNERS AND THE POWER OF CRAFT\n\nIf One Battle After Another won the night, Sinners won the room.\n\nCoogler's film had broken the record for nominations before the ceremony began: 16, more than All About Eve, Titanic or La La Land. It finished with four Oscars. Jordan won Best Actor, Coogler won Best Original Screenplay, Ludwig Göransson won Best Original Score, and Autumn Durald Arkapaw won Best Cinematography.\n\nArkapaw's win was another first. No woman had ever won the cinematography Oscar before. In a category that shapes how an audience sees a film before a word is spoken — framing, movement, light and colour — her work on Sinners was recognised as the best of the year.\n\nJordan became the sixth Black actor to win Best Actor, following Sidney Poitier, Denzel Washington, Jamie Foxx, Forest Whitaker and Will Smith. His partnership with Coogler began with Fruitvale Station in 2013 and ran through Creed and Black Panther. Sinners was its fullest expression."
+       "content": "SINNERS\n\nCoogler's film broke the nominations record before the night began: 16, more than All About Eve, Titanic or La La Land. It went home with four Oscars. Jordan won Best Actor, Coogler won Best Original Screenplay, Ludwig Göransson won Best Original Score, and Autumn Durald Arkapaw won Best Cinematography.\n\nArkapaw's win was another first. No woman had ever won the cinematography Oscar. Coogler wrote the world of Sinners from nothing. Arkapaw made it visible, its light, its colour and the way the camera moves through it.\n\nJordan became the sixth Black actor to win Best Actor, after Sidney Poitier, Denzel Washington, Jamie Foxx, Forest Whitaker and Will Smith. His partnership with Coogler began with Fruitvale Station in 2013 and ran through Creed and Black Panther. Sinners was its fullest expression.\n\nThe ceremony gave the film a moment of its own: a performance inspired by its juke-joint sequence, with the ballerina Misty Copeland among the dancers."
       },
       {
        "id": "v2-oscars-m-3",
@@ -4069,7 +4036,7 @@
       {
        "id": "v2-oscars-t-4",
        "type": "text",
-       "content": "Cinematography and screenplay are separate crafts that depend on each other. Coogler built the story and its characters from nothing. Arkapaw made that world visible, setting its light, its colour and the way the camera moves through it. Together with Jordan's performance and Göransson's score, the four awards recognised a film made whole: writing, image, sound and the man at its centre.\n\nThe ceremony also gave the film a moment of its own: a performance inspired by its juke-joint sequence, with the ballerina Misty Copeland among the dancers."
+       "content": "THE ACTING AWARDS\n\nJessie Buckley won Best Actress for Hamnet, Chloé Zhao's adaptation of Maggie O'Farrell's novel about Shakespeare's family and the death of his son. She played Agnes, Shakespeare's wife, opposite Paul Mescal. She is the first Irish woman to win the award, after a career that has run from musical theatre to some of the most demanding screen roles of the decade.\n\nAmy Madigan won Best Supporting Actress for Weapons, Zach Cregger's horror film. Horror performances rarely win at the Oscars. Hers did, forty years after her first nomination, for Twice in a Lifetime.\n\nWith Penn and Jordan, the four acting awards were spread across three films."
       },
       {
        "id": "v2-oscars-m-4",
@@ -4083,7 +4050,7 @@
       {
        "id": "v2-oscars-t-5",
        "type": "text",
-       "content": "THE ACTING AWARDS\n\nAll four acting prizes went to first-time or long-awaited winners.\n\nJessie Buckley won Best Actress for Hamnet, Chloé Zhao's adaptation of Maggie O'Farrell's novel about Shakespeare's family and the death of his son. She became the first Irish woman to win the award, a fitting crown on a career that has moved from musical theatre to some of the most demanding screen roles of the decade.\n\nAmy Madigan won Best Supporting Actress for Weapons, Zach Cregger's horror film. Genre performances rarely win at the Oscars. Madigan's did, nearly forty years after her first nomination, for Twice in a Lifetime in 1986.\n\nPenn and Jordan completed the four.\n\nThe acting categories are the most closely followed of the night because they put individual performances in direct competition. Yet no performance stands alone. The script, the direction, the edit and the chemistry between actors all shape what reaches the screen, and this year's winners each came from films built around them with unusual care."
+       "content": "INTERNATIONAL FILM AND ANIMATION\n\nBest International Feature went to Sentimental Value, Joachim Trier's Norwegian family drama starring Renate Reinsve and Stellan Skarsgård, from one of the strongest fields in years: Brazil's The Secret Agent, France's It Was Just an Accident, Spain's Sirāt and Tunisia's The Voice of Hind Rajab.\n\nKPop Demon Hunters, the animated musical that became a global phenomenon on streaming, won Best Animated Feature. Its song \"Golden\" won Best Original Song, the first K-pop song ever to do so.\n\nBest Documentary Feature went to Mr. Nobody Against Putin, filmed inside a school in the small Russian town of Karabash by Pavel Talankin, the school's videographer, as the war in Ukraine changed what children were taught. Talankin recorded the patriotic assemblies and parades he was asked to film, then left Russia with the footage. The American director David Borenstein shaped it into the film."
       },
       {
        "id": "v2-oscars-m-5",
@@ -4097,7 +4064,7 @@
       {
        "id": "v2-oscars-t-6",
        "type": "text",
-       "content": "INTERNATIONAL FILM AND ANIMATION\n\nThe International Feature Film award went to Sentimental Value, Joachim Trier's Norwegian family drama. The field was among the strongest in years: Brazil's The Secret Agent, France's It Was Just an Accident, Spain's Sirāt and Tunisia's The Voice of Hind Rajab.\n\nKPop Demon Hunters, the animated musical that became a global phenomenon on streaming, won Best Animated Feature. Its song \"Golden\" won Best Original Song, the first K-pop song ever to do so.\n\nThe geography of the winners was the story. A Norwegian family drama, a Korean-American animated musical and a film smuggled out of Russia all took home Oscars on the same night, a reminder that the Academy's map of cinema now reaches far beyond Hollywood.\n\nBest Documentary Feature went to Mr. Nobody Against Putin, filmed from inside a school in the small Russian town of Karabash by Pavel Talankin, the school's videographer, as the war in Ukraine reshaped what children were taught. Talankin filmed the patriotic assemblies and parades he was asked to record, then fled Russia with the footage, and the American director David Borenstein shaped it into the film."
+       "content": "THE CRAFT CATEGORIES\n\nGuillermo del Toro's Frankenstein took three craft awards: Production Design, Costume Design, and Makeup and Hairstyling. Avatar: Fire and Ash won Visual Effects, and F1 won Sound.\n\nThe short-film categories brought a rare tie. The Live Action Short award was shared by The Singers and Two People Exchanging Saliva. The Documentary Short went to All the Empty Rooms, and the Animated Short to The Girl Who Cried Pearls."
       },
       {
        "id": "v2-oscars-m-6",
@@ -4111,7 +4078,7 @@
       {
        "id": "v2-oscars-t-7",
        "type": "text",
-       "content": "THE CRAFT CATEGORIES\n\nGuillermo del Toro's Frankenstein swept three craft awards: Production Design, Costume Design, and Makeup and Hairstyling. Avatar: Fire and Ash won Visual Effects, and F1 won Sound.\n\nThe short-film categories brought a rare tie. The Live Action Short award was shared by The Singers and Two People Exchanging Saliva. The Documentary Short went to All the Empty Rooms, and the Animated Short to The Girl Who Cried Pearls."
+       "content": "THE WINNERS\n\nBest Picture — One Battle After Another\nDirector — Paul Thomas Anderson, One Battle After Another\nActor — Michael B. Jordan, Sinners\nActress — Jessie Buckley, Hamnet\nSupporting Actor — Sean Penn, One Battle After Another\nSupporting Actress — Amy Madigan, Weapons\nOriginal Screenplay — Ryan Coogler, Sinners\nAdapted Screenplay — Paul Thomas Anderson, One Battle After Another\nCinematography — Autumn Durald Arkapaw, Sinners\nFilm Editing — Andy Jurgensen, One Battle After Another\nCasting — Cassandra Kulukundis, One Battle After Another\nOriginal Score — Ludwig Göransson, Sinners\nOriginal Song — \"Golden,\" KPop Demon Hunters\nInternational Feature — Sentimental Value, Norway\nAnimated Feature — KPop Demon Hunters\nDocumentary Feature — Mr. Nobody Against Putin"
       },
       {
        "id": "v2-oscars-m-7",
@@ -4125,7 +4092,7 @@
       {
        "id": "v2-oscars-t-8",
        "type": "text",
-       "content": "THE WINNERS\n\nBest Picture — One Battle After Another\nDirector — Paul Thomas Anderson, One Battle After Another\nActor — Michael B. Jordan, Sinners\nActress — Jessie Buckley, Hamnet\nSupporting Actor — Sean Penn, One Battle After Another\nSupporting Actress — Amy Madigan, Weapons\nOriginal Screenplay — Ryan Coogler, Sinners\nAdapted Screenplay — Paul Thomas Anderson, One Battle After Another\nCinematography — Autumn Durald Arkapaw, Sinners\nFilm Editing — Andy Jurgensen, One Battle After Another\nCasting — Cassandra Kulukundis, One Battle After Another\nOriginal Score — Ludwig Göransson, Sinners\nOriginal Song — \"Golden,\" KPop Demon Hunters\nInternational Feature — Sentimental Value, Norway\nAnimated Feature — KPop Demon Hunters\nDocumentary Feature — Mr. Nobody Against Putin"
+       "content": "THE NIGHT IN THE ROOM\n\nO'Brien set the tone early. \"Let us celebrate,\" he said, \"not because all is well, but because we work and hope for better.\"\n\nThe In Memoriam carried unusual weight. Rob Reiner, Diane Keaton and Robert Redford were among those remembered, three people who shaped American film for half a century.\n\nThere was lightness too. The cast of Bridesmaids reunited on stage, fifteen years after the film."
       },
       {
        "id": "v2-oscars-m-8",
@@ -4139,21 +4106,7 @@
       {
        "id": "v2-oscars-t-9",
        "type": "text",
-       "content": "THE NIGHT IN THE ROOM\n\nO'Brien set the tone early. \"Let us celebrate,\" he said, \"not because all is well, but because we work and hope for better.\"\n\nThe In Memoriam segment carried unusual weight. Rob Reiner, Diane Keaton and Robert Redford were among those remembered, three figures who shaped American film for half a century. The room stood for them.\n\nThere was lightness too. The cast of Bridesmaids reunited on stage, fifteen years after the film, and the audience treated it like a homecoming."
-      },
-      {
-       "id": "v2-oscars-m-9",
-       "type": "image",
-       "content": "",
-       "caption": "",
-       "citation": "",
-       "imageAlign": "center",
-       "imageWidth": "large"
-      },
-      {
-       "id": "v2-oscars-t-10",
-       "type": "text",
-       "content": "HOW THE YEAR WILL BE REMEMBERED\n\nAwards do not decide which films last. But they shape how the industry remembers a year.\n\nThe 98th Oscars will be remembered for Anderson's long-awaited triumph, for a record-breaking Sinners, for the first casting Oscar and the first woman to win for cinematography, and for a night when the Academy's map of cinema reached from Oslo to Seoul.\n\nOne battle after another.\n\nThis time, Anderson won."
+       "content": "HOW THE YEAR WILL BE REMEMBERED\n\nAwards do not decide which films last. They do shape how a year is remembered.\n\nThis one will be remembered for Anderson's long-awaited night, for a record-breaking Sinners, for the first casting Oscar and the first woman to win for cinematography, and for winners that reached from Oslo to the Urals.\n\nOne battle after another.\n\nThis time, Anderson won."
       }
      ],
      "seoTags": [],
@@ -4612,7 +4565,7 @@
       {
        "id": "h-cv-summit-t-6",
        "type": "text",
-       "content": "AI ENTERS THE FINANCIAL STACK\n\nThe other half of the summit's title was artificial intelligence.\n\nBanks and asset managers are testing AI for research, document analysis, client service and compliance. The sessions in Zürich went further, to autonomous AI agents that can hold assets, make payments and act on a client's behalf. The organisers called this new order \"Wealth³\": programmable money, tokenised assets and AI agents forming the infrastructure of finance.\n\nIn finance, a mistake is more than an inconvenience. Any system that touches credit, investment, compliance or client assets needs clear boundaries, human oversight and an audit trail. Automation can speed up a process. It can speed up an error just as quickly. A session co-hosted by Citi looked further still, at what quantum computing could mean for encryption and the security of the whole stack.\n\nThe two technologies are converging. AI can help analyse transactions and flag unusual activity, while tokenised products make financial workflows programmable. Together they demand stronger security, cleaner data and tighter governance than either needs alone.\n\n\"Innovation has never been as fast as today,\" said Olaf Hannemann, co-founder of CV VC, \"but will never be as slow ever again.\""
+       "content": "AI ENTERS THE FINANCIAL STACK\n\nThe other half of the summit's title was artificial intelligence.\n\nBanks are already using AI for research, documents, client service and compliance. The sessions in Zürich went further, to autonomous agents that hold assets, make payments and act for a client. The organisers have a name for it, \"Wealth³\": programmable money, tokenised assets and AI agents running on the same rails.\n\nIn finance, an error costs money. Anything that touches credit, investments or client assets needs limits, human oversight and an audit trail. Automation speeds up a process. It speeds up a mistake just as fast. A session co-hosted by Citi looked further still, at what quantum computing could do to the encryption that protects all of it.\n\n\"Innovation has never been as fast as today,\" said Olaf Hannemann, co-founder of CV VC, \"but will never be as slow ever again.\""
       },
       {
        "id": "h-cv-summit-m-6",
@@ -4626,7 +4579,7 @@
       {
        "id": "h-cv-summit-t-7",
        "type": "text",
-       "content": "PRIVACY AND GOVERNANCE\n\nThe Swiss context brings its own demands. Financial institutions here must balance innovation with client confidentiality, cybersecurity and some of the most respected banking standards in the world.\n\nDigital systems can make transactions more traceable and processes more automatic. They also create new risks: lost keys, software vulnerabilities and the concentration of technical control in a small number of providers. For a Swiss private bank, a token is only as trustworthy as the custody behind it."
+       "content": "PRIVACY AND CUSTODY\n\nSwitzerland adds its own demands: client confidentiality, cybersecurity and banking standards the world still measures itself against.\n\nDigital systems make money easier to trace and processes easier to automate. They also bring new risks: lost keys, software flaws and too much technical control in too few hands. For a Swiss private bank, a token is only as good as the vault behind it."
       },
       {
        "id": "h-cv-summit-m-7",
@@ -4640,7 +4593,7 @@
       {
        "id": "h-cv-summit-t-8",
        "type": "text",
-       "content": "THE INSTITUTIONAL TEST\n\nThe future of digital assets will be decided by usefulness.\n\nInstitutions adopt a technology when it settles faster, costs less, opens a market or delivers a product clients want. They hold back where the legal treatment is unclear, liquidity is thin or the operational risk is hard to control. That is why the most important sessions in Zürich were the least glamorous: integration costs, interoperability, custody standards and the resilience of networks.\n\nSwitzerland has the banks, the lawyers, the regulator and the builders within a short train ride of each other. That proximity is its real advantage.\n\nInstitutional adoption will not arrive in a single moment. It will come product by product: services that perform reliably, rules that can be followed, and businesses that can show their economics work.\n\nThe twelfth CV Summit returns in 2026.\n\nBy then, the industry will have to show that blockchain and AI have become dependable parts of financial infrastructure, and that Zürich's caution was worth the wait."
+       "content": "THE INSTITUTIONAL TEST\n\nBanks adopt a technology when it settles faster, costs less, opens a market or gives clients something they want. They hold back when the law is unclear, the market is thin or the risk is hard to control. So the sessions that mattered most in Zürich were the least glamorous ones: integration costs, systems that can talk to each other, custody standards and networks that do not go down.\n\nSwitzerland has the banks, the lawyers, the regulator and the builders within a short train ride of each other. That is its real advantage.\n\nAdoption will not arrive in one moment. It will come product by product.\n\nThe twelfth CV Summit returns in 2026.\n\nBy then, the industry will need to show that blockchain and AI have become dependable parts of finance, and that Zürich's caution was worth the wait."
       }
      ],
      "excerpt": "A Recalibration Toward Endurance",
@@ -4963,7 +4916,7 @@
       {
        "id": "v1-pfw-t-4",
        "type": "text",
-       "content": "CHANEL — BEYOND THE RUNWAY\n\nThe stakes are higher at Chanel than almost anywhere else. It is one of the most powerful privately owned businesses in luxury, and its runway is only the visible tip. The business rests on ready-to-wear, handbags, leather goods, shoes, jewellery, watches and beauty, and a creative shift has to work across all of them, not only in photographs taken on a single evening.\n\nToo much continuity and a house repeats itself. Too much change and it loses what customers came for. A spectacular set can frame a collection. It cannot replace one. Blazy's real test lies in what follows: how the ateliers translate his ideas, how the second and third collections build on the first, and whether customers who already know the codes find a new reason to come back."
+       "content": "CHANEL — BEYOND THE RUNWAY\n\nThe runway is the smallest part of Chanel. The business behind it, one of the most powerful privately owned houses in luxury, runs on handbags, shoes, jewellery, watches, fragrance and beauty. Whatever Blazy changes has to work across all of it.\n\nToo little change and a house repeats itself. Too much and it loses the women who came for it. A spectacular set can frame a collection. It cannot replace one. The real verdict will come with the second and third collections, in the ateliers and the boutiques."
       },
       {
        "id": "v1-pfw-m-4",
@@ -5033,21 +4986,7 @@
       {
        "id": "v1-pfw-t-9",
        "type": "text",
-       "content": "THE POWER OF COMPRESSED ATTENTION\n\nFashion Week works because it concentrates the world's attention into a few days. A collection lasts minutes on the runway, then travels as photographs, reviews and social media posts, into showroom appointments and, months later, into orders. The show is theatre. Its consequences unfold over seasons."
-      },
-      {
-       "id": "v1-pfw-m-9",
-       "type": "image",
-       "content": "",
-       "caption": "",
-       "citation": "",
-       "imageAlign": "center",
-       "imageWidth": "large"
-      },
-      {
-       "id": "v1-pfw-t-10",
-       "type": "text",
-       "content": "THE OPENING, NOT THE CONCLUSION\n\nAcross the houses, buyers saw a return to elegance: lingerie details, decorative volume in feathers and fringing, black-and-white tailoring, silk scarves and bold belts. After several seasons of caution, Paris felt ready to dress up again.\n\nBut the season's real story was the change at the top. Dior, Chanel, Balenciaga and Loewe, four of the most powerful names in fashion, all opened new chapters within a single week. Their success will not be measured by one show. It will be measured in the showroom, in the boutique, and in the wardrobes of customers who have worn these houses for decades.\n\nBlazy's first collection was the start of that conversation.\n\nIt began with a dance."
+       "content": "THE OPENING, NOT THE CONCLUSION\n\nAcross the houses, buyers saw a return to elegance: lingerie details, decorative volume in feathers and fringing, black-and-white tailoring, silk scarves and bold belts. After several seasons of caution, Paris felt ready to dress up again.\n\nThe real story was the change at the top. Dior, Chanel, Balenciaga and Loewe all opened new chapters within a single week. A show lasts minutes. Its photographs travel in hours. The orders come months later, and the verdict comes in the wardrobes of women who have worn these houses for decades.\n\nBlazy's first collection was the start of that conversation.\n\nIt began with a dance."
       }
      ],
      "seoTags": [],
@@ -5190,28 +5129,5 @@
     }
    ]
   }
- },
- "ads": [
-  {
-   "id": "ad2",
-   "label": "Mid-Feed Banner",
-   "position": "mid-feed",
-   "width": 728,
-   "height": 90
-  },
-  {
-   "id": "ad3",
-   "label": "Bottom Banner",
-   "position": "bottom-banner",
-   "width": 970,
-   "height": 250
-  },
-  {
-   "id": "ad4",
-   "label": "Sidebar Ad",
-   "position": "sidebar",
-   "width": 300,
-   "height": 600
-  }
- ]
+ }
 }

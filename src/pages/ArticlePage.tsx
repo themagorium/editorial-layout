@@ -448,13 +448,17 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
   }
 
   if (block.type === "image") {
+    const hasTitle = Boolean((block.title || "").trim());
     const hasCaption = isMeaningfulCaption(block.caption);
     const hasCitation = Boolean(block.citation);
     return (
       <figure className={`my-8 relative ${getBodyImageLayoutClasses(block)}`}>
+        {hasTitle && (
+          <p className="font-sans text-xs font-semibold text-foreground uppercase tracking-wider mb-1">{block.title}</p>
+        )}
         <img
           src={block.content}
-          alt={block.caption || ""}
+          alt={block.title || block.caption || ""}
           className="w-full md:w-4/5 mx-auto block rounded"
           loading="lazy"
           onError={(e) => { const fig = e.currentTarget.closest("figure"); if (fig) (fig as HTMLElement).style.display = "none"; }}
@@ -470,10 +474,14 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
   }
 
   if (block.type === "video") {
+    const hasTitle = Boolean((block.title || "").trim());
     const hasCaption = isMeaningfulCaption(block.caption);
     const hasCitation = Boolean(block.citation);
     return (
       <figure className="my-8 relative">
+        {hasTitle && (
+          <p className="font-sans text-xs font-semibold text-foreground uppercase tracking-wider mb-1">{block.title}</p>
+        )}
         <video src={block.content} controls className="w-full rounded" />
         {(hasCaption || hasCitation) && (
           <div className="flex items-start justify-between mt-2 gap-4">

@@ -42,7 +42,7 @@ function getImageLayoutClasses(block: ArticleBodyBlock) {
   return `${widthClassMap[width]} ${alignClassMap[align]}`;
 }
 
-// Insert bar shown between blocks and at top/bottom
+// Insert bar shown between blocks — always visible, not hover-only
 function InsertBar({
   atIndex,
   onAddText,
@@ -56,65 +56,46 @@ function InsertBar({
   onAddImage: (idx: number) => void;
   onAddVideo: (idx: number) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="relative flex items-center gap-1 py-0.5 group/bar">
-      {/* Thin divider line */}
-      <div className="flex-1 h-px bg-border group-hover/bar:bg-primary/30 transition-colors" />
+    <div className="relative flex items-center gap-1 py-1">
+      {/* Always-visible insert row */}
+      <div className="flex-1 h-px bg-border/50" />
 
-      {open ? (
-        <div className="flex items-center gap-1 animate-in fade-in duration-100">
+      <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={() => { onAddText(atIndex); setOpen(false); }}
+            onClick={() => { onAddText(atIndex); }}
             className="flex items-center gap-1 px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded bg-background text-muted-foreground hover:text-primary hover:border-primary transition-colors"
           >
             <Type className="w-3 h-3" /> Text
           </button>
           <button
             type="button"
-            onClick={() => { onAddHeading(atIndex); setOpen(false); }}
+            onClick={() => { onAddHeading(atIndex); }}
             className="flex items-center gap-1 px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded bg-background text-muted-foreground hover:text-primary hover:border-primary transition-colors"
           >
             <Heading className="w-3 h-3" /> Heading
           </button>
           <button
             type="button"
-            onClick={() => { onAddImage(atIndex); setOpen(false); imgRef.current?.click(); }}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] uppercase tracking-wider border border-primary rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-semibold"
+            onClick={() => { onAddImage(atIndex); imgRef.current?.click(); }}
+            className="flex items-center gap-1.5 px-3 py-1 text-[10px] uppercase tracking-wider border-2 border-primary rounded bg-primary/10 text-primary hover:bg-primary/25 transition-colors font-bold"
           >
-            <Image className="w-3 h-3" /> Photo
+            <Image className="w-3 h-3" /> ＋ Insert Photo Here
           </button>
           <button
             type="button"
-            onClick={() => { onAddVideo(atIndex); setOpen(false); vidRef.current?.click(); }}
+            onClick={() => { onAddVideo(atIndex); vidRef.current?.click(); }}
             className="flex items-center gap-1 px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded bg-background text-muted-foreground hover:text-primary hover:border-primary transition-colors"
           >
             <Video className="w-3 h-3" /> Video
           </button>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="px-2 py-1 text-[10px] border border-border rounded bg-background text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ✕
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="flex items-center gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider rounded text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover/bar:opacity-100"
-          title="Insert block here"
-        >
-          <Plus className="w-3 h-3" /> Insert
-        </button>
-      )}
+      </div>
 
-      <div className="flex-1 h-px bg-border group-hover/bar:bg-primary/30 transition-colors" />
+      <div className="flex-1 h-px bg-border/50" />
 
       {/* Hidden file inputs — trigger from parent via pendingInsertIndex ref */}
       <input

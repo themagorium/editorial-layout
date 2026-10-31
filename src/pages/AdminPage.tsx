@@ -54,13 +54,15 @@ function getEditionsFromState(heroes: HeroItem[], articles: Article[]): string[]
 }
 
 function createOctoberPatternBody(seed: string): ArticleBodyBlock[] {
+  // Pattern: Image → Text → Image → Text → Image → Text
+  // Opening image first, then alternating text/image
   return [
-    { id: `${seed}-t1`, type: "text", content: "Add first body paragraph" },
-    { id: `${seed}-m1`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "Upload photo or video" },
-    { id: `${seed}-t2`, type: "text", content: "Add second body paragraph" },
-    { id: `${seed}-m2`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "Upload photo or video" },
-    { id: `${seed}-t3`, type: "text", content: "Add third body paragraph" },
-    { id: `${seed}-m3`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "Upload photo or video" },
+    { id: `${seed}-m0`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "Opening photo — upload image" },
+    { id: `${seed}-t1`, type: "text", content: "" },
+    { id: `${seed}-m1`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "Upload photo" },
+    { id: `${seed}-t2`, type: "text", content: "" },
+    { id: `${seed}-m2`, type: "image", content: "", imageAlign: "center", imageWidth: "full", caption: "Upload photo" },
+    { id: `${seed}-t3`, type: "text", content: "" },
   ];
 }
 
@@ -87,7 +89,7 @@ function isUntouchedStarter(story: HeroItem | Article): boolean {
   if (summary.trim() && !/^Add your .* (hero story|article)$/.test(summary.trim())) return false;
   const media = story as Article;
   if (media.imageUrl || media.videoUrl || media.secondaryImageUrl || media.ad) return false;
-  return (story.body || []).every((b) => !b.content || /^Add (first|second|third) body paragraph$/.test(b.content));
+  return (story.body || []).every((b) => !b.content || /^(Add (first|second|third) body paragraph|Opening photo — upload image|Upload photo(?: or video)?)$/.test(b.content));
 }
 
 function mergeById<T extends { id: string }>(base: T[], overrides: T[]): T[] {

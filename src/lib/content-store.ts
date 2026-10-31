@@ -75,6 +75,7 @@ export interface ArticleBodyBlock {
   headingVariant?: "title" | "subsection";
   textStyle?: "normal" | "bold" | "italic" | "bold-italic";
   textAlign?: "left" | "center" | "right";
+  title?: string;
   caption?: string;
   citation?: string;
 }

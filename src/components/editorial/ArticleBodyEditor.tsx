@@ -407,10 +407,12 @@ export default function ArticleBodyEditor({
                     ))}
                   </select>
                 </div>
+                <input value={block.title || ""} onChange={(e) => updateBlock(block.id, { title: e.target.value })}
+                  placeholder="Photo title (e.g. 'SailGP — Race Day, Cadiz 2024')" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans font-semibold" />
                 <input value={block.caption || ""} onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
-                  placeholder="Image caption (optional)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans" />
+                  placeholder="Photo caption — describe what's shown" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans" />
                 <input value={block.citation || ""} onChange={(e) => updateBlock(block.id, { citation: e.target.value })}
-                  placeholder="Photo credit / citation (e.g. Photo: John Smith / Getty)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans text-right" />
+                  placeholder="Photo credit (e.g. Photo: John Smith / Getty Images)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans text-right" />
               </div>
             )}
 
@@ -430,10 +432,12 @@ export default function ArticleBodyEditor({
                 </div>
                 <input value={block.content || ""} onChange={(e) => updateBlock(block.id, { content: e.target.value })}
                   placeholder="Video URL or data URI" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans" />
+                <input value={block.title || ""} onChange={(e) => updateBlock(block.id, { title: e.target.value })}
+                  placeholder="Video title (optional)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans font-semibold" />
                 <input value={block.caption || ""} onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
-                  placeholder="Video caption (optional)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans" />
+                  placeholder="Video caption — describe what's shown" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans" />
                 <input value={block.citation || ""} onChange={(e) => updateBlock(block.id, { citation: e.target.value })}
-                  placeholder="Video credit / citation (e.g. Video: BBC Sport)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans text-right" />
+                  placeholder="Video credit (e.g. Video: BBC Sport)" className="w-full bg-background text-foreground px-3 py-1.5 rounded text-xs font-sans text-right" />
               </div>
             )}
           </div>

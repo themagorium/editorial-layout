@@ -385,7 +385,7 @@ export default function ArticleBodyEditor({
                       onChange={(e) => { const file = e.target.files?.[0]; if (file) void replaceMediaBlock(block.id, file); e.target.value = ""; }} />
                   </label>
                   {block.content && (
-                    <button type="button" onClick={() => updateBlock(block.id, { content: "" })}
+                    <button type="button" onClick={() => updateBlock(block.id, { content: "", cleared: true })}
                       className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-destructive hover:border-destructive transition-colors">
                       Clear
                     </button>
@@ -425,7 +425,7 @@ export default function ArticleBodyEditor({
                     <input type="file" accept="video/*" className="hidden"
                       onChange={(e) => { const file = e.target.files?.[0]; if (file) void replaceMediaBlock(block.id, file); e.target.value = ""; }} />
                   </label>
-                  <button type="button" onClick={() => updateBlock(block.id, { content: "" })}
+                  <button type="button" onClick={() => updateBlock(block.id, { content: "", cleared: true })}
                     className="px-2 py-1 text-[10px] uppercase tracking-wider border border-border rounded text-muted-foreground hover:text-destructive hover:border-destructive transition-colors">
                     Clear
                   </button>

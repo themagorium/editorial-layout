@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import fs from "fs";
 import path from "path";
+import { mergeKeepingExisting } from "./_lib/keep-existing.js";
 
 type BodyBlock = {
   id: string;
@@ -738,6 +739,13 @@ async function getStory<T>(type: StoryType, id: string): Promise<T | null> {
 async function setStory(type: StoryType, id: string, value: unknown): Promise<void> {
   await kvSet(storyKey(type, id), value);
 }
+/** Every publish path writes through this: a blank photo, cover image or
+ *  text arriving from the admin never overwrites what is already stored
+ *  (see api/_lib/keep-existing.ts). Only explicit deletes remove content. */
+async function setStoryKeepingExisting(type: StoryType, id: string, value: HeroPayload | ArticlePayload): Promise<void> {
+  const existing = await getStory<HeroPayload | ArticlePayload>(type, id);
+  await setStory(type, id, mergeKeepingExisting(existing, value));
+}
 async function deleteStory(type: StoryType, id: string): Promise<void> {
   await kvDel(storyKey(type, id));
 }
@@ -812,77 +820,12 @@ async function rebuildLatestView(publishedAt: string, updatedAt: string): Promis
 }
 
 /** Writes (or deletes) a single story and keeps its edition's index in sync. */
-// ============================================================
-// SERVER-SIDE PHOTO GUARD — photos are NEVER overwritten with
-// empty values. This runs on every single story write so no
-// client bug, stale draft, or stripped localStorage copy can
-// ever wipe a photo that is already saved in the CMS.
-// The only way to remove a photo is to explicitly replace it
-// with a new non-empty value (a real upload or URL).
-// ============================================================
-const DATA_URL_PREFIX_SERVER = "data:";
-const OMITTED_PLACEHOLDER_SERVER = "__omitted__";
-
-function isRealMedia(value: unknown): boolean {
-  if (!value || typeof value !== "string") return false;
-  const v = value.trim();
-  return v.startsWith(DATA_URL_PREFIX_SERVER) || (v.startsWith("http") && v.length > 10);
-}
-
-function isEmpty(value: unknown): boolean {
-  if (!value || typeof value !== "string") return true;
-  const v = value.trim();
-  return v === "" || v === OMITTED_PLACEHOLDER_SERVER;
-}
-
-async function protectPhotos(
-  type: StoryType,
-  incoming: HeroPayload | ArticlePayload,
-): Promise<HeroPayload | ArticlePayload> {
-  // Fetch whatever is already saved for this story id
-  const existing = await getStory<HeroPayload | ArticlePayload>(type, incoming.id);
-  if (!existing) return incoming; // new story — nothing to protect yet
-
-  const safe = { ...incoming } as HeroPayload & ArticlePayload;
-
-  // Guard top-level image/video fields
-  for (const field of ["imageUrl", "heroImage", "videoUrl", "secondaryImageUrl"] as const) {
-    const cur = (existing as Record<string, unknown>)[field];
-    const next = (safe as Record<string, unknown>)[field];
-    if (isRealMedia(cur) && isEmpty(next)) {
-      // Keep the existing photo — do NOT overwrite with empty
-      (safe as Record<string, unknown>)[field] = cur;
-    }
-  }
-
-  // Guard body image/video blocks by index
-  const existingBody = (existing as { body?: BodyBlock[] }).body;
-  if (Array.isArray(safe.body) && Array.isArray(existingBody)) {
-    safe.body = safe.body.map((block: BodyBlock, idx: number) => {
-      if (block.type !== "image" && block.type !== "video") return block;
-      if (!isEmpty(block.content)) return block; // incoming has real media — keep it
-      const existingBlock = existingBody[idx];
-      if (
-        existingBlock &&
-        (existingBlock.type === "image" || existingBlock.type === "video") &&
-        isRealMedia(existingBlock.content)
-      ) {
-        return { ...block, content: existingBlock.content }; // restore saved photo
-      }
-      return block;
-    });
-  }
-
-  return safe;
-}
 
 async function upsertStory(type: StoryType, edition: string, story: HeroPayload | ArticlePayload, stamp: string): Promise<void> {
-  // PHOTO GUARD: never let an empty/stripped value overwrite a real saved photo
-  const safeStory = await protectPhotos(type, story);
-  await setStory(type, safeStory.id, safeStory);
+  await setStoryKeepingExisting(type, story.id, story);
   const index = (await getEditionIndex(edition)) || { heroIds: [], articleIds: [], updatedAt: stamp };
-  if (type === "hero" && !index.heroIds.includes(safeStory.id)) index.heroIds.push(safeStory.id);
-  if (type === "article" && !index.articleIds.includes(safeStory.id)) index.articleIds.push(safeStory.id);
+  if (type === "hero" && !index.heroIds.includes(story.id)) index.heroIds.push(story.id);
+  if (type === "article" && !index.articleIds.includes(story.id)) index.articleIds.push(story.id);
   index.updatedAt = stamp;
   await setEditionIndex(edition, index);
   const editions = await getEditionsIndex();
@@ -934,8 +877,8 @@ async function writeContentAcrossEditions(content: PublishPayload, publishedAt: 
     bucket.heroes.forEach((h) => { if (!heroIds.includes(h.id)) heroIds.push(h.id); });
     bucket.articles.forEach((a) => { if (!articleIds.includes(a.id)) articleIds.push(a.id); });
     await Promise.all([
-      ...bucket.heroes.map((hero) => setStory("hero", hero.id, hero)),
-      ...bucket.articles.map((article) => setStory("article", article.id, article)),
+      ...bucket.heroes.map((hero) => setStoryKeepingExisting("hero", hero.id, hero)),
+      ...bucket.articles.map((article) => setStoryKeepingExisting("article", article.id, article)),
     ]);
     await setEditionIndex(edition, { heroIds, articleIds, updatedAt });
   }
@@ -944,68 +887,6 @@ async function writeContentAcrossEditions(content: PublishPayload, publishedAt: 
   await setEditionsIndex([...previousEditions, ...byEdition.keys()]);
   // Only replace ads when the payload actually carries some.
   if (content.ads.length > 0) await setAdsContent(content.ads);
-  await setMeta({ publishedAt, updatedAt });
-  await rebuildLatestView(publishedAt, updatedAt);
-}
-
-/** The old destructive full-archive diff, kept only for restoring a snapshot
- *  (where "make the site exactly this" is the intent). Never called from a
- *  publish path. */
-async function replaceContentAcrossEditions(content: PublishPayload, publishedAt: string, updatedAt: string): Promise<void> {
-  const byEdition = new Map<string, { heroes: HeroPayload[]; articles: ArticlePayload[] }>();
-  content.heroes.forEach((hero) => {
-    const key = hero.edition || "unknown";
-    const bucket = byEdition.get(key) || { heroes: [], articles: [] };
-    bucket.heroes.push(hero);
-    byEdition.set(key, bucket);
-  });
-  content.articles.forEach((article) => {
-    const key = article.edition || "unknown";
-    const bucket = byEdition.get(key) || { heroes: [], articles: [] };
-    bucket.articles.push(article);
-    byEdition.set(key, bucket);
-  });
-
-  const previousEditions = await getEditionsIndex();
-  const nextEditions = Array.from(byEdition.keys());
-
-  // Editions removed entirely (e.g. "Delete Edition" then Save).
-  for (const edition of previousEditions.filter((e) => !nextEditions.includes(e))) {
-    const index = await getEditionIndex(edition);
-    if (index) {
-      await Promise.all([
-        ...index.heroIds.map((id) => deleteStory("hero", id)),
-        ...index.articleIds.map((id) => deleteStory("article", id)),
-      ]);
-    }
-    await deleteEditionIndex(edition);
-  }
-
-  // Editions present: diff individual stories, write current ones.
-  for (const [edition, bucket] of byEdition.entries()) {
-    const previousIndex = await getEditionIndex(edition);
-    const nextHeroIds = bucket.heroes.map((h) => h.id);
-    const nextArticleIds = bucket.articles.map((a) => a.id);
-
-    if (previousIndex) {
-      const removedHeroIds = previousIndex.heroIds.filter((id) => !nextHeroIds.includes(id));
-      const removedArticleIds = previousIndex.articleIds.filter((id) => !nextArticleIds.includes(id));
-      await Promise.all([
-        ...removedHeroIds.map((id) => deleteStory("hero", id)),
-        ...removedArticleIds.map((id) => deleteStory("article", id)),
-      ]);
-    }
-
-    await Promise.all([
-      ...bucket.heroes.map((hero) => setStory("hero", hero.id, hero)),
-      ...bucket.articles.map((article) => setStory("article", article.id, article)),
-    ]);
-
-    await setEditionIndex(edition, { heroIds: nextHeroIds, articleIds: nextArticleIds, updatedAt });
-  }
-
-  await setEditionsIndex(nextEditions);
-  await setAdsContent(content.ads);
   await setMeta({ publishedAt, updatedAt });
   await rebuildLatestView(publishedAt, updatedAt);
 }
@@ -1317,8 +1198,8 @@ async function listDraftRefs(): Promise<DraftRef[]> {
 
 async function saveDraftStory(edition: string, storyType: StoryType, story: HeroPayload | ArticlePayload): Promise<string> {
   const savedAt = new Date().toISOString();
-  // PHOTO GUARD: protect against stripped localStorage draft overwriting real photos in the draft store
-  const safeStory = await protectPhotos(storyType, story);
+  // Same never-blank-over-real rule as publishing, against the published copy.
+  const safeStory = mergeKeepingExisting(await getStory<HeroPayload | ArticlePayload>(storyType, story.id), story);
   await kvSet(draftKey(edition, storyType, safeStory.id), { ...safeStory, edition });
   const refs = (await listDraftRefs()).filter((r) => !(r.edition === edition && r.storyType === storyType && r.id === safeStory.id));
   refs.push({ edition, storyType, id: safeStory.id, savedAt });
@@ -1628,16 +1509,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             (previousIndex.heroIds.some((id) => !nextHeroIds.includes(id)) ||
               previousIndex.articleIds.some((id) => !nextArticleIds.includes(id))),
         );
-        if (wouldRemove) await snapshotSite(`before edition save ${edition} (removes stories)`);
-
-        if (previousIndex) {
-          const removedHeroIds = previousIndex.heroIds.filter((id) => !nextHeroIds.includes(id));
-          const removedArticleIds = previousIndex.articleIds.filter((id) => !nextArticleIds.includes(id));
-          await Promise.all([
-            ...removedHeroIds.map((id) => deleteStory("hero", id)),
-            ...removedArticleIds.map((id) => deleteStory("article", id)),
-          ]);
-        }
+        if (wouldRemove) await snapshotSite(`before edition save ${edition} (stories missing from payload are kept)`);
+        // Merge-only: stories missing from this payload are KEPT. Deleting a
+        // story is only ever done through the explicit "delete-story" phase.
+        const keptHeroIds = [...nextHeroIds, ...(previousIndex?.heroIds || []).filter((id) => !nextHeroIds.includes(id))];
+        const keptArticleIds = [...nextArticleIds, ...(previousIndex?.articleIds || []).filter((id) => !nextArticleIds.includes(id))];
 
         if (heroes.length === 0 && articles.length === 0) {
           await deleteEditionIndex(edition);
@@ -1645,10 +1521,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           await setEditionsIndex(editions.filter((e) => e !== edition));
         } else {
           await Promise.all([
-            ...heroes.map((hero) => setStory("hero", hero.id, hero)),
-            ...articles.map((article) => setStory("article", article.id, article)),
+            ...heroes.map((hero) => setStoryKeepingExisting("hero", hero.id, hero)),
+            ...articles.map((article) => setStoryKeepingExisting("article", article.id, article)),
           ]);
-          await setEditionIndex(edition, { heroIds: nextHeroIds, articleIds: nextArticleIds, updatedAt: stamp });
+          await setEditionIndex(edition, { heroIds: keptHeroIds, articleIds: keptArticleIds, updatedAt: stamp });
           const editions = await getEditionsIndex();
           if (!editions.includes(edition)) await setEditionsIndex([...editions, edition]);
         }
@@ -1698,7 +1574,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return;
       }
 
-      // ---- Put the whole site back exactly as an automatic snapshot had it ----
+      // ---- Bring back what an automatic snapshot had ----
+      // Merge-only: every story in the snapshot is written back (with the
+      // usual never-blank-over-real guard), but stories and editions created
+      // after the snapshot are KEPT. A restore used to make the site "exactly
+      // the snapshot", which silently deleted the whole October 2026 edition
+      // on 1 Nov 2026. Removing content now only happens through delete-story
+      // and delete-edition.
       if (phase === "restore-backup") {
         const backupId = readFirstString((req.body as { backupId?: unknown })?.backupId).trim();
         const entry = (await listBackups()).find((b) => b.id === backupId);
@@ -1709,7 +1591,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
         const before = await snapshotSite(`before restore of ${backupId}`);
         const stamp = new Date().toISOString();
-        await replaceContentAcrossEditions(sanitizePayload(snapshot), snapshot.publishedAt || stamp, stamp);
+        await writeContentAcrossEditions(sanitizePayload(snapshot), snapshot.publishedAt || stamp, stamp);
         await snapshotPublished(`published by restoring backup from ${entry.createdAt}`);
         res.status(200).json({ ok: true, success: true, configured: isKvConfigured(), restored: backupId, undoBackupId: before?.id });
         return;

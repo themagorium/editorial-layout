@@ -3,10 +3,10 @@ import EditorialHeader from "@/components/editorial/EditorialHeader";
 import ArticleBodyEditor from "@/components/editorial/ArticleBodyEditor";
 import {
   getHeroes, getArticles, getAds, saveHeroes, saveArticles, saveAds,
-  publishEdition, getPublishedContentSnapshot,
+  publishEdition, getPublishedContentSnapshot, wasLastSnapshotFromCms,
   resetToDefaults, clearLocalDraftStorage, isStorageQuotaExceededError,
   CATEGORIES, formatEditionLabel, publishStory, recordPublishedSnapshot, adminTimeZone,
-  saveDraftStory, deleteDrafts, loadDrafts,
+  saveDraftStory, deleteDrafts, loadDrafts, deleteStoryLive, deleteEditionLive,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
 import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, FileText } from "lucide-react";
@@ -83,6 +83,20 @@ function makeStarterPick(edition: string, n: number): Article {
 }
 
 /** A blank starter slot nobody has typed into yet: never published or autosaved. */
+/** Removing a story card is a deliberate delete: confirm, then remove it from
+ *  the live site (server snapshots first) and discard its draft. */
+async function confirmAndDeleteLive(story: HeroItem | Article, storyType: "hero" | "article"): Promise<boolean> {
+  if (isUntouchedStarter(story)) return true;
+  if (!window.confirm(`Delete "${story.title || "this story"}" from your LIVE site?\n\nA backup is taken first, so it can be restored.`)) return false;
+  const token = getAdminPublishToken();
+  if (!token) { toast.error("Admin session expired. Please sign in again."); return false; }
+  const result = await deleteStoryLive(story.edition, storyType, story.id, token);
+  if (!result.success) { toast.error(`Could not delete "${story.title}": ${result.error}`); return false; }
+  await deleteDrafts(token, { edition: story.edition, storyType, id: story.id });
+  toast.success(`Deleted "${story.title}".`);
+  return true;
+}
+
 function isUntouchedStarter(story: HeroItem | Article): boolean {
   if (!/^New (Hero|Article)( \d+)?$/.test((story.title || "").trim())) return false;
   const summary = ("subtitle" in story ? story.subtitle : (story as Article).excerpt) || "";
@@ -213,6 +227,35 @@ export default function AdminPage() {
   return <AdminDashboard />;
 
 }
+const CLEARABLE_MEDIA_FIELDS = ["imageUrl", "videoUrl", "secondaryImageUrl"] as const;
+
+/** Applies an edit and records deliberate photo removals, so the server
+ *  knows an empty cover/opening photo was the editor's choice (otherwise it
+ *  keeps the stored photo rather than let a blank overwrite it). */
+function withClearedFields<T extends { clearedFields?: string[]; removedBlockIds?: string[] }>(story: T, patch: Partial<T>): T {
+  const cleared = new Set(story.clearedFields || []);
+  for (const field of CLEARABLE_MEDIA_FIELDS) {
+    if (!(field in patch)) continue;
+    const value = (patch as Record<string, unknown>)[field];
+    if (value === "" || value === undefined || value === null) cleared.add(field);
+    else cleared.delete(field);
+  }
+  const result = { ...story, ...patch, clearedFields: [...cleared] } as T & { body?: { id: string; type: string; content: string }[]; removedBlockIds?: string[] };
+  if ("body" in patch) {
+    // Photo/video blocks the editor deleted in this edit. The server keeps
+    // any stored photo block that is missing from a save unless it is
+    // listed here, so a stripped browser copy can't drop photos silently.
+    const before = ((story as { body?: { id: string; type: string; content: string }[] }).body || []);
+    const after = result.body || [];
+    const afterIds = new Set(after.map((b) => b.id));
+    const removed = new Set(((story as { removedBlockIds?: string[] }).removedBlockIds) || []);
+    for (const b of before) if ((b.type === "image" || b.type === "video") && b.content && !afterIds.has(b.id)) removed.add(b.id);
+    for (const id of afterIds) removed.delete(id);
+    result.removedBlockIds = [...removed];
+  }
+  return result;
+}
+
 function AdminDashboard() {
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -226,6 +269,7 @@ function AdminDashboard() {
   const [draftsReady, setDraftsReady] = useState(false);
   const [autosave, setAutosave] = useState<{ state: "idle" | "saving" | "saved" | "error"; at?: string; error?: string }>({ state: "idle" });
   const lastSavedRef = useRef<Map<string, string>>(new Map());
+  const loadedFromCmsRef = useRef(false);
   const [draftEditions, setDraftEditions] = useState<string[]>(() => getDraftEditions());
   const [pageContent, setPageContent] = useState<PageContent>(() => {
     try {
@@ -244,6 +288,10 @@ function AdminDashboard() {
       // source of "work in progress".
       const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: false });
       if (!active) return;
+      loadedFromCmsRef.current = wasLastSnapshotFromCms();
+      if (!loadedFromCmsRef.current) {
+        toast.error("Couldn't load your live site, so publishing is switched off to protect it. Reload the admin page and try again.", { duration: 20000 });
+      }
       // Bring back everything autosaved but not yet published.
       const token = getAdminPublishToken();
       const drafts = token ? await loadDrafts(token) : null;
@@ -304,13 +352,10 @@ function AdminDashboard() {
         if (result.success) lastSavedRef.current.set(`${type}:${story.id}`, json);
         else error = `${story.title || "A story"}: ${result.error}`;
       }
-      for (const key of removed) {
-        const [type, id] = key.split(/:(.+)/) as ["hero" | "article", string];
-        const json = lastSavedRef.current.get(key);
-        const edition = json ? (JSON.parse(json) as { edition?: string }).edition : undefined;
-        if (edition) await deleteDrafts(token, { edition, storyType: type, id });
-        lastSavedRef.current.delete(key);
-      }
+      // A story leaving the screen (edition switch, reload, stale tab) is
+      // NOT a delete: its server draft is kept. Drafts are only discarded
+      // after that story has been published.
+      for (const key of removed) lastSavedRef.current.delete(key);
       setAutosave(error ? { state: "error", error } : { state: "saved", at: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
     }, 1500);
     return () => window.clearTimeout(timer);
@@ -326,6 +371,7 @@ function AdminDashboard() {
 
   const save = async () => {
   if (isSaving) return;
+  if (!loadedFromCmsRef.current) { toast.error("Publishing is off: the admin couldn't load your live site. Reload the page first, so nothing older or blank is published over it."); return; }
   if (!window.confirm("This will publish EVERYTHING currently loaded — every edition, including any unpublished drafts — straight to your live site. Continue?")) return;
   setIsSaving(true);
   try {
@@ -369,6 +415,7 @@ function AdminDashboard() {
 
   const publishCurrentEditionLive = async () => {
     if (!currentEdition || isPublishingEdition) return;
+    if (!loadedFromCmsRef.current) { toast.error("Publishing is off: the admin couldn't load your live site. Reload the page first."); return; }
     setIsPublishingEdition(true);
     try {
       const publishToken = getAdminPublishToken();
@@ -444,10 +491,15 @@ function AdminDashboard() {
     }
   };
 
-  const deleteCurrentEdition = () => {
+  const deleteCurrentEdition = async () => {
     if (!currentEdition) return;
     const label = formatEditionLabel(currentEdition);
-    if (!window.confirm(`Delete the entire ${label} edition? This will remove all heroes and articles for that edition.\n\nClick "Save Changes" after deleting to make it permanent.`)) return;
+    if (!window.confirm(`Delete the entire ${label} edition from your LIVE site? Every hero and article in it will be removed.\n\nA backup is taken first, so it can be restored.`)) return;
+    const token = getAdminPublishToken();
+    if (!token) { toast.error("Admin session expired. Please sign in again."); return; }
+    const result = await deleteEditionLive(currentEdition, token);
+    if (!result.success && !/no such|not found/i.test(result.error)) { toast.error(`Could not delete ${label}: ${result.error}`); return; }
+    await deleteDrafts(token, { edition: currentEdition });
     const nextHeroes = heroes.filter((h) => h.edition !== currentEdition);
     const nextArticles = articles.filter((a) => a.edition !== currentEdition);
     setHeroes(nextHeroes);
@@ -565,8 +617,12 @@ function AdminDashboard() {
 
 function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { heroes: HeroItem[]; setHeroes: (h: HeroItem[]) => void; filteredHeroes: HeroItem[]; currentEdition: string }) {
   const addHero = () => setHeroes([{ id: `h-${Date.now()}`, title: "New Hero", subtitle: "", seoTags: [], category: "Travel", imageUrl: "", author: "", body: [], date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) }, ...heroes]);
-  const update = (id: string, patch: Partial<HeroItem>) => setHeroes(heroes.map((h) => (h.id === id ? { ...h, ...patch } : h)));
-  const remove = (id: string) => setHeroes(heroes.filter((h) => h.id !== id));
+  const update = (id: string, patch: Partial<HeroItem>) => setHeroes(heroes.map((h) => (h.id === id ? withClearedFields(h, patch) : h)));
+  const remove = async (id: string) => {
+    const story = heroes.find((h) => h.id === id);
+    if (!story || !(await confirmAndDeleteLive(story, "hero"))) return;
+    setHeroes(heroes.filter((h) => h.id !== id));
+  };
   return (
     <div className="space-y-6">
       <AddButton onClick={addHero} label={`Add Hero to ${currentEdition ? formatEditionLabel(currentEdition) : "Edition"}`} />
@@ -584,8 +640,12 @@ function HeroesManager({ heroes, setHeroes, filteredHeroes, currentEdition }: { 
 
 function ArticlesManager({ articles, setArticles, filteredArticles, currentEdition, publishToken }: { articles: Article[]; setArticles: (a: Article[]) => void; filteredArticles: Article[]; currentEdition: string; publishToken: string | null }) {
   const addArticle = () => setArticles([{ id: `a-${Date.now()}`, title: "New Article", excerpt: "", seoTags: [], category: "Travel", imageUrl: "", author: "", date: new Date().toISOString().split("T")[0], edition: currentEdition || new Date().toISOString().slice(0, 7) }, ...articles]);
-  const update = (id: string, patch: Partial<Article>) => setArticles(articles.map((a) => (a.id === id ? { ...a, ...patch } : a)));
-  const remove = (id: string) => setArticles(articles.filter((a) => a.id !== id));
+  const update = (id: string, patch: Partial<Article>) => setArticles(articles.map((a) => (a.id === id ? withClearedFields(a, patch) : a)));
+  const remove = async (id: string) => {
+    const story = articles.find((a) => a.id === id);
+    if (!story || !(await confirmAndDeleteLive(story, "article"))) return;
+    setArticles(articles.filter((a) => a.id !== id));
+  };
   const saveArticleLive = async (article: Article) => {
     if (!publishToken) { toast.error("Admin session expired. Please sign in again to publish live."); return; }
     const result = await publishStory(currentEdition, "article", article, publishToken);

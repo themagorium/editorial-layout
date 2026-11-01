@@ -45,6 +45,10 @@ export const CATEGORIES: Category[] = [
 ];
 export interface HeroItem {
   id: string;
+  /** Cover/opening photo fields the editor deliberately removed. */
+  clearedFields?: string[];
+  /** Photo/video blocks the editor deliberately deleted from the body. */
+  removedBlockIds?: string[];
   title: string;
   excerpt?: string;
   legacySlugs?: string[];
@@ -52,7 +56,7 @@ export interface HeroItem {
   sources?: string;
   subtitle: string;
   category: Category;
-  
+  imageUrl: string;
   secondaryImageUrl?: string;
   secondaryImageCaption?: string;
   secondaryImageCitation?: string;
@@ -78,6 +82,10 @@ export interface ArticleBodyBlock {
   title?: string;
   caption?: string;
   citation?: string;
+  /** Set when the editor deliberately clears this photo/video ("Clear").
+   *  The server only honours an empty photo when this flag is present;
+   *  otherwise a blank never overwrites a stored photo. */
+  cleared?: boolean;
 }
 
 
@@ -100,6 +108,10 @@ export interface AdSlot {
 
 export interface Article {
   id: string;
+  /** Cover/opening photo fields the editor deliberately removed. */
+  clearedFields?: string[];
+  /** Photo/video blocks the editor deliberately deleted from the body. */
+  removedBlockIds?: string[];
   title: string;
   excerpt: string;
   legacySlugs?: string[];
@@ -1458,6 +1470,7 @@ export async function getPublishedContentSnapshot(options?: {
     return DEFAULT_PUBLISHED_CONTENT;
   }
   const allowLocalDraft = options?.allowLocalDraft ?? false;
+  lastSnapshotFromCms = false;
   ensureFreshDefaults();
   const hasLocalDraft = allowLocalDraft && hasLocalEditsAvailable();
   if (hasLocalDraft) {
@@ -1529,6 +1542,7 @@ export async function getPublishedContentSnapshot(options?: {
       }
       return DEFAULT_PUBLISHED_CONTENT;
     }
+    lastSnapshotFromCms = true;
     return normalized;
   } catch {
     if (!hasLocalDraft && hasCachedSnapshotAvailable()) {
@@ -1540,6 +1554,15 @@ export async function getPublishedContentSnapshot(options?: {
     }
     return DEFAULT_PUBLISHED_CONTENT;
   }
+}
+
+/** True only when the most recent getPublishedContentSnapshot() call got the
+ *  real site from the CMS — not a browser copy (which has its photos
+ *  stripped) and not the built-in defaults. The admin refuses to publish
+ *  otherwise, so a fallback copy can never overwrite the live site. */
+let lastSnapshotFromCms = false;
+export function wasLastSnapshotFromCms(): boolean {
+  return lastSnapshotFromCms;
 }
 
 export async function getLatestPublishedEditionSnapshot(options?: {
@@ -1875,67 +1898,6 @@ export function enforceEditionPattern(heroes: HeroItem[], articles: Article[]) {
   }));
   return { heroes: normalizedHeroes, articles: normalizedArticles };
 }
-// ---------------------------------------------------------------------------
-// PHOTO PROTECTION — never overwrite a real photo with an empty placeholder.
-//
-// Before publishing or autosaving, this function fetches the current live
-// version of the story from the CMS and, for every image/video block whose
-// in-memory content is empty or the OMITTED placeholder, restores the URL
-// that is already saved on the server.  Text edits (SEO, sources, headings,
-// etc.) are preserved; only missing media is back-filled.
-// ---------------------------------------------------------------------------
-async function mergeImagesFromCMS(
-  edition: string,
-  storyType: "hero" | "article",
-  story: HeroItem | Article,
-  authValue: string,
-): Promise<HeroItem | Article> {
-  try {
-    const storyId = (story as { id?: string }).id;
-    if (!storyId) return story;
-
-    const url = `${PUBLISHED_CONTENT_ENDPOINT}?storyId=${encodeURIComponent(storyId)}&storyType=${storyType}&edition=${encodeURIComponent(edition)}`;
-    const res = await fetch(url, {
-      cache: "no-store",
-      headers: { "x-admin-password": authValue, "x-admin-timezone": adminTimeZone() },
-    });
-    if (!res.ok) return story;
-    const payload = (await res.json().catch(() => null)) as { story?: HeroItem | Article } | null;
-    const cms = payload?.story as (HeroItem & Article) | undefined;
-    if (!cms) return story;
-
-    // Helper: is a value empty/placeholder?
-    const isEmpty = (v: unknown): boolean =>
-      !v || v === OMITTED_MEDIA_PLACEHOLDER || (typeof v === "string" && !v.trim());
-
-    // Merge top-level image/video fields
-    const merged = { ...story } as HeroItem & Article;
-    for (const field of ["imageUrl", "heroImage", "videoUrl", "secondaryImageUrl"] as const) {
-      if (isEmpty((merged as Record<string, unknown>)[field]) && !isEmpty((cms as Record<string, unknown>)[field])) {
-        (merged as Record<string, unknown>)[field] = (cms as Record<string, unknown>)[field];
-      }
-    }
-
-    // Merge body image/video blocks
-    if (Array.isArray(merged.body) && Array.isArray(cms.body)) {
-      merged.body = merged.body.map((block: ArticleBodyBlock, idx: number) => {
-        if (block.type !== "image" && block.type !== "video") return block;
-        if (!isEmpty(block.content)) return block;                 // already has data — keep it
-        const cmsBlock = cms.body?.[idx];
-        if (cmsBlock && (cmsBlock.type === "image" || cmsBlock.type === "video") && !isEmpty(cmsBlock.content)) {
-          return { ...block, content: cmsBlock.content };          // restore from CMS
-        }
-        return block;
-      });
-    }
-
-    return merged;
-  } catch {
-    // If the guard fetch fails, proceed with the original story unchanged —
-    // we never want a network hiccup to block a publish.
-    return story;
-  }
-}
 
 export async function publishStory(
   edition: string,
@@ -1952,7 +1914,7 @@ export async function publishStory(
 
     // PHOTO GUARD: restore any images that were stripped from in-memory state
     // before they reach the CMS. This prevents SEO/text edits from wiping photos.
-    const safeStory = await mergeImagesFromCMS(edition, storyType, story, authValue);
+    const safeStory = story; // photos are protected server-side (api/_lib/keep-existing.ts)
 
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
       method: "POST",
@@ -1990,7 +1952,7 @@ export async function saveDraftStory(edition: string, storyType: "hero" | "artic
   try {
     // PHOTO GUARD: merge any missing images from the live CMS before autosaving,
     // so a draft with stripped base64 never clobbers real photos on the server.
-    const safeStory = await mergeImagesFromCMS(edition, storyType, story, authValue);
+    const safeStory = story; // photos are protected server-side (api/_lib/keep-existing.ts)
 
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
       method: "POST",
@@ -2008,6 +1970,37 @@ export async function saveDraftStory(edition: string, storyType: "hero" | "artic
 }
 
 /** Removes private drafts: one story, one edition, or all (after publishing). */
+/** Deliberately deletes ONE story from the live site (the server snapshots
+ *  the site first). This is the only way a published story is removed. */
+export async function deleteStoryLive(edition: string, storyType: "hero" | "article", id: string, authValue: string) {
+  try {
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+      method: "POST",
+      headers: draftHeaders(authValue),
+      body: JSON.stringify({ phase: "delete-story", edition, storyType, id }),
+    });
+    const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+    return response.ok && payload.ok !== false ? { success: true as const } : { success: false as const, error: payload.error || `Delete failed (${response.status}).` };
+  } catch (error) {
+    return { success: false as const, error: error instanceof Error ? error.message : "Delete failed." };
+  }
+}
+
+/** Deliberately deletes a whole edition from the live site (snapshotted first). */
+export async function deleteEditionLive(edition: string, authValue: string) {
+  try {
+    const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
+      method: "POST",
+      headers: draftHeaders(authValue),
+      body: JSON.stringify({ phase: "delete-edition", edition, confirm: edition }),
+    });
+    const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+    return response.ok && payload.ok !== false ? { success: true as const } : { success: false as const, error: payload.error || `Delete failed (${response.status}).` };
+  } catch (error) {
+    return { success: false as const, error: error instanceof Error ? error.message : "Delete failed." };
+  }
+}
+
 export async function deleteDrafts(authValue: string, scope: { all?: boolean; edition?: string; storyType?: "hero" | "article"; id?: string }) {
   try {
     await fetch(PUBLISHED_CONTENT_ENDPOINT, {

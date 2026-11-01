@@ -27,8 +27,12 @@ const TEXT_PLACEHOLDER_PATTERNS = [
 
 const CAPTION_PLACEHOLDERS = new Set([
   "Upload photo or video",
+  "Upload photo",
+  "Upload video",
   "Featured image",
   "Featured video",
+  "Opening photo — upload image",
+  "Upload photo — describe what's shown",
 ]);
 
 const BLOCKED_IMAGE_PATTERNS = [
@@ -60,7 +64,12 @@ function isMeaningfulText(value?: string) {
 function isMeaningfulCaption(value?: string) {
   const trimmed = (value || "").trim();
   if (!trimmed) return false;
-  return !CAPTION_PLACEHOLDERS.has(trimmed);
+  const lower = trimmed.toLowerCase();
+  if (CAPTION_PLACEHOLDERS.has(trimmed)) return false;
+  // Catch any remaining upload/placeholder variants case-insensitively
+  if (/^upload (photo|video|image)/i.test(lower)) return false;
+  if (/^opening photo/i.test(lower)) return false;
+  return true;
 }
 
 function hasRealBodyContent(block: ArticleBodyBlock) {

@@ -238,7 +238,11 @@ function AdminDashboard() {
   useEffect(() => {
     let active = true;
     const initialize = async () => {
-      const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: true });
+      // Always fetch fresh from the CMS on admin init — never use the
+      // localStorage draft here, because it may be stale or from a previous
+      // session.  Server-side autosaved drafts (loaded below) are the right
+      // source of "work in progress".
+      const snapshot = await getPublishedContentSnapshot({ allowLocalDraft: false });
       if (!active) return;
       // Bring back everything autosaved but not yet published.
       const token = getAdminPublishToken();

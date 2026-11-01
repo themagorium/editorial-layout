@@ -812,11 +812,77 @@ async function rebuildLatestView(publishedAt: string, updatedAt: string): Promis
 }
 
 /** Writes (or deletes) a single story and keeps its edition's index in sync. */
+// ============================================================
+// SERVER-SIDE PHOTO GUARD — photos are NEVER overwritten with
+// empty values. This runs on every single story write so no
+// client bug, stale draft, or stripped localStorage copy can
+// ever wipe a photo that is already saved in the CMS.
+// The only way to remove a photo is to explicitly replace it
+// with a new non-empty value (a real upload or URL).
+// ============================================================
+const DATA_URL_PREFIX_SERVER = "data:";
+const OMITTED_PLACEHOLDER_SERVER = "__omitted__";
+
+function isRealMedia(value: unknown): boolean {
+  if (!value || typeof value !== "string") return false;
+  const v = value.trim();
+  return v.startsWith(DATA_URL_PREFIX_SERVER) || (v.startsWith("http") && v.length > 10);
+}
+
+function isEmpty(value: unknown): boolean {
+  if (!value || typeof value !== "string") return true;
+  const v = value.trim();
+  return v === "" || v === OMITTED_PLACEHOLDER_SERVER;
+}
+
+async function protectPhotos(
+  type: StoryType,
+  incoming: HeroPayload | ArticlePayload,
+): Promise<HeroPayload | ArticlePayload> {
+  // Fetch whatever is already saved for this story id
+  const existing = await getStory<HeroPayload | ArticlePayload>(type, incoming.id);
+  if (!existing) return incoming; // new story — nothing to protect yet
+
+  const safe = { ...incoming } as HeroPayload & ArticlePayload;
+
+  // Guard top-level image/video fields
+  for (const field of ["imageUrl", "heroImage", "videoUrl", "secondaryImageUrl"] as const) {
+    const cur = (existing as Record<string, unknown>)[field];
+    const next = (safe as Record<string, unknown>)[field];
+    if (isRealMedia(cur) && isEmpty(next)) {
+      // Keep the existing photo — do NOT overwrite with empty
+      (safe as Record<string, unknown>)[field] = cur;
+    }
+  }
+
+  // Guard body image/video blocks by index
+  const existingBody = (existing as { body?: BodyBlock[] }).body;
+  if (Array.isArray(safe.body) && Array.isArray(existingBody)) {
+    safe.body = safe.body.map((block: BodyBlock, idx: number) => {
+      if (block.type !== "image" && block.type !== "video") return block;
+      if (!isEmpty(block.content)) return block; // incoming has real media — keep it
+      const existingBlock = existingBody[idx];
+      if (
+        existingBlock &&
+        (existingBlock.type === "image" || existingBlock.type === "video") &&
+        isRealMedia(existingBlock.content)
+      ) {
+        return { ...block, content: existingBlock.content }; // restore saved photo
+      }
+      return block;
+    });
+  }
+
+  return safe;
+}
+
 async function upsertStory(type: StoryType, edition: string, story: HeroPayload | ArticlePayload, stamp: string): Promise<void> {
-  await setStory(type, story.id, story);
+  // PHOTO GUARD: never let an empty/stripped value overwrite a real saved photo
+  const safeStory = await protectPhotos(type, story);
+  await setStory(type, safeStory.id, safeStory);
   const index = (await getEditionIndex(edition)) || { heroIds: [], articleIds: [], updatedAt: stamp };
-  if (type === "hero" && !index.heroIds.includes(story.id)) index.heroIds.push(story.id);
-  if (type === "article" && !index.articleIds.includes(story.id)) index.articleIds.push(story.id);
+  if (type === "hero" && !index.heroIds.includes(safeStory.id)) index.heroIds.push(safeStory.id);
+  if (type === "article" && !index.articleIds.includes(safeStory.id)) index.articleIds.push(safeStory.id);
   index.updatedAt = stamp;
   await setEditionIndex(edition, index);
   const editions = await getEditionsIndex();
@@ -1251,9 +1317,11 @@ async function listDraftRefs(): Promise<DraftRef[]> {
 
 async function saveDraftStory(edition: string, storyType: StoryType, story: HeroPayload | ArticlePayload): Promise<string> {
   const savedAt = new Date().toISOString();
-  await kvSet(draftKey(edition, storyType, story.id), { ...story, edition });
-  const refs = (await listDraftRefs()).filter((r) => !(r.edition === edition && r.storyType === storyType && r.id === story.id));
-  refs.push({ edition, storyType, id: story.id, savedAt });
+  // PHOTO GUARD: protect against stripped localStorage draft overwriting real photos in the draft store
+  const safeStory = await protectPhotos(storyType, story);
+  await kvSet(draftKey(edition, storyType, safeStory.id), { ...safeStory, edition });
+  const refs = (await listDraftRefs()).filter((r) => !(r.edition === edition && r.storyType === storyType && r.id === safeStory.id));
+  refs.push({ edition, storyType, id: safeStory.id, savedAt });
   await kvSet(DRAFT_INDEX_KEY, refs);
   return savedAt;
 }

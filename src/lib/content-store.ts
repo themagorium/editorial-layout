@@ -1875,6 +1875,68 @@ export function enforceEditionPattern(heroes: HeroItem[], articles: Article[]) {
   }));
   return { heroes: normalizedHeroes, articles: normalizedArticles };
 }
+// ---------------------------------------------------------------------------
+// PHOTO PROTECTION — never overwrite a real photo with an empty placeholder.
+//
+// Before publishing or autosaving, this function fetches the current live
+// version of the story from the CMS and, for every image/video block whose
+// in-memory content is empty or the OMITTED placeholder, restores the URL
+// that is already saved on the server.  Text edits (SEO, sources, headings,
+// etc.) are preserved; only missing media is back-filled.
+// ---------------------------------------------------------------------------
+async function mergeImagesFromCMS(
+  edition: string,
+  storyType: "hero" | "article",
+  story: HeroItem | Article,
+  authValue: string,
+): Promise<HeroItem | Article> {
+  try {
+    const storyId = (story as { id?: string }).id;
+    if (!storyId) return story;
+
+    const url = `${PUBLISHED_CONTENT_ENDPOINT}?storyId=${encodeURIComponent(storyId)}&storyType=${storyType}&edition=${encodeURIComponent(edition)}`;
+    const res = await fetch(url, {
+      cache: "no-store",
+      headers: { "x-admin-password": authValue, "x-admin-timezone": adminTimeZone() },
+    });
+    if (!res.ok) return story;
+    const payload = (await res.json().catch(() => null)) as { story?: HeroItem | Article } | null;
+    const cms = payload?.story as (HeroItem & Article) | undefined;
+    if (!cms) return story;
+
+    // Helper: is a value empty/placeholder?
+    const isEmpty = (v: unknown): boolean =>
+      !v || v === OMITTED_MEDIA_PLACEHOLDER || (typeof v === "string" && !v.trim());
+
+    // Merge top-level image/video fields
+    const merged = { ...story } as HeroItem & Article;
+    for (const field of ["imageUrl", "heroImage", "videoUrl", "secondaryImageUrl"] as const) {
+      if (isEmpty((merged as Record<string, unknown>)[field]) && !isEmpty((cms as Record<string, unknown>)[field])) {
+        (merged as Record<string, unknown>)[field] = (cms as Record<string, unknown>)[field];
+      }
+    }
+
+    // Merge body image/video blocks
+    if (Array.isArray(merged.body) && Array.isArray(cms.body)) {
+      merged.body = merged.body.map((block: ArticleBodyBlock, idx: number) => {
+        if (block.type !== "image" && block.type !== "video") return block;
+        if (!isEmpty(block.content)) return block;                 // already has data — keep it
+        const cmsBlock = cms.body?.[idx];
+        if (cmsBlock && (cmsBlock.type === "image" || cmsBlock.type === "video") && !isEmpty(cmsBlock.content)) {
+          return { ...block, content: cmsBlock.content };          // restore from CMS
+        }
+        return block;
+      });
+    }
+
+    return merged;
+  } catch {
+    // If the guard fetch fails, proceed with the original story unchanged —
+    // we never want a network hiccup to block a publish.
+    return story;
+  }
+}
+
 export async function publishStory(
   edition: string,
   storyType: "hero" | "article",
@@ -1887,6 +1949,11 @@ export async function publishStory(
     if (!authValue) {
       return { success: false as const, configured: true, error: "Admin session expired. Please sign in again to publish live." };
     }
+
+    // PHOTO GUARD: restore any images that were stripped from in-memory state
+    // before they reach the CMS. This prevents SEO/text edits from wiping photos.
+    const safeStory = await mergeImagesFromCMS(edition, storyType, story, authValue);
+
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
       method: "POST",
       headers: {
@@ -1894,7 +1961,7 @@ export async function publishStory(
         Authorization: `Bearer ${authValue}`,
         "x-admin-password": authValue, "x-admin-timezone": adminTimeZone(),
       },
-      body: JSON.stringify({ phase: "story", edition, storyType, story, snapshot: options.snapshot !== false }),
+      body: JSON.stringify({ phase: "story", edition, storyType, story: safeStory, snapshot: options.snapshot !== false }),
     });
     const payload = (await response.json().catch(() => ({}))) as {
       ok?: boolean; success?: boolean; error?: string; publishedAt?: string; updatedAt?: string;
@@ -1921,10 +1988,14 @@ function draftHeaders(authValue: string) {
 /** Autosaves one story as a private draft. Never touches the live site. */
 export async function saveDraftStory(edition: string, storyType: "hero" | "article", story: HeroItem | Article, authValue: string) {
   try {
+    // PHOTO GUARD: merge any missing images from the live CMS before autosaving,
+    // so a draft with stripped base64 never clobbers real photos on the server.
+    const safeStory = await mergeImagesFromCMS(edition, storyType, story, authValue);
+
     const response = await fetch(PUBLISHED_CONTENT_ENDPOINT, {
       method: "POST",
       headers: draftHeaders(authValue),
-      body: JSON.stringify({ phase: "save-draft", edition, storyType, story }),
+      body: JSON.stringify({ phase: "save-draft", edition, storyType, story: safeStory }),
     });
     const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; savedAt?: string; error?: string };
     if (!response.ok || !payload.ok) {

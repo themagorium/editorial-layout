@@ -379,12 +379,12 @@ export default function ArticlePage() {
               onError={(e) => { const fig = e.currentTarget.closest("figure"); if (fig) (fig as HTMLElement).style.display = "none"; }}
             />
             {(isMeaningfulCaption(content.secondaryImageCaption) || content.secondaryImageCitation) && (
-              <div className="flex items-start justify-between mt-2 gap-4">
+              <div className="relative mt-2">
                 {isMeaningfulCaption(content.secondaryImageCaption) && (
-                  <figcaption className="font-sans text-xs text-muted-foreground italic">{content.secondaryImageCaption}</figcaption>
+                  <figcaption className="font-sans text-xs text-muted-foreground italic text-center">{content.secondaryImageCaption}</figcaption>
                 )}
                 {content.secondaryImageCitation && (
-                  <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap">{content.secondaryImageCitation}</span>
+                  <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap absolute bottom-0 right-0">{content.secondaryImageCitation}</span>
                 )}
               </div>
             )}
@@ -473,9 +473,9 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
           onError={(e) => { const fig = e.currentTarget.closest("figure"); if (fig) (fig as HTMLElement).style.display = "none"; }}
         />
         {(hasCaption || hasCitation) && (
-          <div className="flex items-start justify-between mt-2 gap-4">
-            {hasCaption ? <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption> : null}
-            {hasCitation ? <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap">{block.citation}</span> : null}
+          <div className="relative mt-2">
+            {hasCaption ? <figcaption className="font-sans text-xs text-muted-foreground italic text-center">{block.caption}</figcaption> : null}
+            {hasCitation ? <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap absolute bottom-0 right-0">{block.citation}</span> : null}
           </div>
         )}
       </figure>
@@ -493,9 +493,9 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
         )}
         <video src={block.content} controls className="w-full rounded" />
         {(hasCaption || hasCitation) && (
-          <div className="flex items-start justify-between mt-2 gap-4">
-            {hasCaption ? <figcaption className="font-sans text-xs text-muted-foreground italic">{block.caption}</figcaption> : null}
-            {hasCitation ? <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap">{block.citation}</span> : null}
+          <div className="relative mt-2">
+            {hasCaption ? <figcaption className="font-sans text-xs text-muted-foreground italic text-center">{block.caption}</figcaption> : null}
+            {hasCitation ? <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap absolute bottom-0 right-0">{block.citation}</span> : null}
           </div>
         )}
       </figure>

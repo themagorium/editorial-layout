@@ -379,12 +379,12 @@ export default function ArticlePage() {
               onError={(e) => { const fig = e.currentTarget.closest("figure"); if (fig) (fig as HTMLElement).style.display = "none"; }}
             />
             {(isMeaningfulCaption(content.secondaryImageCaption) || content.secondaryImageCitation) && (
-              <div className="relative mt-2">
+              <div className="mt-3">
                 {isMeaningfulCaption(content.secondaryImageCaption) && (
                   <figcaption className="font-sans text-xs text-muted-foreground italic text-center">{content.secondaryImageCaption}</figcaption>
                 )}
                 {content.secondaryImageCitation && (
-                  <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap absolute bottom-0 right-0">{content.secondaryImageCitation}</span>
+                  <span className="block font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap text-right">{content.secondaryImageCitation}</span>
                 )}
               </div>
             )}
@@ -473,9 +473,9 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
           onError={(e) => { const fig = e.currentTarget.closest("figure"); if (fig) (fig as HTMLElement).style.display = "none"; }}
         />
         {(hasCaption || hasCitation) && (
-          <div className="relative mt-2">
+          <div className="mt-3">
             {hasCaption ? <figcaption className="font-sans text-xs text-muted-foreground italic text-center">{block.caption}</figcaption> : null}
-            {hasCitation ? <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap absolute bottom-0 right-0">{block.citation}</span> : null}
+            {hasCitation ? <span className="block font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap text-right">{block.citation}</span> : null}
           </div>
         )}
       </figure>
@@ -493,9 +493,9 @@ function BodyBlock({ block }: { block: ArticleBodyBlock }) {
         )}
         <video src={block.content} controls className="w-full rounded" />
         {(hasCaption || hasCitation) && (
-          <div className="relative mt-2">
+          <div className="mt-3">
             {hasCaption ? <figcaption className="font-sans text-xs text-muted-foreground italic text-center">{block.caption}</figcaption> : null}
-            {hasCitation ? <span className="font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap absolute bottom-0 right-0">{block.citation}</span> : null}
+            {hasCitation ? <span className="block font-sans text-[10px] text-muted-foreground/70 whitespace-nowrap text-right">{block.citation}</span> : null}
           </div>
         )}
       </figure>

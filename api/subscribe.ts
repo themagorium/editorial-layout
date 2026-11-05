@@ -26,6 +26,7 @@ type SubscriberRecord = {
   page?: string;
   notified: boolean;
   notifyError?: string;
+  notifiedVia?: string;
 };
 
 type Kv = {
@@ -70,10 +71,10 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
 }
 
-async function sendResend(from: string, email: string, page: string, when: string, isRepeat: boolean) {
+async function sendResend(from: string, email: string, page: string, when: string, isRepeat: boolean, to: string = NOTIFY_TO) {
   const key = process.env.RESEND_API_KEY;
   if (!key) return { ok: false, error: "RESEND_API_KEY is not set." };
-  const subject = `${isRepeat ? "Repeat sign-up" : "New subscriber"}: ${email}`;
+  const subject = `${to === NOTIFY_TO ? "" : "[for subscribe@] "}${isRepeat ? "Repeat sign-up" : "New subscriber"}: ${email}`;
   const html = `
     <div style="font-family:Georgia,serif;color:#1f1a4d">
       <h2 style="margin:0 0 12px">${isRepeat ? "Repeat sign-up" : "New Magorium subscriber"}</h2>
@@ -87,7 +88,7 @@ async function sendResend(from: string, email: string, page: string, when: strin
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [NOTIFY_TO], reply_to: email, subject, html, text }),
+      body: JSON.stringify({ from, to: [to], reply_to: email, subject, html, text }),
     });
     if (response.ok) return { ok: true as const };
     const body = await response.text().catch(() => "");
@@ -107,12 +108,18 @@ async function notify(email: string, page: string, when: string, isRepeat: boole
     if (result.ok) return { ok: true as const, via: sender };
     errors.push(result.error || "unknown error");
   }
+  // Until themagorium.com is verified in Resend, Resend will only deliver to
+  // the Resend account owner. Send it there so no sign-up goes unseen.
+  const fallback = await sendResend(RESEND_TEST_FROM, email, page, when, isRepeat, OWNER_FALLBACK_TO);
+  if (fallback.ok) return { ok: true as const, via: `fallback to ${OWNER_FALLBACK_TO}` };
+  errors.push(fallback.error || "unknown error");
   return { ok: false as const, error: errors.join(" | ") };
 }
 
 // Resend's shared test sender works before themagorium.com is verified in
 // Resend, but Resend only delivers it to the Resend account owner's address.
 const RESEND_TEST_FROM = "The Magorium <onboarding@resend.dev>";
+const OWNER_FALLBACK_TO = process.env.SUBSCRIBE_FALLBACK_TO || "millie@themagorium.com";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "no-store");
@@ -193,7 +200,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const current = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, email));
       if (current) {
         await kv.hset(SUBSCRIBERS_KEY, {
-          [email]: JSON.stringify({ ...current, notified: current.notified || result.ok, notifyError: result.ok ? undefined : result.error }),
+          [email]: JSON.stringify({ ...current, notified: current.notified || result.ok, notifiedVia: result.ok ? result.via : current.notifiedVia, notifyError: result.ok ? undefined : result.error }),
         });
       }
     } catch { /* status flag only */ }
@@ -203,5 +210,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(500).json({ ok: false, error: "Sorry, we couldn't save your subscription. Please try again." });
     return;
   }
-  res.status(200).json({ ok: true, saved, emailed: result.ok });
+  res.status(200).json({ ok: true, saved, emailed: result.ok, ...(result.ok && result.via?.startsWith("fallback") ? { emailedTo: "owner" } : {}) });
 }

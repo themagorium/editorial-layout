@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { verifyPublishToken } from "./lib/publish-token.js";
+import { buildXlsx } from "./lib/xlsx.js";
 
 // Newsletter sign-ups from the "Stay in the Loop" box.
 //
@@ -99,12 +100,19 @@ async function sendResend(from: string, email: string, page: string, when: strin
 async function notify(email: string, page: string, when: string, isRepeat: boolean) {
   const configuredFrom = (process.env.SUBSCRIBE_FROM_EMAIL || process.env.ADMIN_RESET_FROM_EMAIL || "").trim();
   const from = configuredFrom || DEFAULT_FROM;
-  const result = await sendResend(from, email, page, when, isRepeat);
-  if (result.ok || from === DEFAULT_FROM) return result;
-  // Fall back to the subscribe@ address if the configured sender is rejected.
-  const retry = await sendResend(DEFAULT_FROM, email, page, when, isRepeat);
-  return retry.ok ? retry : { ok: false as const, error: `${result.error} | ${retry.error}` };
+  const errors: string[] = [];
+  const senders = Array.from(new Set([from, DEFAULT_FROM, RESEND_TEST_FROM]));
+  for (const sender of senders) {
+    const result = await sendResend(sender, email, page, when, isRepeat);
+    if (result.ok) return { ok: true as const, via: sender };
+    errors.push(result.error || "unknown error");
+  }
+  return { ok: false as const, error: errors.join(" | ") };
 }
+
+// Resend's shared test sender works before themagorium.com is verified in
+// Resend, but Resend only delivers it to the Resend account owner's address.
+const RESEND_TEST_FROM = "The Magorium <onboarding@resend.dev>";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "no-store");
@@ -116,6 +124,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const all = (await kv.hgetall<unknown>(SUBSCRIBERS_KEY)) || {};
     const subscribers = Object.values(all).map(parseRecord).filter((r): r is SubscriberRecord => Boolean(r))
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    if (first(req.query?.format as string | string[]).toLowerCase() === "xlsx") {
+      const rows = [
+        ["Email", "Signed up", "Last sign-up", "Times signed up", "Page", "Emailed to subscribe inbox"],
+        ...subscribers.map((s) => [s.email, new Date(s.createdAt), new Date(s.lastSeenAt), s.count || 1, s.page || "", s.notified ? "Yes" : "No"]),
+      ];
+      const buffer = buildXlsx("Subscribers", rows, [38, 22, 22, 16, 36, 26]);
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", `attachment; filename="magorium-subscribers.xlsx"`);
+      res.status(200).send(buffer);
+      return;
+    }
     if (first(req.query?.format as string | string[]).toLowerCase() === "csv") {
       const rows = [["email", "signed_up", "last_signup", "signups", "page", "emailed_to_subscribe_inbox"],
         ...subscribers.map((s) => [s.email, s.createdAt, s.lastSeenAt, String(s.count), s.page || "", s.notified ? "yes" : "no"])];

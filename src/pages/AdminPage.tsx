@@ -1478,11 +1478,11 @@ function SubscribersManager() {
   useEffect(() => { void load(); }, [load]);
 
   const downloadCsv = async () => {
-    const response = await fetch("/api/subscribe?format=csv", { headers, cache: "no-store" });
+    const response = await fetch("/api/subscribe?format=xlsx", { headers, cache: "no-store" });
     if (!response.ok) { toast.error("Download failed. Sign out and back in."); return; }
     const url = URL.createObjectURL(await response.blob());
     const a = document.createElement("a");
-    a.href = url; a.download = `magorium-subscribers-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    a.href = url; a.download = `magorium-subscribers-${new Date().toISOString().slice(0, 10)}.xlsx`; a.click();
     URL.revokeObjectURL(url);
   };
 
@@ -1497,7 +1497,7 @@ function SubscribersManager() {
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={() => void load()} className="flex items-center gap-2 px-4 py-2 text-xs border border-border text-muted-foreground rounded hover:text-foreground"><RotateCcw className="w-3 h-3" />Refresh</button>
-          <button type="button" onClick={() => void downloadCsv()} disabled={!rows?.length} className="flex items-center gap-2 px-4 py-2 text-xs border border-primary text-primary rounded hover:bg-primary/10 disabled:opacity-50"><Download className="w-3 h-3" />Download spreadsheet (CSV)</button>
+          <button type="button" onClick={() => void downloadCsv()} disabled={!rows?.length} className="flex items-center gap-2 px-4 py-2 text-xs border border-primary text-primary rounded hover:bg-primary/10 disabled:opacity-50"><Download className="w-3 h-3" />Download Excel sheet</button>
         </div>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}

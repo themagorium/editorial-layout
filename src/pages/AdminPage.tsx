@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import EditorialHeader from "@/components/editorial/EditorialHeader";
 import ArticleBodyEditor from "@/components/editorial/ArticleBodyEditor";
 import {
@@ -9,7 +9,7 @@ import {
   saveDraftStory, deleteDrafts, loadDrafts, deleteStoryLive, deleteEditionLive,
 } from "@/lib/content-store";
 import type { HeroItem, Article, AdSlot, Category, ArticleBodyBlock } from "@/lib/content-store";
-import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, FileText } from "lucide-react";
+import { Trash2, Plus, Upload, RotateCcw, Image, Video, BarChart3, Eye, MousePointer, TrendingUp, MapPin, Globe, Calendar, FileText, Mail, Download } from "lucide-react";
 import { toast } from "sonner";
 import { fetchAnalytics, mergeContentStats, clearAnalytics, type AnalyticsPayload } from "@/lib/analytics";
 import { getAdminPublishToken, isAdminAuthenticated, setAdminPublishToken, setAdminAuthenticated, resetAdminPasswordAccess } from "@/lib/admin-auth";
@@ -260,7 +260,7 @@ function AdminDashboard() {
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [ads, setAds] = useState<AdSlot[]>([]);
-  const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics" | "pages">("heroes");
+  const [tab, setTab] = useState<"heroes" | "articles" | "ads" | "analytics" | "pages" | "subscribers">("heroes");
   const [currentEdition, setCurrentEdition] = useState<string>("");
   const [showNewEdition, setShowNewEdition] = useState(false);
   const [newEditionMonth, setNewEditionMonth] = useState("");
@@ -596,11 +596,12 @@ function AdminDashboard() {
         )}
 
         <div className="flex gap-1 border-b border-border mb-8 overflow-x-auto">
-          {(["heroes", "articles", "ads", "analytics", "pages"] as const).map((t) => (
+          {(["heroes", "articles", "ads", "analytics", "pages", "subscribers"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)} className={`px-5 py-3 text-sm font-sans uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
               {t === "analytics" && <BarChart3 className="w-4 h-4" />}
               {t === "pages" && <FileText className="w-4 h-4" />}
-              {t === "ads" ? "Advertising" : t === "analytics" ? "Analytics" : t === "pages" ? "Pages" : t === "articles" ? "Editor Picks" : "Heroes"}
+              {t === "subscribers" && <Mail className="w-4 h-4" />}
+              {t === "ads" ? "Advertising" : t === "analytics" ? "Analytics" : t === "pages" ? "Pages" : t === "subscribers" ? "Subscribers" : t === "articles" ? "Editor Picks" : "Heroes"}
             </button>
           ))}
         </div>
@@ -610,6 +611,7 @@ function AdminDashboard() {
         {tab === "ads" && <AdsManager ads={ads} setAds={setAds} />}
         {tab === "analytics" && <AnalyticsDashboard articles={articles} heroes={heroes} ads={ads} />}
         {tab === "pages" && <PagesManager pageContent={pageContent} setPageContent={setPageContent} />}
+        {tab === "subscribers" && <SubscribersManager />}
       </div>
     </div>
   );
@@ -1449,6 +1451,76 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
         <p className="text-2xl font-serif font-bold text-black">{value}</p>
         <p className="text-xs text-blue-700 font-sans uppercase tracking-wider">{label}</p>
       </div>
+    </div>
+  );
+}
+
+
+type SubscriberRow = { email: string; createdAt: string; lastSeenAt: string; count: number; page?: string; notified: boolean; notifyError?: string };
+
+/** Everyone who signed up in the "Stay in the Loop" box. */
+function SubscribersManager() {
+  const [rows, setRows] = useState<SubscriberRow[] | null>(null);
+  const [error, setError] = useState("");
+  const token = getAdminPublishToken();
+  const headers = { Authorization: `Bearer ${token}` };
+
+  const load = useCallback(async () => {
+    setError("");
+    try {
+      const response = await fetch("/api/subscribe", { headers: { Authorization: `Bearer ${getAdminPublishToken()}` }, cache: "no-store" });
+      const payload = (await response.json().catch(() => ({}))) as { subscribers?: SubscriberRow[]; error?: string };
+      if (!response.ok) { setError(payload.error || `Could not load subscribers (${response.status}). Sign out and back in.`); return; }
+      setRows(payload.subscribers || []);
+    } catch { setError("Could not reach the server."); }
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const downloadCsv = async () => {
+    const response = await fetch("/api/subscribe?format=csv", { headers, cache: "no-store" });
+    if (!response.ok) { toast.error("Download failed. Sign out and back in."); return; }
+    const url = URL.createObjectURL(await response.blob());
+    const a = document.createElement("a");
+    a.href = url; a.download = `magorium-subscribers-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const fmt = (iso: string) => new Date(iso).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">Subscribers{rows ? ` (${rows.length})` : ""}</h3>
+          <p className="text-xs text-muted-foreground font-sans">Everyone who signed up in "Stay in the Loop". Each sign-up is also emailed to subscribe@themagorium.com.</p>
+        </div>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => void load()} className="flex items-center gap-2 px-4 py-2 text-xs border border-border text-muted-foreground rounded hover:text-foreground"><RotateCcw className="w-3 h-3" />Refresh</button>
+          <button type="button" onClick={() => void downloadCsv()} disabled={!rows?.length} className="flex items-center gap-2 px-4 py-2 text-xs border border-primary text-primary rounded hover:bg-primary/10 disabled:opacity-50"><Download className="w-3 h-3" />Download spreadsheet (CSV)</button>
+        </div>
+      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      {rows && rows.length === 0 && !error && <p className="text-sm text-muted-foreground">No subscribers yet.</p>}
+      {rows && rows.length > 0 && (
+        <div className="overflow-x-auto border border-border rounded">
+          <table className="w-full text-sm font-sans">
+            <thead className="bg-secondary/50 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <tr><th className="text-left px-4 py-2">Email</th><th className="text-left px-4 py-2">Signed up</th><th className="text-left px-4 py-2">Page</th><th className="text-left px-4 py-2">Emailed to inbox</th></tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.email} className="border-t border-border">
+                  <td className="px-4 py-2 text-foreground"><a href={`mailto:${r.email}`} className="hover:text-primary">{r.email}</a>{r.count > 1 && <span className="ml-2 text-[10px] text-muted-foreground">signed up {r.count}×</span>}</td>
+                  <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">{fmt(r.createdAt)}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{r.page || "—"}</td>
+                  <td className="px-4 py-2">{r.notified ? <span className="text-emerald-400">✓ Sent</span> : <span className="text-yellow-500" title={r.notifyError}>Not sent — saved here</span>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

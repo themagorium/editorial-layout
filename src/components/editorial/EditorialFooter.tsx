@@ -6,15 +6,34 @@ import { toast } from "sonner";
 
 function SubscribeSection() {
   const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState(""); // hidden spam trap
+  const [sending, setSending] = useState(false);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (sending) return;
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       toast.error("Please enter a valid email address.");
       return;
     }
-    // TODO: send `email` to your actual subscription endpoint/service here
-    // (e.g. fetch('/api/subscribe', { method: 'POST', body: JSON.stringify({ email }) }))
+    setSending(true);
+    try {
+      const response = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, website, page: window.location.pathname }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (!response.ok || !payload.ok) {
+        toast.error(payload.error || "Sorry, we couldn't save your subscription. Please try again.");
+        return;
+      }
+    } catch {
+      toast.error("Sorry, we couldn't reach the server. Please try again.");
+      return;
+    } finally {
+      setSending(false);
+    }
 
     toast(
       <span
@@ -48,12 +67,24 @@ function SubscribeSection() {
             placeholder="Your email"
             className="flex-1 rounded-full border border-muted-foreground/30 bg-transparent px-6 py-3 text-sm font-sans text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors"
             maxLength={255}
+            required
+          />
+          <input
+            type="text"
+            name="website"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="hidden"
           />
           <button
             type="submit"
+            disabled={sending}
             className="rounded-full border border-muted-foreground/40 px-8 py-3 text-sm font-sans font-medium text-foreground hover:bg-foreground/5 transition-colors whitespace-nowrap"
           >
-            Subscribe
+            {sending ? "Subscribing…" : "Subscribe"}
           </button>
         </form>
       </div>

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { verifyPublishToken } from "./lib/publish-token";
+import { verifyPublishToken } from "./lib/publish-token.js";
 
 // Newsletter sign-ups from the "Stay in the Loop" box.
 //

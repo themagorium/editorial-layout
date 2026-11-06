@@ -1,5 +1,5 @@
 import type { AdSlot } from "@/lib/content-public";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, withBrandTracking } from "@/lib/analytics";
 import { useEffect, useRef } from "react";
 
 interface Props {
@@ -49,7 +49,7 @@ export default function AdPlacement({ ad, className = "", preview = false, align
           media
         ) : (
           <a
-            href={ad.linkUrl || "#"}
+            href={withBrandTracking(ad.linkUrl, ad.label || ad.id)}
             target="_blank"
             rel="noopener noreferrer sponsored"
             className="block w-full h-full"

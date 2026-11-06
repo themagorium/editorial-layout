@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { isAdminRequest } from "./lib/admin-auth-store.js";
-import { getAnalyticsKv } from "./lib/analytics-store.js";
+import { getAnalyticsKv, daysBetween, dayKey } from "./lib/analytics-store.js";
 
 // Admin only: wipes all analytics counts (the Analytics tab asks for confirmation first).
 
@@ -26,6 +26,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ...(contentKeys || []).map((k) => `content:${k}`),
     ...(locationKeys || []).map((k) => `location:${k}`),
   ];
+  // Daily counters for the last 400 days.
+  const today = dayKey();
+  const start = dayKey(new Date(Date.now() - 399 * 86400000));
+  for (const d of daysBetween(start, today, 400)) {
+    keys.push(`a:d:${d}`, `a:loc:${d}`, `a:dev:${d}`, `a:vis:${d}`, `a:adloc:${d}`, `a:adctx:${d}`, `a:addev:${d}`);
+  }
   for (let i = 0; i < keys.length; i += 100) await kv.del(...keys.slice(i, i + 100));
 
   res.status(200).json({ ok: true });

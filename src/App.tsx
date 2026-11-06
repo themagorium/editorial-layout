@@ -7,7 +7,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { trackPageView } from "@/lib/analytics";
 import Index from "./pages/Index";
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const ArchivePage = lazy(() => import("./pages/ArchivePage"));
@@ -26,12 +28,20 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
+/** Counts a page visit on every route change (admin pages excluded). */
+function PageViewTracker() {
+  const location = useLocation();
+  useEffect(() => { trackPageView(); }, [location.pathname]);
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <PageViewTracker />
         <Suspense
           fallback={(
             <div className="min-h-screen bg-background flex items-center justify-center">

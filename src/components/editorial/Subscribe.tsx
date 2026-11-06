@@ -160,7 +160,7 @@ export function SubscribePopup() {
   return createPortal(
     <div className="fixed inset-0 z-[90]" role="dialog" aria-modal="true" aria-labelledby="stay-in-the-loop-title">
       <div className="absolute inset-0 bg-black/30 animate-in fade-in duration-300" onClick={close} />
-      <div className="absolute left-1/2 top-[65%] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 rounded-lg border border-primary/25 bg-background px-6 py-8 sm:px-10 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="absolute left-1/2 top-[66.7%] sm:top-[65%] w-[calc(100%-2rem)] max-w-xl max-h-[calc(66dvh-1rem)] overflow-y-auto -translate-x-1/2 -translate-y-1/2 rounded-lg border border-primary/25 bg-background px-5 py-6 sm:px-10 sm:py-8 sm:max-h-none shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
         <button type="button" onClick={close} aria-label="Close" className="absolute right-3 top-3 h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-foreground/5 text-lg leading-none">×</button>
         <h3 id="stay-in-the-loop-title" className="text-xl md:text-2xl font-semibold italic text-foreground mb-2 tracking-tight text-center" style={{ fontFamily: "'Playfair Display', serif" }}>Stay in the Loop</h3>
         <p className="text-sm font-sans text-muted-foreground mb-6 text-center">

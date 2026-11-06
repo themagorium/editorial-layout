@@ -60,19 +60,69 @@ export async function fetchAnalytics(publishToken: string): Promise<AnalyticsPay
   } catch {
     return null;
   }
-}export function trackEvent(
+}
+
+// Views and clicks are queued and sent in ONE small request after the page has
+// settled (or when the visitor leaves), so tracking never slows the page down.
+// Each item's view is counted once per visit (browser tab session).
+type QueuedEvent = { contentId: string; contentType: ContentType; eventType: EventType };
+const queue: QueuedEvent[] = [];
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+let listenersAdded = false;
+const seenViews = new Set<string>();
+
+function alreadyViewed(key: string): boolean {
+  if (seenViews.has(key)) return true;
+  seenViews.add(key);
+  try {
+    const stored = JSON.parse(sessionStorage.getItem("magorium:viewed") || "[]") as string[];
+    if (stored.includes(key)) return true;
+    stored.push(key);
+    sessionStorage.setItem("magorium:viewed", JSON.stringify(stored.slice(-500)));
+  } catch { /* storage unavailable: in-memory de-dupe only */ }
+  return false;
+}
+
+function flush() {
+  if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
+  if (!queue.length) return;
+  const events = queue.splice(0, queue.length);
+  const body = JSON.stringify({ events });
+  try {
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      const ok = navigator.sendBeacon("/api/track-event", new Blob([body], { type: "application/json" }));
+      if (ok) return;
+    }
+  } catch { /* fall through to fetch */ }
+  fetch("/api/track-event", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => {});
+}
+
+function scheduleFlush(delay: number) {
+  if (typeof window === "undefined") return;
+  if (!listenersAdded) {
+    listenersAdded = true;
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
+  }
+  if (flushTimer) clearTimeout(flushTimer);
+  flushTimer = setTimeout(() => {
+    const idle = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void }).requestIdleCallback;
+    if (idle) idle(flush, { timeout: 2000 }); else flush();
+  }, delay);
+}
+
+export function trackEvent(
   contentId: string,
   contentType: ContentType,
   eventType: EventType,
-  metadata?: Record<string, string>
+  _metadata?: Record<string, string>
 ) {
-  return; // temporarily disabled — was slowing down live page loads
-  // fetch("/api/track-event", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify({ contentId, contentType, eventType, metadata }),
-  //   keepalive: true,
-  // }).catch(() => {});
+  if (typeof window === "undefined" || !contentId) return;
+  if (window.location.pathname.startsWith("/admin")) return; // don't count the editor's own previews
+  if (eventType === "view" && alreadyViewed(`${contentType}:${contentId}`)) return;
+  queue.push({ contentId, contentType, eventType });
+  // Clicks usually navigate away: send soon. Views: wait for the page to settle.
+  scheduleFlush(eventType === "click" ? 50 : 3000);
 }
 
 export async function clearAnalytics(publishToken: string): Promise<boolean> {

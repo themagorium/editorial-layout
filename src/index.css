@@ -112,3 +112,36 @@
     border: 1px solid hsl(var(--gold) / 0.3);
   }
 }
+
+/* Admin > Analytics: plain white page with black text, easy to read and print.
+   Applies ONLY while the Analytics tab is open; the rest of the site is unchanged. */
+@layer base {
+  .admin-light {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 245 52% 26%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 20%;
+    --accent: 245 52% 26%;
+    --accent-foreground: 0 0% 100%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 245 52% 26%;
+    --gold: 245 52% 26%;
+    --gold-bright: 245 52% 26%;
+    --cream: 0 0% 0%;
+    background-color: #ffffff;
+    color: #000000;
+  }
+  .admin-light #analytics-print-area,
+  .admin-light #analytics-print-area * {
+    color: #000000 !important;
+  }
+}

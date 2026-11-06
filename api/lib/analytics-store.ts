@@ -5,6 +5,7 @@
 //   a:d:<date>       hash  "<type>:<id>:views|clicks" -> n, "_total:views|clicks", "_pageviews"
 //   a:loc:<date>     hash  "<city>|<country>|<code>#views|clicks|pageviews" -> n
 //   a:dev:<date>     hash  "<device>#views|clicks|pageviews" -> n
+//   a:pv:<date>      hash  "<page path>" -> page views
 //   a:vis:<date>     set   anonymous visitor ids (random, no personal data)
 //   a:adloc:<date>   hash  "<adId>#<city>|<country>|<code>#views|clicks" -> n
 //   a:adctx:<date>   hash  "<adId>#<page path>#views|clicks" -> n

@@ -33,6 +33,7 @@ export interface AnalyticsPayload {
   content: { contentId: string; contentType: ContentType; views: number; clicks: number }[];
   locations: LocationRow[];
   devices: DeviceRow[];
+  pages?: { page: string; pageviews: number }[];
   ads: Record<string, AdDetail>;
   daily: { date: string; pageviews: number; views: number; clicks: number; visitors: number }[];
   recent: AnalyticsEvent[];

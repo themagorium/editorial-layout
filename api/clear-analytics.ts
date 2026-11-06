@@ -30,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const today = dayKey();
   const start = dayKey(new Date(Date.now() - 399 * 86400000));
   for (const d of daysBetween(start, today, 400)) {
-    keys.push(`a:d:${d}`, `a:loc:${d}`, `a:dev:${d}`, `a:vis:${d}`, `a:adloc:${d}`, `a:adctx:${d}`, `a:addev:${d}`);
+    keys.push(`a:d:${d}`, `a:loc:${d}`, `a:dev:${d}`, `a:vis:${d}`, `a:adloc:${d}`, `a:adctx:${d}`, `a:addev:${d}`, `a:pv:${d}`);
   }
   for (let i = 0; i < keys.length; i += 100) await kv.del(...keys.slice(i, i + 100));
 

@@ -91,6 +91,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     p.hincrby(`a:d:${day}`, "_pageviews", pageviews);
     p.hincrby(`a:loc:${day}`, `${locKey}#pageviews`, pageviews);
     p.hincrby(`a:dev:${day}`, `${device}#pageviews`, pageviews);
+    if (page) p.hincrby(`a:pv:${day}`, page, pageviews);
   }
   if (vid) p.sadd(`a:vis:${day}`, vid);
 

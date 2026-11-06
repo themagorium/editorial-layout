@@ -56,6 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     p.hgetall(`a:adloc:${d}`);
     p.hgetall(`a:adctx:${d}`);
     p.hgetall(`a:addev:${d}`);
+    p.hgetall(`a:pv:${d}`);
   }
   const results = days.length ? await p.exec<(Record<string, Num> | null)[]>() : [];
 
@@ -65,6 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const adLoc = new Map<string, Map<string, Bucket>>();
   const adCtx = new Map<string, Map<string, Bucket>>();
   const adDev = new Map<string, Map<string, Bucket>>();
+  const pages = new Map<string, number>();
   const daily: { date: string; pageviews: number; views: number; clicks: number; visitors: number }[] = [];
   let pageviews = 0, views = 0, clicks = 0;
 
@@ -75,7 +77,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   };
 
   days.forEach((d, i) => {
-    const [dHash, locHash, devHash, adLocHash, adCtxHash, adDevHash] = results.slice(i * 6, i * 6 + 6).map((r) => r || {});
+    const [dHash, locHash, devHash, adLocHash, adCtxHash, adDevHash, pvHash] = results.slice(i * 7, i * 7 + 7).map((r) => r || {});
     const day = { date: d, pageviews: 0, views: 0, clicks: 0, visitors: 0 };
     for (const [field, raw] of Object.entries(dHash)) {
       const n = Number(raw) || 0;
@@ -109,6 +111,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const [id, dev, bucket] = field.split("#");
       add(nested(adDev, id), dev, bucket, Number(raw) || 0);
     }
+    for (const [page, raw] of Object.entries(pvHash)) pages.set(page, (pages.get(page) || 0) + (Number(raw) || 0));
     pageviews += day.pageviews; views += day.views; clicks += day.clicks;
     daily.push(day);
   });
@@ -154,6 +157,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }),
     locations: locRows(locations),
     devices: devRows(devices),
+    pages: [...pages.entries()].map(([page, n]) => ({ page, pageviews: n })).sort((a, b) => b.pageviews - a.pageviews),
     ads,
     daily,
     recent: (recentRaw || []).map(parseEvent).filter(Boolean),

@@ -130,6 +130,12 @@ export default function Index() {
   );
   const [heroes, setHeroes] = useState<HeroItem[]>(initialSnapshot.heroes);
   const [articles, setArticles] = useState<Article[]>(initialSnapshot.articles);
+
+  // Count each hero and article shown on this page as one view (impression).
+  useEffect(() => {
+    heroes.forEach((h) => trackEvent(h.id, "hero", "view"));
+    articles.forEach((a) => trackEvent(a.id, "article", "view"));
+  }, [heroes, articles]);
   const [ads, setAds] = useState<AdSlot[]>(initialSnapshot.ads);
   const [editionLabel, setEditionLabel] = useState(
     initialSnapshot.latestEdition ? formatEditionLabel(initialSnapshot.latestEdition) : "",

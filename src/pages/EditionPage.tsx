@@ -19,6 +19,12 @@ export default function EditionPage() {
 
   const [heroes, setHeroes] = useState<HeroItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
+
+  // Count each hero and article shown on this page as one view (impression).
+  useEffect(() => {
+    heroes.forEach((h) => trackEvent(h.id, "hero", "view"));
+    articles.forEach((a) => trackEvent(a.id, "article", "view"));
+  }, [heroes, articles]);
   const [ads, setAds] = useState<AdSlot[]>([]);
   const [loaded, setLoaded] = useState(false);
 

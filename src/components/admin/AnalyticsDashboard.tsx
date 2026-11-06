@@ -12,7 +12,7 @@ import { getAdminPublishToken } from "@/lib/admin-auth";
 
 type SectionKey =
   | "summary" | "daily" | "cities" | "countries" | "devices"
-  | "categories" | "heroes" | "articles" | "brands" | "recent";
+  | "categories" | "heroes" | "articles" | "pages" | "brands" | "recent";
 
 const SECTIONS: { key: SectionKey; label: string }[] = [
   { key: "summary", label: "Summary (visitors, page views, views, clicks)" },
@@ -23,6 +23,7 @@ const SECTIONS: { key: SectionKey; label: string }[] = [
   { key: "categories", label: "Categories" },
   { key: "heroes", label: "Heroes" },
   { key: "articles", label: "Articles" },
+  { key: "pages", label: "Most-read pages" },
   { key: "brands", label: "Brands / advertising" },
   { key: "recent", label: "Recent activity" },
 ];
@@ -47,7 +48,7 @@ function loadPrefs(): { sections: Record<SectionKey, boolean>; categories: Recor
   }
 }
 
-type Row = { id: string; label: string; category: string; views: number; clicks: number };
+type Row = { id: string; label: string; category: string; views: number; clicks: number; reads: number };
 
 export default function AnalyticsDashboard({ articles, heroes, ads }: { articles: Article[]; heroes: HeroItem[]; ads: AdSlot[] }) {
   const [from, setFrom] = useState(daysAgo(29));
@@ -99,32 +100,53 @@ export default function AnalyticsDashboard({ articles, heroes, ads }: { articles
     return path;
   }, [articleById, heroById]);
 
+  // Page views of each story's own page = reads.
+  const readsById = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of data?.pages || []) {
+      const match = p.page.match(/--([^/]+)$/);
+      if (match) { const id = decodeURIComponent(match[1]); m.set(id, (m.get(id) || 0) + p.pageviews); }
+    }
+    return m;
+  }, [data]);
+
   const rows = useMemo(() => {
     const heroesRows: Row[] = [];
     const articleRows: Row[] = [];
     const brandRows: Row[] = [];
+    const seen = new Set<string>();
     for (const c of data?.content || []) {
       if (c.contentType === "hero") {
         const h = heroById.get(c.contentId);
-        heroesRows.push({ id: c.contentId, label: h?.title || c.contentId, category: h?.category || "Other", views: c.views, clicks: c.clicks });
+        seen.add(c.contentId);
+        heroesRows.push({ id: c.contentId, label: h?.title || c.contentId, category: h?.category || "Other", views: c.views, clicks: c.clicks, reads: readsById.get(c.contentId) || 0 });
       } else if (c.contentType === "article") {
         const a = articleById.get(c.contentId);
-        articleRows.push({ id: c.contentId, label: a?.title || c.contentId, category: a?.category || "Other", views: c.views, clicks: c.clicks });
+        seen.add(c.contentId);
+        articleRows.push({ id: c.contentId, label: a?.title || c.contentId, category: a?.category || "Other", views: c.views, clicks: c.clicks, reads: readsById.get(c.contentId) || 0 });
       } else {
         const ad = adById.get(c.contentId);
-        brandRows.push({ id: c.contentId, label: ad?.label || c.contentId, category: ad?.position || "", views: c.views, clicks: c.clicks });
+        brandRows.push({ id: c.contentId, label: ad?.label || c.contentId, category: ad?.position || "", views: c.views, clicks: c.clicks, reads: 0 });
       }
     }
-    const byViews = (a: Row, b: Row) => b.views - a.views || b.clicks - a.clicks;
+    // Stories that were read (opened directly, e.g. from Google or social) but not seen in a list.
+    for (const [id, reads] of readsById) {
+      if (seen.has(id)) continue;
+      const h = heroById.get(id);
+      const a = articleById.get(id);
+      if (h) heroesRows.push({ id, label: h.title, category: h.category || "Other", views: 0, clicks: 0, reads });
+      else articleRows.push({ id, label: a?.title || id, category: a?.category || "Other", views: 0, clicks: 0, reads });
+    }
+    const byViews = (a: Row, b: Row) => (b.reads + b.views) - (a.reads + a.views) || b.clicks - a.clicks;
     return { heroes: heroesRows.sort(byViews), articles: articleRows.sort(byViews), brands: brandRows.sort(byViews) };
-  }, [data, articleById, heroById, adById]);
+  }, [data, articleById, heroById, adById, readsById]);
 
   const categories = useMemo(() => {
     const all = [...rows.heroes.map((r) => ({ ...r, kind: "Hero" })), ...rows.articles.map((r) => ({ ...r, kind: "Article" }))];
     const names = [...CATEGORIES, ...new Set(all.map((r) => r.category).filter((c) => !(CATEGORIES as string[]).includes(c)))];
     return names.map((name) => {
-      const items = all.filter((r) => r.category === name).sort((a, b) => b.views - a.views);
-      return { name, items, views: items.reduce((s, r) => s + r.views, 0), clicks: items.reduce((s, r) => s + r.clicks, 0) };
+      const items = all.filter((r) => r.category === name).sort((a, b) => (b.reads + b.views) - (a.reads + a.views));
+      return { name, items, views: items.reduce((s, r) => s + r.views, 0), clicks: items.reduce((s, r) => s + r.clicks, 0), reads: items.reduce((s, r) => s + r.reads, 0) };
     });
   }, [rows]);
 
@@ -214,7 +236,7 @@ export default function AnalyticsDashboard({ articles, heroes, ads }: { articles
             </label>
           )}
         </div>
-        <p className="text-xs font-sans">Dates are in UTC. Day-by-day figures start from 6 November 2026, when daily tracking began.</p>
+        <p className="text-xs font-sans">Dates are in UTC. Figures start from 6 November 2026, when daily tracking began. Reads = times a story's page was opened · Views = times it was shown in a list · Clicks = clicks on it.</p>
 
         {mode === "overview" && showChecklist && (
           <div className="border border-gray-300 rounded p-4 font-sans text-sm">
@@ -284,24 +306,28 @@ export default function AnalyticsDashboard({ articles, heroes, ads }: { articles
           </Section>
 
           <Section title="Categories" className={hideInPrint("categories")}>
-            <Table head={["Category", "Items", "Views", "Clicks", "Click rate"]}
-              rows={categories.filter((c) => c.items.length).map((c) => [c.name, c.items.length, c.views, c.clicks, pct(c.clicks, c.views)])} empty="No category data yet." />
+            <Table head={["Category", "Items", "Reads", "Views", "Clicks", "Click rate"]}
+              rows={categories.filter((c) => c.items.length).map((c) => [c.name, c.items.length, c.reads, c.views, c.clicks, pct(c.clicks, c.views)])} empty="No category data yet." />
             <div className="space-y-6 mt-6">
               {categories.filter((c) => c.items.length).map((c) => (
                 <div key={c.name} className={`avoid-break${prefs.categories[c.name] === false ? " print:hidden" : ""}`}>
                   <h4 className="font-serif font-semibold mb-2">{c.name}</h4>
-                  <Table head={["Title", "Type", "Views", "Clicks", "Click rate"]} rows={c.items.map((r) => [r.label, r.kind, r.views, r.clicks, pct(r.clicks, r.views)])} />
+                  <Table head={["Title", "Type", "Reads", "Views", "Clicks", "Click rate"]} rows={c.items.map((r) => [r.label, r.kind, r.reads, r.views, r.clicks, pct(r.clicks, r.views)])} />
                 </div>
               ))}
             </div>
           </Section>
 
           <Section title="Heroes" className={hideInPrint("heroes")}>
-            <Table head={["Hero", "Category", "Views", "Clicks", "Click rate"]} rows={rows.heroes.map((r) => [r.label, r.category, r.views, r.clicks, pct(r.clicks, r.views)])} empty="No hero data in this period." />
+            <Table head={["Hero", "Category", "Reads", "Views", "Clicks", "Click rate"]} rows={rows.heroes.map((r) => [r.label, r.category, r.reads, r.views, r.clicks, pct(r.clicks, r.views)])} empty="No hero data in this period." />
           </Section>
 
           <Section title="Articles" className={hideInPrint("articles")}>
-            <Table head={["Article", "Category", "Views", "Clicks", "Click rate"]} rows={rows.articles.map((r) => [r.label, r.category, r.views, r.clicks, pct(r.clicks, r.views)])} empty="No article data in this period." />
+            <Table head={["Article", "Category", "Reads", "Views", "Clicks", "Click rate"]} rows={rows.articles.map((r) => [r.label, r.category, r.reads, r.views, r.clicks, pct(r.clicks, r.views)])} empty="No article data in this period." />
+          </Section>
+
+          <Section title="Most-read pages" className={hideInPrint("pages")}>
+            <Table head={["Page", "Page views"]} rows={(data.pages || []).slice(0, 50).map((p) => [pageLabel(p.page), p.pageviews])} empty="No page views in this period." />
           </Section>
 
           <Section title="Brands / advertising" className={hideInPrint("brands")}>

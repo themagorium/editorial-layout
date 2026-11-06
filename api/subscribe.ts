@@ -28,6 +28,7 @@ type SubscriberRecord = {
   notified: boolean;
   notifyError?: string;
   notifiedVia?: string;
+  lastWarnings?: string;
 };
 
 type Kv = {
@@ -125,7 +126,10 @@ async function notify(email: string, page: string, when: string, isRepeat: boole
   // Until themagorium.com is verified in Resend, Resend will only deliver to
   // the Resend account owner. Send it there so no sign-up goes unseen.
   const fallback = await sendResend(RESEND_TEST_FROM, email, page, when, isRepeat, OWNER_FALLBACK_TO);
-  if (fallback.ok) return { ok: true as const, via: `fallback to ${OWNER_FALLBACK_TO}` };
+  if (fallback.ok) {
+    console.warn("[subscribe] delivered via owner fallback; earlier attempts failed:", errors.join(" | "));
+    return { ok: true as const, via: `fallback to ${OWNER_FALLBACK_TO}`, warnings: errors.join(" | ").slice(0, 900) };
+  }
   errors.push(fallback.error || "unknown error");
   return { ok: false as const, error: errors.join(" | ") };
 }
@@ -214,7 +218,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const current = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, email));
       if (current) {
         await kv.hset(SUBSCRIBERS_KEY, {
-          [email]: JSON.stringify({ ...current, notified: current.notified || result.ok, notifiedVia: result.ok ? result.via : current.notifiedVia, notifyError: result.ok ? undefined : result.error }),
+          [email]: JSON.stringify({ ...current, notified: current.notified || result.ok, notifiedVia: result.ok ? result.via : current.notifiedVia, lastWarnings: result.ok && "warnings" in result ? result.warnings : undefined, notifyError: result.ok ? undefined : result.error }),
         });
       }
     } catch { /* status flag only */ }

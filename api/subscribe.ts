@@ -5,7 +5,7 @@ import { isSmtpConfigured, sendSmtp } from "./lib/smtp.js";
 
 // Newsletter sign-ups from the "Stay in the Loop" box.
 //
-// POST { email }  (public)
+// POST { contact }  (public) — an email address or a phone number
 //   1. Saves the address in the database FIRST, so a sign-up is never lost
 //      even if email delivery fails.
 //   2. Emails the address to subscribe@themagorium.com (via Resend).
@@ -17,10 +17,21 @@ const SUBSCRIBERS_KEY = "magorium:subscribers:v1"; // hash: email -> JSON record
 const NOTIFY_TO = process.env.SUBSCRIBE_NOTIFY_TO || "subscribe@themagorium.com";
 const DEFAULT_FROM = "The Magorium <subscribe@themagorium.com>";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^\+?\d{7,15}$/;
+
+/** Email (lower-cased) or phone (digits, optional leading +). */
+function parseContact(raw: string): { kind: "email" | "phone"; value: string } | null {
+  const v = raw.trim().slice(0, 255);
+  if (EMAIL_RE.test(v)) return { kind: "email", value: v.toLowerCase() };
+  const phone = v.replace(/[\s().\-\/]/g, "").replace(/^00/, "+");
+  if (PHONE_RE.test(phone)) return { kind: "phone", value: phone };
+  return null;
+}
 const RATE_LIMIT_PER_HOUR = 10;
 
 type SubscriberRecord = {
-  email: string;
+  email: string; // empty for phone-only sign-ups
+  phone?: string;
   createdAt: string;
   lastSeenAt: string;
   count: number;
@@ -71,12 +82,12 @@ function buildMessage(email: string, page: string, when: string, isRepeat: boole
   const html = `
     <div style="font-family:Georgia,serif;color:#1f1a4d">
       <h2 style="margin:0 0 12px">${isRepeat ? "Repeat sign-up" : "New Magorium subscriber"}</h2>
-      <p style="font-size:16px;margin:0 0 6px"><strong>Email:</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></p>
+      <p style="font-size:16px;margin:0 0 6px"><strong>${email.includes("@") ? "Email" : "Phone"}:</strong> <a href="${email.includes("@") ? "mailto:" : "tel:"}${escapeHtml(email)}">${escapeHtml(email)}</a></p>
       <p style="font-size:14px;margin:0 0 6px"><strong>Signed up:</strong> ${escapeHtml(when)}</p>
       ${page ? `<p style="font-size:14px;margin:0 0 6px"><strong>Page:</strong> ${escapeHtml(page)}</p>` : ""}
       <p style="font-size:12px;color:#666;margin-top:18px">Every subscriber is also saved in the Magorium admin under Subscribers.</p>
     </div>`;
-  const text = `${subject}\n\nEmail: ${email}\nSigned up: ${when}${page ? `\nPage: ${page}` : ""}\n\nEvery subscriber is also saved in the Magorium admin under Subscribers.`;
+  const text = `${subject}\n\n${email.includes("@") ? "Email" : "Phone"}: ${email}\nSigned up: ${when}${page ? `\nPage: ${page}` : ""}\n\nEvery subscriber is also saved in the Magorium admin under Subscribers.`;
   return { subject, html, text };
 }
 
@@ -88,7 +99,7 @@ async function sendResend(from: string, email: string, page: string, when: strin
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [to], reply_to: email, subject, html, text }),
+      body: JSON.stringify({ from, to: [to], ...(email.includes("@") ? { reply_to: email } : {}), subject, html, text }),
     });
     if (response.ok) return { ok: true as const };
     const body = await response.text().catch(() => "");
@@ -105,7 +116,7 @@ async function notify(email: string, page: string, when: string, isRepeat: boole
   // 1) Preferred: the Magorium's own mail server (GoDaddy), straight to subscribe@.
   if (isSmtpConfigured()) {
     const { subject, html, text } = buildMessage(email, page, when, isRepeat, NOTIFY_TO);
-    const smtp = await sendSmtp({ from: `The Magorium <${process.env.SMTP_USER}>`, to: NOTIFY_TO, replyTo: email, subject, html, text });
+    const smtp = await sendSmtp({ from: `The Magorium <${process.env.SMTP_USER}>`, to: NOTIFY_TO, replyTo: email.includes("@") ? email : undefined, subject, html, text });
     if (smtp.ok) return { ok: true as const, via: "smtp" };
     else errors.push((smtp as { error: string }).error);
   }
@@ -132,18 +143,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     if (first(req.query?.format as string | string[]).toLowerCase() === "xlsx") {
       const rows = [
-        ["Email", "Signed up", "Last sign-up", "Times signed up", "Page", "Emailed to subscribe inbox"],
-        ...subscribers.map((s) => [s.email, new Date(s.createdAt), new Date(s.lastSeenAt), s.count || 1, s.page || "", s.notified ? "Yes" : "No"]),
+        ["Email", "Phone", "Signed up", "Last sign-up", "Times signed up", "Page", "Emailed to subscribe inbox"],
+        ...subscribers.map((s) => [s.email, s.phone || "", new Date(s.createdAt), new Date(s.lastSeenAt), s.count || 1, s.page || "", s.notified ? "Yes" : "No"]),
       ];
-      const buffer = buildXlsx("Subscribers", rows, [38, 22, 22, 16, 36, 26]);
+      const buffer = buildXlsx("Subscribers", rows, [38, 20, 22, 22, 16, 36, 26]);
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       res.setHeader("Content-Disposition", `attachment; filename="magorium-subscribers.xlsx"`);
       res.status(200).send(buffer);
       return;
     }
     if (first(req.query?.format as string | string[]).toLowerCase() === "csv") {
-      const rows = [["email", "signed_up", "last_signup", "signups", "page", "emailed_to_subscribe_inbox"],
-        ...subscribers.map((s) => [s.email, s.createdAt, s.lastSeenAt, String(s.count), s.page || "", s.notified ? "yes" : "no"])];
+      const rows = [["email", "phone", "signed_up", "last_signup", "signups", "page", "emailed_to_subscribe_inbox"],
+        ...subscribers.map((s) => [s.email, s.phone || "", s.createdAt, s.lastSeenAt, String(s.count), s.page || "", s.notified ? "yes" : "no"])];
       const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader("Content-Disposition", `attachment; filename="magorium-subscribers.csv"`);
@@ -159,8 +170,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const body = (typeof req.body === "string" ? (() => { try { return JSON.parse(req.body); } catch { return {}; } })() : req.body) || {};
   // Honeypot: real visitors never fill this hidden field.
   if (typeof body.website === "string" && body.website.trim()) { res.status(200).json({ ok: true }); return; }
-  const email = String(body.email || "").trim().toLowerCase().slice(0, 255);
-  if (!EMAIL_RE.test(email)) { res.status(400).json({ ok: false, error: "Please enter a valid email address." }); return; }
+  const contact = parseContact(String(body.contact ?? body.email ?? ""));
+  if (!contact) { res.status(400).json({ ok: false, error: "Please enter a valid email address or phone number." }); return; }
+  // "email" below is the contact value (an email address or a phone number).
+  const email = contact.value;
+  const field = contact.kind === "email" ? email : `phone:${email}`;
   const page = String(body.page || "").slice(0, 300);
   const now = new Date();
   const when = now.toLocaleString("en-GB", { timeZone: "Europe/Zurich", dateStyle: "medium", timeStyle: "short" }) + " (Swiss time)";
@@ -180,11 +194,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let saved = false;
   if (kv) {
     try {
-      existing = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, email));
+      existing = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, field));
       const record: SubscriberRecord = existing
         ? { ...existing, lastSeenAt: now.toISOString(), count: (existing.count || 1) + 1 }
-        : { email, createdAt: now.toISOString(), lastSeenAt: now.toISOString(), count: 1, page, notified: false };
-      await kv.hset(SUBSCRIBERS_KEY, { [email]: JSON.stringify(record) });
+        : { email: contact.kind === "email" ? email : "", ...(contact.kind === "phone" ? { phone: email } : {}), createdAt: now.toISOString(), lastSeenAt: now.toISOString(), count: 1, page, notified: false };
+      await kv.hset(SUBSCRIBERS_KEY, { [field]: JSON.stringify(record) });
       saved = true;
     } catch (error) {
       console.error("[subscribe] save failed", error);
@@ -196,10 +210,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!result.ok) console.error("[subscribe] email failed", result.error);
   if (kv && saved) {
     try {
-      const current = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, email));
+      const current = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, field));
       if (current) {
         await kv.hset(SUBSCRIBERS_KEY, {
-          [email]: JSON.stringify({ ...current, notified: current.notified || result.ok, notifiedVia: result.ok ? result.via : current.notifiedVia, lastWarnings: result.ok && "warnings" in result ? result.warnings : undefined, notifyError: result.ok ? undefined : result.error }),
+          [field]: JSON.stringify({ ...current, notified: current.notified || result.ok, notifiedVia: result.ok ? result.via : current.notifiedVia, lastWarnings: result.ok && "warnings" in result ? result.warnings : undefined, notifyError: result.ok ? undefined : result.error }),
         });
       }
     } catch { /* status flag only */ }

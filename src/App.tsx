@@ -11,6 +11,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { trackPageView } from "@/lib/analytics";
 import Index from "./pages/Index";
+import { SubscribePopup, SubscribeThankYou } from "@/components/editorial/Subscribe";
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const ArchivePage = lazy(() => import("./pages/ArchivePage"));
 const ArticlePage = lazy(() => import("./pages/ArticlePage"));
@@ -42,6 +43,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <PageViewTracker />
+        <SubscribeThankYou />
+        <SubscribePopup />
         <Suspense
           fallback={(
             <div className="min-h-screen bg-background flex items-center justify-center">

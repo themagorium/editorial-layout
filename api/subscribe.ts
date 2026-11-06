@@ -117,27 +117,15 @@ async function notify(email: string, page: string, when: string, isRepeat: boole
     else errors.push((smtp as { error: string }).error);
   }
   // 2) Resend.
-  const senders = Array.from(new Set([from, DEFAULT_FROM, RESEND_TEST_FROM]));
+  const senders = Array.from(new Set([from, DEFAULT_FROM]));
   for (const sender of senders) {
     const result = await sendResend(sender, email, page, when, isRepeat);
     if (result.ok) return { ok: true as const, via: sender };
     errors.push(result.error || "unknown error");
   }
-  // Until themagorium.com is verified in Resend, Resend will only deliver to
-  // the Resend account owner. Send it there so no sign-up goes unseen.
-  const fallback = await sendResend(RESEND_TEST_FROM, email, page, when, isRepeat, OWNER_FALLBACK_TO);
-  if (fallback.ok) {
-    console.warn("[subscribe] delivered via owner fallback; earlier attempts failed:", errors.join(" | "));
-    return { ok: true as const, via: `fallback to ${OWNER_FALLBACK_TO}`, warnings: errors.join(" | ").slice(0, 900) };
-  }
-  errors.push(fallback.error || "unknown error");
   return { ok: false as const, error: errors.join(" | ") };
 }
 
-// Resend's shared test sender works before themagorium.com is verified in
-// Resend, but Resend only delivers it to the Resend account owner's address.
-const RESEND_TEST_FROM = "The Magorium <onboarding@resend.dev>";
-const OWNER_FALLBACK_TO = process.env.SUBSCRIBE_FALLBACK_TO || "millie@themagorium.com";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "no-store");
@@ -228,5 +216,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(500).json({ ok: false, error: "Sorry, we couldn't save your subscription. Please try again." });
     return;
   }
-  res.status(200).json({ ok: true, saved, emailed: result.ok, ...(result.ok && result.via?.startsWith("fallback") ? { emailedTo: "owner" } : {}) });
+  res.status(200).json({ ok: true, saved, emailed: result.ok });
 }

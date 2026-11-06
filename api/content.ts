@@ -701,16 +701,12 @@ async function verifyBearerPublishToken(token: string, adminPassword: string): P
 }
 
 async function authorized(req: VercelRequest): Promise<boolean> {
-  const configured = getConfiguredAdminPassword();
-  if (!configured) return false;
-  const authHeader = req.headers.authorization || req.headers.Authorization;
-  const normalizedAuth = Array.isArray(authHeader) ? authHeader[0] : authHeader;
-  const bearer = (normalizedAuth || "").replace(/^Bearer\s+/i, "").trim();
-  if (bearer && (await verifyBearerPublishToken(bearer, configured))) return true;
-  const directHeader = req.headers["x-admin-password"];
-  const providedDirect = Array.isArray(directHeader) ? directHeader[0] : directHeader;
-  if ((providedDirect || "").trim() === configured) return true;
-  return false;
+  try {
+    const auth = await import("./lib/admin-auth-store.js");
+    return await auth.isAdminRequest(req);
+  } catch {
+    return false;
+  }
 }
 
 // ===== Per-story storage layer =====

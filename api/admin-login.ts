@@ -10,27 +10,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) {
+  const auth = await import("./lib/admin-auth-store.js");
+  if (!(await auth.isAdminConfigured())) {
     res.status(500).json({ error: "Server authentication is not configured." });
     return;
   }
 
   const { password } = (req.body || {}) as LoginRequestBody;
-  const normalizedInput = (password || "").trim();
-  if (!normalizedInput) {
+  if (!(await auth.checkAdminPassword(password || ""))) {
     res.status(401).json({ error: "Invalid credentials." });
     return;
   }
-
-  if (normalizedInput !== adminPassword) {
-    res.status(401).json({ error: "Invalid credentials." });
-    return;
-  }
+  const signingKey = (await auth.getSigningKey()) as string;
 
   try {
     const tokenModule = await import("./lib/publish-token.js");
-    const { token, expiresAt } = tokenModule.createPublishToken(adminPassword);
+    const { token, expiresAt } = tokenModule.createPublishToken(signingKey);
     res.status(200).json({ success: true, token, expiresAt });
     return;
   } catch {

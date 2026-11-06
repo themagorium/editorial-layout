@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { verifyPublishToken } from "./lib/publish-token.js";
+import { isAdminRequest } from "./lib/admin-auth-store.js";
 import { buildXlsx } from "./lib/xlsx.js";
 import { isSmtpConfigured, sendSmtp } from "./lib/smtp.js";
 
@@ -61,13 +61,6 @@ function parseRecord(raw: unknown): SubscriberRecord | null {
   return raw as SubscriberRecord;
 }
 
-function isAdmin(req: VercelRequest): boolean {
-  const configured = process.env.ADMIN_PASSWORD;
-  if (!configured) return false;
-  const bearer = first(req.headers.authorization).replace(/^Bearer\s+/i, "").trim();
-  if (bearer && verifyPublishToken(bearer, configured)) return true;
-  return first(req.headers["x-admin-password"]).trim() === configured;
-}
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
@@ -132,7 +125,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const kv = await getKv();
 
   if (req.method === "GET") {
-    if (!isAdmin(req)) { res.status(401).json({ ok: false, error: "Unauthorized." }); return; }
+    if (!(await isAdminRequest(req))) { res.status(401).json({ ok: false, error: "Unauthorized." }); return; }
     if (!kv) { res.status(503).json({ ok: false, error: "Database is not configured." }); return; }
     const all = (await kv.hgetall<unknown>(SUBSCRIBERS_KEY)) || {};
     const subscribers = Object.values(all).map(parseRecord).filter((r): r is SubscriberRecord => Boolean(r))

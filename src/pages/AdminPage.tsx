@@ -156,18 +156,63 @@ export default function AdminPage() {
   const [passwordError, setPasswordError] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
+  // "Forgot password": the emailed link opens /admin?resetToken=...
+  const [resetToken, setResetToken] = useState<string | null>(() => {
+    try { return new URL(window.location.href).searchParams.get("resetToken"); } catch { return null; }
+  });
+  const [newPassword, setNewPassword] = useState("");
+  const [newPassword2, setNewPassword2] = useState("");
+  const [resetBusy, setResetBusy] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
+
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const resetToken = url.searchParams.get("resetToken");
     if (!resetToken) return;
     resetAdminPasswordAccess();
     setAuthenticated(false);
-    setPasswordInput("");
-    setPasswordError(false);
+    const url = new URL(window.location.href);
     url.searchParams.delete("resetToken");
     window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
-    toast.success("Reset link used.");
-  }, []);
+  }, [resetToken]);
+
+  const handleForgotPassword = async () => {
+    setResetBusy(true);
+    setResetMessage("");
+    try {
+      const response = await fetch("/api/admin-reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "request" }) });
+      const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string; sentTo?: string };
+      setResetMessage(response.ok && payload.ok
+        ? `A reset link has been sent to ${payload.sentTo || "the owner's email"}. It works once and expires in 30 minutes.`
+        : payload.error || "The reset email couldn't be sent. Please try again.");
+    } catch {
+      setResetMessage("Couldn't reach the server. Please try again.");
+    } finally {
+      setResetBusy(false);
+    }
+  };
+
+  const handleSetNewPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.trim().length < 10) { setResetMessage("Please use at least 10 characters."); return; }
+    if (newPassword !== newPassword2) { setResetMessage("The two passwords don't match."); return; }
+    setResetBusy(true);
+    setResetMessage("");
+    try {
+      const response = await fetch("/api/admin-reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "reset", token: resetToken, password: newPassword }) });
+      const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (response.ok && payload.ok) {
+        setResetToken(null);
+        setNewPassword("");
+        setNewPassword2("");
+        toast.success("Password changed. Sign in with your new password.");
+        return;
+      }
+      setResetMessage(payload.error || "Couldn't change the password. Please try again.");
+    } catch {
+      setResetMessage("Couldn't reach the server. Please try again.");
+    } finally {
+      setResetBusy(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,6 +249,27 @@ export default function AdminPage() {
     toast.success("Signed out on this device.");
   };
 
+  if (resetToken) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <form onSubmit={handleSetNewPassword} className="w-full max-w-sm mx-auto p-8 space-y-6 text-center">
+          <h1 className="text-3xl font-bold tracking-tight masthead-font">
+            <span className="text-foreground">THE </span>
+            <span className="text-primary">MAGORIUM</span>
+          </h1>
+          <p className="text-sm text-muted-foreground uppercase tracking-widest">Choose a new password</p>
+          <div className="space-y-3 text-left">
+            <input type="password" value={newPassword} onChange={(e) => { setNewPassword(e.target.value); setResetMessage(""); }} placeholder="New password (at least 10 characters)" autoComplete="new-password" className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" autoFocus />
+            <input type="password" value={newPassword2} onChange={(e) => { setNewPassword2(e.target.value); setResetMessage(""); }} placeholder="Type it again" autoComplete="new-password" className="w-full h-10 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+            {resetMessage && <p className="text-sm text-destructive text-center">{resetMessage}</p>}
+            <button type="submit" disabled={resetBusy} className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-70">{resetBusy ? "Saving..." : "Save new password"}</button>
+            <button type="button" onClick={() => { setResetToken(null); setResetMessage(""); }} className="w-full text-xs text-muted-foreground hover:text-foreground">Cancel</button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
   if (!authenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -218,6 +284,8 @@ export default function AdminPage() {
             {passwordError && <p className="text-sm text-destructive">Incorrect password</p>}
             <button type="submit" disabled={isLoggingIn} className="w-full h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-70">{isLoggingIn ? "Signing In..." : "Sign In"}</button>
             <button type="button" onClick={handleResetAccess} className="w-full h-10 rounded-md border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Sign out on this device</button>
+            <button type="button" onClick={() => void handleForgotPassword()} disabled={resetBusy} className="w-full text-xs text-primary hover:underline disabled:opacity-60">{resetBusy ? "Sending reset link..." : "Forgot password?"}</button>
+            {resetMessage && <p className="text-xs text-muted-foreground">{resetMessage}</p>}
           </div>
         </form>
       </div>

@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { verifyPublishToken } from "./lib/publish-token.js";
 import { buildXlsx } from "./lib/xlsx.js";
+import { isSmtpConfigured, sendSmtp } from "./lib/smtp.js";
 
 // Newsletter sign-ups from the "Stay in the Loop" box.
 //
@@ -71,9 +72,7 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
 }
 
-async function sendResend(from: string, email: string, page: string, when: string, isRepeat: boolean, to: string = NOTIFY_TO) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return { ok: false, error: "RESEND_API_KEY is not set." };
+function buildMessage(email: string, page: string, when: string, isRepeat: boolean, to: string) {
   const subject = `${to === NOTIFY_TO ? "" : "[for subscribe@] "}${isRepeat ? "Repeat sign-up" : "New subscriber"}: ${email}`;
   const html = `
     <div style="font-family:Georgia,serif;color:#1f1a4d">
@@ -84,6 +83,13 @@ async function sendResend(from: string, email: string, page: string, when: strin
       <p style="font-size:12px;color:#666;margin-top:18px">Every subscriber is also saved in the Magorium admin under Subscribers.</p>
     </div>`;
   const text = `${subject}\n\nEmail: ${email}\nSigned up: ${when}${page ? `\nPage: ${page}` : ""}\n\nEvery subscriber is also saved in the Magorium admin under Subscribers.`;
+  return { subject, html, text };
+}
+
+async function sendResend(from: string, email: string, page: string, when: string, isRepeat: boolean, to: string = NOTIFY_TO) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return { ok: false, error: "RESEND_API_KEY is not set." };
+  const { subject, html, text } = buildMessage(email, page, when, isRepeat, to);
   try {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -102,6 +108,14 @@ async function notify(email: string, page: string, when: string, isRepeat: boole
   const configuredFrom = (process.env.SUBSCRIBE_FROM_EMAIL || process.env.ADMIN_RESET_FROM_EMAIL || "").trim();
   const from = configuredFrom || DEFAULT_FROM;
   const errors: string[] = [];
+  // 1) Preferred: the Magorium's own mail server (GoDaddy), straight to subscribe@.
+  if (isSmtpConfigured()) {
+    const { subject, html, text } = buildMessage(email, page, when, isRepeat, NOTIFY_TO);
+    const smtp = await sendSmtp({ from: `The Magorium <${process.env.SMTP_USER}>`, to: NOTIFY_TO, replyTo: email, subject, html, text });
+    if (smtp.ok) return { ok: true as const, via: "smtp" };
+    else errors.push((smtp as { error: string }).error);
+  }
+  // 2) Resend.
   const senders = Array.from(new Set([from, DEFAULT_FROM, RESEND_TEST_FROM]));
   for (const sender of senders) {
     const result = await sendResend(sender, email, page, when, isRepeat);

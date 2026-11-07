@@ -115,7 +115,8 @@ export function classifySource(opts: { referrer?: string; utmSource?: string; ut
   if (host && (host === site || host.endsWith(`.${site}`))) host = "";
 
   // 1) Tagged links (utm_...) win.
-  if (utmM === "email" || /newsletter|mailchimp|klaviyo|email|e-mail/.test(utmS)) return { source: "Email", host: utmS || host };
+  if (/newsletter|mailchimp|klaviyo|substack|beehiiv|convertkit|sendinblue|brevo|campaign-monitor/.test(`${utmS} ${utmM}`)) return { source: "Newsletter", host: utmS || utmM || host };
+  if (utmM === "email" || /email|e-mail/.test(utmS)) return { source: "Email", host: utmS || host };
   if (utmS) {
     for (const [re, name] of SOCIAL_HOSTS) if (re.test(`${utmS}.com`) || utmS.includes(name.toLowerCase().split(" ")[0])) return { source: name, host: utmS };
     if (/google/.test(utmS)) return { source: "Google", host: utmS };
@@ -130,6 +131,7 @@ export function classifySource(opts: { referrer?: string; utmSource?: string; ut
   if (/WhatsApp/i.test(ua)) return { source: "WhatsApp", host: host || "whatsapp" };
   // 3) Referring website.
   if (!host) return { source: "Direct (typed, bookmark or app)", host: "" };
+  if (/(^|\.)(substack\.com|beehiiv\.com|list-manage\.com|mailchi\.mp|klaviyo\.com|convertkit\.com|campaign-archive\.com)$/.test(host)) return { source: "Newsletter", host };
   if (EMAIL_HOSTS.test(host)) return { source: "Email", host };
   for (const [re, name] of SEARCH_HOSTS) if (re.test(host)) return { source: name, host };
   for (const [re, name] of SOCIAL_HOSTS) if (re.test(host)) return { source: name, host };

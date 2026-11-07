@@ -17,7 +17,7 @@ type SectionKey =
 const SECTIONS: { key: SectionKey; label: string }[] = [
   { key: "summary", label: "Summary (visitors, page views, views, clicks)" },
   { key: "daily", label: "Day by day" },
-  { key: "sources", label: "Where visitors come from (Instagram, Google, email…)" },
+  { key: "sources", label: "Where visitors come from (Instagram, Google, newsletter, email…)" },
   { key: "platforms", label: "Phones & computers (iPhone, Android, Mac, Windows…)" },
   { key: "cities", label: "Cities" },
   { key: "countries", label: "Countries" },
@@ -460,7 +460,7 @@ function share(n: number, total: number) { return total > 0 ? `${Math.round((n /
 
 function SourceTable({ rows, hosts }: { rows: { source: string; visits: number }[]; hosts: { source: string; host: string; visits: number }[] }) {
   const total = rows.reduce((t, r) => t + r.visits, 0);
-  const others = hosts.filter((h) => h.source === "Other websites" || h.source === "Email" || h.source === "Other web search / AI");
+  const others = hosts.filter((h) => ["Other websites", "Email", "Newsletter", "Other web search / AI"].includes(h.source));
   return (
     <div className="space-y-4">
       <Table head={["Source", "Visits", "Share"]} rows={rows.map((r) => [r.source, r.visits, share(r.visits, total)])}
@@ -471,7 +471,7 @@ function SourceTable({ rows, hosts }: { rows: { source: string; visits: number }
           <Table head={["Source", "Website / service", "Visits"]} rows={others.map((h) => [h.source, h.host, h.visits])} />
         </div>
       )}
-      <p className="text-xs text-gray-500 font-sans">A visit is counted once, when it starts. "Direct" means the visitor typed the address, used a bookmark, or came from an app that doesn't say where it's from. To track a newsletter or a post, add ?utm_source=newsletter&utm_medium=email (or utm_source=instagram) to the link.</p>
+      <p className="text-xs text-gray-500 font-sans">A visit is counted once, when it starts. "Direct" means the visitor typed the address, used a bookmark, or came from an app that doesn't say where it's from. To credit a link exactly, add a tag to it: ?utm_source=newsletter for the newsletter, ?utm_medium=email for a personal email, or ?utm_source=instagram for Instagram.</p>
     </div>
   );
 }

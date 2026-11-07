@@ -18,7 +18,6 @@ const SECTIONS: { key: SectionKey; label: string }[] = [
   { key: "summary", label: "Summary (visitors, page views, views, clicks)" },
   { key: "daily", label: "Day by day" },
   { key: "sources", label: "Where visitors come from (Instagram, Google, newsletter, email…)" },
-  { key: "platforms", label: "Phones & computers (iPhone, Android, Mac, Windows…)" },
   { key: "cities", label: "Cities" },
   { key: "countries", label: "Countries" },
   { key: "devices", label: "Devices (mobile / tablet / desktop)" },
@@ -28,6 +27,7 @@ const SECTIONS: { key: SectionKey; label: string }[] = [
   { key: "pages", label: "Most-read pages" },
   { key: "brands", label: "Brands / advertising" },
   { key: "recent", label: "Recent activity" },
+  { key: "platforms", label: "Phones & computers (iPhone, Android, Mac, Windows…)" },
 ];
 
 const PREFS_KEY = "magorium:analytics:print";
@@ -299,10 +299,6 @@ export default function AnalyticsDashboard({ articles, heroes, ads }: { articles
             <SourceTable rows={data.sources || []} hosts={data.sourceHosts || []} />
           </Section>
 
-          <Section title="Phones & computers" className={hideInPrint("platforms")}>
-            <PlatformTable rows={data.platforms || []} />
-          </Section>
-
           <Section title="Cities" icon={<MapPin className="w-4 h-4" />} className={hideInPrint("cities")}>
             <LocationTable rows={data.locations} />
           </Section>
@@ -351,6 +347,10 @@ export default function AnalyticsDashboard({ articles, heroes, ads }: { articles
               `${ev.contentType}: ${ev.contentType === "ad" ? adById.get(ev.contentId)?.label || ev.contentId : (articleById.get(ev.contentId) || heroById.get(ev.contentId))?.title || ev.contentId}`,
               ev.location ? `${ev.location.city}, ${ev.location.countryCode}` : "—",
             ])} empty="No activity yet." />
+          </Section>
+
+          <Section title="Phones & computers" className={hideInPrint("platforms")}>
+            <PlatformTable rows={data.platforms || []} />
           </Section>
 
           <div className="flex justify-end print:hidden">

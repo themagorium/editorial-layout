@@ -11,12 +11,14 @@ import { getAdminPublishToken } from "@/lib/admin-auth";
 // printout. "Brand report" gives a one-page printable report for one brand.
 
 type SectionKey =
-  | "summary" | "daily" | "cities" | "countries" | "devices"
+  | "summary" | "daily" | "sources" | "platforms" | "cities" | "countries" | "devices"
   | "categories" | "heroes" | "articles" | "pages" | "brands" | "recent";
 
 const SECTIONS: { key: SectionKey; label: string }[] = [
   { key: "summary", label: "Summary (visitors, page views, views, clicks)" },
   { key: "daily", label: "Day by day" },
+  { key: "sources", label: "Where visitors come from (Instagram, Google, email…)" },
+  { key: "platforms", label: "Phones & computers (iPhone, Android, Mac, Windows…)" },
   { key: "cities", label: "Cities" },
   { key: "countries", label: "Countries" },
   { key: "devices", label: "Devices (mobile / tablet / desktop)" },
@@ -293,6 +295,14 @@ export default function AnalyticsDashboard({ articles, heroes, ads }: { articles
               rows={data.daily.filter((d) => d.pageviews || d.views || d.clicks || d.visitors).reverse().map((d) => [fmtDate(d.date), d.visitors, d.pageviews, d.views, d.clicks])} empty="No visits in this period yet." />
           </Section>
 
+          <Section title="Where visitors come from" className={hideInPrint("sources")}>
+            <SourceTable rows={data.sources || []} hosts={data.sourceHosts || []} />
+          </Section>
+
+          <Section title="Phones & computers" className={hideInPrint("platforms")}>
+            <PlatformTable rows={data.platforms || []} />
+          </Section>
+
           <Section title="Cities" icon={<MapPin className="w-4 h-4" />} className={hideInPrint("cities")}>
             <LocationTable rows={data.locations} />
           </Section>
@@ -444,6 +454,32 @@ function Table({ head, rows, empty = "No data." }: { head: string[]; rows: (stri
 
 function LocationTable({ rows }: { rows: LocationRow[] }) {
   return <Table head={["City", "Country", "Page views", "Content views", "Clicks"]} rows={rows.map((l) => [l.city, `${l.country}${l.countryCode ? ` (${l.countryCode})` : ""}`, l.pageviews, l.views, l.clicks])} empty="No location data yet." />;
+}
+
+function share(n: number, total: number) { return total > 0 ? `${Math.round((n / total) * 100)}%` : "—"; }
+
+function SourceTable({ rows, hosts }: { rows: { source: string; visits: number }[]; hosts: { source: string; host: string; visits: number }[] }) {
+  const total = rows.reduce((t, r) => t + r.visits, 0);
+  const others = hosts.filter((h) => h.source === "Other websites" || h.source === "Email" || h.source === "Other web search / AI");
+  return (
+    <div className="space-y-4">
+      <Table head={["Source", "Visits", "Share"]} rows={rows.map((r) => [r.source, r.visits, share(r.visits, total)])}
+        empty="No visits recorded since sources started being tracked." />
+      {others.length > 0 && (
+        <div className="avoid-break">
+          <h4 className="font-serif font-semibold mb-2">Websites, email and search services behind those visits</h4>
+          <Table head={["Source", "Website / service", "Visits"]} rows={others.map((h) => [h.source, h.host, h.visits])} />
+        </div>
+      )}
+      <p className="text-xs text-gray-500 font-sans">A visit is counted once, when it starts. "Direct" means the visitor typed the address, used a bookmark, or came from an app that doesn't say where it's from. To track a newsletter or a post, add ?utm_source=newsletter&utm_medium=email (or utm_source=instagram) to the link.</p>
+    </div>
+  );
+}
+
+function PlatformTable({ rows }: { rows: { platform: string; pageviews: number; visits: number }[] }) {
+  const total = rows.reduce((t, r) => t + r.pageviews, 0);
+  return <Table head={["Phone / computer", "Visits", "Page views", "Share of page views"]} rows={rows.map((r) => [r.platform, r.visits, r.pageviews, share(r.pageviews, total)])}
+    empty="No data yet since phones & computers started being tracked." />;
 }
 
 function DeviceTable({ rows }: { rows: DeviceRow[] }) {

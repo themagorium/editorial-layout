@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getAnalyticsKv, CONTENT_TYPES, EVENT_TYPES, dayKey, deviceFromUserAgent } from "./lib/analytics-store.js";
+import { getAnalyticsKv, CONTENT_TYPES, EVENT_TYPES, dayKey, deviceFromUserAgent, platformFromUserAgent, classifySource } from "./lib/analytics-store.js";
 
 // Public: records page visits plus article / hero / ad views and clicks for the
 // admin Analytics tab. The site batches everything into one small request.
@@ -31,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (typeof body === "string") {
     try { body = JSON.parse(body); } catch { body = {}; }
   }
-  const raw = (body || {}) as { events?: InEvent[]; vid?: unknown; page?: unknown; pageviews?: unknown } & InEvent;
+  const raw = (body || {}) as { events?: InEvent[]; vid?: unknown; page?: unknown; pageviews?: unknown; src?: { ref?: unknown; us?: unknown; um?: unknown } } & InEvent;
   const list: InEvent[] = Array.isArray(raw.events) ? raw.events : raw.contentId ? [raw] : [];
 
   const events = list.slice(0, MAX_EVENTS).filter((e) =>
@@ -44,7 +44,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const vid = typeof raw.vid === "string" && /^[a-z0-9]{8,40}$/i.test(raw.vid) ? raw.vid : "";
   const page = cleanPage(raw.page);
 
-  if (!events.length && !pageviews) {
+  const src = raw.src && typeof raw.src === "object" ? raw.src : null;
+  if (!events.length && !pageviews && !src) {
     res.status(400).json({ ok: false, error: "No valid events" });
     return;
   }
@@ -80,7 +81,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   city = city.replace(/[#|]/g, " ");
   countryName = countryName.replace(/[#|]/g, " ");
   const locKey = countryCode ? `${city}|${countryName}|${countryCode}` : "Unknown|Unknown|";
-  const device = deviceFromUserAgent(first(req.headers["user-agent"]));
+  const userAgent = first(req.headers["user-agent"]);
+  const device = deviceFromUserAgent(userAgent);
+  const platform = platformFromUserAgent(userAgent).replace(/[#|]/g, " ");
   const day = dayKey();
   const now = new Date().toISOString();
 
@@ -92,6 +95,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     p.hincrby(`a:loc:${day}`, `${locKey}#pageviews`, pageviews);
     p.hincrby(`a:dev:${day}`, `${device}#pageviews`, pageviews);
     if (page) p.hincrby(`a:pv:${day}`, page, pageviews);
+    p.hincrby(`a:os:${day}`, `${platform}#pageviews`, pageviews);
+  }
+  // Where this visit came from (sent once per visit by the site).
+  if (src) {
+    const str = (v: unknown, n: number) => (typeof v === "string" ? v.slice(0, n) : "");
+    const { source, host } = classifySource({
+      referrer: str(src.ref, 500), utmSource: str(src.us, 80), utmMedium: str(src.um, 80), userAgent,
+      siteHost: first(req.headers.host),
+    });
+    const clean = (v: string) => v.replace(/[#|]/g, " ").slice(0, 120);
+    p.hincrby(`a:src:${day}`, clean(source), 1);
+    if (host) p.hincrby(`a:srchost:${day}`, `${clean(source)}#${clean(host)}`, 1);
+    p.hincrby(`a:os:${day}`, `${platform}#visits`, 1);
   }
   if (vid) p.sadd(`a:vis:${day}`, vid);
 

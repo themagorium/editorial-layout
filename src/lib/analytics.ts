@@ -34,6 +34,9 @@ export interface AnalyticsPayload {
   locations: LocationRow[];
   devices: DeviceRow[];
   pages?: { page: string; pageviews: number }[];
+  sources?: { source: string; visits: number }[];
+  sourceHosts?: { source: string; host: string; visits: number }[];
+  platforms?: { platform: string; pageviews: number; visits: number }[];
   ads: Record<string, AdDetail>;
   daily: { date: string; pageviews: number; views: number; clicks: number; visitors: number }[];
   recent: AnalyticsEvent[];
@@ -80,6 +83,21 @@ let queuedPage = "";
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let listenersAdded = false;
 const seenViews = new Set<string>();
+let pendingSource: { ref: string; us: string; um: string } | null = null;
+
+/** Where this visit came from: sent once per visit (browser tab session). */
+function captureSourceOnce() {
+  try {
+    if (sessionStorage.getItem("magorium:src")) return;
+    sessionStorage.setItem("magorium:src", "1");
+  } catch { if (pendingSource !== null) return; }
+  const params = new URLSearchParams(window.location.search);
+  pendingSource = {
+    ref: (document.referrer || "").slice(0, 500),
+    us: (params.get("utm_source") || "").slice(0, 80),
+    um: (params.get("utm_medium") || "").slice(0, 80),
+  };
+}
 
 function isAdminPath(): boolean {
   return typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
@@ -121,12 +139,14 @@ function send(body: string) {
 
 function flush() {
   if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
-  if (!queue.length && !pendingPageviews) return;
+  if (!queue.length && !pendingPageviews && !pendingSource) return;
   const events = queue.splice(0, queue.length);
   const pageviews = pendingPageviews;
   pendingPageviews = 0;
+  const src = pendingSource;
+  pendingSource = null;
   const page = queuedPage || window.location.pathname;
-  send(JSON.stringify({ vid: visitorId(), page, pageviews, events }));
+  send(JSON.stringify({ vid: visitorId(), page, pageviews, events, ...(src ? { src } : {}) }));
 }
 
 function scheduleFlush(delay: number) {
@@ -152,6 +172,7 @@ export function trackPageView() {
   if (queuedPage && queuedPage !== path) flush();
   queuedPage = path;
   pendingPageviews += 1;
+  captureSourceOnce();
   scheduleFlush(3000);
 }
 

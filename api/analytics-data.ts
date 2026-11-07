@@ -57,6 +57,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     p.hgetall(`a:adctx:${d}`);
     p.hgetall(`a:addev:${d}`);
     p.hgetall(`a:pv:${d}`);
+    p.hgetall(`a:src:${d}`);
+    p.hgetall(`a:srchost:${d}`);
+    p.hgetall(`a:os:${d}`);
   }
   const results = days.length ? await p.exec<(Record<string, Num> | null)[]>() : [];
 
@@ -67,6 +70,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const adCtx = new Map<string, Map<string, Bucket>>();
   const adDev = new Map<string, Map<string, Bucket>>();
   const pages = new Map<string, number>();
+  const sources = new Map<string, number>();
+  const sourceHosts = new Map<string, number>();
+  const platforms = new Map<string, { pageviews: number; visits: number }>();
   const daily: { date: string; pageviews: number; views: number; clicks: number; visitors: number }[] = [];
   let pageviews = 0, views = 0, clicks = 0;
 
@@ -77,7 +83,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   };
 
   days.forEach((d, i) => {
-    const [dHash, locHash, devHash, adLocHash, adCtxHash, adDevHash, pvHash] = results.slice(i * 7, i * 7 + 7).map((r) => r || {});
+    const [dHash, locHash, devHash, adLocHash, adCtxHash, adDevHash, pvHash, srcHash, srcHostHash, osHash] = results.slice(i * 10, i * 10 + 10).map((r) => r || {});
+    for (const [name, raw] of Object.entries(srcHash)) sources.set(name, (sources.get(name) || 0) + (Number(raw) || 0));
+    for (const [field, raw] of Object.entries(srcHostHash)) sourceHosts.set(field, (sourceHosts.get(field) || 0) + (Number(raw) || 0));
+    for (const [field, raw] of Object.entries(osHash)) {
+      const [name, bucket] = field.split("#");
+      const row = platforms.get(name) || { pageviews: 0, visits: 0 };
+      if (bucket === "pageviews") row.pageviews += Number(raw) || 0; else if (bucket === "visits") row.visits += Number(raw) || 0;
+      platforms.set(name, row);
+    }
     const day = { date: d, pageviews: 0, views: 0, clicks: 0, visitors: 0 };
     for (const [field, raw] of Object.entries(dHash)) {
       const n = Number(raw) || 0;
@@ -158,6 +172,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     locations: locRows(locations),
     devices: devRows(devices),
     pages: [...pages.entries()].map(([page, n]) => ({ page, pageviews: n })).sort((a, b) => b.pageviews - a.pageviews),
+    sources: [...sources.entries()].map(([source, visits]) => ({ source, visits })).sort((a, b) => b.visits - a.visits),
+    sourceHosts: [...sourceHosts.entries()].map(([field, visits]) => {
+      const [source, host] = field.split("#");
+      return { source, host, visits };
+    }).sort((a, b) => b.visits - a.visits).slice(0, 50),
+    platforms: [...platforms.entries()].map(([platform, r]) => ({ platform, ...r })).sort((a, b) => (b.pageviews + b.visits) - (a.pageviews + a.visits)),
     ads,
     daily,
     recent: (recentRaw || []).map(parseEvent).filter(Boolean),

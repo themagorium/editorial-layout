@@ -54,7 +54,8 @@ export function welcomeHtml(unsubscribeUrl: string): string {
 
               <p style="margin:0 0 4px;">With warm regards,</p>
               <p style="margin:0;font-weight:bold;color:#262065;">Millie Sealana</p>
-              <p style="margin:0 0 32px;">Editor-in-Chief, The Magorium</p>
+              <p style="margin:0;">Editor-in-Chief</p>
+              <p style="margin:0 0 32px;white-space:nowrap;">The&nbsp;Magorium</p>
             </td>
           </tr>
 
@@ -90,7 +91,8 @@ export function welcomeText(unsubscribeUrl: string): string {
     "",
     "With warm regards,",
     "Millie Sealana",
-    "Editor-in-Chief, The Magorium",
+    "Editor-in-Chief",
+    "The Magorium",
     "",
     "--",
     "You're receiving this email because you subscribed at themagorium.com.",

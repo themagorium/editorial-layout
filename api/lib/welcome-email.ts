@@ -60,8 +60,8 @@ export function welcomeHtml(unsubscribeUrl: string): string {
 
           <!-- Footer -->
           <tr>
-            <td style="padding:20px 40px 30px;border-top:1px solid #e6e2da;font-family:Calibri,Helvetica,Arial,sans-serif;font-size:11pt;line-height:1.5;color:#7a7686;">
-              <p style="margin:0 0 8px;">You're receiving this email because you subscribed at <a href="https://www.themagorium.com/" style="color:#7a7686;">themagorium.com</a>.</p>
+            <td style="padding:20px 40px 30px;border-top:1px solid #e6e2da;font-family:Calibri,Helvetica,Arial,sans-serif;font-size:11pt;line-height:1.5;color:#8a847a;">
+              <p style="margin:0 0 8px;">You're receiving this email because you subscribed at <a href="https://www.themagorium.com/" style="color:#8a847a;">themagorium.com</a>.</p>
               <p style="margin:0 0 8px;">The Magorium · San Francisco · New York · Zürich</p>
               <p style="margin:0;"><a href="${unsubscribeUrl}" style="color:#262065;text-decoration:underline;">Unsubscribe</a></p>
             </td>

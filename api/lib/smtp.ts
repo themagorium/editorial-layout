@@ -16,7 +16,7 @@ function wrapBase64(text: string): string {
   return Buffer.from(text, "utf8").toString("base64").replace(/.{1,76}/g, "$&\r\n");
 }
 
-export async function sendSmtp(opts: { from: string; to: string; replyTo?: string; subject: string; text: string; html: string }): Promise<{ ok: true } | { ok: false; error: string }> {
+export async function sendSmtp(opts: { from: string; to: string; replyTo?: string; subject: string; text: string; html: string; headers?: Record<string, string> }): Promise<{ ok: true } | { ok: false; error: string }> {
   const host = process.env.SMTP_HOST as string;
   const port = Number(process.env.SMTP_PORT || 465);
   const user = process.env.SMTP_USER as string;
@@ -27,6 +27,7 @@ export async function sendSmtp(opts: { from: string; to: string; replyTo?: strin
     `From: ${opts.from}`,
     `To: ${opts.to}`,
     ...(opts.replyTo ? [`Reply-To: ${opts.replyTo}`] : []),
+    ...Object.entries(opts.headers || {}).map(([k, v]) => `${k}: ${v.replace(/[\r\n]/g, " ")}`),
     `Subject: ${encodeHeader(opts.subject)}`,
     `Date: ${new Date().toUTCString()}`,
     `Message-ID: <${Date.now()}.${Math.random().toString(36).slice(2)}@themagorium.com>`,

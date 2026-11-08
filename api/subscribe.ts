@@ -2,6 +2,8 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { isAdminRequest } from "./lib/admin-auth-store.js";
 import { buildXlsx } from "./lib/xlsx.js";
 import { isSmtpConfigured, sendSmtp } from "./lib/smtp.js";
+import { WELCOME_SUBJECT, welcomeHtml, welcomeText } from "./lib/welcome-email.js";
+import { unsubscribeUrl } from "./lib/unsubscribe-token.js";
 
 // Newsletter sign-ups from the "Stay in the Loop" box.
 //
@@ -38,6 +40,10 @@ type SubscriberRecord = {
   page?: string;
   notified: boolean;
   notifyError?: string;
+  welcomeSentAt?: string;
+  welcomeError?: string;
+  unsubscribed?: boolean;
+  unsubscribedAt?: string;
   notifiedVia?: string;
   lastWarnings?: string;
 };
@@ -143,18 +149,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     if (first(req.query?.format as string | string[]).toLowerCase() === "xlsx") {
       const rows = [
-        ["Email", "Phone", "Signed up", "Last sign-up", "Times signed up", "Page", "Emailed to subscribe inbox"],
-        ...subscribers.map((s) => [s.email, s.phone || "", new Date(s.createdAt), new Date(s.lastSeenAt), s.count || 1, s.page || "", s.notified ? "Yes" : "No"]),
+        ["Email", "Phone", "Status", "Welcome email", "Signed up", "Last sign-up", "Times signed up", "Page", "Emailed to subscribe inbox"],
+        ...subscribers.map((s) => [s.email, s.phone || "", s.unsubscribed ? "Unsubscribed" : "Subscribed", s.welcomeSentAt ? "Sent" : s.email ? "Not sent" : "—", new Date(s.createdAt), new Date(s.lastSeenAt), s.count || 1, s.page || "", s.notified ? "Yes" : "No"]),
       ];
-      const buffer = buildXlsx("Subscribers", rows, [38, 20, 22, 22, 16, 36, 26]);
+      const buffer = buildXlsx("Subscribers", rows, [38, 20, 16, 16, 22, 22, 16, 36, 26]);
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       res.setHeader("Content-Disposition", `attachment; filename="magorium-subscribers.xlsx"`);
       res.status(200).send(buffer);
       return;
     }
     if (first(req.query?.format as string | string[]).toLowerCase() === "csv") {
-      const rows = [["email", "phone", "signed_up", "last_signup", "signups", "page", "emailed_to_subscribe_inbox"],
-        ...subscribers.map((s) => [s.email, s.phone || "", s.createdAt, s.lastSeenAt, String(s.count), s.page || "", s.notified ? "yes" : "no"])];
+      const rows = [["email", "phone", "status", "signed_up", "last_signup", "signups", "page", "emailed_to_subscribe_inbox"],
+        ...subscribers.map((s) => [s.email, s.phone || "", s.unsubscribed ? "unsubscribed" : "subscribed", s.createdAt, s.lastSeenAt, String(s.count), s.page || "", s.notified ? "yes" : "no"])];
       const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader("Content-Disposition", `attachment; filename="magorium-subscribers.csv"`);
@@ -196,7 +202,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       existing = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, field));
       const record: SubscriberRecord = existing
-        ? { ...existing, lastSeenAt: now.toISOString(), count: (existing.count || 1) + 1 }
+        ? { ...existing, lastSeenAt: now.toISOString(), count: (existing.count || 1) + 1, unsubscribed: false }
         : { email: contact.kind === "email" ? email : "", ...(contact.kind === "phone" ? { phone: email } : {}), createdAt: now.toISOString(), lastSeenAt: now.toISOString(), count: 1, page, notified: false };
       await kv.hset(SUBSCRIBERS_KEY, { [field]: JSON.stringify(record) });
       saved = true;
@@ -217,6 +223,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
     } catch { /* status flag only */ }
+  }
+
+  // 3) Welcome email to the subscriber: email sign-ups only, first time (or
+  //    after they had unsubscribed), never twice.
+  if (contact.kind === "email" && isSmtpConfigured() && (!existing || existing.unsubscribed || !existing.welcomeSentAt)) {
+    try {
+      const unsubUrl = await unsubscribeUrl(email);
+      const welcome = await sendSmtp({
+        from: DEFAULT_FROM,
+        to: email,
+        replyTo: NOTIFY_TO,
+        subject: WELCOME_SUBJECT,
+        html: welcomeHtml(unsubUrl),
+        text: welcomeText(unsubUrl),
+        headers: { "List-Unsubscribe": `<${unsubUrl}>, <mailto:${NOTIFY_TO}?subject=unsubscribe>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+      });
+      if (kv && saved) {
+        const current = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, field));
+        if (current) {
+          await kv.hset(SUBSCRIBERS_KEY, {
+            [field]: JSON.stringify({ ...current, ...(welcome.ok ? { welcomeSentAt: new Date().toISOString(), welcomeError: undefined } : { welcomeError: (welcome as { error: string }).error }) }),
+          });
+        }
+      }
+      if (!welcome.ok) console.error("[subscribe] welcome email failed", (welcome as { error: string }).error);
+    } catch (error) {
+      console.error("[subscribe] welcome email failed", error);
+    }
   }
 
   if (!saved && !result.ok) {

@@ -1335,7 +1335,7 @@ function MediaUpload({ imageUrl, videoUrl, onImage, onVideo }: { imageUrl?: stri
   );
 }
 
-type SubscriberRow = { email: string; createdAt: string; lastSeenAt: string; count: number; page?: string; notified: boolean; notifyError?: string };
+type SubscriberRow = { email: string; phone?: string; unsubscribed?: boolean; welcomeSentAt?: string; createdAt: string; lastSeenAt: string; count: number; page?: string; notified: boolean; notifyError?: string };
 
 /** Everyone who signed up in the "Stay in the Loop" box. */
 function SubscribersManager() {
@@ -1385,12 +1385,13 @@ function SubscribersManager() {
         <div className="overflow-x-auto border border-border rounded">
           <table className="w-full text-sm font-sans">
             <thead className="bg-secondary/50 text-[11px] uppercase tracking-wider text-muted-foreground">
-              <tr><th className="text-left px-4 py-2">Email</th><th className="text-left px-4 py-2">Signed up</th><th className="text-left px-4 py-2">Page</th><th className="text-left px-4 py-2">Emailed to inbox</th></tr>
+              <tr><th className="text-left px-4 py-2">Email / phone</th><th className="text-left px-4 py-2">Status</th><th className="text-left px-4 py-2">Signed up</th><th className="text-left px-4 py-2">Page</th><th className="text-left px-4 py-2">Emailed to inbox</th></tr>
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.email} className="border-t border-border">
-                  <td className="px-4 py-2 text-foreground"><a href={`mailto:${r.email}`} className="hover:text-primary">{r.email}</a>{r.count > 1 && <span className="ml-2 text-[10px] text-muted-foreground">signed up {r.count}×</span>}</td>
+                <tr key={r.email || r.phone} className="border-t border-border">
+                  <td className="px-4 py-2 text-foreground">{r.email ? <a href={`mailto:${r.email}`} className="hover:text-primary">{r.email}</a> : <a href={`tel:${r.phone}`} className="hover:text-primary">{r.phone}</a>}{r.count > 1 && <span className="ml-2 text-[10px] text-muted-foreground">signed up {r.count}×</span>}</td>
+                  <td className="px-4 py-2 whitespace-nowrap">{r.unsubscribed ? <span className="text-muted-foreground">Unsubscribed</span> : <span className="text-foreground">Subscribed</span>}{r.welcomeSentAt && <span className="block text-[10px] text-muted-foreground">welcome email sent</span>}</td>
                   <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">{fmt(r.createdAt)}</td>
                   <td className="px-4 py-2 text-muted-foreground">{r.page || "—"}</td>
                   <td className="px-4 py-2">{r.notified ? <span className="text-emerald-400">✓ Sent</span> : <span className="text-yellow-500" title={r.notifyError}>Not sent — saved here</span>}</td>

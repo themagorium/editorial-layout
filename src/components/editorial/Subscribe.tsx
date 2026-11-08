@@ -115,7 +115,7 @@ export function SubscribeThankYou() {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 animate-in fade-in duration-300" onClick={() => setVisible(false)} role="status" aria-live="polite">
       <div className="rounded-lg border border-primary/30 bg-background px-10 py-8 text-center shadow-2xl max-w-md">
         <p className="text-primary text-xl md:text-2xl" style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic" }}>
-          Thank you for subscribing to the Magorium.
+          Thank you for subscribing to The Magorium.
         </p>
       </div>
     </div>,

@@ -7,7 +7,7 @@ import { unsubscribeUrl } from "./lib/unsubscribe-token.js";
 
 // Newsletter sign-ups from the "Stay in the Loop" box.
 //
-// POST { contact }  (public) — an email address or a phone number
+// POST { contact }  (public) — an email address
 //   1. Saves the address in the database FIRST, so a sign-up is never lost
 //      even if email delivery fails.
 //   2. Emails the address to subscribe@themagorium.com (via Resend).
@@ -177,7 +177,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Honeypot: real visitors never fill this hidden field.
   if (typeof body.website === "string" && body.website.trim()) { res.status(200).json({ ok: true }); return; }
   const contact = parseContact(String(body.contact ?? body.email ?? ""));
-  if (!contact) { res.status(400).json({ ok: false, error: "Please enter a valid email address or phone number." }); return; }
+  // Sign-ups are email only (phone sign-ups were retired Nov 2026; earlier phone records stay in the list).
+  if (!contact || contact.kind !== "email") { res.status(400).json({ ok: false, error: "Please enter a valid email address." }); return; }
   // "email" below is the contact value (an email address or a phone number).
   const email = contact.value;
   const field = contact.kind === "email" ? email : `phone:${email}`;

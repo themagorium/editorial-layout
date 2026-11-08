@@ -7,7 +7,6 @@ import { toast } from "sonner";
 // centred thank-you message all live here.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^\+?\d{7,15}$/;
 const THANKS_EVENT = "magorium:subscribed";
 const POPUP_KEY = "magorium-subscribe-popup";
 const POPUP_DELAY_MS = 12000;
@@ -15,9 +14,7 @@ const POPUP_SCROLL_RATIO = 0.3;
 const POPUP_SNOOZE_DAYS = 14;
 
 function isValidContact(value: string): boolean {
-  const v = value.trim();
-  if (EMAIL_RE.test(v)) return true;
-  return PHONE_RE.test(v.replace(/[\s().\-/]/g, "").replace(/^00/, "+"));
+  return EMAIL_RE.test(value.trim());
 }
 
 function readPopupState(): { subscribed?: boolean; dismissedAt?: number } {
@@ -30,7 +27,7 @@ function writePopupState(state: { subscribed?: boolean; dismissedAt?: number }) 
 /** Sends a sign-up. Returns true on success (and shows the centred thank-you). */
 export async function submitSubscription(contact: string, website: string): Promise<boolean> {
   if (!isValidContact(contact)) {
-    toast.error("Please enter a valid email address or phone number.", { position: "top-center" });
+    toast.error("Please enter a valid email address.", { position: "top-center" });
     return false;
   }
   try {
@@ -53,7 +50,7 @@ export async function submitSubscription(contact: string, website: string): Prom
   return true;
 }
 
-/** The email/phone field + Subscribe button, used by the footer and the pop-up. */
+/** The email field + Subscribe button, used by the footer and the pop-up. */
 export function SubscribeForm({ autoFocus = false, onDone }: { autoFocus?: boolean; onDone?: () => void }) {
   const [contact, setContact] = useState("");
   const [website, setWebsite] = useState(""); // hidden spam trap
@@ -71,13 +68,13 @@ export function SubscribeForm({ autoFocus = false, onDone }: { autoFocus?: boole
   return (
     <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 w-full">
       <input
-        type="text"
+        type="email"
         inputMode="email"
         autoComplete="email"
         value={contact}
         onChange={(e) => setContact(e.target.value)}
-        placeholder="Your email, or phone number"
-        aria-label="Your email, or phone number"
+        placeholder="Your email address"
+        aria-label="Your email address"
         className="flex-1 min-w-0 rounded-full border border-muted-foreground/45 bg-transparent px-6 py-3 text-sm font-sans text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/60 transition-colors"
         maxLength={255}
         required

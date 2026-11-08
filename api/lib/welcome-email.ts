@@ -63,7 +63,8 @@ export function welcomeHtml(unsubscribeUrl: string): string {
           <tr>
             <td style="padding:20px 40px 30px;border-top:1px solid #e6e2da;font-family:Calibri,Helvetica,Arial,sans-serif;font-size:11pt;line-height:1.5;color:#8a847a;">
               <p style="margin:0 0 8px;">You're receiving this email because you subscribed at <a href="https://www.themagorium.com/" style="color:#8a847a;">themagorium.com</a>.</p>
-              <p style="margin:0 0 8px;">The Magorium · San Francisco · New York · Zürich</p>
+              <p style="margin:0;white-space:nowrap;">The&nbsp;Magorium</p>
+              <p style="margin:0 0 8px;white-space:nowrap;">San&nbsp;Francisco&nbsp;·&nbsp;New&nbsp;York&nbsp;·&nbsp;Zürich</p>
               <p style="margin:0;"><a href="${unsubscribeUrl}" style="color:#262065;text-decoration:underline;">Unsubscribe</a></p>
             </td>
           </tr>
@@ -96,7 +97,8 @@ export function welcomeText(unsubscribeUrl: string): string {
     "",
     "--",
     "You're receiving this email because you subscribed at themagorium.com.",
-    "The Magorium · San Francisco · New York · Zürich",
+    "The Magorium",
+    "San Francisco · New York · Zürich",
     `Unsubscribe: ${unsubscribeUrl}`,
   ].join("\n");
 }

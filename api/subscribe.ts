@@ -137,6 +137,38 @@ async function notify(email: string, page: string, when: string, isRepeat: boole
 }
 
 
+/** Sends the welcome email to one subscriber and records the result. */
+async function sendWelcome(kv: Kv | null, field: string, email: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const unsubUrl = await unsubscribeUrl(email);
+    const welcome = await sendSmtp({
+      from: DEFAULT_FROM,
+      to: email,
+      replyTo: NOTIFY_TO,
+      subject: WELCOME_SUBJECT,
+      html: welcomeHtml(unsubUrl),
+      text: welcomeText(unsubUrl),
+      headers: { "List-Unsubscribe": `<${unsubUrl}>, <mailto:${NOTIFY_TO}?subject=unsubscribe>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+    });
+    const error = welcome.ok ? undefined : (welcome as { error: string }).error;
+    if (kv) {
+      const current = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, field));
+      if (current) {
+        await kv.hset(SUBSCRIBERS_KEY, {
+          [field]: JSON.stringify({ ...current, ...(welcome.ok ? { welcomeSentAt: new Date().toISOString(), welcomeError: undefined } : { welcomeError: error }) }),
+        });
+      }
+    }
+    if (!welcome.ok) console.error("[subscribe] welcome email failed", error);
+    return welcome.ok ? { ok: true } : { ok: false, error };
+  } catch (e) {
+    console.error("[subscribe] welcome email failed", e);
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+const WELCOME_BATCH_MAX = 40; // stays well inside GoDaddy's 500/hour and the function time limit
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "no-store");
   const kv = await getKv();
@@ -174,6 +206,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") { res.status(405).json({ ok: false, error: "Method not allowed." }); return; }
 
   const body = (typeof req.body === "string" ? (() => { try { return JSON.parse(req.body); } catch { return {}; } })() : req.body) || {};
+
+  // Admin: send the welcome email to every email subscriber who never got one
+  // (e.g. signed up before it existed). Never sends twice; skips unsubscribed.
+  if (body.action === "send-pending-welcomes") {
+    if (!(await isAdminRequest(req))) { res.status(401).json({ ok: false, error: "Unauthorized." }); return; }
+    if (!kv) { res.status(503).json({ ok: false, error: "Database is not configured." }); return; }
+    if (!isSmtpConfigured()) { res.status(503).json({ ok: false, error: "Mail server is not configured." }); return; }
+    const exclude = new Set((Array.isArray(body.exclude) ? body.exclude : []).map((e: unknown) => String(e).trim().toLowerCase()));
+    const all = (await kv.hgetall<unknown>(SUBSCRIBERS_KEY)) || {};
+    const pending = Object.entries(all)
+      .map(([f, raw]) => [f, parseRecord(raw)] as const)
+      .filter((entry): entry is readonly [string, SubscriberRecord] => Boolean(entry[1]))
+      .filter(([, r]) => r.email && !r.unsubscribed && !r.welcomeSentAt && !exclude.has(r.email))
+      .sort((x, y) => (x[1].createdAt < y[1].createdAt ? -1 : 1));
+    const batch = pending.slice(0, WELCOME_BATCH_MAX);
+    const results: { email: string; ok: boolean; error?: string }[] = [];
+    for (const [f, r] of batch) results.push({ email: r.email, ...(await sendWelcome(kv, f, r.email)) });
+    res.status(200).json({ ok: true, sent: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok), remaining: pending.length - batch.length });
+    return;
+  }
   // Honeypot: real visitors never fill this hidden field.
   if (typeof body.website === "string" && body.website.trim()) { res.status(200).json({ ok: true }); return; }
   const contact = parseContact(String(body.contact ?? body.email ?? ""));
@@ -204,7 +256,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       existing = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, field));
       const record: SubscriberRecord = existing
         ? { ...existing, lastSeenAt: now.toISOString(), count: (existing.count || 1) + 1, unsubscribed: false }
-        : { email: contact.kind === "email" ? email : "", ...(contact.kind === "phone" ? { phone: email } : {}), createdAt: now.toISOString(), lastSeenAt: now.toISOString(), count: 1, page, notified: false };
+        : { email, createdAt: now.toISOString(), lastSeenAt: now.toISOString(), count: 1, page, notified: false };
       await kv.hset(SUBSCRIBERS_KEY, { [field]: JSON.stringify(record) });
       saved = true;
     } catch (error) {
@@ -229,29 +281,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 3) Welcome email to the subscriber: email sign-ups only, first time (or
   //    after they had unsubscribed), never twice.
   if (contact.kind === "email" && isSmtpConfigured() && (!existing || existing.unsubscribed || !existing.welcomeSentAt)) {
-    try {
-      const unsubUrl = await unsubscribeUrl(email);
-      const welcome = await sendSmtp({
-        from: DEFAULT_FROM,
-        to: email,
-        replyTo: NOTIFY_TO,
-        subject: WELCOME_SUBJECT,
-        html: welcomeHtml(unsubUrl),
-        text: welcomeText(unsubUrl),
-        headers: { "List-Unsubscribe": `<${unsubUrl}>, <mailto:${NOTIFY_TO}?subject=unsubscribe>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
-      });
-      if (kv && saved) {
-        const current = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, field));
-        if (current) {
-          await kv.hset(SUBSCRIBERS_KEY, {
-            [field]: JSON.stringify({ ...current, ...(welcome.ok ? { welcomeSentAt: new Date().toISOString(), welcomeError: undefined } : { welcomeError: (welcome as { error: string }).error }) }),
-          });
-        }
-      }
-      if (!welcome.ok) console.error("[subscribe] welcome email failed", (welcome as { error: string }).error);
-    } catch (error) {
-      console.error("[subscribe] welcome email failed", error);
-    }
+    await sendWelcome(kv && saved ? kv : null, field, email);
   }
 
   if (!saved && !result.ok) {

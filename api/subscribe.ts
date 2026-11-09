@@ -52,6 +52,7 @@ type Kv = {
   hget: <T>(key: string, field: string) => Promise<T | null>;
   hset: (key: string, value: Record<string, unknown>) => Promise<unknown>;
   hgetall: <T>(key: string) => Promise<Record<string, T> | null>;
+  hdel: (key: string, ...fields: string[]) => Promise<number>;
   incr: (key: string) => Promise<number>;
   expire: (key: string, seconds: number) => Promise<unknown>;
 };
@@ -200,6 +201,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
     res.status(200).json({ ok: true, count: subscribers.length, subscribers });
+    return;
+  }
+
+  // Admin: permanently delete one subscriber. Body/query: { email } or { phone }.
+  if (req.method === "DELETE") {
+    if (!(await isAdminRequest(req))) { res.status(401).json({ ok: false, error: "Unauthorized." }); return; }
+    if (!kv) { res.status(503).json({ ok: false, error: "Database is not configured." }); return; }
+    const del = (typeof req.body === "string" ? (() => { try { return JSON.parse(req.body); } catch { return {}; } })() : req.body) || {};
+    const delEmail = String(del.email ?? first(req.query?.email as string | string[]) ?? "").trim().toLowerCase();
+    const delPhone = String(del.phone ?? first(req.query?.phone as string | string[]) ?? "").trim();
+    const delField = delEmail ? delEmail : delPhone ? `phone:${delPhone}` : "";
+    if (!delField) { res.status(400).json({ ok: false, error: "Say which subscriber to delete." }); return; }
+    const removed = await kv.hdel(SUBSCRIBERS_KEY, delField);
+    if (!removed) { res.status(404).json({ ok: false, error: "That subscriber is not in the list." }); return; }
+    console.log("[subscribe] admin deleted a subscriber");
+    res.status(200).json({ ok: true });
     return;
   }
 

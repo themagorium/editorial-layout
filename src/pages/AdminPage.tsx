@@ -1367,6 +1367,27 @@ function SubscribersManager() {
 
   const fmt = (iso: string) => new Date(iso).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const rowKey = (r: SubscriberRow) => r.email || `phone:${r.phone}`;
+  const deleteSubscriber = async (r: SubscriberRow) => {
+    const key = rowKey(r);
+    setDeleting(key);
+    try {
+      const query = r.email ? `email=${encodeURIComponent(r.email)}` : `phone=${encodeURIComponent(r.phone || "")}`;
+      const response = await fetch(`/api/subscribe?${query}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getAdminPublishToken()}`, "Content-Type": "application/json" },
+        body: JSON.stringify(r.email ? { email: r.email } : { phone: r.phone }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) { toast.error(payload.error || `Delete failed (${response.status}). Sign out and back in.`); return; }
+      setRows((prev) => (prev || []).filter((x) => rowKey(x) !== key));
+      toast.success(`Deleted ${r.email || r.phone}`);
+    } catch { toast.error("Could not reach the server."); }
+    finally { setDeleting(null); setConfirming(null); }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1385,17 +1406,28 @@ function SubscribersManager() {
         <div className="overflow-x-auto border border-border rounded">
           <table className="w-full text-sm font-sans">
             <thead className="bg-secondary/50 text-[11px] uppercase tracking-wider text-muted-foreground">
-              <tr><th className="text-left px-4 py-2">Email / phone</th><th className="text-left px-4 py-2">Status</th><th className="text-left px-4 py-2">Welcome email</th><th className="text-left px-4 py-2">Signed up</th><th className="text-left px-4 py-2">Page</th><th className="text-left px-4 py-2">Emailed to inbox</th></tr>
+              <tr><th className="text-left px-4 py-2">Email / phone</th><th className="text-left px-4 py-2">Status</th><th className="text-left px-4 py-2">Welcome email</th><th className="text-left px-4 py-2">Signed up</th><th className="text-left px-4 py-2">Page</th><th className="text-left px-4 py-2">Emailed to inbox</th><th className="px-4 py-2"><span className="sr-only">Delete</span></th></tr>
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.email || r.phone} className="border-t border-border">
+                <tr key={rowKey(r)} className="border-t border-border">
                   <td className="px-4 py-2 text-foreground">{r.email ? <a href={`mailto:${r.email}`} className="hover:text-primary">{r.email}</a> : <a href={`tel:${r.phone}`} className="hover:text-primary">{r.phone}</a>}{r.count > 1 && <span className="ml-2 text-[10px] text-muted-foreground">signed up {r.count}×</span>}</td>
                   <td className="px-4 py-2 whitespace-nowrap">{r.unsubscribed ? <span className="text-muted-foreground">Unsubscribed</span> : <span className="text-foreground">Subscribed</span>}</td>
                   <td className="px-4 py-2 whitespace-nowrap">{!r.email ? <span className="text-muted-foreground">— (phone)</span> : r.welcomeSentAt ? <span className="text-emerald-400">✓ Sent {fmt(r.welcomeSentAt)}</span> : r.welcomeError ? <span className="text-destructive" title={r.welcomeError}>Failed</span> : <span className="text-yellow-500">Not sent</span>}</td>
                   <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">{fmt(r.createdAt)}</td>
                   <td className="px-4 py-2 text-muted-foreground">{r.page || "—"}</td>
                   <td className="px-4 py-2">{r.notified ? <span className="text-emerald-400">✓ Sent</span> : <span className="text-yellow-500" title={r.notifyError}>Not sent — saved here</span>}</td>
+                  <td className="px-4 py-2 text-right whitespace-nowrap">
+                    {confirming === rowKey(r) ? (
+                      <span className="inline-flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">Delete permanently?</span>
+                        <button type="button" onClick={() => void deleteSubscriber(r)} disabled={deleting === rowKey(r)} className="px-2 py-1 text-xs rounded bg-destructive text-destructive-foreground hover:opacity-90 disabled:opacity-60">{deleting === rowKey(r) ? "Deleting…" : "Yes, delete"}</button>
+                        <button type="button" onClick={() => setConfirming(null)} className="px-2 py-1 text-xs rounded border border-border text-muted-foreground hover:text-foreground">Cancel</button>
+                      </span>
+                    ) : (
+                      <button type="button" onClick={() => setConfirming(rowKey(r))} title="Delete this subscriber" aria-label={`Delete ${r.email || r.phone}`} className="inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" />Delete</button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

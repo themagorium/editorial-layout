@@ -149,8 +149,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     if (first(req.query?.format as string | string[]).toLowerCase() === "xlsx") {
       const rows = [
-        ["Email", "Phone", "Status", "Welcome email", "Signed up", "Last sign-up", "Times signed up", "Page", "Emailed to subscribe inbox"],
-        ...subscribers.map((s) => [s.email, s.phone || "", s.unsubscribed ? "Unsubscribed" : "Subscribed", s.welcomeSentAt ? "Sent" : s.email ? "Not sent" : "—", new Date(s.createdAt), new Date(s.lastSeenAt), s.count || 1, s.page || "", s.notified ? "Yes" : "No"]),
+        ["Email", "Phone", "Status", "Welcome email sent", "Signed up", "Last sign-up", "Times signed up", "Page", "Emailed to subscribe inbox"],
+        ...subscribers.map((s) => [s.email, s.phone || "", s.unsubscribed ? "Unsubscribed" : "Subscribed", s.welcomeSentAt ? new Date(s.welcomeSentAt) : s.email ? (s.welcomeError ? "Failed" : "Not sent") : "—", new Date(s.createdAt), new Date(s.lastSeenAt), s.count || 1, s.page || "", s.notified ? "Yes" : "No"]),
       ];
       const buffer = buildXlsx("Subscribers", rows, [38, 20, 16, 16, 22, 22, 16, 36, 26]);
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");

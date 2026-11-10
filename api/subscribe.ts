@@ -138,11 +138,30 @@ async function notify(email: string, page: string, when: string, isRepeat: boole
 }
 
 
+/** Returns null on success, or the error text. */
+async function sendWelcomeViaResend(m: { from: string; to: string; replyTo: string; subject: string; html: string; text: string; headers: Record<string, string> }): Promise<string | null> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return "RESEND_API_KEY is not set.";
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: m.from, to: [m.to], reply_to: m.replyTo, subject: m.subject, html: m.html, text: m.text, headers: m.headers }),
+    });
+    if (response.ok) return null;
+    return `Resend ${response.status}: ${(await response.text().catch(() => "")).slice(0, 300)}`;
+  } catch (error) {
+    return error instanceof Error ? error.message : "Resend request failed.";
+  }
+}
+
+const canSendWelcome = () => Boolean(process.env.RESEND_API_KEY) || isSmtpConfigured();
+
 /** Sends the welcome email to one subscriber and records the result. */
 async function sendWelcome(kv: Kv | null, field: string, email: string): Promise<{ ok: boolean; error?: string }> {
   try {
     const unsubUrl = await unsubscribeUrl(email);
-    const welcome = await sendSmtp({
+    const message = {
       from: DEFAULT_FROM,
       to: email,
       replyTo: NOTIFY_TO,
@@ -150,7 +169,17 @@ async function sendWelcome(kv: Kv | null, field: string, email: string): Promise
       html: welcomeHtml(unsubUrl),
       text: welcomeText(unsubUrl),
       headers: { "List-Unsubscribe": `<${unsubUrl}>, <mailto:${NOTIFY_TO}?subject=unsubscribe>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
-    });
+    };
+    // Resend first: it signs with DKIM for themagorium.com, so the email passes the
+    // domain's DMARC policy and reaches the inbox. The GoDaddy server (no DKIM) is
+    // only a fallback, because its mail is quarantined to spam by that policy.
+    let welcome: { ok: true } | { ok: false; error: string } = { ok: false, error: "No mail service is configured." };
+    const resendError = await sendWelcomeViaResend(message);
+    if (!resendError) welcome = { ok: true };
+    else if (isSmtpConfigured()) {
+      const smtp = await sendSmtp(message);
+      welcome = smtp.ok ? { ok: true } : { ok: false, error: `${resendError} | ${(smtp as { error: string }).error}` };
+    } else welcome = { ok: false, error: resendError };
     const error = welcome.ok ? undefined : (welcome as { error: string }).error;
     if (kv) {
       const current = parseRecord(await kv.hget<unknown>(SUBSCRIBERS_KEY, field));
@@ -168,7 +197,7 @@ async function sendWelcome(kv: Kv | null, field: string, email: string): Promise
   }
 }
 
-const WELCOME_BATCH_MAX = 40; // stays well inside GoDaddy's 500/hour and the function time limit
+const WELCOME_BATCH_MAX = 40; // keeps each run inside the function time limit and Resend's rate limit
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "no-store");
@@ -229,7 +258,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (body.action === "send-pending-welcomes") {
     if (!(await isAdminRequest(req))) { res.status(401).json({ ok: false, error: "Unauthorized." }); return; }
     if (!kv) { res.status(503).json({ ok: false, error: "Database is not configured." }); return; }
-    if (!isSmtpConfigured()) { res.status(503).json({ ok: false, error: "Mail server is not configured." }); return; }
+    if (!canSendWelcome()) { res.status(503).json({ ok: false, error: "No mail service is configured." }); return; }
     const exclude = new Set((Array.isArray(body.exclude) ? body.exclude : []).map((e: unknown) => String(e).trim().toLowerCase()));
     const all = (await kv.hgetall<unknown>(SUBSCRIBERS_KEY)) || {};
     const pending = Object.entries(all)
@@ -239,7 +268,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .sort((x, y) => (x[1].createdAt < y[1].createdAt ? -1 : 1));
     const batch = pending.slice(0, WELCOME_BATCH_MAX);
     const results: { email: string; ok: boolean; error?: string }[] = [];
-    for (const [f, r] of batch) results.push({ email: r.email, ...(await sendWelcome(kv, f, r.email)) });
+    for (const [f, r] of batch) {
+      if (results.length) await new Promise((done) => setTimeout(done, 600)); // stay under Resend's per-second limit
+      results.push({ email: r.email, ...(await sendWelcome(kv, f, r.email)) });
+    }
     res.status(200).json({ ok: true, sent: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok), remaining: pending.length - batch.length });
     return;
   }
@@ -297,7 +329,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // 3) Welcome email to the subscriber: email sign-ups only, first time (or
   //    after they had unsubscribed), never twice.
-  if (contact.kind === "email" && isSmtpConfigured() && (!existing || existing.unsubscribed || !existing.welcomeSentAt)) {
+  if (contact.kind === "email" && canSendWelcome() && (!existing || existing.unsubscribed || !existing.welcomeSentAt)) {
     await sendWelcome(kv && saved ? kv : null, field, email);
   }
 

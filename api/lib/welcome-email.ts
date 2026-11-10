@@ -52,7 +52,7 @@ export function welcomeHtml(unsubscribeUrl: string): string {
                 </tr>
               </table>
 
-              <p style="margin:0 0 4px;">With warm regards,</p>
+              <p style="margin:0 0 22px;">With warm regards,</p>
               <p style="margin:0;font-weight:bold;color:#262065;">Millie Sealana</p>
               <p style="margin:0;">Editor-in-Chief</p>
               <p style="margin:0 0 32px;white-space:nowrap;">The&nbsp;Magorium</p>
@@ -91,6 +91,7 @@ export function welcomeText(unsubscribeUrl: string): string {
     "Read the current edition: https://www.themagorium.com/",
     "",
     "With warm regards,",
+    "",
     "Millie Sealana",
     "Editor-in-Chief",
     "The Magorium",

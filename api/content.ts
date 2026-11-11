@@ -495,9 +495,15 @@ function parsePositiveInt(value: string, fallback: number): number {
   return parsed;
 }
 
+/**
+ * Data URLs longer than this are dropped from the homepage and "latest"
+ * summaries. The admin upload limits in src/lib/media-limits.ts must match.
+ */
+export const MAX_INLINE_DATA_URL_CHARS = 2_400_000;
+
 function isLargeInlineDataUrl(value?: string): boolean {
   const normalized = (value || "").trim();
-  return normalized.startsWith("data:") && normalized.length > 2_400_000;
+  return normalized.startsWith("data:") && normalized.length > MAX_INLINE_DATA_URL_CHARS;
 }
 
 function isInvalidMediaValue(value?: string): boolean {

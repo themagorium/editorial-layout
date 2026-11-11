@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import { getAdminPublishToken, isAdminAuthenticated, setAdminPublishToken, setAdminAuthenticated, resetAdminPasswordAccess } from "@/lib/admin-auth";
 import { fileToOptimizedDataUrl } from "@/lib/media-optimizer";
+import { MAX_AD_VIDEO_BYTES, MAX_AD_VIDEO_MB, fitsInlineDataUrlLimit } from "@/lib/media-limits";
 import AdPlacement from "@/components/editorial/AdPlacement";
 
 const STORAGE_KEY = "magorium_page_content";
@@ -915,8 +916,6 @@ const AD_PLACEMENTS: { value: NonNullable<AdSlot["placement"]>; label: string }[
   { value: "mid-right", label: "Middle, right side" },
 ];
 
-const MAX_AD_VIDEO_BYTES = 3.5 * 1024 * 1024;
-
 /** The advertisement box shown on every Hero and Editor Pick. */
 function StoryAdBox({ ad, onAdChange, storyLabel, position }: { ad?: AdSlot; onAdChange: (v: AdSlot | undefined) => void; storyLabel: string; position: AdSlot["position"] }) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -933,10 +932,15 @@ function StoryAdBox({ ad, onAdChange, storyLabel, position }: { ad?: AdSlot; onA
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file || !ad) return;
-    if (mediaType === "video" && file.size > MAX_AD_VIDEO_BYTES) { toast.error("That video is too large. Please use a short clip under 3.5 MB (MP4 or WebM)."); return; }
+    const tooLargeMessage = `That video is too large. Please use a short clip under ${MAX_AD_VIDEO_MB} MB (MP4 or WebM), or it won't show on the homepage.`;
+    if (mediaType === "video" && file.size > MAX_AD_VIDEO_BYTES) { toast.error(tooLargeMessage); return; }
     setBusy(true);
     try {
       const url = await fileToOptimizedDataUrl(file);
+      if (!fitsInlineDataUrlLimit(url)) {
+        toast.error(mediaType === "video" ? tooLargeMessage : "That photo is too large to show on the homepage. Please use a smaller image.");
+        return;
+      }
       patch(mediaType === "video" ? { videoUrl: url, mediaType: "video" } : { imageUrl: url, mediaType: "image" });
     } finally { setBusy(false); }
   };
@@ -968,7 +972,7 @@ function StoryAdBox({ ad, onAdChange, storyLabel, position }: { ad?: AdSlot; onA
                 <button type="button" onClick={() => fileRef.current?.click()} disabled={busy} className="flex items-center gap-2 px-3 py-2 text-xs border border-primary text-primary rounded hover:bg-primary/10 transition-colors disabled:opacity-60"><Upload className="w-3 h-3" />{busy ? "Uploading…" : currentUrl ? `Replace ${mediaType === "video" ? "video" : "photo"}` : `Upload ${mediaType === "video" ? "video" : "photo"}`}</button>
                 {currentUrl && <button type="button" onClick={() => patch(mediaType === "video" ? { videoUrl: undefined } : { imageUrl: undefined })} className="px-3 py-2 text-xs text-muted-foreground hover:text-destructive">Remove {mediaType === "video" ? "video" : "photo"}</button>}
               </div>
-              {mediaType === "video" && <p className="text-[10px] text-muted-foreground mt-1">Plays silently on a loop. Short clips under 3.5 MB.</p>}
+              {mediaType === "video" && <p className="text-[10px] text-muted-foreground mt-1">Plays silently on a loop. Short clips under {MAX_AD_VIDEO_MB} MB (about 6–15 seconds).</p>}
             </div>
 
             <div>
